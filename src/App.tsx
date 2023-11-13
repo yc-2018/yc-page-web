@@ -1,26 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
+//导入antd输入框
+import { Input, Button } from 'antd';
 import './App.css';
+import Search from './pages/Search';
 
-function App() {
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App" >
+      {/* antd居中输入框 */}
+      <div className="ant-input-group">
+        <div className="ant-input-group-addon">
+          <i className="anticon anticon-user"></i>
+        </div>
+        <Search />
+      </div>
     </div>
   );
 }
 
-export default App;
