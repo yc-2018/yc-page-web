@@ -5,18 +5,6 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* 设置背景图 */
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),    /* 半透明的白色覆盖层 */
-    url('http://pic.netbian.com/uploads/allimg/231111/010350-16996358307f29.jpg');/* 背景图片 */
-  /* 背景图填充整个页面 */
-  background-size: cover;
-  /* 设置背景图位置 */
-  /* background-position: center; */
-  /* 设置背景图不重复 */
-  background-repeat: no-repeat;
-  height: 100%;
 }
 
 code {

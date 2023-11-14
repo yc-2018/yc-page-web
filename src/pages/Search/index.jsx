@@ -7,18 +7,18 @@ const { Search: AntdSearch } = Input;
 export default function Search() {
     const [loading, setLoading] = useState(false);
     const [searchEngines, setSearchEngines] = useState("谷歌");
-    const [searchOptions, setSearchOptions] = useState({
-        '百度': 'https://www.baidu.com/s?wd=@@@',
-        '谷歌': 'https://www.google.com/search?q=@@@',
-        '必应': 'https://www.bing.com/search?q=@@@',
-        ' 360': 'https://www.so.com/s?q=@@@',
-        '搜狗': 'https://www.sogou.com/web?query=@@@',
-    });
+    const [searchOptions, setSearchOptions] = useState([
+        {name:'百度',engineUrl:'https://www.baidu.com/s?wd=@@@'},
+        {name:'谷歌',engineUrl:'https://www.google.com/search?q=@@@'},
+        {name:'必应',engineUrl:'https://www.bing.com/search?q=@@@'},
+        {name:'360' ,engineUrl:'https://www.so.com/s?q=@@@'},
+        {name:'搜狗',engineUrl:'https://www.sogou.com/web?query=@@@'},
+    ]);
     const [quickSearch, setQuickSearch] = useState({
         '百度': 'https://www.baidu.com/s?wd=@@@',
         '谷歌': 'https://www.google.com/search?q=@@@',
         '必应': 'https://www.bing.com/search?q=@@@',
-        ' 360': 'https://www.so.com/s?q=@@@',
+        '360': 'https://www.so.com/s?q=@@@',
         '搜狗': 'https://www.sogou.com/web?query=@@@',
         '抖音': 'https://www.douyin.com/search/@@@',
         '百度翻译': 'https://fanyi.baidu.com/#auto/en/@@@',
@@ -37,11 +37,13 @@ export default function Search() {
     // 点击搜索按钮 或回车触发的事件
     const onSearch = (value, _e) => {
         const searchFor = value.target?.value ?? value; //回车时_e不存在
-        window.open(searchOptions[searchEngines].replace('@@@', searchFor), '_blank');
+        //通过搜索引擎名字找到他对应的URL=》这就要求名字在一个用户中是唯一的
+        const engineUrl = searchOptions.find(option => option.name === searchEngines).engineUrl;
+        window.open(engineUrl.replace('@@@', searchFor), '_blank');
         setLoading(true); window.setTimeout(() => setLoading(false), 1000);
     }
 
-    // 点击搜索按钮 或回车触发的事件
+    // 点击快速搜索按钮触发的事件
     const onQuickSearch = (value) => {
         const searchFor = value; //回车时_e不存在
         window.open(quickSearch[searchEngines].replace('@@@', searchFor), '_blank');
@@ -55,8 +57,7 @@ export default function Search() {
         <>
             {/* 选择搜索引擎 */}
             <Segmented
-                options={Object.keys(searchOptions)}
-                // options={Array.from(new Map(Object.entries(searchOptions)).keys())} 
+                options={searchOptions.map(option => option.name)}
                 value={searchEngines}
                 onChange={(value) => setSearchEngines(value)}
             />
