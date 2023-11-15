@@ -1,12 +1,12 @@
-import { Input, Segmented, Flex, Button } from 'antd'
+import { Segmented, Flex, Button } from 'antd'
 import React, { useState, useEffect } from 'react';
+import { observer } from 'mobx-react-lite'
 import MySearch from '../../compontets/MySearch';
-// 引入搜索组件
-const { Search: AntdSearch } = Input;
+import searchStore from '../../store/SearchEnginesStore';
 
 
-export default function Search() {
-    const [searchEngines, setSearchEngines] = useState("谷歌");
+function Search() {
+    // const [searchEngines, setSearchEngines] = useState("Bing");
     const [searchOptions, setSearchOptions] = useState([
         { name: '百度', engineUrl: 'https://www.baidu.com/s?wd=@@@' },
         { name: 'Bing', engineUrl: 'https://www.bing.com/search?q=@@@' },
@@ -38,32 +38,26 @@ export default function Search() {
     const onSearch = (value, _e) => {
         const searchFor = value.target?.value ?? value; //回车时_e不存在
         //通过搜索引擎名字找到他对应的URL=》这就要求名字在一个用户中是唯一的
-        const engineUrl = searchOptions.find(option => option.name === searchEngines).engineUrl;
+        const engineUrl = searchOptions.find(option => option.name === searchStore.searchEngines).engineUrl;
         window.open(engineUrl.replace('@@@', searchFor), '_blank');
-        setLoading(true); window.setTimeout(() => setLoading(false), 1000);
     }
 
-    // 点击快速搜索按钮触发的事件
-    const onQuickSearch = (value) => {
-        const searchFor = value; //回车时_e不存在
-        window.open(quickSearch[searchEngines].replace('@@@', searchFor), '_blank');
-        setLoading(true); window.setTimeout(() => setLoading(false), 1000);
-    }
 
     // 存搜索框的值
-    let searchValue;
+    let searchValue = undefined;
+    const setSearchValue = value => {searchValue = value}
 
     return (
         <>
             {/* 选择搜索引擎 */}
             <Segmented
                 options={searchOptions.map(option => option.name)}
-                value={searchEngines}
-                onChange={(value) => setSearchEngines(value)}
+                value={searchStore.searchEngines}
+                onChange={(value) => searchStore.setSearchEngines(value)}
             />
             <br />
             {/* 搜索框 */}
-            <MySearch onSearch={onSearch} />
+            <MySearch onSearch={onSearch} setSearchValue={setSearchValue}/>
 
 
             <br />
@@ -76,3 +70,4 @@ export default function Search() {
         </>
     )
 }
+export default observer(Search)

@@ -10,9 +10,9 @@ export default function App() {
     return (
         <div className="App" style={{
             height: '100vh',
-            'background-image': `linear-gradient( rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.829)),url(${backgroundImage})`,
-            "background-size": "cover",
-            "background-repeat": "no-repeat"
+            backgroundImage: `linear-gradient( rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.829)),url(${backgroundImage})`,
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat"
         }}>
             {/* antd居中输入框 */}
             <div className="ant-input-group">
