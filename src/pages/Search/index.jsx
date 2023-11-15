@@ -1,18 +1,18 @@
-import { Input, Segmented, Flex , Button } from 'antd'
+import { Input, Segmented, Flex, Button } from 'antd'
 import React, { useState, useEffect } from 'react';
+import MySearch from '../../compontets/MySearch';
 // 引入搜索组件
 const { Search: AntdSearch } = Input;
 
 
 export default function Search() {
-    const [loading, setLoading] = useState(false);
     const [searchEngines, setSearchEngines] = useState("谷歌");
     const [searchOptions, setSearchOptions] = useState([
-        {name:'百度',engineUrl:'https://www.baidu.com/s?wd=@@@'},
-        {name:'谷歌',engineUrl:'https://www.google.com/search?q=@@@'},
-        {name:'必应',engineUrl:'https://www.bing.com/search?q=@@@'},
-        {name:'360' ,engineUrl:'https://www.so.com/s?q=@@@'},
-        {name:'搜狗',engineUrl:'https://www.sogou.com/web?query=@@@'},
+        { name: '百度', engineUrl: 'https://www.baidu.com/s?wd=@@@' },
+        { name: 'Bing', engineUrl: 'https://www.bing.com/search?q=@@@' },
+        { name: '谷歌', engineUrl: 'https://www.google.com/search?q=@@@' },
+        { name: '360', engineUrl: 'https://www.so.com/s?q=@@@' },
+        { name: '搜狗', engineUrl: 'https://www.sogou.com/web?query=@@@' },
     ]);
     const [quickSearch, setQuickSearch] = useState({
         '百度': 'https://www.baidu.com/s?wd=@@@',
@@ -63,16 +63,9 @@ export default function Search() {
             />
             <br />
             {/* 搜索框 */}
-            <AntdSearch
-                placeholder="你想搜索吗？"
-                onSearch={onSearch}
-                onPressEnter={onSearch}
-                size="large"
-                style={{ width: 500, 'margin': "5px" }}
-                loading={loading}
-                value={searchValue}
-                onChange={e => searchValue=e.target.value}
-            />
+            <MySearch onSearch={onSearch} />
+
+
             <br />
             {/* 快速搜索 */}
             <Flex  /* style={{ width: "80%" }} */ wrap="wrap" gap="small" justify='center'>
