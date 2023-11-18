@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { AutoComplete, Input } from 'antd';
 import axios from 'axios';
-import { observer } from 'mobx-react-lite'
 import searchStore from '../../store/SearchEnginesStore';
-import { ArrowRightOutlined } from '@ant-design/icons';
+import {SendOutlined } from '@ant-design/icons';
 
 const { Search } = Input;
 // 异步获取百度联想列表
@@ -39,7 +38,7 @@ const MySearch: React.FC<ChildComponentProps> = ({ onSearch,setSearchValue}) => 
             <Search 
             placeholder="求知若渴，解惑在斯。" 
             size="large" 
-            enterButton={[searchStore.searchEngines,<ArrowRightOutlined key={'搜索按钮'}/>]}      //搜索按钮
+            enterButton={[searchStore.searchEngines,<SendOutlined  key={'搜索按钮'}/>]}      //搜索按钮
             onSearch={onSearch}             //点击搜索按钮的回调
             />
         </AutoComplete>
