@@ -1,13 +1,15 @@
 import { Segmented, Flex, Button } from 'antd'
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite'
-import {ThunderboltOutlined} from '@ant-design/icons';
+import {ThunderboltOutlined,PlusOutlined} from '@ant-design/icons';
 import MySearch from '../../compontets/MySearch';
 import searchStore from '../../store/SearchEnginesStore';
 
 
 function Search() {
     // const [searchEngines, setSearchEngines] = useState("Bing");
+    const [searchValue, setSearchVal] = useState("");
+    const setSearchValue = value => setSearchVal(value)     // 输入框的值改变的回调(直接传setSearchVal给子组件会报错：Rendered more hooks than during the previous render.)
     const [searchOptions, setSearchOptions] = useState([
         { name: '百度', engineUrl: 'https://www.baidu.com/s?wd=@@@' },
         { name: 'Bing', engineUrl: 'https://www.bing.com/search?q=@@@' },
@@ -44,9 +46,7 @@ function Search() {
     }
 
 
-    // 存搜索框的值
-    let searchValue = "";
-    const setSearchValue = value => {searchValue = value}
+    
 
     return (
         <>
@@ -56,6 +56,8 @@ function Search() {
                 value={searchStore.searchEngines}
                 onChange={(value) => searchStore.setSearchEngines(value)}
             />
+            {/* 添加搜索引擎 */}
+            <Button icon={<PlusOutlined />} style={{margin: '0 3px'}}/>
             <br />
             {/* 搜索框 */}
             <MySearch onSearch={onSearch} setSearchValue={setSearchValue}/>
@@ -67,6 +69,7 @@ function Search() {
                 {Object.entries(quickSearch).map(([key, value], index) => (
                     <Button key={index} onClick={() => window.open(value.replace('@@@', searchValue), '_blank')} icon={<ThunderboltOutlined />}>{key}</Button>
                 ))}
+                <Button icon={<PlusOutlined />}/>
             </Flex>
         </>
     )
