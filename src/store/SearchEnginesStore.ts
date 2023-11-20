@@ -1,7 +1,7 @@
 import { makeAutoObservable } from 'mobx'
 
 class SearchEnginesStore {
-  searchEngines: string = '360'
+  searchEngines: string = 'Bing'
   
     //构造函数
     constructor() {
