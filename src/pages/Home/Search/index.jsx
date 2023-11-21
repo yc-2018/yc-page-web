@@ -2,8 +2,8 @@ import { Segmented, Flex, Button } from 'antd'
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite'
 import { ThunderboltOutlined, PlusOutlined } from '@ant-design/icons';
-import MySearch from '../../compontets/MySearch';
-import searchStore from '../../store/SearchEnginesStore';
+import MySearch from '../../../compontets/MySearch';
+import searchStore from '../../../store/SearchEnginesStore';
 
 
 function Search() {
