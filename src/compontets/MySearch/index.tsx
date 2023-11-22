@@ -9,7 +9,7 @@ const { Search } = Input;
 async function getThinkList(param: string) {
     if (!param) return;
     const response = await axios.get(`/bd/sugrec?ie=utf-&prod=pc&from=pc_web&wd=${param}`);
-    console.log(response.data);
+    // console.log(response.data);
     return response.data.g?.map((item: { q: any }) => ({ value: item.q }));
 
 

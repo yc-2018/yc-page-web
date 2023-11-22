@@ -11,6 +11,7 @@ module.exports = function (app) {
             target: 'https://www.baidu.com',    //请求转发给谁
             changeOrigin: true,                 //控制服务器收到的请求头中Host的值
             pathRewrite: { '^/bd': '' }        //重写请求路径(必须)
-        })
+        }),
+        
     )
 }

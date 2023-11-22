@@ -1,7 +1,7 @@
 import { makeAutoObservable } from 'mobx'
 
 class SearchEnginesStore {
-  searchEngines: string = 'Bing'
+  searchEngines: string = localStorage.getItem('searchEngines') || 'Bing'
   
     //构造函数
     constructor() {
@@ -10,6 +10,7 @@ class SearchEnginesStore {
   
     //设置查询值
     setSearchEngines(searchEngines: string) {
+      localStorage.setItem('searchEngines',searchEngines)
       this.searchEngines = searchEngines;
     }
       

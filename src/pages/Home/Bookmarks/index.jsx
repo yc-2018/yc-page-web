@@ -1,6 +1,4 @@
-import React from 'react';
-import {DownOutlined, SmileOutlined} from '@ant-design/icons';
-import {Dropdown, Space} from 'antd';
+import {Button, Dropdown, Space} from 'antd';
 
 
 export default function Bookmarks() {
@@ -8,64 +6,53 @@ export default function Bookmarks() {
         {
             key: '1',
             label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-                    1st menu item
+                <a target="_blank"  href="https://ant-design.gitee.io/components/dropdown-cn">
+                    下拉菜单 Dropdown - Ant Design
                 </a>
             ),
+            icon: <img src="https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png" width={10}/>,
         },
         {
             key: '2',
             label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
+                <a target="_blank" href="https://www.aliyun.com">
                     2nd menu item (disabled)
                 </a>
             ),
-            icon: <SmileOutlined/>,
-            disabled: true,
+            icon: <img src="https://g.csdnimg.cn/static/logo/favicon32.ico" width={10}/>,
         },
         {
             key: '3',
             label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-                    3rd menu item (disabled)
+                <a target="_blank"  href="https://x.chatmindai.net/">
+                    gpt一年
                 </a>
             ),
-            disabled: true,
+            icon: <img src="https://x.chatmindai.net/Logo.png" width={10}/>,
         },
         {
             key: '4',
-            danger: true,
             label: 'a danger item',
+            icon: <img src="https://x.chatmindai.net/Logo.png" width={10}/>,
         },
+        
+
+        
     ];
 
     return (
-        <>
-            <Dropdown
-                menu={{
-                    items,
-                }}
-            >
-                <a onClick={(e) => e.preventDefault()}>
-                    <Space>
-                        Hover me
-                        <DownOutlined/>
-                    </Space>
+        <Space>
+
+            <Dropdown menu={{items,}} >
+                <Button ghost type="dashed" size='small'>ikun</Button>
+            </Dropdown>
+
+            <Dropdown menu={{items}}>
+                <a /* onClick={(e) => e.preventDefault()} */ href='http://8.134.201.95/'>
+                    Hover me
                 </a>
             </Dropdown>
 
-            <Dropdown
-                menu={{
-                    items,
-                }}
-            >
-                <a onClick={(e) => e.preventDefault()}>
-                    <Space>
-                        Hover me
-                        <DownOutlined/>
-                    </Space>
-                </a>
-            </Dropdown>
-        </>
+        </Space>
     )
 }
