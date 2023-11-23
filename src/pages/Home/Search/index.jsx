@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite'
 import { ThunderboltOutlined, PlusOutlined } from '@ant-design/icons';
 import MySearch from '../../../compontets/MySearch';
 import searchStore from '../../../store/SearchEnginesStore';
+import "./Search.css"
 
 
 function Search() {
@@ -58,13 +59,14 @@ function Search() {
                 onChange={(value) => searchStore.setSearchEngines(value)}
             />
             {/* 添加搜索引擎 */}
-            <Button icon={<PlusOutlined />} style={{ margin: '0 3px' }} />
+            <Button icon={<PlusOutlined />} style={{ margin: '0 3px' }} className={"addButton"}/>
             <br />
             {/* 搜索框 */}
             <MySearch onSearch={onSearch} setSearchValue={setSearchValue} />
 
 
             <br />
+            {/*快速搜索*/}
             <Flex style={{ margin: "5px 80px" }} wrap="wrap" gap="small" justify='center'>
                 {quickSearch.map((item, index) => (
                     <Button
@@ -75,7 +77,8 @@ function Search() {
                         {item.name}
                     </Button>
                 ))}
-                <Button icon={<PlusOutlined />} />
+                {/*添加按钮*/}
+                <Button icon={<PlusOutlined />} className={"addButton"}/>
             </Flex>
 
         </>

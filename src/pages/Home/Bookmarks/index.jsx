@@ -1,4 +1,4 @@
-import {Button, Dropdown, Space} from 'antd';
+import {Button, Dropdown, Select, Space} from 'antd';
 
 
 export default function Bookmarks() {
@@ -44,13 +44,20 @@ export default function Bookmarks() {
         <Space>
 
             <Dropdown menu={{items,}} >
-                <Button ghost type="dashed" size='small'>ikun</Button>
+                <Button ghost type="dashed" size='small' href={"https://x.chatmindai.net/"}>ikun</Button>
             </Dropdown>
 
-            <Dropdown menu={{items}}>
-                <a /* onClick={(e) => e.preventDefault()} */ href='http://8.134.201.95/'>
-                    Hover me
-                </a>
+            <Dropdown
+            dropdownRender={()=>
+                <div>
+                    <div><img src="https://x.chatmindai.net/Logo.png" width={10}/>自定义内容</div>
+                    <div>自定义内容</div>
+                    <div>自定义内容</div>
+                    <div>自定义内容</div>
+                </div>
+              }
+            >
+                <Button ghost type="dashed" size='small' href={"https://ant-design.gitee.io/components/dropdown-cn"}>小黑子</Button>
             </Dropdown>
 
         </Space>

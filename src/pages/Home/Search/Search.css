@@ -1,0 +1,7 @@
+/*添加按钮透明度的改变*/
+.addButton{
+    opacity: 0.3;
+}
+.addButton:hover{
+    opacity: 1;
+}

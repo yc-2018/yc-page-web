@@ -7,7 +7,6 @@ class ShowOrNot {
     //构造函数
     constructor() {
       makeAutoObservable(this)  //自动化数据管理
-      console.log(this.memoDrawerShow)
     }
   
   

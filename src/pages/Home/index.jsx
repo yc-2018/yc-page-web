@@ -2,9 +2,10 @@ import React, { useState/* ,useEffect */ } from 'react';
 import Search from './Search';
 import Bookmarks from './Bookmarks';
 import { FloatButton, Drawer } from "antd";
-import { PictureTwoTone } from "@ant-design/icons";
+import { PictureTwoTone, SnippetsTwoTone} from "@ant-design/icons";
 import { observer } from 'mobx-react-lite'
 import showOrNot from '../../store/ShowOrNot';
+import "./Home.css"
 // import axios from 'axios';
 
 
@@ -73,11 +74,20 @@ function Home() {
                     {/*搜索框*/}
                     <Search />
 
+                    {/*显示备忘录*/}
+                    <FloatButton
+                        onClick={() => showOrNot.setMemoDrawerShow(true)}
+                        icon={<SnippetsTwoTone />}
+                        tooltip="点击弹出备忘录"
+                        style={{opacity: 0.3}}
+                    />
+
                     {/*换壁纸*/}
                     <FloatButton
                         onClick={reImagesUrl}
                         icon={<PictureTwoTone />}
                         tooltip="点击换壁纸"
+                        style={{right: 80}}
                     />
 
                     <Drawer title="备忘录" placement="right" onClose={() => showOrNot.setMemoDrawerShow(false)} open={showOrNot.memoDrawerShow} style={{opacity: 0.8}}>
