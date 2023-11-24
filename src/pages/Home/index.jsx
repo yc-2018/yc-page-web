@@ -2,7 +2,7 @@ import React, { useState/* ,useEffect */ } from 'react';
 import Search from './Search';
 import Bookmarks from './Bookmarks';
 import { FloatButton, Drawer } from "antd";
-import { PictureTwoTone, SnippetsTwoTone} from "@ant-design/icons";
+import { PictureTwoTone, SnippetsTwoTone } from "@ant-design/icons";
 import { observer } from 'mobx-react-lite'
 import showOrNot from '../../store/ShowOrNot';
 import "./Home.css"
@@ -49,6 +49,12 @@ function Home() {
         console.log(imgUrl)
     }
 
+    const handleRightClick = (event) => {
+        event.preventDefault(); // 阻止默认的右键菜单弹出
+        console.log("右键被点击了！");
+        showOrNot.setEnglishDrawerShow(true);  // 打开英语抽屉
+        };
+
 
     return (
 
@@ -64,7 +70,7 @@ function Home() {
             <Bookmarks />
 
             {/* 居中部分 */}
-            <div className="App" >
+            <div className="App" onContextMenu={handleRightClick}>
                 {/* antd居中输入框 */}
                 <div className="ant-input-group">
                     <div className="ant-input-group-addon">
@@ -79,7 +85,7 @@ function Home() {
                         onClick={() => showOrNot.setMemoDrawerShow(true)}
                         icon={<SnippetsTwoTone />}
                         tooltip="点击弹出备忘录"
-                        style={{opacity: 0.3}}
+                        style={{ opacity: 0.3 }}
                     />
 
                     {/*换壁纸*/}
@@ -87,10 +93,10 @@ function Home() {
                         onClick={reImagesUrl}
                         icon={<PictureTwoTone />}
                         tooltip="点击换壁纸"
-                        style={{right: 80}}
+                        style={{ right: 80 }}
                     />
 
-                    <Drawer title="备忘录" placement="right" onClose={() => showOrNot.setMemoDrawerShow(false)} open={showOrNot.memoDrawerShow} style={{opacity: 0.8}}>
+                    <Drawer title="备忘录" placement="right" onClose={() => showOrNot.setMemoDrawerShow(false)} open={showOrNot.memoDrawerShow} style={{ opacity: 0.8 }}>
                         <p>按时睡觉，不按时睡觉，你就是个loser</p>
                         <p>Some contents...</p>
                         <p>Some contents...</p>
@@ -115,9 +121,7 @@ function Home() {
                         <p>Some contents...</p>
                         <p>Some contents...</p>
                         <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
- 
+
                     </Drawer>
 
                     {/* 侧边半透明的边 移动到上面显示抽屉 */}
@@ -126,7 +130,37 @@ function Home() {
                         style={{ width: 5, position: 'fixed', right: 0, top: 0, height: '100%', backgroundColor: 'aliceblue', opacity: '15%' }}
                     />
 
-
+                    <Drawer title="备忘英语" placement="left" onClose={() => showOrNot.setEnglishDrawerShow(false)} open={showOrNot.englishDrawerShow} style={{ opacity: 0.8 }}>
+                        <p>按时睡觉，不按时睡觉，你就是个loser</p>
+                        <p>left:左侧</p>
+                        <p>right:右侧</p>
+                        <p>Redux react的数据管理</p>
+                        <p>CentOS</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                    </Drawer>
                 </div>
             </div>
         </div>
