@@ -1,3 +1,23 @@
+.App {
+    text-align: center;
+    z-index: 1000;
+  }
+  
+  
+  .App-link {
+    color: #61dafb;
+  }
+
+/* 按钮透明度的改变 */
+ .buttonOpacity{
+    opacity: 0.3;
+    transition: all 0.5s ;
+  }
+ .buttonOpacity:hover{
+    opacity: 1;
+  }
+
+
 .ant-drawer-body::-webkit-scrollbar-thumb{	/*定义滚动条颜色*/
     background-color: #ffffff;
     border-radius: 10px;

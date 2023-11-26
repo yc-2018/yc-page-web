@@ -5,3 +5,11 @@
 .addButton:hover{
     opacity: 1;
 }
+
+.searchButton{
+    opacity: 0.6;
+    transition: all 0.5s;
+}
+.searchButton:hover{
+    opacity: 1;
+}

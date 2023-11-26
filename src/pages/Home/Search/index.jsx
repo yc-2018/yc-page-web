@@ -25,12 +25,12 @@ function Search() {
         { name: '360', engineUrl: 'https://www.so.com/s?q=@@@' },
         { name: '搜狗', engineUrl: 'https://www.sogou.com/web?query=@@@' },
         { name: '抖音', engineUrl: 'https://www.douyin.com/search/@@@' },
-        { name: '百度翻译', engineUrl: 'https://fanyi.baidu.com/#auto/en/@@@' },
-        { name: 'B站', engineUrl: 'https://search.bilibili.com/all?keyword=@@@&search_source=1' },
-        { name: 'GitHub', engineUrl: 'https://github.com/search?q=@@@&type=repositories' },
         { name: '京东', engineUrl: 'https://search.jd.com/Search?keyword=@@@' },
         { name: '天猫', engineUrl: 'https://s.taobao.com/search?fromTmallRedirect=true&q=@@@&tab=mall' },
         { name: '小红书', engineUrl: 'https://www.xiaohongshu.com/search_result?keyword=@@@&source=web_explore_feed' },
+        { name: 'B站', engineUrl: 'https://search.bilibili.com/all?keyword=@@@&search_source=1' },
+        { name: 'GitHub', engineUrl: 'https://github.com/search?q=@@@&type=repositories' },
+        { name: '百度翻译', engineUrl: 'https://fanyi.baidu.com/#auto/en/@@@' },
     ]);
 
 
@@ -70,6 +70,7 @@ function Search() {
             <Flex style={{ margin: "5px 80px" }} wrap="wrap" gap="small" justify='center'>
                 {quickSearch.map((item, index) => (
                     <Button
+                        className={"searchButton"}
                         key={item.name}
                         onClick={() => window.open(item.engineUrl.replace('@@@', searchValue), '_blank')}
                         icon={<ThunderboltOutlined />}

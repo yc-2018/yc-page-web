@@ -1,8 +1,8 @@
 import React, { useState/* ,useEffect */ } from 'react';
 import Search from './Search';
 import Bookmarks from './Bookmarks';
-import { FloatButton, Drawer } from "antd";
-import { PictureTwoTone, SnippetsTwoTone } from "@ant-design/icons";
+import { FloatButton, Drawer,message  } from "antd";
+import { PictureTwoTone, SnippetsTwoTone, UserOutlined } from "@ant-design/icons";
 import { observer } from 'mobx-react-lite'
 import showOrNot from '../../store/ShowOrNot';
 import "./Home.css"
@@ -11,6 +11,7 @@ import "./Home.css"
 
 function Home() {
     const [count, setCount] = useState(0);
+    const [messageApi, contextHolder] = message.useMessage();
     let backgroundImages = [
         'https://pic.netbian.com/uploads/allimg/231111/010350-16996358307f29.jpg',       //靓女
         'https://pic.netbian.com/uploads/allimg/231117/235008-170023620888b9.jpg',     //龙年贺图
@@ -39,7 +40,7 @@ function Home() {
 
 
     let backgroundImage = localStorage.getItem('backgroundImages');
-    const [images, setImages] = useState('https://pic.netbian.com/uploads/allimg/231111/010350-16996358307f29.jpg');
+    const [images, setImages] = useState('https://pic.netbian.com/uploads/allimg/231028/002717-169842403784a6.jpg');
 
     const reImagesUrl = () => {
         setCount(Math.floor(Math.random() * backgroundImages.length));
@@ -51,9 +52,8 @@ function Home() {
 
     const handleRightClick = (event) => {
         event.preventDefault(); // 阻止默认的右键菜单弹出
-        console.log("右键被点击了！");
         showOrNot.setEnglishDrawerShow(true);  // 打开英语抽屉
-        };
+    };
 
 
     return (
@@ -66,11 +66,28 @@ function Home() {
                 backgroundRepeat: "no-repeat"
             }}
         >
+            {/* 全局提示 */}
+            {contextHolder}
+
+            {/* 漂浮在底层透明背景，用做 点击右键显示 抽屉 只能放在这上面，放到下面去写会挡住按钮 不知道为啥。*/}
+            <div
+                style={{
+                    position: 'absolute',
+                    bottom: '10%',
+                    right: '20%',
+                    width: '60%',
+                    height: '80%',
+                    zIndex: 0
+                    // backgroundColor: 'aliceblue',
+                    // opacity: '15%',
+                }}
+                onContextMenu={handleRightClick}
+            />
             {/* 书签 */}
-            <Bookmarks />
+            <Bookmarks messageApi={messageApi}/>
 
             {/* 居中部分 */}
-            <div className="App" onContextMenu={handleRightClick}>
+            <div className="App">
                 {/* antd居中输入框 */}
                 <div className="ant-input-group">
                     <div className="ant-input-group-addon">
@@ -85,7 +102,7 @@ function Home() {
                         onClick={() => showOrNot.setMemoDrawerShow(true)}
                         icon={<SnippetsTwoTone />}
                         tooltip="点击弹出备忘录"
-                        style={{ opacity: 0.3 }}
+                        className='buttonOpacity'
                     />
 
                     {/*换壁纸*/}
@@ -94,6 +111,16 @@ function Home() {
                         icon={<PictureTwoTone />}
                         tooltip="点击换壁纸"
                         style={{ right: 80 }}
+                        className='buttonOpacity'
+                    />
+
+                    {/*用户*/}
+                    <FloatButton
+                        onClick={() => { messageApi.info('抱一丝，路漫漫其修远兮，唔得慢慢完善') }}
+                        icon={<UserOutlined />}
+                        tooltip="用户"
+                        style={{ right: 135 }}
+                        className='buttonOpacity'
                     />
 
                     <Drawer title="备忘录" placement="right" onClose={() => showOrNot.setMemoDrawerShow(false)} open={showOrNot.memoDrawerShow} style={{ opacity: 0.8 }}>
@@ -136,8 +163,8 @@ function Home() {
                         <p>right:右侧</p>
                         <p>Redux react的数据管理</p>
                         <p>CentOS</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
+                        <p>message 消息</p>
+                        <p>Layout 布局</p>
                         <p>Some contents...</p>
                         <p>Some contents...</p>
                         <p>Some contents...</p>

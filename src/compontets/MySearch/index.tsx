@@ -3,6 +3,7 @@ import { AutoComplete, Input } from 'antd';
 import axios from 'axios';
 import searchStore from '../../store/SearchEnginesStore';
 import {SendOutlined } from '@ant-design/icons';
+import "./MySearch.css"
 
 const { Search } = Input;
 // 异步获取百度联想列表
@@ -27,6 +28,7 @@ const MySearch: React.FC<ChildComponentProps> = ({ onSearch,setSearchValue}) => 
 
     return (
         <AutoComplete
+        className="inputOpacity"
             value={searchValue}                 //输入框的值
             options={anotherOptions}            //联想列表
             style={{ width: 500, margin: '5px 0 15px 0' }}

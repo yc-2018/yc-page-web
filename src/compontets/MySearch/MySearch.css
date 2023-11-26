@@ -1,0 +1,8 @@
+/* 按钮透明度的改变 */
+.inputOpacity{
+    opacity: 0.8;
+    transition: all 0.5s ;
+  }
+ .inputOpacity:hover{
+    opacity: 1;
+  }
