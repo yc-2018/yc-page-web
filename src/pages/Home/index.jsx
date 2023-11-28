@@ -1,16 +1,20 @@
-import React, { useState/* ,useEffect */ } from 'react';
+import React, {useState/* ,useEffect */} from 'react';
 import Search from './Search';
 import Bookmarks from './Bookmarks';
-import { FloatButton, Drawer,message  } from "antd";
-import { PictureTwoTone, SnippetsTwoTone, UserOutlined } from "@ant-design/icons";
-import { observer } from 'mobx-react-lite'
+import {Button, FloatButton, Input, message, Modal, Space} from "antd";
+import {PictureTwoTone, SnippetsTwoTone, UserOutlined} from "@ant-design/icons";
+import {observer} from 'mobx-react-lite'
 import showOrNot from '../../store/ShowOrNot';
 import "./Home.css"
+import EnglishDrawer from "./EnglishDrawer";
+import MemoDrawer from "./MemoDrawer";
+
 // import axios from 'axios';
 
 
 function Home() {
     const [count, setCount] = useState(0);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
     let backgroundImages = [
         'https://pic.netbian.com/uploads/allimg/231111/010350-16996358307f29.jpg',       //靓女
@@ -95,12 +99,12 @@ function Home() {
                     </div>
 
                     {/*搜索框*/}
-                    <Search />
+                    <Search/>
 
                     {/*显示备忘录*/}
                     <FloatButton
                         onClick={() => showOrNot.setMemoDrawerShow(true)}
-                        icon={<SnippetsTwoTone />}
+                        icon={<SnippetsTwoTone/>}
                         tooltip="点击弹出备忘录"
                         className='buttonOpacity'
                     />
@@ -108,88 +112,60 @@ function Home() {
                     {/*换壁纸*/}
                     <FloatButton
                         onClick={reImagesUrl}
-                        icon={<PictureTwoTone />}
+                        icon={<PictureTwoTone/>}
                         tooltip="点击换壁纸"
-                        style={{ right: 80 }}
+                        style={{right: 80}}
                         className='buttonOpacity'
                     />
 
                     {/*用户*/}
                     <FloatButton
-                        onClick={() => { messageApi.info('抱一丝，路漫漫其修远兮，唔得慢慢完善') }}
-                        icon={<UserOutlined />}
+                        icon={<UserOutlined/>}
                         tooltip="用户"
-                        style={{ right: 135 }}
+                        style={{right: 135}}
                         className='buttonOpacity'
+                        onClick={() => {
+                            setModalIsOpen(true);
+                        }}
                     />
-
-                    <Drawer title="备忘录" placement="right" onClose={() => showOrNot.setMemoDrawerShow(false)} open={showOrNot.memoDrawerShow} style={{ opacity: 0.8 }}>
-                        <p>按时睡觉，不按时睡觉，你就是个loser</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-
-                    </Drawer>
 
                     {/* 侧边半透明的边 移动到上面显示抽屉 */}
                     <div
                         onMouseEnter={() => showOrNot.setMemoDrawerShow(true)}
-                        style={{ width: 5, position: 'fixed', right: 0, top: 0, height: '100%', backgroundColor: 'aliceblue', opacity: '15%' }}
+                        style={{
+                            width: 5,
+                            position: 'fixed',
+                            right: 0,
+                            top: "20%",
+                            height: '60%',
+                            backgroundColor: 'aliceblue',
+                            opacity: '15%'
+                        }}
                     />
 
-                    <Drawer title="备忘英语" placement="left" onClose={() => showOrNot.setEnglishDrawerShow(false)} open={showOrNot.englishDrawerShow} style={{ opacity: 0.8 }}>
-                        <p>按时睡觉，不按时睡觉，你就是个loser</p>
-                        <p>left:左侧</p>
-                        <p>right:右侧</p>
-                        <p>Redux react的数据管理</p>
-                        <p>CentOS</p>
-                        <p>message 消息</p>
-                        <p>Layout 布局</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
-                    </Drawer>
+                    {/*备忘录抽屉*/}
+                    <MemoDrawer/>
+                    {/*备忘英语抽屉*/}
+                    <EnglishDrawer/>
                 </div>
             </div>
+            <Modal
+                open={modalIsOpen}
+                onCancel={() => setModalIsOpen(false)}
+                footer={<></>}
+            >
+                <span style={{textAlign: 'center',display: 'block', margin: '0 auto'}}>
+                    <p style={{fontSize: 20}}>请使用微信扫一扫关注登录</p>
+                    <img src="/wxGzh.jpg"/>
+                    <Space.Compact style={{width: '80%'}} size={"large"}>
+                        <Input placeholder="请输入验证码"/>
+                        <Button type="primary" onClick={() => messageApi.info('抱一丝，路漫漫其修远兮，唔得慢慢完善')}>
+                            验证登录
+                        </Button>
+                    </Space.Compact>
+                    <p style={{color: '#fa5555'}}>如已关注，请回复“<strong>登录</strong>”二字获取验证码进行登录</p>
+                </span>
+            </Modal>
         </div>
     );
 }
