@@ -12,6 +12,10 @@ module.exports = function (app) {
             changeOrigin: true,                 //控制服务器收到的请求头中Host的值
             pathRewrite: { '^/bd': '' }        //重写请求路径(必须)
         }),
-        
+        proxy('/jfApi', {                         
+            target: 'https://www.jianfast.com',    //请求转发给谁
+            changeOrigin: true,                 //控制服务器收到的请求头中Host的值
+            pathRewrite: { '^/jfApi': '' }        //重写请求路径(必须)
+        }),
     )
 }

@@ -31,6 +31,7 @@ function Search() {
         { name: 'B站', engineUrl: 'https://search.bilibili.com/all?keyword=@@@&search_source=1' },
         { name: 'GitHub', engineUrl: 'https://github.com/search?q=@@@&type=repositories' },
         { name: '百度翻译', engineUrl: 'https://fanyi.baidu.com/#auto/en/@@@' },
+        { name: 'deepl翻译', engineUrl: 'https://www.deepl.com/translator#auto/en/@@@' },
     ]);
 
 
