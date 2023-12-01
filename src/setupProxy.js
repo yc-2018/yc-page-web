@@ -23,7 +23,7 @@ module.exports = function (app) {
             pathRewrite: { '^/bz1Api': '' }        //重写请求路径(必须)
         }),
         proxy('/bz2Api', {
-            target: 'https://img.xjh.me',    //请求转发给谁
+            target: 'https://api.likepoems.com',    //请求转发给谁
             changeOrigin: true,                 //控制服务器收到的请求头中Host的值
             pathRewrite: { '^/bz2Api': '' }        //重写请求路径(必须)
         }),

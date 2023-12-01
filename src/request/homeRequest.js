@@ -2,8 +2,8 @@ import axios from 'axios';
 
 
 /**
- * 获取首页背景图
- * @returns {Promise<null|string>}
+ * 获取首页背景图（搞多几个做备份）
+ * @returns {Promise<null|string>} 随机壁纸URL
  */
 export async function reImagesUrl()  {
     try {
@@ -21,12 +21,11 @@ export async function reImagesUrl()  {
         }
 
         async function bz2Api() {
-            // https://img.xjh.me/random_img.php?return=json&type=bg
-            const response = await axios.get('/bz2Api/random_img.php?return=json&type=bg');
-            return 'https:' + response.data.img;
+            // 如诗 - API接口文档 https://api.likepoems.com/
+            // https://api.likepoems.com/img/pc/?type=json
+            const response = await axios.get('/bz2Api/img/pc/?type=json');
+            return response.data.url;
         }
-
-
         return bz2Api();
     } catch (error) {
         return null;
