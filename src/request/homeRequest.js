@@ -26,7 +26,7 @@ export async function reImagesUrl()  {
             const response = await axios.get('/bz2Api/img/pc/?type=json');
             return response.data.url;
         }
-        return bz2Api();
+        return jfApi();
     } catch (error) {
         return null;
     }
