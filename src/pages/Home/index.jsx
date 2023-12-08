@@ -36,7 +36,13 @@ function Home() {
      * 登录
      */
     const goLogin = async() => {
-        const isLogin = login(loginCaptcha);
+        // 校验 loginCaptcha 是否为6位数字
+        if (loginCaptcha.length!== 6) {
+            message.error('验证码格式有误');
+            return;
+        }
+        const isLogin =await login(loginCaptcha);
+        loginCaptcha=undefined;
         console.log(isLogin);
         if (isLogin) setModalIsOpen(false);
     }
