@@ -8,7 +8,7 @@ import showOrNot from '../../store/ShowOrNot';
 import "./Home.css"
 import EnglishDrawer from "./EnglishDrawer";
 import MemoDrawer from "./MemoDrawer";
-import {reImagesUrl} from "../../request/homeRequest";
+import {reImagesUrl,login} from "../../request/homeRequest";
 
 
 function Home() {
@@ -35,7 +35,7 @@ function Home() {
     /**
      * 登录
      */
-    const login = async() => {
+    const goLogin = async() => {
         const isLogin = login();
         if (isLogin) setModalIsOpen(false);
     }
@@ -149,7 +149,7 @@ function Home() {
                     <img src="/wxGzh.jpg" />
                     <Space.Compact style={{ width: '80%' }} size={"large"}>
                         <Input placeholder="请输入验证码" />
-                        <Button type="primary" onClick={() => login}>
+                        <Button type="primary" onClick={goLogin}>
                             验证登录
                         </Button>
                     </Space.Compact>
