@@ -37,6 +37,7 @@ function Home() {
      */
     const goLogin = async() => {
         const isLogin = login(loginCaptcha);
+        console.log(isLogin);
         if (isLogin) setModalIsOpen(false);
     }
 
