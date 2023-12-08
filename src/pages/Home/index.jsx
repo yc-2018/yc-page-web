@@ -14,7 +14,7 @@ import {reImagesUrl,login} from "../../request/homeRequest";
 function Home() {
     const [modalIsOpen, setModalIsOpen] = useState(false);  // 弹出抽屉状态
     const [messageApi, contextHolder] = message.useMessage();
-
+    let loginCaptcha = undefined;
 
     let backgroundImage = localStorage.getItem('backgroundImages');
     const [images, setImages] = useState('/Default-wallpaper.jpg');
@@ -36,7 +36,7 @@ function Home() {
      * 登录
      */
     const goLogin = async() => {
-        const isLogin = login();
+        const isLogin = login(loginCaptcha);
         if (isLogin) setModalIsOpen(false);
     }
 
@@ -148,7 +148,7 @@ function Home() {
                     <p style={{ fontSize: 20 }}>请使用微信扫一扫关注登录</p>
                     <img src="/wxGzh.jpg" />
                     <Space.Compact style={{ width: '80%' }} size={"large"}>
-                        <Input placeholder="请输入验证码" />
+                        <Input placeholder="请输入验证码" value={loginCaptcha} onChange={(e) => loginCaptcha = e.target.value} />
                         <Button type="primary" onClick={goLogin}>
                             验证登录
                         </Button>
