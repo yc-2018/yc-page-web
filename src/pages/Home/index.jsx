@@ -32,6 +32,14 @@ function Home() {
             messageApi.info('获取壁纸出错');
     }
 
+    /**
+     * 登录
+     */
+    const login = async() => {
+        const isLogin = login();
+        if (isLogin) setModalIsOpen(false);
+    }
+
 
 
 
@@ -141,7 +149,7 @@ function Home() {
                     <img src="/wxGzh.jpg" />
                     <Space.Compact style={{ width: '80%' }} size={"large"}>
                         <Input placeholder="请输入验证码" />
-                        <Button type="primary" onClick={() => messageApi.info('抱一丝，路漫漫其修远兮，唔得慢慢完善')}>
+                        <Button type="primary" onClick={() => login}>
                             验证登录
                         </Button>
                     </Space.Compact>
