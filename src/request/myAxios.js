@@ -2,6 +2,8 @@
 import axios from 'axios';
 import {message} from 'antd'
 
+import UserStore from '../store/UserStore';
+
 const myAxios = axios.create({
     timeout: 10000 // 设置超时时间为 10000 毫秒（10秒）
 });
@@ -10,11 +12,14 @@ const myAxios = axios.create({
 myAxios.interceptors.request.use(
     config => {
         // 在发送请求之前做些什么
-        const token = localStorage.getItem('jwt'); // 从存储中获取 JWT
-        if (token) {
+        const token = UserStore.jwt; // 从仓库中获取 JWT
+        if (!JWTUtils.isExpired()) {
             config.headers.Authorization = `Bearer ${token}`; // 如果存在 JWT，则添加到请求头
+            return config; // 返回配置，这样请求就会带上这些设置
         }
-        return config; // 返回配置，这样请求就会带上这些设置
+        message.error('未登录或登录已过期，请重新登录。');
+        localStorage.removeItem('jwt');
+        return Promise.reject(new Error('Token expired'));
     },
     error => {
         // 请求错误时做些什么

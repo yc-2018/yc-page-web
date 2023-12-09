@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import showOrNot from "../../../store/ShowOrNot";
 import {Drawer} from "antd";
-import React from "react";
 
 function EnglishDrawer() {
 

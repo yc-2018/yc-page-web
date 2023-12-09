@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AutoComplete, Input } from 'antd';
+import { AutoComplete, Button, Input } from 'antd';
 import axios from 'axios';
 import searchStore from '../../store/SearchEnginesStore';
 import {SendOutlined } from '@ant-design/icons';
@@ -12,9 +12,10 @@ async function getThinkList(param: string) {
     const response = await axios.get(`/bd/sugrec?ie=utf-&prod=pc&from=pc_web&wd=${param}`);
     // console.log(response.data);
     return response.data.g?.map((item: { q: any }) => ({ value: item.q }));
-
-
 }
+
+
+
 interface ChildComponentProps {
     onSearch: (value: any, event: any) => void;
     setSearchValue: (value: any) => void;
@@ -32,8 +33,8 @@ const MySearch: React.FC<ChildComponentProps> = ({ onSearch,setSearchValue}) => 
             value={searchValue}                 //输入框的值
             options={anotherOptions}            //联想列表
             style={{ width: 500, margin: '5px 0 15px 0' }}
-            // onSelect={onSelect}                                                    //选中联想列表的回调
-            onChange={v=>{searchValue = v; setSearchValue(v);}}                       //输入框的值改变的回调
+          //onSelect={v=>console.log(v,"#########")}                                    //选中联想列表的回调
+            onChange={v=>{setSearchValue(v);searchValue = v;}}                         //输入框的值改变的回调
             onSearch={async (text) => setAnotherOptions(await getThinkList(text))}    //输入框值改变时联想列表的回调
             // size='large'
         >

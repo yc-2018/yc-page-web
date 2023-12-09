@@ -53,42 +53,28 @@ function Home() {
     }
 
 
-
-
-
-    const handleRightClick = (event) => {
-        event.preventDefault(); // 阻止默认的右键菜单弹出
-        showOrNot.setEnglishDrawerShow(true);  // 打开英语抽屉
-    };
-
-
     return (
 
         <div
             style={{
                 height: '100vh',
-                backgroundImage: `linear-gradient( rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.4)),url(${backgroundImage || images})`,
                 backgroundSize: "cover",
-                backgroundRepeat: "no-repeat"
+                backgroundRepeat: "no-repeat",
+                backgroundImage: `linear-gradient( rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.4)),url(${backgroundImage || images})`,
             }}
         >
             {/* 全局提示 */}
             {contextHolder}
 
-            {/* 漂浮在底层透明背景，用做 点击右键显示 抽屉 只能放在这上面，放到下面去写会挡住按钮 不知道为啥。*/}
+            {/* 《为了打开英语抽屉漂浮在底层透明背景》用做 点击右键显示 抽屉 只能放在这上面，放到下面去写会挡住按钮 不知道为啥。*/}
             <div
-                style={{
-                    position: 'absolute',
-                    bottom: '10%',
-                    right: '20%',
-                    width: '60%',
-                    height: '80%',
-                    zIndex: 0
-                    // backgroundColor: 'aliceblue',
-                    // opacity: '15%',
+                style={{position: 'absolute',bottom: '10%',right: '20%',width: '60%', height: '80%', zIndex: 0}}
+                onContextMenu={(event) => {
+                    event.preventDefault();                 // 阻止默认的右键菜单弹出
+                    showOrNot.setEnglishDrawerShow(true);  // 打开英语抽屉
                 }}
-                onContextMenu={handleRightClick}
             />
+
             {/* 书签 */}
             <Bookmarks messageApi={messageApi} />
 

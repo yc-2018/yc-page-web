@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {message} from 'antd'
+import UserStore from '../store/UserStore';
 
 /**
  * 获取首页背景图（搞多几个做备份）
@@ -43,7 +44,7 @@ export async function login(loginCode) {
 
         if (code === 1) {
             // 存储 JWT
-            localStorage.setItem('jwt', data);
+            UserStore.setJwt(data);
             message.success("登录成功");
             return true;
         } else if (code === 0) {
