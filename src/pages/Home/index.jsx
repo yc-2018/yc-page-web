@@ -12,14 +12,13 @@ import {reImagesUrl,login} from "../../request/homeRequest";
 
 
 function Home() {
-    const [modalIsOpen, setModalIsOpen] = useState(false);  // 弹出抽屉状态
-    const [loginLoading, setLoginLoading] = useState(false);  // 点击登录按钮加载
-    const [loginCaptcha, setLoginCaptcha] = useState(undefined);  // 登录验证码
-    const [messageApi, contextHolder] = message.useMessage();
-
+    const [modalIsOpen, setModalIsOpen] = useState(false);          // 弹出抽屉状态
+    const [loginLoading, setLoginLoading] = useState(false);        // 点击登录按钮加载
+    const [loginCaptcha, setLoginCaptcha] = useState(undefined);    // 登录验证码
+    const [images, setImages] = useState('/Default-wallpaper.jpg'); // 背景壁纸
+    const [messageApi, contextHolder] = message.useMessage();       // Hooks 调用全局提示（antd推荐）因为静态Message方法无法消费上下文，因而 ConfigProvider 的数据也不会生效。
 
     let backgroundImage = localStorage.getItem('backgroundImages');
-    const [images, setImages] = useState('/Default-wallpaper.jpg');
 
     /**
      * 获取壁纸
