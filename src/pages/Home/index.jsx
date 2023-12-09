@@ -23,8 +23,8 @@ function Home() {
     /**
      * 获取壁纸
      */
-    const reImages = async() => {
-        const imgUrl = reImagesUrl();
+    const reImages = async(bzType) => {
+        const imgUrl = reImagesUrl(bzType);
         if (imgUrl){
             localStorage.setItem('backgroundImages', await imgUrl);
             setImages(await imgUrl);
@@ -115,7 +115,11 @@ function Home() {
                     <FloatButton
                         onClick={reImages}
                         icon={<PictureTwoTone />}
-                        tooltip="点击换壁纸"
+                        tooltip={<div style={{textAlign: 'center'}}>
+                            <div>点击换缓慢的风景壁纸:默认</div>
+                            <Button onClick={()=>{reImages("动画");console.log("动画")}}>加载快速的动画壁纸</Button>
+                            <Button onClick={()=>{reImages("随机");console.log("随机")}}>高清缓慢的随机壁纸</Button>
+                            </div> }
                         style={{ right: 80 }}
                         className='buttonOpacity'
                     />

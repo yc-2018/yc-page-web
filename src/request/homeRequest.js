@@ -5,7 +5,7 @@ import {message} from 'antd'
  * 获取首页背景图（搞多几个做备份）
  * @returns {Promise<null|string>} 随机壁纸URL
  */
-export async function reImagesUrl() {
+export async function reImagesUrl(bzType="风景") {
     try {
         async function jfApi() {
             const response = await axios.get('/jfApi/home/bg/ajaxbg');
@@ -16,7 +16,7 @@ export async function reImagesUrl() {
 
         async function bz1Api() {
             // https://api.btstu.cn/sjbz/api.php?lx=dongman&format=json
-            const response = await axios.get('/bz1Api/sjbz/api.php?lx=dongman&format=json');
+            const response = await axios.get('/bz1Api/sjbz/api.php?format=json');
             return response.data.imgurl;
         }
 
@@ -26,7 +26,10 @@ export async function reImagesUrl() {
             const response = await axios.get('/bz2Api/img/pc/?type=json');
             return response.data.url;
         }
-        return jfApi();
+        return bzType === "风景"? jfApi():               
+               bzType === "动画"? bz2Api():            
+               bzType === "随机"? bz1Api():jfApi();     
+
     } catch (error) {
         return null;
     }

@@ -44,7 +44,15 @@ export default function Bookmarks({ messageApi }) {
         <Space>
 
             <Dropdown menu={{ items, }} >
-                <Button ghost type="dashed" size='small' href={"https://x.chatmindai.net/"}>ikun</Button>
+                <Button 
+                    ghost 
+                    type="dashed" 
+                    size='small' 
+                    href={"https://x.chatmindai.net/"} 
+                    style={{textShadow:' 0px 0px 5px #abc9ec', borderColor: 'rgb(0 0 0)'}}
+                >
+                    ikun
+                </Button>
             </Dropdown>
 
             <Dropdown
