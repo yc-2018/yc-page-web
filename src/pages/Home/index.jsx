@@ -13,8 +13,10 @@ import {reImagesUrl,login} from "../../request/homeRequest";
 
 function Home() {
     const [modalIsOpen, setModalIsOpen] = useState(false);  // 弹出抽屉状态
+    const [loginLoading, setLoginLoading] = useState(false);  // 点击登录按钮加载
+    const [loginCaptcha, setLoginCaptcha] = useState(undefined);  // 登录验证码
     const [messageApi, contextHolder] = message.useMessage();
-    let loginCaptcha = undefined;
+
 
     let backgroundImage = localStorage.getItem('backgroundImages');
     const [images, setImages] = useState('/Default-wallpaper.jpg');
@@ -37,14 +39,18 @@ function Home() {
      */
     const goLogin = async() => {
         // 校验 loginCaptcha 是否为6位数字
-        if (loginCaptcha.length!== 6) {
-            message.error('验证码格式有误');
+        if (loginCaptcha?.length!== 6) {
+            messageApi.error('验证码格式有误');
             return;
         }
+        setLoginLoading(true);
         const isLogin =await login(loginCaptcha);
-        loginCaptcha=undefined;
+        setLoginLoading(false);
         console.log(isLogin);
-        if (isLogin) setModalIsOpen(false);
+        if (isLogin) {
+            setLoginCaptcha(undefined); // 验证码清空
+            setModalIsOpen(false);      // 关闭弹出弹窗
+        }
     }
 
 
@@ -153,10 +159,10 @@ function Home() {
             >
                 <span style={{ textAlign: 'center', display: 'block', margin: '0 auto' }}>
                     <p style={{ fontSize: 20 }}>请使用微信扫一扫关注登录</p>
-                    <img src="/wxGzh.jpg" />
+                    <img src="/wxGzh.jpg" /> 
                     <Space.Compact style={{ width: '80%' }} size={"large"}>
-                        <Input placeholder="请输入验证码" value={loginCaptcha} onChange={(e) => loginCaptcha = e.target.value} />
-                        <Button type="primary" onClick={goLogin}>
+                        <Input placeholder="请输入验证码" value={loginCaptcha} onChange={(e) => setLoginCaptcha(e.target.value)} />
+                        <Button type="primary" onClick={goLogin} loading={loginLoading}>
                             验证登录
                         </Button>
                     </Space.Compact>
