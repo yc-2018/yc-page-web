@@ -2,26 +2,37 @@ import React, { useState/* ,useEffect */ } from 'react';
 import Search from './Search';
 import Bookmarks from './Bookmarks';
 import { Button, FloatButton, Input, message, Modal, Space } from "antd";
-import { PictureTwoTone, SnippetsTwoTone, UserOutlined } from "@ant-design/icons";
+import {
+    PictureTwoTone,
+    SnippetsTwoTone,
+    UserOutlined,
+    SyncOutlined,
+    DownloadOutlined,
+    UploadOutlined,
+    HomeTwoTone, PoweroffOutlined
+} from "@ant-design/icons";
 import { observer } from 'mobx-react-lite'
 import showOrNot from '../../store/ShowOrNot';
 import "./Home.css"
 import EnglishDrawer from "./EnglishDrawer";
 import MemoDrawer from "./MemoDrawer";
 import {reImagesUrl,login} from "../../request/homeRequest";
+import UserStore from "../../store/UserStore";
+import JWTUtils from  "../../utils/JWTUtils"
 
 
 function Home() {
-    const [modalIsOpen, setModalIsOpen] = useState(false);          // 弹出抽屉状态
+    const [modalIsOpen, setModalIsOpen] = useState(false);          // 弹出登录框
+    const [customizeBzModal, setCustomizeBzModal] = useState(false);// 弹出自定义壁纸框
     const [loginLoading, setLoginLoading] = useState(false);        // 点击登录按钮加载
     const [loginCaptcha, setLoginCaptcha] = useState(undefined);    // 登录验证码
     const [images, setImages] = useState('/Default-wallpaper.jpg'); // 背景壁纸
     const [messageApi, contextHolder] = message.useMessage();       // Hooks 调用全局提示（antd推荐）因为静态Message方法无法消费上下文，因而 ConfigProvider 的数据也不会生效。
 
-    let backgroundImage = localStorage.getItem('backgroundImages');
+    let backgroundImage = localStorage.getItem('backgroundImages'); // 尝试获取本地存储的壁纸URL
 
     /**
-     * 获取壁纸
+     * 获取壁纸请求
      */
     const reImages = async(bzType) => {
         const imgUrl = reImagesUrl(bzType);
@@ -34,7 +45,7 @@ function Home() {
     }
 
     /**
-     * 登录
+     * 登录请求
      */
     const goLogin = async() => {
         // 校验 loginCaptcha 是否为6位数字
@@ -97,29 +108,93 @@ function Home() {
                         className='buttonOpacity'
                     />
 
-                    {/*换壁纸*/}
-                    <FloatButton
-                        onClick={reImages}
-                        icon={<PictureTwoTone />}
-                        tooltip={<div style={{textAlign: 'center'}}>
-                            <div>点击换缓慢的风景壁纸:默认</div>
-                            <Button onClick={()=>{reImages("动画");console.log("动画")}}>加载快速的动画壁纸</Button>
-                            <Button onClick={()=>{reImages("随机");console.log("随机")}}>高清缓慢的随机壁纸</Button>
-                            </div> }
+                    {/*壁纸*/}
+                    <FloatButton.Group
                         style={{ right: 80 }}
+                        trigger="hover"
+                        icon={<PictureTwoTone />}
                         className='buttonOpacity'
-                    />
+                    >
+                        {UserStore.jwt&&
+                        (
+                            /* 上传壁纸到服务器 */
+                            <FloatButton
+                            icon={<UploadOutlined />}
+                            tooltip="上传壁纸到服务器"
+                            className='buttonOpacity'
+                        />)
+                    }
 
-                    {/*用户*/}
-                    <FloatButton
-                        icon={<UserOutlined />}
-                        tooltip="用户"
-                        style={{ right: 135 }}
-                        className='buttonOpacity'
-                        onClick={() => {
-                            setModalIsOpen(true);
-                        }}
-                    />
+                        {/* 下载壁纸 */}
+                        <FloatButton
+                            icon={<DownloadOutlined />}
+                            tooltip="下载当前壁纸"
+                            className='buttonOpacity'
+                        />
+                        {/*换壁纸*/}
+                        <FloatButton
+                            onClick={reImages}
+                            icon={<SyncOutlined />}
+                            tooltip={<div style={{textAlign: 'center'}} onClick={event=>event.stopPropagation()}>
+                                <div>点击换缓慢的风景壁纸:默认</div>
+                                <Button onClick={()=>reImages("动画")}>加载快速的动画壁纸</Button>
+                                <Button onClick={()=>reImages("随机")}>高清缓慢的随机壁纸</Button>
+                                <Input placeholder="自定义壁纸链接，回车加载" onPressEnter={event => {
+                                    localStorage.setItem('backgroundImages', event.target.value);
+                                    setImages(event.target.value)
+                                }}/>
+                                </div> }
+                            className='buttonOpacity'
+                        />
+                    </FloatButton.Group>
+
+                    {UserStore.jwt?
+                        (
+                            /*用户登录后选项*/
+                            <FloatButton.Group
+                                trigger="hover"
+                                icon={<HomeTwoTone />}
+                                tooltip={"用户:"+JWTUtils.getName()}
+                                style={{ right: 135 }}
+                                className='buttonOpacity'
+                                onClick={() => {
+                                    setModalIsOpen(true);
+                                }}
+                             >
+                                <FloatButton
+                                    icon={<PoweroffOutlined />}
+                                    tooltip="退出登录"
+                                    style={{ right: 135 }}
+                                    className='buttonOpacity'
+                                    onClick={() => {
+                                        UserStore.clearJwt()
+                                    }}
+                                />
+                                <FloatButton
+                                    icon={<UserOutlined />}
+                                    tooltip="用户登录"
+                                    style={{ right: 135 }}
+                                    className='buttonOpacity'
+                                    onClick={() => {
+                                        setModalIsOpen(true);
+                                    }}
+                                />
+                            </FloatButton.Group>
+                        )
+                        :
+                        (
+                            /*用户登录按钮*/
+                            <FloatButton
+                            icon={<UserOutlined />}
+                            tooltip="用户登录"
+                            style={{ right: 135 }}
+                            className='buttonOpacity'
+                            onClick={() => {
+                                setModalIsOpen(true);
+                            }}
+                            />
+                        )
+                    }
 
                     {/* 侧边半透明的边 移动到上面显示抽屉 */}
                     <div
@@ -141,6 +216,7 @@ function Home() {
                     <EnglishDrawer />
                 </div>
             </div>
+            {/* 登录弹窗 */}
             <Modal
                 open={modalIsOpen}
                 onCancel={() => setModalIsOpen(false)}
@@ -158,6 +234,7 @@ function Home() {
                     <p style={{ color: '#fa5555' }}>如已关注，请回复“<strong>登录</strong>”二字获取验证码进行登录</p>
                 </span>
             </Modal>
+
         </div>
     );
 }

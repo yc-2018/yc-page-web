@@ -16,6 +16,12 @@ class UserStore {
       localStorage.setItem('jwt', jwt)
       this.jwt = jwt
     }
+
+    // 清除jwt
+    clearJwt() {
+      localStorage.removeItem('jwt')
+      this.jwt = null
+    }
   
   }
   

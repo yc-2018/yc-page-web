@@ -18,7 +18,7 @@ myAxios.interceptors.request.use(
             return config; // 返回配置，这样请求就会带上这些设置
         }
         message.error('未登录或登录已过期，请重新登录。');
-        localStorage.removeItem('jwt');
+        UserStore.clearJwt();
         return Promise.reject(new Error('Token expired'));
     },
     error => {

@@ -1,7 +1,8 @@
-class JWTUtils {
+import UserStore from "../store/UserStore";
+export default class JWTUtils {
     // 获取存储在 localStorage 中的 JWT
     static getToken() {
-    return localStorage.getItem('jwt');
+        return UserStore.jwt;
     }
   
     // 解析 JWT
@@ -29,7 +30,8 @@ class JWTUtils {
     // 从 JWT 中获取 name
     static getName() {
     const payload = this.parseJWT();
-    return payload ? payload.name : null;
+    console.log('@##@#@',payload);
+    return payload ? payload.username||payload.userId : null;
     }
   }
   
