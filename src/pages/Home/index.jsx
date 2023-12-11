@@ -130,6 +130,14 @@ function Home() {
                             icon={<DownloadOutlined />}
                             tooltip="下载当前壁纸"
                             className='buttonOpacity'
+                            onClick={() => {
+                                const a = document.createElement('a');
+                                a.href = images;
+                                a.download = filename || 'download';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                            }}
                         />
                         {/*换壁纸*/}
                         <FloatButton
