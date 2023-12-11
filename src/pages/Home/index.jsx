@@ -19,6 +19,7 @@ import MemoDrawer from "./MemoDrawer";
 import {reImagesUrl,login} from "../../request/homeRequest";
 import UserStore from "../../store/UserStore";
 import JWTUtils from  "../../utils/JWTUtils"
+import axios from "axios";
 
 
 function Home() {
@@ -131,9 +132,13 @@ function Home() {
                             tooltip="下载当前壁纸"
                             className='buttonOpacity'
                             onClick={async () => {
-                                const image = await fetch(images);
+                                console.log('开始下载壁纸，，');
+                                messageApi.info('开始下载壁纸，，');
+                                const image = await axios.get(images);
                                 const imageBlob = await image.blob();
                                 const imageURL = URL.createObjectURL(imageBlob);
+                                console.log('下载壁纸完成');
+                                messageApi.info('下载壁纸完成');
 
                                 const a = document.createElement('a');
                                 a.href = imageURL;
