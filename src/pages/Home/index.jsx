@@ -130,13 +130,18 @@ function Home() {
                             icon={<DownloadOutlined />}
                             tooltip="下载当前壁纸"
                             className='buttonOpacity'
-                            onClick={() => {
+                            onClick={async () => {
+                                const image = await fetch(images);
+                                const imageBlob = await image.blob();
+                                const imageURL = URL.createObjectURL(imageBlob);
+
                                 const a = document.createElement('a');
-                                a.href = images;
+                                a.href = imageURL;
                                 a.download = 'yc背景';
                                 document.body.appendChild(a);
                                 a.click();
                                 document.body.removeChild(a);
+                                URL.revokeObjectURL(imageURL);
                             }}
                         />
                         {/*换壁纸*/}
