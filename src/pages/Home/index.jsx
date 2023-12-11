@@ -9,7 +9,7 @@ import {
     SyncOutlined,
     DownloadOutlined,
     UploadOutlined,
-    HomeTwoTone, PoweroffOutlined
+    HomeTwoTone, PoweroffOutlined, SettingOutlined
 } from "@ant-design/icons";
 import { observer } from 'mobx-react-lite'
 import showOrNot from '../../store/ShowOrNot';
@@ -132,8 +132,9 @@ function Home() {
                             tooltip="下载当前壁纸"
                             className='buttonOpacity'
                             onClick={async () => {
+                                messageApi.info('正在缓存该壁纸...');
                                 try {
-                                    const response = await axios.get(images, {
+                                    const response = await axios.get(backgroundImage || images, {
                                         responseType: 'blob', // 重要：这会告诉 Axios 返回一个 Blob 对象
                                     });
 
@@ -141,15 +142,17 @@ function Home() {
                                     const url = window.URL.createObjectURL(new Blob([response.data]));
                                     const link = document.createElement('a');
                                     link.href = url;
-                                    link.setAttribute('download', 'image.jpg'); // 或者任何你想要的文件名
+                                    link.setAttribute('download', '仰晨背景.jpg'); // 或者任何你想要的文件名
                                     document.body.appendChild(link);
                                     link.click();
 
                                     // 清理并重置 URL
                                     window.URL.revokeObjectURL(url);
                                     link.remove();
+                                    messageApi.info('开始下载壁纸...');
                                 } catch (error) {
-                                    console.error('Error downloading the image', error);
+                                    messageApi.info('该图片无法直接下载,请在新标签页中保存')
+                                    window.open(backgroundImage || images, '_blank'); // 在新标签页中打开图片
                                 }
                             }}
                         />
@@ -158,7 +161,7 @@ function Home() {
                             onClick={reImages}
                             icon={<SyncOutlined />}
                             tooltip={<div style={{textAlign: 'center'}} onClick={event=>event.stopPropagation()}>
-                                <div>点击换缓慢的风景壁纸:默认</div>
+                                <div>点击换缓慢的科技|风景壁纸:默认</div>
                                 <Button onClick={()=>reImages("动画")}>加载快速的动画壁纸</Button>
                                 <Button onClick={()=>reImages("随机")}>高清缓慢的随机壁纸</Button>
                                 <Input placeholder="自定义壁纸链接，回车加载" onPressEnter={event => {
@@ -179,9 +182,6 @@ function Home() {
                                 tooltip={"用户:"+JWTUtils.getName()}
                                 style={{ right: 135 }}
                                 className='buttonOpacity'
-                                onClick={() => {
-                                    setModalIsOpen(true);
-                                }}
                              >
                                 <FloatButton
                                     icon={<PoweroffOutlined />}
@@ -193,12 +193,12 @@ function Home() {
                                     }}
                                 />
                                 <FloatButton
-                                    icon={<UserOutlined />}
-                                    tooltip="用户登录"
+                                    icon={<SettingOutlined />}
+                                    tooltip="页面样式配置"
                                     style={{ right: 135 }}
                                     className='buttonOpacity'
                                     onClick={() => {
-                                        setModalIsOpen(true);
+                                        messageApi.info('还没写呢...');
                                     }}
                                 />
                             </FloatButton.Group>
