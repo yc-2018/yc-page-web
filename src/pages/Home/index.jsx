@@ -132,21 +132,25 @@ function Home() {
                             tooltip="下载当前壁纸"
                             className='buttonOpacity'
                             onClick={async () => {
-                                console.log('开始下载壁纸，，');
-                                messageApi.info('开始下载壁纸，，');
-                                const image = await axios.get(images);
-                                const imageBlob = await image.blob();
-                                const imageURL = URL.createObjectURL(imageBlob);
-                                console.log('下载壁纸完成');
-                                messageApi.info('下载壁纸完成');
+                                try {
+                                    const response = await axios.get(images, {
+                                        responseType: 'blob', // 重要：这会告诉 Axios 返回一个 Blob 对象
+                                    });
 
-                                const a = document.createElement('a');
-                                a.href = imageURL;
-                                a.download = 'yc背景';
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(imageURL);
+                                    // 创建一个指向下载对象的 URL
+                                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.setAttribute('download', 'image.jpg'); // 或者任何你想要的文件名
+                                    document.body.appendChild(link);
+                                    link.click();
+
+                                    // 清理并重置 URL
+                                    window.URL.revokeObjectURL(url);
+                                    link.remove();
+                                } catch (error) {
+                                    console.error('Error downloading the image', error);
+                                }
                             }}
                         />
                         {/*换壁纸*/}
