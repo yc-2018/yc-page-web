@@ -39,7 +39,7 @@ export async function reImagesUrl(bzType="风景") {
 // 登录
 export async function login(loginCode) {
     try {
-        const response = await axios.post(`/api/users?key=${loginCode}`);
+        const response = await axios.post(`/api/users/login?key=${loginCode}`);
         const {code,msg,data} = response.data;
 
         if (code === 1) {
