@@ -133,7 +133,7 @@ function Home() {
                             onClick={() => {
                                 const a = document.createElement('a');
                                 a.href = images;
-                                a.download = filename || 'download';
+                                a.download = 'yc背景';
                                 document.body.appendChild(a);
                                 a.click();
                                 document.body.removeChild(a);
