@@ -7,6 +7,7 @@ import searchStore from '../../../store/SearchEnginesStore';
 import {searchData} from '../../../store/NoLoginData';
 
 import "./Search.css"
+import UserStore from "../../../store/UserStore";
 
 
 function Search() {
@@ -36,8 +37,11 @@ function Search() {
                 value={searchStore.searchEngines}
                 onChange={(value) => searchStore.setSearchEngines(value)}
             />
-            {/* 添加搜索引擎 */}
-            <Button icon={<PlusOutlined />} style={{ margin: '0 3px' }} className={"addButton"}/>
+            {
+                /* 登录显示添加搜索引擎 */
+                UserStore.jwt&&
+                <Button icon={<PlusOutlined />} style={{ margin: '0 3px' }} className={"addButton"}/>
+            }
             <br />
             {/* 搜索框 */}
             <MySearch onSearch={onSearch} setSearchValue={setSearchValue} />
@@ -56,8 +60,11 @@ function Search() {
                         {item.name}
                     </Button>
                 ))}
-                {/*添加按钮*/}
-                <Button icon={<PlusOutlined />} className={"addButton"}/>
+                {
+                    /*登录后显示添加快速搜索按钮*/
+                    UserStore.jwt&&
+                    <Button icon={<PlusOutlined />} className={"addButton"}/>
+                }
             </Flex>
 
         </>
