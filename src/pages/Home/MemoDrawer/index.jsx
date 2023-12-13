@@ -1,7 +1,7 @@
 import {observer} from 'mobx-react-lite'
 
 import showOrNot from "../../../store/ShowOrNot";
-import {Drawer, Avatar, Divider, List, Skeleton, Button, Space} from "antd";
+import {Drawer,List, Skeleton, Button, Tag} from "antd";
 import React, {useEffect, useState} from "react";
 import './MemoDrawer.css'
 import axios from "axios";
@@ -62,8 +62,18 @@ const MemoDrawer = observer(() => {
             ) : null;
 
         return (
-            <Drawer title="备忘录" placement="right" onClose={() => showOrNot.setMemoDrawerShow(false)}
-                    open={showOrNot.memoDrawerShow} style={{opacity: 0.8}}
+            <Drawer placement="right"
+                    onClose={() => showOrNot.setMemoDrawerShow(false)}
+                    open={showOrNot.memoDrawerShow}
+                    style={{opacity: 0.8}}
+                    closable={false}
+                    title={<><div>备忘录<Tag bordered={false} color="success">普通待办</Tag></div>
+                        <Tag color="processing">循环</Tag>
+                        <Tag color="processing">长期</Tag>
+                        <Tag color="processing">紧急</Tag>
+                        <Tag color="processing">日记</Tag>
+                        <Tag color="processing">工作</Tag>
+                    </>}
             >
 
                 <List
