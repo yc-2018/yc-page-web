@@ -1,6 +1,7 @@
 import axios from 'axios';
 import {message} from 'antd'
 import UserStore from '../store/UserStore';
+import myAxios  from "./myAxios";
 
 /**
  * 获取首页背景图（搞多几个做备份）
@@ -56,5 +57,17 @@ export async function login(loginCode) {
         message.error('请求失败');
         console.error('请求失败:', error);
         return false;
+    }
+}
+
+// 获取一个类型的待办列表
+export async function getToDoItems(type=0, page=1,pageSize=10) {
+    try {
+        const response = await myAxios.get(`/toDoItems/${type}`);
+        return response.data.data;
+    } catch (error) {
+        message.error('请求失败');
+        console.error('待办请求失败:', error);
+        return [];
     }
 }

@@ -1,57 +1,49 @@
 import {observer} from 'mobx-react-lite'
-import axios from "axios";
 import {Drawer,List, Skeleton, Button, Tag} from "antd";
 import React, {useEffect, useState} from "react";
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
+import {getToDoItems} from "../../../request/homeRequest"
 import './MemoDrawer.css'
-
-const count = 5;
-const fakeDataUrl = `https://randomuser.me/api/?results=${count}&inc=name,gender,email,nat,picture&noinfo`;
 
 const MemoDrawer = observer(({setModalIsOpen}) => {
         const [initLoading, setInitLoading] = useState(true);
         const [loading, setLoading] = useState(false);  //
         const [data, setData] = useState([]);
         const [list, setList] = useState([]);
+
         useEffect(() => {
-            fetch(fakeDataUrl)
-                .then((res) => res.json())
-                .then((res) => {
-                    setInitLoading(false);
-                    setData(res.results);
-                    setList(res.results);
-                });
-        }, []);
-        const onLoadMore =async () => {
+             if(UserStore.jwt&&list.length===0)(async() => {
+            const response = await getToDoItems(0);
+            setData(response.records);
+            setList(response.records);
+            setInitLoading(false);
+            console.log(data,"@@@@@@@@@@@@@@@@@@",list,response.records)
+            })();
+        }, [UserStore.jwt]);
+        const onLoadMore = async() => {
             setLoading(true);
-            setList(
-                data.concat(
-                    [...new Array(count)].map(() => ({
-                        loading: true,
-                        name: {},
-                        picture: {},
-                    })),
-                ),
-            );
-            try {
-                // 使用 axios 发起请求
-                const response = await axios.get(fakeDataUrl);
+            // setList(
+            //     data.concat(
+            //         [...new Array(10)].map(() => ({
+            //             loading: true,
+            //             name: {},
+            //             picture: {},
+            //         })),
+            //     ),
+            // );
 
-                // 结合旧数据和新数据
-                const newData = data.concat(response.data.results);
-                setData(newData);
-                setList(newData);
-                setLoading(false);
+            // 使用 axios 发起请求
+            const response = await getToDoItems(0);
+            // 结合旧数据和新数据
+            // const newData = data.concat(response.results);
+            // // setData(newData);
+            // setList(newData);
+            // setLoading(false);
+            // // 触发 resize 事件
+            // window.dispatchEvent(new Event('resize'));
 
-                // 触发 resize 事件
-                window.dispatchEvent(new Event('resize'));
-            } catch (error) {
-                // 错误处理
-                console.error(error);
-                setLoading(false);
-            }
         };
 
         // 显示加载更多？还是到底了
@@ -84,12 +76,12 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     loadMore={loadMore}
                     dataSource={list}
                     renderItem={(item) => (
-                        <List.Item>
+                        <List.Item key={item.id}>
                             <Skeleton avatar title={false} loading={item.loading} active>
                                 <List.Item.Meta
                                     description={
                                         <div>
-                                            {item.name?.last}内容，内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容
+                                            {item.content}
                                             <br/>
                                             [<a key="list-loadmore-success">完成</a>|
                                             <a key="list-loadmore-edit">编辑</a>|
@@ -100,7 +92,8 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                             </Skeleton>
                         </List.Item>
                     )}
-                />:<div className='loadMore' onClick={()=>setModalIsOpen(true)}><Button type="link">请先登录</Button><Skeleton/><Skeleton/><Skeleton/> </div>}
+                />:<div className='loadMore' onClick={()=>setModalIsOpen(true)}><Button type="link">请先登录</Button><Skeleton/><Skeleton/><Skeleton/> </div>
+                }
 
             </Drawer>
         )

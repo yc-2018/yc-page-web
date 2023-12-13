@@ -30,8 +30,7 @@ export default class JWTUtils {
     // 从 JWT 中获取 name
     static getName() {
     const payload = this.parseJWT();
-    console.log('@##@#@',payload);
-    return payload ? payload.username||payload.userId : null;
+    return payload ? payload.username||payload?.userId?.substring(0, 20) + '...' : null;
     }
   }
   

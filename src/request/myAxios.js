@@ -3,8 +3,10 @@ import axios from 'axios';
 import {message} from 'antd'
 
 import UserStore from '../store/UserStore';
+import JWTUtils from "../utils/JWTUtils";
 
 const myAxios = axios.create({
+    baseURL: '/api/', // 设置基础 URL
     timeout: 10000 // 设置超时时间为 10000 毫秒（10秒）
 });
 
