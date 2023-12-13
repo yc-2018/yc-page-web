@@ -19,7 +19,6 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
             setData(response.records);
             setList(response.records);
             setInitLoading(false);
-            console.log(data,"@@@@@@@@@@@@@@@@@@",list,response.records)
             })();
         }, [UserStore.jwt]);
         const onLoadMore = async() => {
@@ -86,6 +85,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                             [<a key="list-loadmore-success">完成</a>|
                                             <a key="list-loadmore-edit">编辑</a>|
                                             <a key="list-loadmore-more">删除</a>]
+                                            <span style={{fontSize:10}}> 创建时间:{item.createTime.replace('T',' ')}</span>
                                         </div>
                                     }
                                 />
