@@ -24,7 +24,6 @@ import axios from "axios";
 
 function Home() {
     const [modalIsOpen, setModalIsOpen] = useState(false);          // 弹出登录框
-    const [customizeBzModal, setCustomizeBzModal] = useState(false);// 弹出自定义壁纸框
     const [loginLoading, setLoginLoading] = useState(false);        // 点击登录按钮加载
     const [loginCaptcha, setLoginCaptcha] = useState(undefined);    // 登录验证码
     const [images, setImages] = useState('/Default-wallpaper.jpg'); // 背景壁纸
@@ -233,7 +232,7 @@ function Home() {
                     />
 
                     {/*备忘录抽屉*/}
-                    <MemoDrawer />
+                    <MemoDrawer setModalIsOpen={setModalIsOpen}/>
                     {/*备忘英语抽屉*/}
                     <EnglishDrawer />
                 </div>
@@ -246,7 +245,7 @@ function Home() {
             >
                 <span style={{ textAlign: 'center', display: 'block', margin: '0 auto' }}>
                     <p style={{ fontSize: 20 }}>请使用微信扫一扫关注登录</p>
-                    <img src="/wxGzh.jpg" /> 
+                    <img src="/wxGzh.jpg"  alt="仰晨公众号二维码"/>
                     <Space.Compact style={{ width: '80%' }} size={"large"}>
                         <Input placeholder="请输入验证码" value={loginCaptcha} onChange={(e) => setLoginCaptcha(e.target.value)} />
                         <Button type="primary" onClick={goLogin} loading={loginLoading}>

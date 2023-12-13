@@ -1,17 +1,18 @@
 import {observer} from 'mobx-react-lite'
-
-import showOrNot from "../../../store/ShowOrNot";
+import axios from "axios";
 import {Drawer,List, Skeleton, Button, Tag} from "antd";
 import React, {useEffect, useState} from "react";
+
+import showOrNot from "../../../store/ShowOrNot";
+import UserStore from "../../../store/UserStore";
 import './MemoDrawer.css'
-import axios from "axios";
 
 const count = 5;
 const fakeDataUrl = `https://randomuser.me/api/?results=${count}&inc=name,gender,email,nat,picture&noinfo`;
 
-const MemoDrawer = observer(() => {
+const MemoDrawer = observer(({setModalIsOpen}) => {
         const [initLoading, setInitLoading] = useState(true);
-        const [loading, setLoading] = useState(false);
+        const [loading, setLoading] = useState(false);  //
         const [data, setData] = useState([]);
         const [list, setList] = useState([]);
         useEffect(() => {
@@ -23,7 +24,7 @@ const MemoDrawer = observer(() => {
                     setList(res.results);
                 });
         }, []);
-        const onLoadMore = () => {
+        const onLoadMore =async () => {
             setLoading(true);
             setList(
                 data.concat(
@@ -34,32 +35,32 @@ const MemoDrawer = observer(() => {
                     })),
                 ),
             );
-            fetch(fakeDataUrl)
-                .then((res) => res.json())
-                .then((res) => {
-                    const newData = data.concat(res.results);
-                    setData(newData);
-                    setList(newData);
-                    setLoading(false);
-                    // Resetting window's offsetTop so as to display react-virtualized demo underfloor.
-                    // In real scene, you can using public method of react-virtualized:
-                    // https://stackoverflow.com/questions/46700726/how-to-use-public-method-updateposition-of-react-virtualized
-                    window.dispatchEvent(new Event('resize'));
-                });
+            try {
+                // 使用 axios 发起请求
+                const response = await axios.get(fakeDataUrl);
+
+                // 结合旧数据和新数据
+                const newData = data.concat(response.data.results);
+                setData(newData);
+                setList(newData);
+                setLoading(false);
+
+                // 触发 resize 事件
+                window.dispatchEvent(new Event('resize'));
+            } catch (error) {
+                // 错误处理
+                console.error(error);
+                setLoading(false);
+            }
         };
+
+        // 显示加载更多？还是到底了
         const loadMore =
             !initLoading && !loading ? (
-                <div
-                    style={{
-                        textAlign: 'center',
-                        marginTop: 12,
-                        height: 32,
-                        lineHeight: '32px',
-                    }}
-                >
-                    <Button onClick={onLoadMore}>loading more</Button>
+                <div className="loadMore">
+                    <Button onClick={onLoadMore}>加载更多</Button>
                 </div>
-            ) : null;
+            ) : <div className="loadMore">到底啦</div>;
 
         return (
             <Drawer placement="right"
@@ -75,7 +76,7 @@ const MemoDrawer = observer(() => {
                         <Tag color="processing">工作</Tag>
                     </>}
             >
-
+                {UserStore.jwt?
                 <List
                     className="demo-loadmore-list"
                     loading={initLoading}
@@ -99,7 +100,7 @@ const MemoDrawer = observer(() => {
                             </Skeleton>
                         </List.Item>
                     )}
-                />
+                />:<div className='loadMore' onClick={()=>setModalIsOpen(true)}><Button type="link">请先登录</Button><Skeleton/><Skeleton/><Skeleton/> </div>}
 
             </Drawer>
         )
