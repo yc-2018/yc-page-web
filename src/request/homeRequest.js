@@ -63,7 +63,7 @@ export async function login(loginCode) {
 // 获取一个类型的待办列表
 export async function getToDoItems(type=0, page=1,pageSize=10) {
     try {
-        const response = await myAxios.get(`/toDoItems/${type}`);
+        const response = await myAxios.get(`/toDoItems/${type}?page=${page}&pageSize=${pageSize}`);
         return response.data.data;
     } catch (error) {
         message.error('请求失败');
