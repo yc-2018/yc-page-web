@@ -38,9 +38,9 @@ export async function reImagesUrl(bzType="风景") {
 }
 
 // 登录
-export async function login(loginCode) {
+export async function login(loginCode,expireTime='bt') {
     try {
-        const response = await axios.post(`/api/users/login?key=${loginCode}`);
+        const response = await axios.post(`/api/users/login?key=${loginCode}&expireTime=${expireTime}`);
         const {code,msg,data} = response.data;
 
         if (code === 1) {
@@ -62,6 +62,20 @@ export async function login(loginCode) {
 
 // 获取一个类型的待办列表
 export async function getToDoItems(type=0, page=1,pageSize=10) {
+    try {
+        const response = await myAxios.get(`/toDoItems/${type}?page=${page}&pageSize=${pageSize}`);
+        return response.data.data;
+    } catch (error) {
+        message.error('请求失败');
+        console.error('待办请求失败:', error);
+        return [];
+    }
+}
+
+
+
+// 保存或修改一个待办
+export async function saveOrUpdateToDoItem(type=0, page=1,pageSize=10) {
     try {
         const response = await myAxios.get(`/toDoItems/${type}?page=${page}&pageSize=${pageSize}`);
         return response.data.data;

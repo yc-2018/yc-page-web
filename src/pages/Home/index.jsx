@@ -1,7 +1,7 @@
 import React, { useState/* ,useEffect */ } from 'react';
 import Search from './Search';
 import Bookmarks from './Bookmarks';
-import { Button, FloatButton, Input, message, Modal, Space } from "antd";
+import { Button, FloatButton, Input, message, Modal, Space,Radio } from "antd";
 import {
     PictureTwoTone,
     SnippetsTwoTone,
@@ -23,10 +23,11 @@ import axios from "axios";
 
 
 function Home() {
-    const [modalIsOpen, setModalIsOpen] = useState(false);          // 弹出登录框
+    const [modalIsOpen, setModalIsOpen] = useState(false);           // 弹出登录框
     const [loginLoading, setLoginLoading] = useState(false);        // 点击登录按钮加载
-    const [loginCaptcha, setLoginCaptcha] = useState(undefined);    // 登录验证码
-    const [images, setImages] = useState('/Default-wallpaper.jpg'); // 背景壁纸
+    const [loginCaptcha, setLoginCaptcha] = useState(undefined);            // 登录验证码
+    const [expireTime, setExpireTime] = useState(undefined);               // 登录有效时间
+    const [images, setImages] = useState('/Default-wallpaper.jpg');// 背景壁纸
     const [messageApi, contextHolder] = message.useMessage();       // Hooks 调用全局提示（antd推荐）因为静态Message方法无法消费上下文，因而 ConfigProvider 的数据也不会生效。
 
     let backgroundImage = localStorage.getItem('backgroundImages'); // 尝试获取本地存储的壁纸URL
@@ -54,7 +55,7 @@ function Home() {
             return;
         }
         setLoginLoading(true);
-        const isLogin =await login(loginCaptcha);
+        const isLogin =await login(loginCaptcha,expireTime);
         setLoginLoading(false);
         console.log(isLogin);
         if (isLogin) {
@@ -246,12 +247,27 @@ function Home() {
                 <span style={{ textAlign: 'center', display: 'block', margin: '0 auto' }}>
                     <p style={{ fontSize: 20 }}>请使用微信扫一扫关注登录</p>
                     <img src="/wxGzh.jpg"  alt="仰晨公众号二维码"/>
+
+                    <Radio.Group
+                        defaultValue="bt"
+                        size="small"
+                        style={{marginBottom:5}}
+                        onChange={(e)=>setExpireTime(e.target.value)}
+                    >
+                        <Radio.Button disabled style={{color:'#85a2c7'}}>登录有效时长:</Radio.Button>
+                        <Radio.Button value="bt">半天</Radio.Button>
+                        <Radio.Button value="yt">一天</Radio.Button>
+                        <Radio.Button value="yz">一周</Radio.Button>
+                        <Radio.Button value="yy">一个月</Radio.Button>
+                        <Radio.Button value="yn">一年</Radio.Button>
+                    </Radio.Group>
                     <Space.Compact style={{ width: '80%' }} size={"large"}>
                         <Input placeholder="请输入验证码" value={loginCaptcha} onChange={(e) => setLoginCaptcha(e.target.value)} />
                         <Button type="primary" onClick={goLogin} loading={loginLoading}>
                             验证登录
                         </Button>
                     </Space.Compact>
+
                     <p style={{ color: '#fa5555' }}>如已关注，请回复“<strong>登录</strong>”二字获取验证码进行登录</p>
                 </span>
             </Modal>

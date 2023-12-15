@@ -33,6 +33,7 @@ myAxios.interceptors.request.use(
 /** 添加myAxios《响应》拦截器 */
 myAxios.interceptors.response.use(
     response => {
+        if(response.data.code !== 1) message.error(response.data.msg);
         // 如果响应正常，直接返回响应
         return response;
     },
