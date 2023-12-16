@@ -58,7 +58,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                 <div className="loadMore">
                     <Button onClick={onLoadMore}>加载更多</Button>
                 </div>
-            ) : !loading && <div className="loadMore">到底啦</div>;
+            ) : !loading && list.length && <div className="loadMore">到底啦</div>;
 
 
     // 标签生成
