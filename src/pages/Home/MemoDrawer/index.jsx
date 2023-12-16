@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import {Drawer, List, Skeleton, Button, Tag, Spin, Tooltip, Select} from "antd";
+import {Drawer, List, Skeleton, Button, Tag, Spin, Tooltip, Select, Divider} from "antd";
 import React, {useEffect, useState} from "react";
 
 import showOrNot from "../../../store/ShowOrNot";
@@ -64,9 +64,9 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         const loadMore =
             !initLoading && !itemLoading && list.length < total ? (
                 <div className="loadMore">
-                    <Button onClick={onLoadMore}>加载更多</Button>
+                    <Button block onClick={onLoadMore}>加载更多</Button>
                 </div>
-            ) : !itemLoading && list.length && <div className="loadMore">到底啦</div>;
+            ) : !itemLoading && list.length && <Divider plain>🥺到底啦🐾</Divider>;
 
 
     // 标签生成
@@ -183,8 +183,15 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                 </Skeleton>
                             </List.Item>
                         )}
-                    /> : <div className='loadMore' onClick={() => setModalIsOpen(true)}><Button
-                        type="link">请先登录</Button><Skeleton/><Skeleton/><Skeleton/></div>
+                    />
+                    :
+                    <div className='loadMore' onClick={() => setModalIsOpen(true)}>
+                        <Divider plain>🥺<Button type="link">请先登录</Button>🐾</Divider>
+
+                        <Skeleton/>
+                        <Skeleton/>
+                        <Skeleton/>
+                    </div>
                 }
                 </Spin>
             </Drawer>
