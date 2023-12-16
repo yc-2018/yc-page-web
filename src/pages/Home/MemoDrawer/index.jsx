@@ -4,11 +4,11 @@ import React, {useEffect, useState} from "react";
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
-import {getToDoItems, saveOrUpdateToDoItem} from "../../../request/homeRequest"
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../../request/homeRequest"
 import './MemoDrawer.css'
 import {SyncOutlined} from "@ant-design/icons";
 
-let total = 999;    // 待办总数
+let total = 999;    // 初始化待办总数
 const MemoDrawer = observer(({setModalIsOpen}) => {
         const [initLoading, setInitLoading] = useState(true);
         const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
@@ -82,6 +82,11 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         const id = target.parentElement.getAttribute('data-id');
 
         switch(action) {
+            case 'save':
+                console.log('保存');
+
+                // 实现编辑逻辑
+                break;
             case 'edit':
                 console.log('编辑操作，ID:', id);
 
@@ -89,17 +94,21 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                 break;
             case 'finish':
                 setWebLoading(true)
-                const response = await saveOrUpdateToDoItem({id, completed: 1},'put')
-                if(response) setRefreshTrigger(!refreshTrigger)  // 刷新触发
+                const finishResponse = await saveOrUpdateToDoItem({id, completed: 1},'put')
+                if(finishResponse) setRefreshTrigger(!refreshTrigger)  // 刷新触发
                 setWebLoading(false)
                 break;
             case 'delete':
-                console.log('删除操作，ID:', id);
-                // 实现删除逻辑
+                setWebLoading(true)
+                const deleteResponse = await delToDoItem(id)
+                if(deleteResponse) setRefreshTrigger(!refreshTrigger)  // 刷新触发
+                setWebLoading(false)
                 break;
             // 可以添加其他案例
         }
     }
+
+
 
         return (
 

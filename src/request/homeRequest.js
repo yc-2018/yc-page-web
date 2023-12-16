@@ -66,7 +66,6 @@ export async function getToDoItems(type=0, page=1,pageSize=10) {
         const response = await myAxios.get(`/toDoItems/${type}?page=${page}&pageSize=${pageSize}`);
         return response.data.data;
     } catch (error) {
-        message.error('请求失败');
         console.error('待办请求失败:', error);
         return [];
     }
@@ -77,22 +76,21 @@ export async function getToDoItems(type=0, page=1,pageSize=10) {
 // 保存或修改一个待办
 export async function saveOrUpdateToDoItem(body,requestType='put') {
     try {
-        const config = {
-            method: requestType,
-            url: '/toDoItems',
-            data : body
-        };
-        const response = await myAxios(config);
-        const {code,msg} = response.data;
-        if (code === 1) {
+        const response = await myAxios({url: '/toDoItems',method: requestType, data : body});
+        if (response.data.code === 1) {
             message.success("成功");
             return true;
-        }else
-            message.error(msg);
+        }
+    } catch (error) {console.error('待办请求失败:', error)}
+}
 
-    } catch (error) {
-        message.error('请求失败');
-        console.error('待办请求失败:', error);
-    }
-
+// 删除一个待办
+export async function delToDoItem(id) {
+    try {
+        const response = await myAxios.delete(`/toDoItems/${id}`);
+        if (response.data.code === 1) {
+            message.success("删除成功");
+            return true;
+        }
+    } catch (error) {console.error('待办请求失败:', error)}
 }
