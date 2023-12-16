@@ -1,23 +1,28 @@
 import {observer} from 'mobx-react-lite'
-import {Drawer, List, Skeleton, Button, Tag} from "antd";
+import {Drawer, List, Skeleton, Button, Tag, Spin, Tooltip} from "antd";
 import React, {useEffect, useState} from "react";
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
-import {getToDoItems} from "../../../request/homeRequest"
+import {getToDoItems, saveOrUpdateToDoItem} from "../../../request/homeRequest"
 import './MemoDrawer.css'
+import {SyncOutlined} from "@ant-design/icons";
 
 let total = 999;    // 待办总数
 const MemoDrawer = observer(({setModalIsOpen}) => {
         const [initLoading, setInitLoading] = useState(true);
-        const [loading, setLoading] = useState(false);  //
+        const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
+        const [webLoading, setWebLoading] = useState(false);        // 网络加载
+        const [refreshTrigger, setRefreshTrigger] = useState(true); // 刷新触发(值无意义，改变即刷新
         const [data, setData] = useState([]);
         const [list, setList] = useState([]);
         const [page, setPage] = useState(1);    // 待办翻页
         const [type, setType] = useState(0);    // 待办类型
 
 
+
         useEffect(() => {
+            setWebLoading(true)
             setPage(1)
             if (UserStore.jwt) (async () => {
                 const response = await getToDoItems(type, 1);
@@ -25,10 +30,12 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                 setList(response.records);
                 total = response.total;
                 setInitLoading(false);
+                setWebLoading(false)
             })();
-        }, [UserStore.jwt, type]);
+
+        }, [UserStore.jwt, type,refreshTrigger]);
         const onLoadMore = async () => {
-            setLoading(true);
+            setItemItemLoading(true);
             setList(
                 data.concat(
                     [...new Array(2)].map(() => ({
@@ -45,7 +52,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
             const newData = data.concat(response.records);
             setData(newData);
             setList(newData);
-            setLoading(false);
+            setItemItemLoading(false);
             setPage(page + 1);  // 异步放前面也没用
             // 触发 resize 事件
             window.dispatchEvent(new Event('resize'));
@@ -54,11 +61,11 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
 
         // 显示加载更多？还是到底了
         const loadMore =
-            !initLoading && !loading && list.length < total ? (
+            !initLoading && !itemLoading && list.length < total ? (
                 <div className="loadMore">
                     <Button onClick={onLoadMore}>加载更多</Button>
                 </div>
-            ) : !loading && list.length && <div className="loadMore">到底啦</div>;
+            ) : !itemLoading && list.length && <div className="loadMore">到底啦</div>;
 
 
     // 标签生成
@@ -66,27 +73,62 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
             type===TypeNum?undefined:<Tag className='pointer' color="processing" onClick={()=>setType(TypeNum)} >{typeName}</Tag>
 
     // 当前所在标签名称
-    const getNowTagName = () => type===0? "普通" : type===1? "循环" : type===2? "长期" : type===3? "紧急" : type===5? "日记" : type===6? "工作" : "未知"
+    const getNowTagName = () =>type===0? "普通" : type===1? "循环" : type===2? "长期" : type===3? "紧急" : type===5? "日记" : type===6? "工作" : "未知"
+
+    const listHandleAction = async(event) => {
+
+        const target = event.target;
+        const action = target.getAttribute('data-action');
+        const id = target.parentElement.getAttribute('data-id');
+
+        switch(action) {
+            case 'edit':
+                console.log('编辑操作，ID:', id);
+
+                // 实现编辑逻辑
+                break;
+            case 'finish':
+                setWebLoading(true)
+                const response = await saveOrUpdateToDoItem({id, completed: 1},'put')
+                if(response) setRefreshTrigger(!refreshTrigger)  // 刷新触发
+                setWebLoading(false)
+                break;
+            case 'delete':
+                console.log('删除操作，ID:', id);
+                // 实现删除逻辑
+                break;
+            // 可以添加其他案例
+        }
+    }
 
         return (
+
             <Drawer placement="right"
                     onClose={() => showOrNot.setMemoDrawerShow(false)}
                     open={showOrNot.memoDrawerShow}
                     style={{opacity: 0.8}}
                     closable={false}
                     title={<>
-                        <div>备忘录<Tag bordered={false} color="success">{getNowTagName()}待办</Tag></div>
+                    <Spin spinning={webLoading} indicator={<></>}>
+                        <div style={{marginBottom: 6}}>备忘录
+                            <Tooltip title={'刷新当前待办'} mouseEnterDelay={0.6}>
+                                <SyncOutlined className='refresh' spin={webLoading} onClick={()=> setRefreshTrigger(!refreshTrigger)}/>
+                            </Tooltip>
+                            <Tag bordered={false} color="success">当前：{getNowTagName()}待办</Tag>
+                        </div>
                         {getTag(0, "普通")}
                         {getTag(1, "循环")}
                         {getTag(2, "长期")}
                         {getTag(3, "紧急")}
                         {getTag(5, "日记")}
                         {getTag(6, "工作")}
-
+                    </Spin>
                     </>}
             >
+                <Spin spinning={webLoading} tip={'正在加载'+getNowTagName()+'待办'}>
                 {UserStore.jwt ?
                     <List
+                        onClick={listHandleAction} // 在这里设置事件监听器
                         className="demo-loadmore-list"
                         loading={initLoading}
                         itemLayout="horizontal"
@@ -97,12 +139,12 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                 <Skeleton avatar title={false} loading={item.loading} active>
                                     <List.Item.Meta
                                         description={
-                                            <div>
+                                            <div data-id={item.id}>
                                                 {item.content}
                                                 <br/>
-                                                [<a key="list-loadmore-success">完成</a>|
-                                                <a key="list-loadmore-edit">编辑</a>|
-                                                <a key="list-loadmore-more">删除</a>]
+                                                [<a data-action="finish">完成</a>|
+                                                <a data-action="edit">编辑</a>|
+                                                <a data-action="delete">删除</a>]
                                                 <span
                                                     style={{fontSize: 10}}> 创建时间:{item?.createTime?.replace('T', ' ')}</span>
                                             </div>
@@ -114,8 +156,9 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     /> : <div className='loadMore' onClick={() => setModalIsOpen(true)}><Button
                         type="link">请先登录</Button><Skeleton/><Skeleton/><Skeleton/></div>
                 }
-
+                </Spin>
             </Drawer>
+
         )
     }
 )

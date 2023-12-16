@@ -75,13 +75,24 @@ export async function getToDoItems(type=0, page=1,pageSize=10) {
 
 
 // 保存或修改一个待办
-export async function saveOrUpdateToDoItem(type=0, page=1,pageSize=10) {
+export async function saveOrUpdateToDoItem(body,requestType='put') {
     try {
-        const response = await myAxios.get(`/toDoItems/${type}?page=${page}&pageSize=${pageSize}`);
-        return response.data.data;
+        const config = {
+            method: requestType,
+            url: '/toDoItems',
+            data : body
+        };
+        const response = await myAxios(config);
+        const {code,msg} = response.data;
+        if (code === 1) {
+            message.success("成功");
+            return true;
+        }else
+            message.error(msg);
+
     } catch (error) {
         message.error('请求失败');
         console.error('待办请求失败:', error);
-        return [];
     }
+
 }

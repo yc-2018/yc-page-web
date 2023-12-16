@@ -11,3 +11,9 @@
 .pointer{
     cursor: pointer;
 }
+
+/*给备忘录刷新按钮添加样式*/
+.refresh{
+    cursor: pointer;
+    color: #2274e3;
+}
