@@ -84,7 +84,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
             type===TypeNum?undefined:<Tag className='pointer' color="processing" onClick={()=>setType(TypeNum)} >{typeName}</Tag>
 
     // 当前所在标签名称
-    const getNowTagName = () =>type===0? "普通" : type===1? "循环" : type===2? "长期" : type===3? "紧急" : type===5? "日记" : type===6? "工作" : "未知"
+    const getNowTagName = () =>type===0? "普通" : type===1? "循环" : type===2? "长期" : type===3? "紧急" : type===5? "日记" : type===6? "工作" : "其他"
 
     const listHandleAction = async(event) => {
 
@@ -164,7 +164,14 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                 style={{width: '6em'}}
                             />
                             <Tooltip title={'添加一个待办'} mouseEnterDelay={1}>
-                                <Button icon={<PlusOutlined />} onClick={() => setFormModal(true)} size={"small"} className={"addItemButton"}/>
+                                <Button
+                                    icon={<PlusOutlined />}
+                                    onClick={() => {
+                                        setFModalData(undefined)
+                                        setFormModal(true)
+                                    }}
+                                    size={"small"} className={"addItemButton"}
+                                />
                             </Tooltip>
                         </div>
                         {getTag(0, "普通")}
@@ -173,6 +180,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                         {getTag(3, "紧急")}
                         {getTag(5, "日记")}
                         {getTag(6, "工作")}
+                        {getTag(7, "其他")}
                     </Spin>
                     </>}
             >

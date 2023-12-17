@@ -31,6 +31,7 @@ a.confirm-delete,
 a.confirm-delete:hover,
 a.confirm-delete:active,
 a.confirm-delete:focus {
+    transition: all .5s;
     color: red;         /* 红色字体 */
     font-weight: bold; /* 加粗字体 */
 }
