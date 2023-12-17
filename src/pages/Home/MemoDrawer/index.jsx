@@ -1,12 +1,13 @@
 import {observer} from 'mobx-react-lite'
 import {Drawer, List, Skeleton, Button, Tag, Spin, Tooltip, Select, Divider} from "antd";
+import {PlusOutlined, SyncOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../../request/homeRequest"
+import FormModal from "../../../compontets/FormModal";
 import './MemoDrawer.css'
-import {SyncOutlined} from "@ant-design/icons";
 
 let total = -1;    // 初始化待办总数
 const MemoDrawer = observer(({setModalIsOpen}) => {
@@ -19,6 +20,8 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         const [page, setPage] = useState(1);    // 待办翻页
         const [type, setType] = useState(0);    // 待办类型
         const [completed, setCompleted] = useState(0); // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+        const [formModal, setFormModal] = useState(true);
+        const [fModalData, setFModalData] = useState();
 
 
 
@@ -90,16 +93,11 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         const id = target.parentElement.getAttribute('data-id');
 
         switch(action) {
-            case 'add':
-                console.log('保存');
-
-                // 实现编辑逻辑
-                break;
             case 'edit':
-                console.log('编辑操作，ID:', id);
-
-                // 实现编辑逻辑
+                setFModalData(list.find(item => item.id === parseInt(id)))
+                setFormModal(true)
                 break;
+
             case 'finish':
                 setWebLoading(true)
                 const finishResponse = await saveOrUpdateToDoItem({id, completed: 1},'put')
@@ -146,6 +144,8 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     title={<>
                     <Spin spinning={webLoading} indicator={<></>}>
                         <div style={{marginBottom: 6}}>
+                            {/*新增和编辑表单*/}
+                            <FormModal isFormModalOpen={formModal} setFormModal={setFormModal} data={fModalData}/>
                             <Tooltip title={'刷新当前待办'} mouseEnterDelay={0.6}>
                                 <SyncOutlined className='refresh' spin={webLoading} onClick={()=> setRefreshTrigger(!refreshTrigger)}/>
                             </Tooltip>
@@ -163,6 +163,9 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                 onChange={value => setCompleted(value)}
                                 style={{width: '6em'}}
                             />
+                            <Tooltip title={'添加一个待办'} mouseEnterDelay={1}>
+                                <Button icon={<PlusOutlined />} onClick={() => setFormModal(true)} size={"small"} className={"addItemButton"}/>
+                            </Tooltip>
                         </div>
                         {getTag(0, "普通")}
                         {getTag(1, "循环")}
