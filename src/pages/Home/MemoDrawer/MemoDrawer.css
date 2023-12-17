@@ -3,9 +3,9 @@
 }
 .loadMore {
     text-align: center;
-    margin-top: 12px;
+    margin-top: 40px !important;
     height: 32px;
-    line-height: 32px
+    line-height: 32px;
 }
 /*鼠标变小手*/
 .pointer{
@@ -19,8 +19,19 @@
     color: #2274e3;
 }
 
+/*给完成的待办添加样式*/
 .finish{
     box-shadow: 0 0 8px 1px #bbf2c991;
     background-color: #fafff5;
     border-radius: 6px;
 }
+
+/*给备忘录确定删除按钮添加样式*/
+a.confirm-delete,
+a.confirm-delete:hover,
+a.confirm-delete:active,
+a.confirm-delete:focus {
+    color: red;         /* 红色字体 */
+    font-weight: bold; /* 加粗字体 */
+}
+

@@ -8,7 +8,7 @@ import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../../request/
 import './MemoDrawer.css'
 import {SyncOutlined} from "@ant-design/icons";
 
-let total = 999;    // 初始化待办总数
+let total = -1;    // 初始化待办总数
 const MemoDrawer = observer(({setModalIsOpen}) => {
         const [initLoading, setInitLoading] = useState(true);
         const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
@@ -25,8 +25,15 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         useEffect(() => {
             if (UserStore.jwt) (async () => {
                 setWebLoading(true)
+                setList([]);
                 setPage(1)
+                total = -1;
                 const response = await getToDoItems(type, 1, completed);
+                if (!response.records) {
+                    setInitLoading(false);
+                    setWebLoading(false);
+                    return;
+                }
                 setData(response.records);
                 setList(response.records);
                 total = response.total;
@@ -66,7 +73,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                 <div className="loadMore">
                     <Button block onClick={onLoadMore}>加载更多</Button>
                 </div>
-            ) : !itemLoading && list.length && <Divider plain>🥺到底啦🐾</Divider>;
+            ) : !itemLoading && list.length && <Divider className='loadMore' plain>🥺到底啦🐾</Divider>;
 
 
     // 标签生成
@@ -106,10 +113,22 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                 setWebLoading(false)
                 break;
             case 'delete':
-                setWebLoading(true)
-                const deleteResponse = await delToDoItem(id)
-                if(deleteResponse) setRefreshTrigger(!refreshTrigger)  // 刷新触发
-                setWebLoading(false)
+                // 如果按钮已经在删除确认状态
+                if (target.classList.contains('confirm-delete')) {
+                    setWebLoading(true)
+                    const deleteResponse = await delToDoItem(id)
+                    if (deleteResponse) setRefreshTrigger(!refreshTrigger)  // 刷新触发
+                    setWebLoading(false)
+                }else {
+                    target.classList.add('confirm-delete');
+                    target.textContent = '确定删除';
+                    setTimeout(() => {
+                        if (target?.classList?.contains('confirm-delete')) {
+                            target.classList.remove('confirm-delete');
+                            target.textContent = '删除';
+                        }
+                    }, 3000);
+                }
                 break;
             // 可以添加其他案例
         }
@@ -123,7 +142,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     onClose={() => showOrNot.setMemoDrawerShow(false)}
                     open={showOrNot.memoDrawerShow}
                     style={{opacity: 0.8}}
-                    closable={false}
+                    closeIcon={false}
                     title={<>
                     <Spin spinning={webLoading} indicator={<></>}>
                         <div style={{marginBottom: 6}}>
@@ -173,7 +192,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                                 <br/>
                                                 [
                                                 {item.completed?<a data-action="noFinish">取消完成</a>:<a data-action="finish">完成</a>}|
-                                                <a data-action="edit">编辑</a>|
+                                                {item.completed?undefined:<><a data-action="edit">编辑</a>|</> /*完成了就不要显示编辑了*/}
                                                 <a data-action="delete">删除</a>]
                                                 <span
                                                     style={{fontSize: 10}}> 创建时间:{item?.createTime?.replace('T', ' ')}</span>
