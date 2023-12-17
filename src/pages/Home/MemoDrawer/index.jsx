@@ -20,7 +20,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         const [page, setPage] = useState(1);    // 待办翻页
         const [type, setType] = useState(0);    // 待办类型
         const [completed, setCompleted] = useState(0); // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
-        const [formModal, setFormModal] = useState(true);
+        const [formModal, setFormModal] = useState(false);
         const [fModalData, setFModalData] = useState();
 
 
