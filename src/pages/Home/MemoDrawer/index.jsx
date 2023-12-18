@@ -11,17 +11,17 @@ import './MemoDrawer.css'
 
 let total = -1;    // 初始化待办总数
 const MemoDrawer = observer(({setModalIsOpen}) => {
-        const [initLoading, setInitLoading] = useState(true);
+        const [initLoading, setInitLoading] = useState(true);       // 初始化加载
         const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
         const [webLoading, setWebLoading] = useState(false);        // 网络加载
         const [refreshTrigger, setRefreshTrigger] = useState(true); // 刷新触发(值无意义，改变即刷新
-        const [data, setData] = useState([]);
-        const [list, setList] = useState([]);
+        const [data, setData] = useState([]);     // 待办列表数据
+        const [list, setList] = useState([]);     // 待办展示列表
         const [page, setPage] = useState(1);    // 待办翻页
         const [type, setType] = useState(0);    // 待办类型
-        const [completed, setCompleted] = useState(0); // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
-        const [formModal, setFormModal] = useState(false);
-        const [fModalData, setFModalData] = useState();
+        const [completed, setCompleted] = useState(0);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+        const [formModal, setFormModal] = useState(false);  // 是否显示新增或编辑的模态框。
+        const [fModalData, setFModalData] = useState();             // 设置模态框数据
 
 
 
@@ -121,7 +121,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     setWebLoading(false)
                 }else {
                     target.classList.add('confirm-delete');
-                    target.textContent = '确定删除';
+                    target.textContent = '确定删除?';
                     setTimeout(() => {
                         if (target?.classList?.contains('confirm-delete')) {
                             target.classList.remove('confirm-delete');
@@ -203,12 +203,14 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                             <div data-id={item.id}>
                                                 {item.content}
                                                 <br/>
-                                                [
-                                                {item.completed?<a data-action="noFinish">取消完成</a>:<a data-action="finish">完成</a>}|
-                                                {item.completed?undefined:<><a data-action="edit">编辑</a>|</> /*完成了就不要显示编辑了*/}
-                                                <a data-action="delete">删除</a>]
-                                                <span
-                                                    style={{fontSize: 10}}> 创建时间:{item?.createTime?.replace('T', ' ')}</span>
+
+                                                {item.completed?<a data-action="noFinish">取消完成</a>:<a data-action="finish">完成</a>}
+                                                {item.completed?undefined:<><a data-action="edit">编辑</a></> /*完成了就不要显示编辑了*/}
+                                                <a data-action="delete">删除</a>
+                                                <div style={{fontSize: 10}}>
+                                                    创建于:{item?.createTime?.replace('T', ' ')}
+                                                    {item.createTime !== item.updateTime? ` ${item.completed?'完成':'修改'}于:`+item.updateTime?.replace('T', ' '):null}
+                                                </div>
                                             </div>
                                         }
                                     />

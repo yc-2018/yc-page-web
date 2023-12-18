@@ -34,9 +34,11 @@ a.confirm-delete:focus {
     transition: all .5s;
     color: red;         /* 红色字体 */
     font-weight: bold; /* 加粗字体 */
+    background: rgba(255, 255, 255, 0);
+    border: 1px solid red;
 }
 
-/*添加待办按钮*/
+/*《添加待办》的按钮*/
 .addItemButton{
     margin-left: 6px;
     color: #52c41a;
@@ -47,4 +49,23 @@ a.confirm-delete:focus {
 .addItemButton:hover{
     opacity: 1;
 }
+
+
+/* 列表下的全部按钮 */
+.demo-loadmore-list a {
+    padding: 0 1rem;
+    margin: 0 2px;
+    border-radius: 1.5rem;
+    border: 1px solid #3d3a4e;
+    color: #3f3d3d;
+    transition: all 0.8s;
+    opacity: 0.6;
+}
+.demo-loadmore-list a:hover{
+    background: #3d3a4e;
+    color: #FFF;
+    opacity: .9;
+}
+
+
 

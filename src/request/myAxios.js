@@ -55,7 +55,7 @@ myAxios.interceptors.response.use(
         }
 
         // 继续传递错误，以便可以进行其他处理
-        return {code: 0, msg: error.message}; //Promise.reject(error);
+        return {code: 0, msg: error.message};
     }
 );
 
