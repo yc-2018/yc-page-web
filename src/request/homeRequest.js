@@ -74,7 +74,7 @@ export async function getToDoItems(type=0, page=1,completed=0) {
 
 
 // 保存或修改一个待办
-export async function saveOrUpdateToDoItem(body,requestType='put') {
+export async function saveOrUpdateToDoItem(body,requestType='post') {
     try {
         const response = await myAxios({url: '/toDoItems',method: requestType, data : body});
         if (response.data.code === 1) {

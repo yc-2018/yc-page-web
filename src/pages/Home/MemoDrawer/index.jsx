@@ -145,7 +145,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     <Spin spinning={webLoading} indicator={<></>}>
                         <div style={{marginBottom: 6}}>
                             {/*新增和编辑表单*/}
-                            <FormModal isFormModalOpen={formModal} setFormModal={setFormModal} data={fModalData}/>
+                            <FormModal isOpen={formModal} setOpen={setFormModal} data={fModalData}/>
                             <Tooltip title={'刷新当前待办'} mouseEnterDelay={0.6}>
                                 <SyncOutlined className='refresh' spin={webLoading} onClick={()=> setRefreshTrigger(!refreshTrigger)}/>
                             </Tooltip>
