@@ -93,23 +93,20 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         const target = event.target;
         const action = target.getAttribute('data-action');
         const id = target.parentElement.getAttribute('data-id');
+        const itemObj = list.find(item => item.id === parseInt(id));
 
         switch(action) {
             case 'edit':
-                setFModalData(list.find(item => item.id === parseInt(id)))
+
+                setFModalData(itemObj)
                 setFormModal(true)
                 break;
 
             case 'finish':
                 setWebLoading(true)
-                const finishResponse = await saveOrUpdateToDoItem({id, completed: 1},'put')
-                if(finishResponse) setRefreshTrigger(!refreshTrigger)  // 刷新触发
-                setWebLoading(false)
-                break;
-            case 'noFinish':
-                setWebLoading(true)
-                const noFinishResponse = await saveOrUpdateToDoItem({id, completed: 0},'put')
-                if(noFinishResponse) setRefreshTrigger(!refreshTrigger)  // 刷新触发
+                // 是否完成状态的转换。
+                const finishResponse = await saveOrUpdateToDoItem({id, completed: itemObj.completed?0:1}, 'put')
+                if (finishResponse) setRefreshTrigger(!refreshTrigger)  // 刷新触发
                 setWebLoading(false)
                 break;
             case 'delete':
@@ -204,8 +201,8 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                                 {item.content}
                                                 <br/>
 
-                                                {item.completed?<a data-action="noFinish">取消完成</a>:<a data-action="finish">完成</a>}
-                                                {item.completed?undefined:<><a data-action="edit">编辑</a></> /*完成了就不要显示编辑了*/}
+                                                <a data-action="finish">{item.completed? '取消': null}完成</a>
+                                                {item.completed? null: <a data-action="edit">编辑</a> /*完成了就不要显示编辑了*/}
                                                 <a data-action="delete">删除</a>
                                                 <div style={{fontSize: 10}}>
                                                     创建于:{item?.createTime?.replace('T', ' ')}
