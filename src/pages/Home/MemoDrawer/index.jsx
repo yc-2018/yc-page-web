@@ -27,10 +27,12 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
 
         useEffect(() => {
             if (UserStore.jwt) (async () => {
-                setWebLoading(true)
-                setList([]);
-                setPage(1)
-                total = -1;
+                setFModalData(null)     // 模态框数据重置 null和 undefined 来回切换
+                setWebLoading(true)     // 网络加载
+                setList([]);            // 待办列表重置
+                setPage(1)              // 待办翻页重置
+                total = -1;                   // 待办总数重置
+                // 使用 axios 发起请求 获取又一次初始化待办列表
                 const response = await getToDoItems(type, 1, completed);
                 if (!response.records) {
                     setInitLoading(false);
@@ -145,7 +147,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     <Spin spinning={webLoading} indicator={<></>}>
                         <div style={{marginBottom: 6}}>
                             {/*新增和编辑表单*/}
-                            <FormModal isOpen={formModal} setOpen={setFormModal} data={fModalData}/>
+                            <FormModal isOpen={formModal} setOpen={setFormModal} data={fModalData} reList={setRefreshTrigger} currentMemoType={type}/>
                             <Tooltip title={'刷新当前待办'} mouseEnterDelay={0.6}>
                                 <SyncOutlined className='refresh' spin={webLoading} onClick={()=> setRefreshTrigger(!refreshTrigger)}/>
                             </Tooltip>

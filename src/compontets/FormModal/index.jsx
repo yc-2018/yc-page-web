@@ -2,7 +2,14 @@ import React, {useEffect, useState} from "react";
 import {Modal, Input, Radio, Space, Divider, message, ConfigProvider} from 'antd';
 import {saveOrUpdateToDoItem} from "../../request/homeRequest";
 const { TextArea } = Input;
-const FormModal = ({isOpen,setOpen,data}) => {
+/**
+ * @param {boolean}     isOpen          弹窗是否显示
+ * @param {function}    setOpen         关闭弹窗
+ * @param {object}      data            编辑的数据
+ * @param {function}    reList          刷新列表
+ * @param {number}      currentMemoType 当前备忘类型,编辑的不用，新增的才要
+ * */
+const FormModal = ({isOpen,setOpen,data,reList,currentMemoType=4}) => {
     const [formData, setFormData] = useState(null);
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
@@ -10,7 +17,7 @@ const FormModal = ({isOpen,setOpen,data}) => {
         if(data) setFormData(data)
         else setFormData({
             content:null,
-            itemType:null,
+            itemType:currentMemoType,
         })
     },[data])
     const handleOk = async() => {
@@ -24,7 +31,10 @@ const FormModal = ({isOpen,setOpen,data}) => {
         body.itemType = formData.itemType===data?.itemType?null:formData.itemType;
         body.id = data?.id;
         let result = await saveOrUpdateToDoItem(body,data && "put");
-        if(result) setOpen(false);
+        if(result) {
+            setOpen(false);
+            reList(Math.random()) // 刷新列表
+        }
         setConfirmLoading(false);
     };
 
