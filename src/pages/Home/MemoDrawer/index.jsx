@@ -103,11 +103,23 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                 break;
 
             case 'finish':
-                setWebLoading(true)
-                // 是否完成状态的转换。
-                const finishResponse = await saveOrUpdateToDoItem({id, completed: itemObj.completed?0:1}, 'put')
-                if (finishResponse) setRefreshTrigger(!refreshTrigger)  // 刷新触发
-                setWebLoading(false)
+                // 如果按钮已经在完成确认状态
+                if (target.classList.contains('confirm-finish')) {
+                    setWebLoading(true)
+                    // 是否完成状态的转换。
+                    const finishResponse = await saveOrUpdateToDoItem({id, completed: itemObj.completed?0:1}, 'put')
+                    if (finishResponse) setRefreshTrigger(!refreshTrigger)  // 刷新触发
+                    setWebLoading(false)
+                }else {
+                    target.classList.add('confirm-finish');
+                    target.textContent = `确定${itemObj.completed? '取消完成': '完成'}吗?`;
+                    setTimeout(() => {
+                        if (target?.classList?.contains('confirm-finish')) {
+                            target.classList.remove('confirm-finish');
+                            target.textContent = `${itemObj.completed?'取消完成':'完成'}`;
+                        }
+                    }, 3000);
+                }
                 break;
             case 'delete':
                 // 如果按钮已经在删除确认状态
