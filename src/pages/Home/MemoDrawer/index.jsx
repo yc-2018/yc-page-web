@@ -30,6 +30,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
             if (UserStore.jwt) (async () => {
                 setFModalData(null)     // 模态框数据重置 null和 undefined 来回切换
                 setWebLoading(true)     // 网络加载
+                setUnFinishCounts(null) // 待办未完成计数重置
                 setList([]);            // 待办列表重置
                 setPage(1)              // 待办翻页重置
                 total = -1;                   // 待办总数重置
@@ -44,10 +45,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                 setData(data.records);
                 setList(data.records);
                 total = data.total;
-                if(completed===0)
-                    setUnFinishCounts(map.groupToDoItemsCounts)
-                else
-                    setUnFinishCounts(null);
+                if(completed===0) setUnFinishCounts(map.groupToDoItemsCounts)
                 setInitLoading(false);
                 setWebLoading(false);
             })();
