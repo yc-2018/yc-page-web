@@ -64,10 +64,10 @@ export async function login(loginCode,expireTime='bt') {
 export async function getToDoItems(type=0, page=1,completed=0) {
     try {
         const response = await myAxios.get(`/toDoItems/${type}?page=${page}&completed=${completed}`);
-        return response.data.data;
+        return response.data;
     } catch (error) {
         console.error('待办请求失败:', error);
-        return [];
+        return {};
     }
 }
 

@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import {Drawer, List, Skeleton, Button, Tag, Spin, Tooltip, Select, Divider} from "antd";
+import {Drawer, List, Skeleton, Button, Tag, Spin, Tooltip, Select, Divider, Badge,Space} from "antd";
 import {PlusOutlined, SyncOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 
@@ -19,6 +19,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         const [list, setList] = useState([]);     // 待办展示列表
         const [page, setPage] = useState(1);    // 待办翻页
         const [type, setType] = useState(0);    // 待办类型
+        const [unFinishCounts, setUnFinishCounts] = useState();     // 待办未完成计数
         const [completed, setCompleted] = useState(0);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
         const [formModal, setFormModal] = useState(false);  // 是否显示新增或编辑的模态框。
         const [fModalData, setFModalData] = useState();             // 设置模态框数据
@@ -33,17 +34,22 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                 setPage(1)              // 待办翻页重置
                 total = -1;                   // 待办总数重置
                 // 使用 axios 发起请求 获取又一次初始化待办列表
-                const response = await getToDoItems(type, 1, completed);
-                if (!response.records) {
+                const resp = await getToDoItems(type, 1, completed);
+                if (!(resp?.code === 1)) {
                     setInitLoading(false);
                     setWebLoading(false);
                     return;
                 }
-                setData(response.records);
-                setList(response.records);
-                total = response.total;
+                const {data, map} = resp;
+                setData(data.records);
+                setList(data.records);
+                total = data.total;
+                if(completed===0)
+                    setUnFinishCounts(map.groupToDoItemsCounts)
+                else
+                    setUnFinishCounts(null);
                 setInitLoading(false);
-                setWebLoading(false)
+                setWebLoading(false);
             })();
 
         }, [UserStore.jwt, type,completed,refreshTrigger]);
@@ -60,9 +66,9 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
             );
 
             // 使用 axios 发起请求
-            const response = await getToDoItems(0, page + 1,completed);
+            const {data:respData} = await getToDoItems(0, page + 1,completed);
             // 结合旧数据和新数据
-            const newData = data.concat(response.records);
+            const newData = data.concat(respData.records);
             setData(newData);
             setList(newData);
             setItemItemLoading(false);
@@ -83,8 +89,10 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
 
     // 标签生成
     const getTag = (TypeNum,typeName) =>
-            type===TypeNum?undefined:<Tag className='pointer' color="processing" onClick={()=>setType(TypeNum)} >{typeName}</Tag>
-
+            type===TypeNum?undefined:
+                <Badge count={unFinishCounts?.[TypeNum]} size="small" offset={[-5, 2]} title={"未完成的条数"}>
+                    <Tag className='pointer' color="processing" onClick={()=>setType(TypeNum)} >{typeName}</Tag>
+                </Badge>
     // 当前所在标签名称
     const getNowTagName = () =>type===0? "普通" : type===1? "循环" : type===2? "长期" : type===3? "紧急" : type===5? "日记" : type===6? "工作" : "其他"
 
@@ -154,7 +162,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     closeIcon={false}
                     title={<>
                     <Spin spinning={webLoading} indicator={<></>}>
-                        <div style={{marginBottom: 6}}>
+                        <div style={{marginBottom: 8}}>
                             {/*新增和编辑表单*/}
                             <FormModal isOpen={formModal} setOpen={setFormModal} data={fModalData} reList={setRefreshTrigger} currentMemoType={type}/>
                             <Tooltip title={'刷新当前待办'} mouseEnterDelay={0.6}>
@@ -185,13 +193,15 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                 />
                             </Tooltip>
                         </div>
-                        {getTag(0, "普通")}
-                        {getTag(1, "循环")}
-                        {getTag(2, "长期")}
-                        {getTag(3, "紧急")}
-                        {getTag(5, "日记")}
-                        {getTag(6, "工作")}
-                        {getTag(7, "其他")}
+                        <Space>
+                            {getTag(0, "普通")}
+                            {getTag(1, "循环")}
+                            {getTag(2, "长期")}
+                            {getTag(3, "紧急")}
+                            {getTag(5, "日记")}
+                            {getTag(6, "工作")}
+                            {getTag(7, "其他")}
+                        </Space>
                     </Spin>
                     </>}
             >
