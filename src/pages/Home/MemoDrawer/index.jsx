@@ -10,6 +10,16 @@ import FormModal from "../../../compontets/FormModal";
 import './MemoDrawer.css'
 
 let total = -1;    // 初始化待办总数
+// 待办类型映射
+const tagNameMapper = {
+    0: "普通",
+    1: "循环",
+    2: "长期",
+    3: "紧急",
+    5: "日记",
+    6: "工作",
+    7: "其他"
+}
 const MemoDrawer = observer(({setModalIsOpen}) => {
         const [initLoading, setInitLoading] = useState(true);       // 初始化加载
         const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
@@ -51,6 +61,9 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
             })();
 
         }, [UserStore.jwt, type,completed,refreshTrigger]);
+
+
+        /** 点击加载更多数据触发 */
         const onLoadMore = async () => {
             setItemItemLoading(true);
             setList(
@@ -76,7 +89,8 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
 
         };
 
-        // 显示加载更多？还是到底了
+
+        /** 判断 显示《加载更多》《到底了》还是什么都不显示 */
         const loadMore =
             !initLoading && !itemLoading && list.length < total ? (
                 <div className="loadMore">
@@ -86,14 +100,14 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
 
 
     // 标签生成
-    const getTag = (TypeNum,typeName) =>
+    const getTag = (TypeNum,typeName,color) =>
             type===TypeNum?undefined:
                 <Badge count={unFinishCounts?.[TypeNum]} size="small" offset={[-5, 2]} title={"未完成的条数"}>
-                    <Tag className='pointer' color="processing" onClick={()=>setType(TypeNum)} >{typeName}</Tag>
+                    <Tag className='pointer' color={color ?? "processing"} onClick={()=>setType(TypeNum)} >{typeName}</Tag>
                 </Badge>
-    // 当前所在标签名称
-    const getNowTagName = () =>type===0? "普通" : type===1? "循环" : type===2? "长期" : type===3? "紧急" : type===5? "日记" : type===6? "工作" : "其他"
 
+
+    /** 处理待办列表的操作 */
     const listHandleAction = async(event) => {
 
         const target = event.target;
@@ -103,7 +117,6 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
 
         switch(action) {
             case 'edit':
-
                 setFModalData(itemObj)
                 setFormModal(true)
                 break;
@@ -118,7 +131,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     setWebLoading(false)
                 }else {
                     target.classList.add('confirm-finish');
-                    target.textContent = `确定${itemObj.completed? '取消完成': '完成'}吗?`;
+                    target.textContent = `确定${itemObj.completed? '取消': '完成'}?`;
                     setTimeout(() => {
                         if (target?.classList?.contains('confirm-finish')) {
                             target.classList.remove('confirm-finish');
@@ -127,6 +140,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     }, 3000);
                 }
                 break;
+
             case 'delete':
                 // 如果按钮已经在删除确认状态
                 if (target.classList.contains('confirm-delete')) {
@@ -145,7 +159,26 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     }, 3000);
                 }
                 break;
-            // 可以添加其他案例
+
+            case 'addOne':
+                // 如果按钮已经在确认状态
+                if (target.classList.contains('confirm-addOne')) {
+                    setWebLoading(true)
+                    const body = {id:target.parentElement.parentElement.getAttribute('data-id'), numberOfRecurrences:666};
+                    if (await saveOrUpdateToDoItem(body, 'put'))
+                        setRefreshTrigger(!refreshTrigger)  // 刷新触发
+                    setWebLoading(false)
+                }else {
+                    target.classList.add('confirm-addOne');
+                    target.textContent = '确定+1?';
+                    setTimeout(() => {
+                        if (target?.classList?.contains('confirm-addOne')) {
+                            target.classList.remove('confirm-addOne');
+                            target.textContent = '循环+1';
+                        }
+                    }, 3000);
+                }
+                break;
         }
     }
 
@@ -167,7 +200,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                 <SyncOutlined className='refresh' spin={webLoading} onClick={()=> setRefreshTrigger(!refreshTrigger)}/>
                             </Tooltip>
                             备忘录
-                            <Tag bordered={false} color="success" className={'ripple-tag'}>当前：{getNowTagName()}</Tag>
+                            <Tag bordered={false} color="success" className={'ripple-tag'}>当前：{tagNameMapper[type]}</Tag>
                             {/*下拉框选择看那种待办*/}
                             <Select
                                 value={completed}
@@ -193,17 +226,17 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                         </div>
                         <Space>
                             {getTag(0, "普通")}
-                            {getTag(1, "循环")}
-                            {getTag(2, "长期")}
                             {getTag(3, "紧急")}
-                            {getTag(5, "日记")}
                             {getTag(6, "工作")}
                             {getTag(7, "其他")}
+                            {getTag(2, "长期","warning")}
+                            {getTag(1, "循环","warning")}
+                            {getTag(5, "日记","default")}
                         </Space>
                     </Spin>
                     </>}
             >
-                <Spin spinning={webLoading} tip={'正在加载'+getNowTagName()+'待办'}>
+                <Spin spinning={webLoading} tip={'正在加载'+tagNameMapper[type]+'待办'}>
                 {UserStore.jwt ?
                     <List
                         onClick={listHandleAction} // 在这里设置事件监听器
@@ -224,6 +257,10 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                                 <a data-action="finish">{item.completed? '取消': null}完成</a>
                                                 {item.completed? null: <a data-action="edit">编辑</a> /*完成了就不要显示编辑了*/}
                                                 <a data-action="delete">删除</a>
+                                                {item.itemType === 1? <Badge count={item.numberOfRecurrences} style={{backgroundColor: '#52c41a',}} >
+                                                    <a data-action="addOne">循环+1</a>
+                                                </Badge> :null}
+
                                                 <div style={{fontSize: 10}}>
                                                     创建于:{item?.createTime?.replace('T', ' ')}
                                                     {item.createTime !== item.updateTime? ` ${item.completed?'完成':'修改'}于:`+item.updateTime?.replace('T', ' '):null}
