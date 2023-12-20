@@ -1,6 +1,7 @@
 import axios from 'axios';
 import {message} from 'antd'
 import UserStore from '../store/UserStore';
+import CommonStore from "../store/CommonStore";
 import myAxios  from "./myAxios";
 
 /**
@@ -8,31 +9,34 @@ import myAxios  from "./myAxios";
  * @returns {Promise<null|string>} 随机壁纸URL
  */
 export async function reImagesUrl(bzType="风景") {
+    CommonStore.setLoading(true);
     try {
         async function jfApi() {
-            const response = await axios.get('/jfApi/home/bg/ajaxbg');
-            const images = response.data;
-            if (images.length > 0)
-                return 'https://i0.wp.com/www.jianfast.com' + images[0].replace('/400', '');
+            const { data: [image] } = await axios.get('/jfApi/home/bg/ajaxbg');
+            CommonStore.setLoading(false,"获取风景/科技壁纸成功,正在加载...");
+            return 'https://i0.wp.com/www.jianfast.com' + image.replace('/400', '');
         }
 
         async function bz1Api() {
             // https://api.btstu.cn/sjbz/api.php?lx=dongman&format=json
-            const response = await axios.get('/bz1Api/sjbz/api.php?format=json');
-            return response.data.imgurl;
+            const {data:{imgurl}} = await axios.get('/bz1Api/sjbz/api.php?format=json');
+            CommonStore.setLoading(false,"获取随机壁纸成功,正在缓慢加载中...");
+            return imgurl;
         }
 
         async function bz2Api() {
             // 如诗 - API接口文档 https://api.likepoems.com/
             // https://api.likepoems.com/img/pc/?type=json
-            const response = await axios.get('/bz2Api/img/pc/?type=json');
-            return response.data.url;
+            const {data:{url}} = await axios.get('/bz2Api/img/pc/?type=json');
+            CommonStore.setLoading(false,"获取动画壁纸成功,正在加载...");
+            return url;
         }
         return bzType === "风景"? jfApi():               
                bzType === "动画"? bz2Api():            
                bzType === "随机"? bz1Api():jfApi();     
 
     } catch (error) {
+        CommonStore.setLoading(false,"获取壁纸失败了");
         return null;
     }
 }
