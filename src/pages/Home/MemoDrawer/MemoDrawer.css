@@ -26,17 +26,19 @@
     border-radius: 6px;
 }
 
-/*给备忘录确定删除按钮添加样式*/
-a.confirm-delete,
-a.confirm-delete:hover,
-a.confirm-delete:active,
-a.confirm-delete:focus {
-    transition: all .5s;
-    color: red;         /* 红色字体 */
-    font-weight: bold; /* 加粗字体 */
-    background: rgba(255, 255, 255, 0);
-    border: 1px solid red;
-}
+/*!*给备忘录确定删除按钮添加样式*!*/
+/*a.confirm-delete,*/
+/*a.confirm-delete:hover,*/
+/*a.confirm-delete:active,*/
+/*a.confirm-delete:focus {*/
+/*    transition: all .5s;*/
+/*    color: red;         !* 红色字体 *!*/
+/*    font-weight: bold; !* 加粗字体 *!*/
+/*    background: rgba(255, 255, 255, 0);*/
+/*    border: 1px solid red;*/
+/*}*/
+
+
 
 /*《添加待办》的按钮*/
 .addItemButton{
@@ -62,9 +64,29 @@ a.confirm-delete:focus {
     opacity: 0.6;
 }
 .demo-loadmore-list a:hover{
-    background: #3d3a4e;
-    color: #FFF;
+    background: rgba(61, 58, 78, 0.23);
     opacity: .9;
+}
+
+/*点完成按钮后的样式*/
+.confirm-finish:hover{
+    background-color: #0080004d !important;
+    color:green!important;
+    border: 1px solid green!important;
+    font-weight: bold; /* 加粗字体 */
+}
+
+/*点删除按钮后的样式*/
+.confirm-delete:hover{
+    background-color: #8000004d !important;
+    color:red !important;
+    border: 1px solid red !important;
+    font-weight: bold; /* 加粗字体 */
+}
+
+[data-action="edit"]:active{
+    background-color: rgba(145, 174, 248, 0.69) !important;
+    border: 1px solid rgba(0, 0, 0, 0) !important;
 }
 
 
