@@ -167,7 +167,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                 <SyncOutlined className='refresh' spin={webLoading} onClick={()=> setRefreshTrigger(!refreshTrigger)}/>
                             </Tooltip>
                             备忘录
-                            <Tag bordered={false} color="success">当前：{getNowTagName()}待办</Tag>
+                            <Tag bordered={false} color="success" className={'ripple-tag'}>当前：{getNowTagName()}</Tag>
                             {/*下拉框选择看那种待办*/}
                             <Select
                                 value={completed}
