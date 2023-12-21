@@ -8,15 +8,14 @@ import {
     UserOutlined,
     SyncOutlined,
     DownloadOutlined,
-    UploadOutlined,
-    HomeTwoTone, PoweroffOutlined, SettingOutlined
+    HomeTwoTone, PoweroffOutlined, SettingOutlined, CloudUploadOutlined, CloudDownloadOutlined
 } from "@ant-design/icons";
 import { observer } from 'mobx-react-lite'
 import showOrNot from '../../store/ShowOrNot';
 import "./Home.css"
 import EnglishDrawer from "./EnglishDrawer";
 import MemoDrawer from "./MemoDrawer";
-import {reImagesUrl,login} from "../../request/homeRequest";
+import {reImagesUrl, login, uploadInfo} from "../../request/homeRequest";
 import UserStore from "../../store/UserStore";
 import JWTUtils from  "../../utils/JWTUtils"
 import CommonStore from "../../store/CommonStore";
@@ -120,12 +119,22 @@ function Home() {
                     >
                         {UserStore.jwt&&
                         (
-                            /* 上传壁纸到服务器 */
-                            <FloatButton
-                            icon={<UploadOutlined />}
-                            tooltip="上传壁纸到服务器"
-                            className='buttonOpacity'
-                        />)
+                            <>
+                                {/* 上传壁纸到服务器 */}
+                                <FloatButton
+                                    icon={<CloudUploadOutlined />}
+                                    tooltip="上传壁纸到服务器"
+                                    className='buttonOpacity'
+                                    onClick={()=>uploadInfo({backgroundUrl: images})}
+                                />
+                                {/*获取服务器壁纸 */}
+                                <FloatButton
+                                    icon={<CloudDownloadOutlined />}
+                                    tooltip="获取服务器壁纸"
+                                    className='buttonOpacity'
+                                />
+                            </>
+                        )
                     }
 
                         {/* 下载壁纸 */}

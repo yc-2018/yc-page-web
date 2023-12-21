@@ -13,9 +13,9 @@ class CommonStore {
 
 
     //设置jwt
-    setLoading(statuses, msg) {
+    setLoading(statuses, msg=null, type="info") {
         this.loading = statuses
-        if (msg) return  message.success(msg)
+        if (msg) return  type==="success"? message.success(msg): type==="error"?message.error(msg): message.info(msg)
     }
 
 

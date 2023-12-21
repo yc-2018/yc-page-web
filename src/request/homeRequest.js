@@ -36,8 +36,7 @@ export async function reImagesUrl(bzType="风景") {
                bzType === "随机"? bz1Api():jfApi();     
 
     } catch (error) {
-        CommonStore.setLoading(false,"获取壁纸失败了");
-        return null;
+         CommonStore.setLoading(false,"获取壁纸失败了",'error');
     }
 }
 
@@ -97,4 +96,14 @@ export async function delToDoItem(id) {
             return true;
         }
     } catch (error) {console.error('待办请求失败:', error)}
+}
+
+/** 上传壁纸到云端 */
+export async function uploadInfo(Info) {
+    CommonStore.setLoading(true,"开始上传");
+    try {
+        const {data:{data}} = await myAxios({url: `/pageParameters`,method: 'put', data : Info});
+
+        data._code || CommonStore.setLoading(false,"上传成功",'success');
+    } catch (error) {CommonStore.setLoading(false);}
 }
