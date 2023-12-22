@@ -27,10 +27,10 @@ function Home() {
     const [loginLoading, setLoginLoading] = useState(false);        // 点击登录按钮加载
     const [loginCaptcha, setLoginCaptcha] = useState(undefined);            // 登录验证码
     const [expireTime, setExpireTime] = useState(undefined);               // 登录有效时间
-    const [images, setImages] = useState('/Default-wallpaper.jpg');// 背景壁纸
+    const [images, setImages] = useState('/Default-wallpaper.jpg');// 背景背景
     const [messageApi, contextHolder] = message.useMessage();       // Hooks 调用全局提示（antd推荐）因为静态Message方法无法消费上下文，因而 ConfigProvider 的数据也不会生效。
 
-    let backgroundImage = localStorage.getItem('backgroundImages'); // 尝试获取本地存储的壁纸URL
+    let backgroundImage = localStorage.getItem('backgroundImages'); // 尝试获取本地存储的背景URL
     let {jwt} = UserStore;
 
     useEffect(() => {
@@ -41,18 +41,18 @@ function Home() {
     },[jwt])
 
     /**
-     * 获取壁纸请求
+     * 获取背景请求
      */
     const reImages = async(bzType) => {
         const imgUrl = await reImagesUrl(bzType);
         if (imgUrl) setBgImage(imgUrl);
-        else messageApi.info('获取壁纸出错');
+        else messageApi.info('获取背景出错');
     }
 
-    /**  获取本地记录壁纸URL */
+    /**  获取本地记录背景URL */
     const getBgImage = () => backgroundImage || images
 
-    /** 保存壁纸URL到本地 */
+    /** 保存背景URL到本地 */
     const setBgImage = (backgroundUrl)=> {
         localStorage.setItem('backgroundImages', backgroundUrl);
         setImages(backgroundUrl);
@@ -123,7 +123,7 @@ function Home() {
                         className='buttonOpacity'
                     />
 
-                    {/*壁纸*/}
+                    {/*背景*/}
                     <FloatButton.Group
                         style={{ right: 80 }}
                         trigger="hover"
@@ -133,17 +133,17 @@ function Home() {
                         {jwt &&
                         (
                             <>
-                                {/* 上传壁纸到服务器 */}
+                                {/* 上传背景到服务器 */}
                                 <FloatButton
                                     icon={<CloudUploadOutlined />}
-                                    tooltip="上传壁纸到服务器"
+                                    tooltip="上传背景到服务器"
                                     className='buttonOpacity'
                                     onClick={()=>uploadInfo({backgroundUrl: getBgImage()})}
                                 />
-                                {/*获取服务器壁纸 */}
+                                {/*获取服务器背景 */}
                                 <FloatButton
                                     icon={<CloudDownloadOutlined />}
-                                    tooltip="获取服务器壁纸"
+                                    tooltip="获取服务器背景"
                                     className='buttonOpacity'
                                     onClick={async()=> {
                                         const {backgroundUrl} = await getPageInfo()
@@ -157,13 +157,13 @@ function Home() {
                         )
                     }
 
-                        {/* 下载壁纸 */}
+                        {/* 下载背景 */}
                         <FloatButton
                             icon={<DownloadOutlined />}
-                            tooltip="下载当前壁纸"
+                            tooltip="下载当前背景"
                             className='buttonOpacity'
                             onClick={async () => {
-                                CommonStore.setLoading(true,'开始缓存该壁纸...');
+                                CommonStore.setLoading(true,'开始缓存该背景...');
                                 try {
                                     const response = await axios.get(backgroundImage || images, {
                                         responseType: 'blob', // 重要：这会告诉 Axios 返回一个 Blob 对象
@@ -187,15 +187,15 @@ function Home() {
                                 }
                             }}
                         />
-                        {/*换壁纸*/}
+                        {/*换背景*/}
                         <FloatButton
                             onClick={reImages}
                             icon={<SyncOutlined />}
                             tooltip={<div style={{textAlign: 'center'}} onClick={event=>event.stopPropagation()}>
-                                <div>点击换缓慢的科技|风景壁纸:默认</div>
-                                <Button onClick={()=>reImages("动画")}>加载快速的动画壁纸</Button>
-                                <Button onClick={()=>reImages("随机")}>高清缓慢的随机壁纸</Button>
-                                <Input placeholder="自定义壁纸链接，回车加载" onPressEnter={event => {
+                                <div>点击换缓慢的科技|风景背景:默认</div>
+                                <Button onClick={()=>reImages("动画")}>加载快速的动画背景</Button>
+                                <Button onClick={()=>reImages("随机")}>高清缓慢的随机背景</Button>
+                                <Input placeholder="自定义背景链接，回车加载" onPressEnter={event => {
                                     setBgImage(event.target.value) // 设置背景
                                     messageApi.info('正在设置中...');
                                 }}/>
