@@ -45,17 +45,18 @@ function Home() {
      */
     const reImages = async(bzType) => {
         const imgUrl = await reImagesUrl(bzType);
-        if (imgUrl) setBgImage(imgUrl);
+        if (imgUrl) setBgImage(imgUrl, '获取背景成功，喜欢的话请手动点击上传到云端☁');
         else messageApi.info('获取背景出错');
     }
 
     /**  获取本地记录背景URL */
-    const getBgImage = () => backgroundImage || images
+    const getBgImage = () =>  backgroundImage || images
 
     /** 保存背景URL到本地 */
-    const setBgImage = (backgroundUrl)=> {
+    const setBgImage = (backgroundUrl,msg=null)=> {
         localStorage.setItem('backgroundImages', backgroundUrl);
         setImages(backgroundUrl);
+        if(msg) messageApi.info(msg);
     }
 
     /**
@@ -133,25 +134,24 @@ function Home() {
                         {jwt &&
                         (
                             <>
-                                {/* 上传背景到服务器 */}
-                                <FloatButton
-                                    icon={<CloudUploadOutlined />}
-                                    tooltip="上传背景到服务器"
-                                    className='buttonOpacity'
-                                    onClick={()=>uploadInfo({backgroundUrl: getBgImage()})}
-                                />
                                 {/*获取服务器背景 */}
                                 <FloatButton
                                     icon={<CloudDownloadOutlined />}
-                                    tooltip="获取服务器背景"
+                                    tooltip="获取云端背景"
                                     className='buttonOpacity'
                                     onClick={async()=> {
                                         const {backgroundUrl} = await getPageInfo()
-                                        if (backgroundUrl) {
-                                            setBgImage(backgroundUrl)   // 设置背景
-                                            messageApi.info('获取背景成功');
-                                        } else messageApi.error('您还没有上传过背景到服务器哦');
+                                        if (backgroundUrl) setBgImage(backgroundUrl,'获取背景成功')   // 设置背景
+                                         else messageApi.error('您还没有上传过背景到服务器哦');
                                     }}
+                                />
+
+                                {/* 上传背景到服务器 */}
+                                <FloatButton
+                                    icon={<CloudUploadOutlined />}
+                                    tooltip="上传背景到云端"
+                                    className='buttonOpacity'
+                                    onClick={()=>uploadInfo({backgroundUrl: getBgImage()})}
                                 />
                             </>
                         )
@@ -196,8 +196,7 @@ function Home() {
                                 <Button onClick={()=>reImages("动画")}>加载快速的动画背景</Button>
                                 <Button onClick={()=>reImages("随机")}>高清缓慢的随机背景</Button>
                                 <Input placeholder="自定义背景链接，回车加载" onPressEnter={event => {
-                                    setBgImage(event.target.value) // 设置背景
-                                    messageApi.info('正在设置中...');
+                                    setBgImage(event.target.value,'正在设置中...') // 设置背景
                                 }}/>
                                 </div> }
                             className='buttonOpacity'
