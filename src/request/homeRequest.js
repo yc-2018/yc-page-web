@@ -98,12 +98,23 @@ export async function delToDoItem(id) {
     } catch (error) {console.error('待办请求失败:', error)}
 }
 
-/** 上传壁纸到云端 */
+/** 上传页面配置信息到云端 */
 export async function uploadInfo(Info) {
     CommonStore.setLoading(true,"开始上传");
     try {
-        const {data:{data}} = await myAxios({url: `/pageParameters`,method: 'put', data : Info});
+        const {data:{data}} = await myAxios({url: '/pageParameters',method: 'put', data : Info});
 
         data._code || CommonStore.setLoading(false,"上传成功",'success');
+    } catch (error) {CommonStore.setLoading(false);}
+}
+
+
+/** 从云端获取页面配置信息 */
+export async function getPageInfo() {
+    CommonStore.setLoading(true,"正在获取");
+    try {
+        const {data:{data}} = await myAxios.get('/pageParameters');
+        CommonStore.setLoading(false,"获取成功，开始加载",'success');
+        return data;
     } catch (error) {CommonStore.setLoading(false);}
 }

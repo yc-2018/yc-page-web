@@ -1,6 +1,7 @@
-import React, { useState/* ,useEffect */ } from 'react';
-import Search from './Search';
+import React, { useState ,useEffect  } from 'react';
+import axios from "axios";
 import Bookmarks from './Bookmarks';
+import { observer } from 'mobx-react-lite'
 import {Button, FloatButton, Input, message, Modal, Space, Radio, Spin} from "antd";
 import {
     PictureTwoTone,
@@ -10,16 +11,15 @@ import {
     DownloadOutlined,
     HomeTwoTone, PoweroffOutlined, SettingOutlined, CloudUploadOutlined, CloudDownloadOutlined
 } from "@ant-design/icons";
-import { observer } from 'mobx-react-lite'
+import Search from './Search';
 import showOrNot from '../../store/ShowOrNot';
-import "./Home.css"
 import EnglishDrawer from "./EnglishDrawer";
 import MemoDrawer from "./MemoDrawer";
-import {reImagesUrl, login, uploadInfo} from "../../request/homeRequest";
+import {reImagesUrl, login, uploadInfo,getPageInfo} from "../../request/homeRequest";
 import UserStore from "../../store/UserStore";
 import JWTUtils from  "../../utils/JWTUtils"
 import CommonStore from "../../store/CommonStore";
-import axios from "axios";
+import "./Home.css"
 
 
 function Home() {
@@ -36,13 +36,12 @@ function Home() {
      * 获取壁纸请求
      */
     const reImages = async(bzType) => {
-        const imgUrl = reImagesUrl(bzType);
+        const imgUrl = await reImagesUrl(bzType);
         if (imgUrl){
-            localStorage.setItem('backgroundImages', await imgUrl);
-            setImages(await imgUrl);
+            localStorage.setItem('backgroundImages', imgUrl);
+            setImages(imgUrl);
         }
-        else
-            messageApi.info('获取壁纸出错');
+        else messageApi.info('获取壁纸出错');
     }
 
     /**
@@ -132,6 +131,13 @@ function Home() {
                                     icon={<CloudDownloadOutlined />}
                                     tooltip="获取服务器壁纸"
                                     className='buttonOpacity'
+                                    onClick={async()=> {
+                                        const info = await getPageInfo()
+                                        if (info) {
+                                            localStorage.setItem('backgroundImages', info.backgroundUrl);
+                                            setImages(info.backgroundUrl);
+                                        }
+                                    }}
                                 />
                             </>
                         )
