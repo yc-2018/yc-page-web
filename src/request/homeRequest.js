@@ -111,10 +111,10 @@ export async function uploadInfo(Info) {
 
 /** 从云端获取页面配置信息 */
 export async function getPageInfo() {
-    CommonStore.setLoading(true,"正在获取");
+    CommonStore.setLoading(true);
     try {
         const {data:{data}} = await myAxios.get('/pageParameters');
-        CommonStore.setLoading(false,"获取成功，开始加载",'success');
+        CommonStore.setLoading(false);
         return data;
     } catch (error) {CommonStore.setLoading(false);}
 }

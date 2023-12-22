@@ -31,17 +31,31 @@ function Home() {
     const [messageApi, contextHolder] = message.useMessage();       // Hooks 调用全局提示（antd推荐）因为静态Message方法无法消费上下文，因而 ConfigProvider 的数据也不会生效。
 
     let backgroundImage = localStorage.getItem('backgroundImages'); // 尝试获取本地存储的壁纸URL
+    let {jwt} = UserStore;
+
+    useEffect(() => {
+        if(jwt)(async()=> {
+            const info = await getPageInfo()
+            if (info?.backgroundUrl) setBgImage(info.backgroundUrl)
+        })();
+    },[jwt])
 
     /**
      * 获取壁纸请求
      */
     const reImages = async(bzType) => {
         const imgUrl = await reImagesUrl(bzType);
-        if (imgUrl){
-            localStorage.setItem('backgroundImages', imgUrl);
-            setImages(imgUrl);
-        }
+        if (imgUrl) setBgImage(imgUrl);
         else messageApi.info('获取壁纸出错');
+    }
+
+    /**  获取本地记录壁纸URL */
+    const getBgImage = () => backgroundImage || images
+
+    /** 保存壁纸URL到本地 */
+    const setBgImage = (backgroundUrl)=> {
+        localStorage.setItem('backgroundImages', backgroundUrl);
+        setImages(backgroundUrl);
     }
 
     /**
@@ -56,7 +70,7 @@ function Home() {
         setLoginLoading(true);
         const isLogin =await login(loginCaptcha,expireTime);
         setLoginLoading(false);
-        console.log(isLogin);
+
         if (isLogin) {
             setLoginCaptcha(undefined); // 验证码清空
             setModalIsOpen(false);      // 关闭弹出弹窗
@@ -72,7 +86,7 @@ function Home() {
                 height: '100vh',
                 backgroundSize: "cover",
                 backgroundRepeat: "no-repeat",
-                backgroundImage: `linear-gradient( rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.4)),url(${backgroundImage || images})`,
+                backgroundImage: `linear-gradient( rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.4)),url(${getBgImage()})`,
             }}
         >
             {/* 全局提示 */}
@@ -116,7 +130,7 @@ function Home() {
                         icon={<PictureTwoTone />}
                         className='buttonOpacity'
                     >
-                        {UserStore.jwt&&
+                        {jwt &&
                         (
                             <>
                                 {/* 上传壁纸到服务器 */}
@@ -124,7 +138,7 @@ function Home() {
                                     icon={<CloudUploadOutlined />}
                                     tooltip="上传壁纸到服务器"
                                     className='buttonOpacity'
-                                    onClick={()=>uploadInfo({backgroundUrl: backgroundImage || images})}
+                                    onClick={()=>uploadInfo({backgroundUrl: getBgImage()})}
                                 />
                                 {/*获取服务器壁纸 */}
                                 <FloatButton
@@ -132,11 +146,11 @@ function Home() {
                                     tooltip="获取服务器壁纸"
                                     className='buttonOpacity'
                                     onClick={async()=> {
-                                        const info = await getPageInfo()
-                                        if (info) {
-                                            localStorage.setItem('backgroundImages', info.backgroundUrl);
-                                            setImages(info.backgroundUrl);
-                                        }
+                                        const {backgroundUrl} = await getPageInfo()
+                                        if (backgroundUrl) {
+                                            setBgImage(backgroundUrl)   // 设置背景
+                                            messageApi.info('获取背景成功');
+                                        } else messageApi.error('您还没有上传过背景到服务器哦');
                                     }}
                                 />
                             </>
@@ -182,8 +196,7 @@ function Home() {
                                 <Button onClick={()=>reImages("动画")}>加载快速的动画壁纸</Button>
                                 <Button onClick={()=>reImages("随机")}>高清缓慢的随机壁纸</Button>
                                 <Input placeholder="自定义壁纸链接，回车加载" onPressEnter={event => {
-                                    localStorage.setItem('backgroundImages', event.target.value);
-                                    setImages(event.target.value)
+                                    setBgImage(event.target.value) // 设置背景
                                     messageApi.info('正在设置中...');
                                 }}/>
                                 </div> }
@@ -191,7 +204,7 @@ function Home() {
                         />
                     </FloatButton.Group>
 
-                    {UserStore.jwt?
+                    {jwt?
                         (
                             /*用户登录后选项*/
                             <FloatButton.Group
