@@ -196,7 +196,9 @@ function Home() {
                                 <Button onClick={()=>reImages("动画")}>加载快速的动画背景</Button>
                                 <Button onClick={()=>reImages("随机")}>高清缓慢的随机背景</Button>
                                 <Input placeholder="自定义背景链接，回车加载" onPressEnter={event => {
-                                    setBgImage(event.target.value,'正在设置中...') // 设置背景
+                                    if (/^(http|https):\/\/.+/.test(event.target.value))
+                                        setBgImage(event.target.value,'正在设置中...') // 设置背景
+                                    else messageApi.error('请输入正确的链接');
                                 }}/>
                                 </div> }
                             className='buttonOpacity'
