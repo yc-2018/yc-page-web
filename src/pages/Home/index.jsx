@@ -125,7 +125,7 @@ function Home() {
                                     icon={<CloudUploadOutlined />}
                                     tooltip="上传壁纸到服务器"
                                     className='buttonOpacity'
-                                    onClick={()=>uploadInfo({backgroundUrl: images})}
+                                    onClick={()=>uploadInfo({backgroundUrl: backgroundImage || images})}
                                 />
                                 {/*获取服务器壁纸 */}
                                 <FloatButton
