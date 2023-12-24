@@ -4,6 +4,16 @@ import UserStore from '../store/UserStore';
 import CommonStore from "../store/CommonStore";
 import myAxios  from "./myAxios";
 
+
+/** 异步获取百度联想列表 */
+export async function getThinkList(param) {
+    if (!param) return;
+    const {data} = await axios.get(`/bd/sugrec?ie=utf-&prod=pc&from=pc_web&wd=${param}`);
+
+    return data.g?.map(item => ({ value: item.q }));
+}
+
+
 /**
  * 获取首页背景图（搞多几个做备份）
  * @returns {Promise<null|string>} 随机壁纸URL
@@ -76,7 +86,6 @@ export async function getToDoItems(type=0, page=1,completed=0) {
     }
 }
 
-
 /** 保存或修改一个待办 */
 export async function saveOrUpdateToDoItem(body,requestType='post') {
     try {
@@ -99,6 +108,7 @@ export async function delToDoItem(id) {
     } catch (error) {console.error('待办请求失败:', error)}
 }
 
+
 /** 上传页面配置信息到云端 */
 export async function uploadInfo(Info) {
     CommonStore.setLoading(true,"开始上传");
@@ -109,7 +119,6 @@ export async function uploadInfo(Info) {
     } catch (error) {CommonStore.setLoading(false);}
 }
 
-
 /** 从云端获取页面配置信息 */
 export async function getPageInfo() {
     try {
@@ -118,10 +127,11 @@ export async function getPageInfo() {
     } catch (error) {return null}
 }
 
+
 /** 从云端获取搜索引擎列表 */
-export async function getSearchEngineList() {
+export async function getSearchEngineList(type=null) {
     try {
-        const {data:{data}} = await myAxios.get('/searchEngines/list');
+        const {data:{data}} = await myAxios.get(`/searchEngines/list${type?'?type='+type:''}`);
         return data;
     } catch (error) {return null}
 }

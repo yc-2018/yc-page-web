@@ -2,13 +2,13 @@ import { Segmented, Flex, Button } from 'antd'
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite'
 import { ThunderboltOutlined, PlusOutlined } from '@ant-design/icons';
+
 import MySearch from '../../../compontets/MySearch';
+import {getSearchEngineList} from "../../../request/homeRequest";
 import searchStore from '../../../store/SearchEnginesStore';
 import {searchData} from '../../../store/NoLoginData';
-
-import "./Search.css"
 import UserStore from "../../../store/UserStore";
-import {getSearchEngineList} from "../../../request/homeRequest";
+import "./Search.css"
 
 
 function Search() {
@@ -29,6 +29,10 @@ function Search() {
             if (searchEngineList) {
                 setSearchOptions(searchEngineList.filter(item => item.isQuickSearch === 0))
                 setQuickSearch(searchEngineList.filter(item => item.isQuickSearch === 1))
+
+                // 如果仓库的搜索引擎不在当前列表，就设置为当前列表的第一个搜索引擎
+                if(searchEngineList.filter(item => item.name === searchStore.searchEngines).length===0)
+                    searchStore.setSearchEngines(searchOptions[0].name)
             }
         })()
 
@@ -36,8 +40,8 @@ function Search() {
     
 
     // 点击搜索按钮 或回车触发的事件
-    const onSearch = (value, _e) => {
-        //todo 通过搜索引擎名字找到他对应的URL=》这就要求名字在一个用户中是唯一的 想想怎么改成id
+    const onSearch = () => {
+        // 通过搜索引擎名字找到他对应的URL=》这就要求名字在一个用户中是唯一的
         const engineUrl = searchOptions.find(option => option.name === searchStore.searchEngines).engineUrl;
         window.open(engineUrl.replace('@@@', searchValue), '_blank');
     }
@@ -65,7 +69,7 @@ function Search() {
             <br />
             {/*快速搜索*/}
             <Flex style={{ margin: "5px 80px" }} wrap="wrap" gap="small" justify='center'>
-                {quickSearch.map((item) => (
+                {quickSearch.map(item =>
                     <Button
                         className={"searchButton"}
                         key={item.id}
@@ -74,7 +78,7 @@ function Search() {
                     >
                         {item.name}
                     </Button>
-                ))}
+                )}
                 {
                     /*登录后显示添加快速搜索按钮*/
                     UserStore.jwt&&
