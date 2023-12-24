@@ -40,7 +40,8 @@ export async function reImagesUrl(bzType="风景") {
     }
 }
 
-// 登录
+
+/** 登录 */
 export async function login(loginCode,expireTime='bt') {
     try {
         const response = await axios.post(`/api/users/login?key=${loginCode}&expireTime=${expireTime}`);
@@ -63,7 +64,8 @@ export async function login(loginCode,expireTime='bt') {
     }
 }
 
-// 获取一个类型的待办列表
+
+/** 获取一个类型的待办列表 */
 export async function getToDoItems(type=0, page=1,completed=0) {
     try {
         const response = await myAxios.get(`/toDoItems/${type}?page=${page}&completed=${completed}`);
@@ -75,8 +77,7 @@ export async function getToDoItems(type=0, page=1,completed=0) {
 }
 
 
-
-// 保存或修改一个待办
+/** 保存或修改一个待办 */
 export async function saveOrUpdateToDoItem(body,requestType='post') {
     try {
         const response = await myAxios({url: '/toDoItems',method: requestType, data : body});
@@ -87,7 +88,7 @@ export async function saveOrUpdateToDoItem(body,requestType='post') {
     } catch (error) {console.error('待办请求失败:', error)}
 }
 
-// 删除一个待办
+/** 删除一个待办 */
 export async function delToDoItem(id) {
     try {
         const response = await myAxios.delete(`/toDoItems/${id}`);
@@ -104,17 +105,48 @@ export async function uploadInfo(Info) {
     try {
         const {data:{data}} = await myAxios({url: '/pageParameters',method: 'put', data : Info});
 
-        data._code || CommonStore.setLoading(false,"上传成功",'success');
+        data._ || CommonStore.setLoading(false,"上传成功",'success');
     } catch (error) {CommonStore.setLoading(false);}
 }
 
 
 /** 从云端获取页面配置信息 */
 export async function getPageInfo() {
-    CommonStore.setLoading(true);
     try {
         const {data:{data}} = await myAxios.get('/pageParameters');
-        CommonStore.setLoading(false);
         return data;
-    } catch (error) {CommonStore.setLoading(false);}
+    } catch (error) {return null}
+}
+
+/** 从云端获取搜索引擎列表 */
+export async function getSearchEngineList() {
+    try {
+        const {data:{data}} = await myAxios.get('/searchEngines/list');
+        return data;
+    } catch (error) {return null}
+}
+
+/** 添加搜索引擎 */
+export async function addSearchEngine(body) {
+    CommonStore.setLoading(true);
+    try {
+        const {data:{data}} = await myAxios({url:'/searchEngines',method: 'post', data : body});
+        data._ || CommonStore.setLoading(false,"添加成功",'success');
+        return data;
+    } catch (error) {CommonStore.setLoading(false)}
+}
+
+/** 修改搜索引擎 */
+export async function updateSearchEngine(bodyList) {
+    CommonStore.setLoading(true);
+    try {
+        const {data:{data}} = await myAxios({url:'/searchEngines',method: 'put', data : bodyList});
+        // 如果data字符串中全部的true就是成功 有true有false就是部分成功  只有false就是失败
+        if (data.indexOf('true') === -1) {
+            CommonStore.setLoading(false,"部分修改成功",'error');
+            return false;
+        }
+        data._ || CommonStore.setLoading(false,"修改成功",'success');
+        return data;
+    } catch (error) {CommonStore.setLoading(false)}
 }

@@ -15,7 +15,7 @@ import Search from './Search';
 import showOrNot from '../../store/ShowOrNot';
 import EnglishDrawer from "./EnglishDrawer";
 import MemoDrawer from "./MemoDrawer";
-import {reImagesUrl, login, uploadInfo,getPageInfo} from "../../request/homeRequest";
+import {reImagesUrl, login, uploadInfo, getPageInfo} from "../../request/homeRequest";
 import UserStore from "../../store/UserStore";
 import JWTUtils from  "../../utils/JWTUtils"
 import CommonStore from "../../store/CommonStore";
@@ -35,8 +35,10 @@ function Home() {
 
     useEffect(() => {
         if(jwt)(async()=> {
+            // 获取云端保存的页面信息
             const info = await getPageInfo()
-            if (info?.backgroundUrl) setBgImage(info.backgroundUrl)
+            if (info?.backgroundUrl) setBgImage(info.backgroundUrl);
+
         })();
     },[jwt])
 
@@ -56,7 +58,7 @@ function Home() {
     const setBgImage = (backgroundUrl,msg=null)=> {
         localStorage.setItem('backgroundImages', backgroundUrl);
         setImages(backgroundUrl);
-        if(msg) messageApi.info(msg);
+        return msg && messageApi.info(msg);
     }
 
     /**
