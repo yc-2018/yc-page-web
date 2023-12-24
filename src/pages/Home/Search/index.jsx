@@ -112,10 +112,9 @@ function Search() {
                             form.resetFields();
                             if(modalType===0) setSearchOptions([...searchOptions,aSearch])
                             else setQuickSearch([...quickSearch,aSearch])
-
                         })
-                        .catch((info) => {
-                            console.log('Validate Failed:', info);
+                        .catch(() => {
+                            setModalLoading(false)
                         });
                 }}
                 confirmLoading={modalLoading}
