@@ -77,7 +77,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
             );
 
             // 使用 axios 发起请求
-            const {data:respData} = await getToDoItems(0, page + 1,completed);
+            const {data:respData} = await getToDoItems(type, page + 1,completed);
             // 结合旧数据和新数据
             const newData = data.concat(respData.records);
             setData(newData);
