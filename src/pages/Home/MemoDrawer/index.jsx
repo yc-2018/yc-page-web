@@ -254,12 +254,13 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                                 {item.content}
                                                 <br/>
 
+                                                {item.itemType === 1?
+                                                    <Badge count={item.numberOfRecurrences} style={{backgroundColor: '#52c41a'}} >
+                                                        <a data-action="addOne">循环+1</a>
+                                                    </Badge> :null}
                                                 <a data-action="finish">{item.completed? '取消': null}完成</a>
                                                 {item.completed? null: <a data-action="edit">编辑</a> /*完成了就不要显示编辑了*/}
                                                 <a data-action="delete">删除</a>
-                                                {item.itemType === 1? <Badge count={item.numberOfRecurrences} style={{backgroundColor: '#52c41a',}} >
-                                                    <a data-action="addOne">循环+1</a>
-                                                </Badge> :null}
 
                                                 <div style={{fontSize: 10}}>
                                                     创建于:{item?.createTime?.replace('T', ' ')}
