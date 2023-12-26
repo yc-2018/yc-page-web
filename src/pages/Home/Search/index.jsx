@@ -67,7 +67,17 @@ function Search() {
             message.info('菜单长度超过10个字符或者有换行符，请重新选择');
             return;
         }
-        message.info(`Click on item ${key}`);
+        Modal.confirm({
+            title: 'This is a warning message',
+            content: 'some messages...some messages...',
+            onOk() {
+                message.info(`000000000Click on item ${key}`);
+            },
+            onCancel() {
+                message.info('1111111111Click on cancel');
+            },
+        })
+
     };
 
     // 右键时的动作
