@@ -17,9 +17,9 @@ const DELETE = '1'
 function Search() {
     const setSearchValue = value => setSearchVal(value)            // 输入框的值改变的回调(直接传setSearchVal给子组件会报错：Rendered more hooks than during the previous render.)
     const [searchValue, setSearchVal] = useState();     // 搜索框的值
-    const [openModal, setOpenModal] = useState(false);         // 添加搜索引擎的对话框是否显示
-    const [modalLoading, setModalLoading] = useState(false);  // 添加时的网络延迟动画
-    const [modalType, setModalType] = useState(0);           // 添加时的搜索引擎类型类型
+    const [modalLoading, setModalLoading] = useState(false);   // 添加时的网络延迟动画
+    const [modalType, setModalType] = useState(0);            // 添加时的搜索引擎类型类型
+    const [editSearchData, setEditSearchData] = useState(undefined); // 要修改的搜索引擎对象—》增改对话框是否显示
     const [searchOptions, setSearchOptions] = useState(searchData.filter(item => item.isQuickSearch === 0));    // 搜索引擎列表
     const [quickSearch, setQuickSearch] = useState(searchData.filter(item => item.isQuickSearch === 1));        // 快速搜索列表
     const [rightClickMenu, setRightClickMenu] = useState('');   // 右键菜单选中搞哪种搜索引擎
@@ -48,7 +48,10 @@ function Search() {
 
     }, [UserStore.jwt])
 
-    
+    // 每次修改表达的值都要重置表单 才能获取最新的初始值  因为异步的原因还要手动延迟一下
+    useEffect(()=> {
+        setTimeout(() => form.resetFields(), 100)
+    },[editSearchData])
 
     // 点击搜索按钮 或回车触发的事件
     const onSearch = () => {
@@ -60,7 +63,7 @@ function Search() {
 
     // 添加搜索引擎
     const addSearch = type => {
-        setOpenModal(true)
+        setEditSearchData({})
         setModalType(type)
     }
 
@@ -85,7 +88,8 @@ function Search() {
                     }
                 }
             })
-        else return  message.info(`编辑${rightClickName}`);
+        else  // 点击的是编辑
+            setEditSearchData(rightClickMenu === SEARCH_OPTION ? searchOptions.find(option => option.name === rightClickName) : quickSearch.find(option => option.name === rightClickName))
 
     };
 
@@ -103,6 +107,29 @@ function Search() {
         }else
             setRightClickMenu(QUICK_SEARCH)         // 右键菜单选中BUTTON或SPAN->快速搜索
         setRightClickName(e.target.innerText)
+    }
+
+
+    // 提交表单方法
+    const modalOnOk = () => {
+        form.validateFields()
+            .then(async values => {
+                if(modalType === 0 && searchOptions.filter(item => item.name === values.name).length!==0)
+                    return message.error("普通搜索引擎名称不允许有相同的")
+                if(modalType === 1 && quickSearch.filter(item => item.name === values.name).length!==0)
+                    return message.error("快速搜索引擎名称不允许有相同的")
+                setModalLoading(true)
+                const aSearch = {...values,isQuickSearch:modalType};
+                const response = await addSearchEngine(aSearch)
+                setModalLoading(false)
+                if (response) {
+                    setEditSearchData(undefined)
+                    // 不从云获取了直接在本地添加算了
+                    if (modalType === 0) setSearchOptions([...searchOptions, {...aSearch,id:response}])
+                    else setQuickSearch([...quickSearch, {...aSearch,id:response}])
+                }
+            })
+            .catch(() => setModalLoading(false));
     }
 
     return (
@@ -151,53 +178,34 @@ function Search() {
 
             <Modal
                 title={`添加${modalType?"快速":''}搜索引擎`}
-                open={openModal}
-                onOk={() => {
-                    form.validateFields()
-                        .then(async values => {
-                            if(modalType === 0 && searchOptions.filter(item => item.name === values.name).length!==0)
-                               return message.error("普通搜索引擎名称不允许有相同的")
-                            if(modalType === 1 && quickSearch.filter(item => item.name === values.name).length!==0)
-                                return message.error("快速搜索引擎名称不允许有相同的")
-                            setModalLoading(true)
-                            const aSearch = {...values,isQuickSearch:modalType};
-                            const response = await addSearchEngine(aSearch)
-                            setModalLoading(false)
-                            if (response) {
-                                setOpenModal(false)
-                                form.resetFields();
-                                // 不从云获取了直接在本地添加算了
-                                if (modalType === 0) setSearchOptions([...searchOptions, {...aSearch,id:response}])
-                                else setQuickSearch([...quickSearch, {...aSearch,id:response}])
-                            }
-                        })
-                        .catch(() => setModalLoading(false));
-                }}
+                open={!!editSearchData}    /*新增打开 或 编辑打开*/
+                onOk={modalOnOk}
                 confirmLoading={modalLoading}
-                onCancel={()=>setOpenModal(false)}
+                onCancel={()=>editSearchData?setEditSearchData(undefined): setEditSearchData({})}
             >
-                <Alert
-                    description={<>提示 添加搜索引擎时用@@@替代你要搜索的内容哦，比如百度的： <Divider style={{color:'blue'}}>https://www.baidu.com/s?wd=@@@</Divider></>}
+                {!!editSearchData && <Alert
+                    description={<>提示 添加搜索引擎时用@@@替代你要搜索的内容哦，比如百度的： <Divider
+                        style={{color: 'blue'}}>https://www.baidu.com/s?wd=@@@</Divider></>}
                     type="success"
-                />
+                />}
                 <br/>
                 <Form
                     form={form}
                     labelCol={{span: 6}}
                     wrapperCol={{span: 16}}
                     style={{maxWidth: 600}}
+                    initialValues={{
+                        'name':editSearchData?.name,
+                        'engineUrl':editSearchData?.engineUrl
+                    }}
                 >
-                    <Form.Item
-                        label="引擎名称"
-                        name="name"
+                    <Form.Item label="引擎名称" name="name"
                         rules={[{required: true, message: '请输入引擎名字'},{max: 10, message: '引擎名称不能超过10个字符'}]}
                     >
                         <Input />
                     </Form.Item>
 
-                    <Form.Item
-                        label="引擎URL"
-                        name="engineUrl"
+                    <Form.Item label="引擎URL" name="engineUrl"
                         rules={[
                             {required: true, message: '请输入引擎URL'},
                             {max: 100, message: '引擎URL不能超过100个字符'},
