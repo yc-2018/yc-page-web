@@ -1,4 +1,4 @@
-import {Segmented, Flex, Button, Modal, Form, Input, message} from 'antd'
+import {Segmented, Flex, Button, Modal, Form, Input, message, Alert, Divider} from 'antd'
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite'
 import { ThunderboltOutlined, PlusOutlined } from '@ant-design/icons';
@@ -106,20 +106,26 @@ function Search() {
                                return message.error("普通搜索引擎名称不允许有相同的")
                             setModalLoading(true)
                             const aSearch = {...values,isQuickSearch:modalType};
-                            await addSearchEngine(aSearch)
+                            const response = await addSearchEngine(aSearch)
                             setModalLoading(false)
-                            setOpenModal(false)
-                            form.resetFields();
-                            if(modalType===0) setSearchOptions([...searchOptions,aSearch])
-                            else setQuickSearch([...quickSearch,aSearch])
+                            if (response) {
+                                setOpenModal(false)
+                                form.resetFields();
+                                // 不从云获取了直接在本地添加算了
+                                if (modalType === 0) setSearchOptions([...searchOptions, aSearch])
+                                else setQuickSearch([...quickSearch, aSearch])
+                            }
                         })
-                        .catch(() => {
-                            setModalLoading(false)
-                        });
+                        .catch(() => setModalLoading(false));
                 }}
                 confirmLoading={modalLoading}
                 onCancel={()=>setOpenModal(false)}
             >
+                <Alert
+                    description={<>提示 添加搜索引擎时用@@@替代你要搜索的内容哦，比如百度的： <Divider style={{color:'blue'}}>https://www.baidu.com/s?wd=@@@</Divider></>}
+                    type="success"
+                />
+                <br/>
                 <Form
                     form={form}
                     labelCol={{span: 6}}
