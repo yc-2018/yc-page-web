@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite'
 import { ThunderboltOutlined, PlusOutlined } from '@ant-design/icons';
 
 import MySearch from '../../../compontets/MySearch';
-import {addSearchEngine, getSearchEngineList} from "../../../request/homeRequest";
+import {addSearchEngine, deleteSearchEngine, getSearchEngineList} from "../../../request/homeRequest";
 import searchStore from '../../../store/SearchEnginesStore';
 import {searchData} from '../../../store/NoLoginData';
 import UserStore from "../../../store/UserStore";
@@ -12,6 +12,9 @@ import "./Search.css"
 
 const SEARCH_OPTION= 'searchOption'
 const QUICK_SEARCH = 'quickSearch'
+const EDIT = '0'
+const DELETE = '1'
+let init = true
 function Search() {
     const setSearchValue = value => setSearchVal(value)            // 输入框的值改变的回调(直接传setSearchVal给子组件会报错：Rendered more hooks than during the previous render.)
     const [searchValue, setSearchVal] = useState();     // 搜索框的值
@@ -25,7 +28,8 @@ function Search() {
  // const [searchEngines, setSearchEngines] = useState("Bing");  //放mobx去了
 
     const [form] = Form.useForm();      // 创建一个表单域
-    const items = [{label: '编辑', key: '1'}, {label: '删除', key: '2'}];
+    const [modal, contextHolder] = Modal.useModal();
+    const items = [{label: '编辑', key: EDIT}, {label: '删除', key: DELETE}];
 
     useEffect(() => {
 
@@ -44,6 +48,14 @@ function Search() {
         })()
 
     }, [UserStore.jwt])
+
+    useEffect(() => {
+        if (init) return;
+
+        console.log("不执行")
+
+
+    }, [searchOptions])
     
 
     // 点击搜索按钮 或回车触发的事件
@@ -62,21 +74,26 @@ function Search() {
 
     // 菜单右键后点击事件
     const onClick = ({ key }) => {
-        //todo 长度超过10或者有换行的就提示菜单
-        if (key.length > 10 || key.includes('\n')) {
-            message.info('菜单长度超过10个字符或者有换行符，请重新选择');
-            return;
-        }
-        Modal.confirm({
-            title: 'This is a warning message',
-            content: 'some messages...some messages...',
-            onOk() {
-                message.info(`000000000Click on item ${key}`);
-            },
-            onCancel() {
-                message.info('1111111111Click on cancel');
-            },
-        })
+        // 长度超过10或者有换行的就小细节
+        if (rightClickName.length > 10 || rightClickName.includes('\n'))
+            return message.info('这么细的边都被你点到了，哈哈哈，往里面点点看');
+
+        if (key === DELETE)
+            modal.confirm({
+                title: `确定删除 ${rightClickName} 吗?`,
+                content: `${rightClickMenu===SEARCH_OPTION?'搜索引擎':'快速搜索'}删除了就找不回来了...`,
+                async onOk() {
+                    if (rightClickMenu === SEARCH_OPTION) {
+                        const res = await deleteSearchEngine([searchOptions.find(option => option.name === rightClickName).id])
+                        return res && setSearchOptions(searchOptions.filter(option => option.name!== rightClickName))
+                    }
+                    else {
+                        const res = await deleteSearchEngine([quickSearch.find(option=>option.name===rightClickName).id])
+                        return res && setQuickSearch(quickSearch.filter(option=>option.name!==rightClickName))
+                    }
+                }
+            })
+        else return  message.info(`编辑${rightClickName}`);
 
     };
 
@@ -91,8 +108,8 @@ function Search() {
             e.target = e.target.parentElement.parentElement;
         if (e.target.tagName ==='DIV') {
             setRightClickMenu(SEARCH_OPTION)
-        }
-        setRightClickMenu(QUICK_SEARCH)         // 右键菜单选中BUTTON或SPAN->快速搜索
+        }else
+            setRightClickMenu(QUICK_SEARCH)         // 右键菜单选中BUTTON或SPAN->快速搜索
         setRightClickName(e.target.innerText)
     }
 
@@ -200,6 +217,7 @@ function Search() {
                     </Form.Item>
                 </Form>
             </Modal>
+            {contextHolder}
         </>
     )
 }
