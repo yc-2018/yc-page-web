@@ -57,12 +57,15 @@ function Search() {
         setModalType(type)
     }
 
-
+    // 菜单右键后点击事件
+    const onClick = ({ key }) => {
+        message.info(`Click on item ${key}`);
+    };
 
     return (
         <>
             {/* 选择搜索引擎 */}
-            <Dropdown menu={{items}} trigger={['contextMenu']} >
+            <Dropdown menu={{items,onClick}} trigger={['contextMenu']} >
                 <Segmented
                     options={searchOptions.map(option => option.name)}
                     value={searchStore.searchEngines}
@@ -83,7 +86,7 @@ function Search() {
             {/*快速搜索*/}
             <Flex style={{ margin: "5px 80px" }} wrap="wrap" gap="small" justify='center'>
                 {quickSearch.map(item =>
-                    <Dropdown menu={{items}} trigger={['contextMenu']} >
+                    <Dropdown menu={{items,onClick}} trigger={['contextMenu']} >
                         <Button
                             className={"searchButton"}
                             key={item.id}
