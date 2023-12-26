@@ -14,7 +14,6 @@ const SEARCH_OPTION= 'searchOption'
 const QUICK_SEARCH = 'quickSearch'
 const EDIT = '0'
 const DELETE = '1'
-let init = true
 function Search() {
     const setSearchValue = value => setSearchVal(value)            // 输入框的值改变的回调(直接传setSearchVal给子组件会报错：Rendered more hooks than during the previous render.)
     const [searchValue, setSearchVal] = useState();     // 搜索框的值
@@ -49,13 +48,6 @@ function Search() {
 
     }, [UserStore.jwt])
 
-    useEffect(() => {
-        if (init) return;
-
-        console.log("不执行")
-
-
-    }, [searchOptions])
     
 
     // 点击搜索按钮 或回车触发的事件
@@ -138,10 +130,9 @@ function Search() {
             {/*快速搜索*/}
             <Flex style={{ margin: "5px 80px" }} wrap="wrap" gap="small" justify='center'>
                 {quickSearch.map(item =>
-                    <Dropdown menu={{items,onClick}} trigger={['contextMenu']} onContextMenu={onContextMenu}>
+                    <Dropdown menu={{items,onClick}} trigger={['contextMenu']} onContextMenu={onContextMenu} key={item.id}>
                         <Button
                             className={"searchButton"}
-                            key={item.id}
                             onClick={() => window.open(item.engineUrl.replace('@@@', searchValue), '_blank')}
                             icon={<ThunderboltOutlined />}
                         >
@@ -176,8 +167,8 @@ function Search() {
                                 setOpenModal(false)
                                 form.resetFields();
                                 // 不从云获取了直接在本地添加算了
-                                if (modalType === 0) setSearchOptions([...searchOptions, aSearch])
-                                else setQuickSearch([...quickSearch, aSearch])
+                                if (modalType === 0) setSearchOptions([...searchOptions, {...aSearch,id:response}])
+                                else setQuickSearch([...quickSearch, {...aSearch,id:response}])
                             }
                         })
                         .catch(() => setModalLoading(false));
