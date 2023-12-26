@@ -177,13 +177,13 @@ function Search() {
 
 
             <Modal
-                title={`添加${modalType?"快速":''}搜索引擎`}
+                title={editSearchData?.isQuickSearch===undefined?`${modalType?'添加快速搜索引擎':'添加搜索引擎'}`:editSearchData?.isQuickSearch===1?'修改快速搜索引擎':'修改搜索引擎'}
                 open={!!editSearchData}    /*新增打开 或 编辑打开*/
                 onOk={modalOnOk}
                 confirmLoading={modalLoading}
                 onCancel={()=>editSearchData?setEditSearchData(undefined): setEditSearchData({})}
             >
-                {!!editSearchData && <Alert
+                {!editSearchData?.id && <Alert
                     description={<>提示 添加搜索引擎时用@@@替代你要搜索的内容哦，比如百度的： <Divider
                         style={{color: 'blue'}}>https://www.baidu.com/s?wd=@@@</Divider></>}
                     type="success"
