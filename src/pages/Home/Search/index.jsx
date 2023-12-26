@@ -10,7 +10,8 @@ import {searchData} from '../../../store/NoLoginData';
 import UserStore from "../../../store/UserStore";
 import "./Search.css"
 
-
+const SEARCH_OPTION= 'searchOption'
+const QUICK_SEARCH = 'quickSearch'
 function Search() {
     const setSearchValue = value => setSearchVal(value)            // 输入框的值改变的回调(直接传setSearchVal给子组件会报错：Rendered more hooks than during the previous render.)
     const [searchValue, setSearchVal] = useState();     // 搜索框的值
@@ -19,6 +20,8 @@ function Search() {
     const [modalType, setModalType] = useState(0);           // 添加时的搜索引擎类型类型
     const [searchOptions, setSearchOptions] = useState(searchData.filter(item => item.isQuickSearch === 0));    // 搜索引擎列表
     const [quickSearch, setQuickSearch] = useState(searchData.filter(item => item.isQuickSearch === 1));        // 快速搜索列表
+    const [rightClickMenu, setRightClickMenu] = useState('');   // 右键菜单选中搞哪种搜索引擎
+    const [rightClickName, setRightClickName] = useState('');   // 右键菜单选中的搜索引擎名字
  // const [searchEngines, setSearchEngines] = useState("Bing");  //放mobx去了
 
     const [form] = Form.useForm();      // 创建一个表单域
@@ -51,7 +54,7 @@ function Search() {
     }
 
 
-    // 推荐搜索引擎
+    // 添加搜索引擎
     const addSearch = type => {
         setOpenModal(true)
         setModalType(type)
@@ -59,8 +62,29 @@ function Search() {
 
     // 菜单右键后点击事件
     const onClick = ({ key }) => {
+        //todo 长度超过10或者有换行的就提示菜单
+        if (key.length > 10 || key.includes('\n')) {
+            message.info('菜单长度超过10个字符或者有换行符，请重新选择');
+            return;
+        }
         message.info(`Click on item ${key}`);
     };
+
+    // 右键时的动作
+    const onContextMenu = (e) => {
+        e.preventDefault();  // 阻止浏览器的右键菜单
+        if (e.target.tagName === 'path')
+            e.target = e.target.parentElement;
+        if (e.target.tagName === 'svg')
+            e.target = e.target.parentElement;
+        if (e.target.innerText ==='')
+            e.target = e.target.parentElement.parentElement;
+        if (e.target.tagName ==='DIV') {
+            setRightClickMenu(SEARCH_OPTION)
+        }
+        setRightClickMenu(QUICK_SEARCH)         // 右键菜单选中BUTTON或SPAN->快速搜索
+        setRightClickName(e.target.innerText)
+    }
 
     return (
         <>
@@ -70,6 +94,7 @@ function Search() {
                     options={searchOptions.map(option => option.name)}
                     value={searchStore.searchEngines}
                     onChange={(value) => searchStore.setSearchEngines(value)}
+                    onContextMenu={onContextMenu}
                 />
             </Dropdown>
             {
@@ -86,7 +111,7 @@ function Search() {
             {/*快速搜索*/}
             <Flex style={{ margin: "5px 80px" }} wrap="wrap" gap="small" justify='center'>
                 {quickSearch.map(item =>
-                    <Dropdown menu={{items,onClick}} trigger={['contextMenu']} >
+                    <Dropdown menu={{items,onClick}} trigger={['contextMenu']} onContextMenu={onContextMenu}>
                         <Button
                             className={"searchButton"}
                             key={item.id}
@@ -114,6 +139,8 @@ function Search() {
                         .then(async values => {
                             if(modalType === 0 && searchOptions.filter(item => item.name === values.name).length!==0)
                                return message.error("普通搜索引擎名称不允许有相同的")
+                            if(modalType === 1 && quickSearch.filter(item => item.name === values.name).length!==0)
+                                return message.error("快速搜索引擎名称不允许有相同的")
                             setModalLoading(true)
                             const aSearch = {...values,isQuickSearch:modalType};
                             const response = await addSearchEngine(aSearch)
@@ -145,7 +172,7 @@ function Search() {
                     <Form.Item
                         label="引擎名称"
                         name="name"
-                        rules={[{required: true, message: '请输入引擎名字'}]}
+                        rules={[{required: true, message: '请输入引擎名字'},{max: 10, message: '引擎名称不能超过10个字符'}]}
                     >
                         <Input />
                     </Form.Item>
@@ -155,6 +182,7 @@ function Search() {
                         name="engineUrl"
                         rules={[
                             {required: true, message: '请输入引擎URL'},
+                            {max: 100, message: '引擎URL不能超过100个字符'},
                             {pattern: /^(http|https):\/\/.*@@@.*$/, message: 'URL必须以 http:// 或 https:// 开头，并且包含 "@@@"'}
                         ]}
                     >
