@@ -1,4 +1,4 @@
-import {Segmented, Flex, Button, Modal, Form, Input, message, Alert, Divider} from 'antd'
+import {Segmented, Flex, Button, Modal, Form, Input, message, Alert, Divider, Dropdown} from 'antd'
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite'
 import { ThunderboltOutlined, PlusOutlined } from '@ant-design/icons';
@@ -21,7 +21,8 @@ function Search() {
     const [quickSearch, setQuickSearch] = useState(searchData.filter(item => item.isQuickSearch === 1));        // 快速搜索列表
  // const [searchEngines, setSearchEngines] = useState("Bing");  //放mobx去了
 
-    const [form] = Form.useForm();
+    const [form] = Form.useForm();      // 创建一个表单域
+    const items = [{label: '编辑', key: '1'}, {label: '删除', key: '2'}];
 
     useEffect(() => {
 
@@ -61,11 +62,13 @@ function Search() {
     return (
         <>
             {/* 选择搜索引擎 */}
-            <Segmented
-                options={searchOptions.map(option => option.name)}
-                value={searchStore.searchEngines}
-                onChange={(value) => searchStore.setSearchEngines(value)}
-            />
+            <Dropdown menu={{items}} trigger={['contextMenu']} >
+                <Segmented
+                    options={searchOptions.map(option => option.name)}
+                    value={searchStore.searchEngines}
+                    onChange={(value) => searchStore.setSearchEngines(value)}
+                />
+            </Dropdown>
             {
                 /* 登录显示添加搜索引擎 */
                 UserStore.jwt&&
@@ -80,14 +83,16 @@ function Search() {
             {/*快速搜索*/}
             <Flex style={{ margin: "5px 80px" }} wrap="wrap" gap="small" justify='center'>
                 {quickSearch.map(item =>
-                    <Button
-                        className={"searchButton"}
-                        key={item.id}
-                        onClick={() => window.open(item.engineUrl.replace('@@@', searchValue), '_blank')}
-                        icon={<ThunderboltOutlined />}
-                    >
-                        {item.name}
-                    </Button>
+                    <Dropdown menu={{items}} trigger={['contextMenu']} >
+                        <Button
+                            className={"searchButton"}
+                            key={item.id}
+                            onClick={() => window.open(item.engineUrl.replace('@@@', searchValue), '_blank')}
+                            icon={<ThunderboltOutlined />}
+                        >
+                            {item.name}
+                        </Button>
+                    </Dropdown>
                 )}
                 {
                     /*登录后显示添加快速搜索按钮*/
@@ -95,6 +100,8 @@ function Search() {
                     <Button icon={<PlusOutlined />} className={"addButton"} onClick={()=>addSearch(1)}/>
                 }
             </Flex>
+
+
 
             <Modal
                 title={`添加${modalType?"快速":''}搜索引擎`}
