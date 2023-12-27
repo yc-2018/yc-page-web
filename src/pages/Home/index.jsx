@@ -274,6 +274,7 @@ function Home() {
             </div>
             {/* 登录弹窗 */}
             <Modal
+                zIndex={1001}
                 open={modalIsOpen}
                 onCancel={() => setModalIsOpen(false)}
                 footer={<></>}
