@@ -224,6 +224,7 @@ function Home() {
                                     className='buttonOpacity'
                                     onClick={() => {
                                         UserStore.clearJwt()
+                                        window.location.reload();
                                     }}
                                 />
                                 <FloatButton
