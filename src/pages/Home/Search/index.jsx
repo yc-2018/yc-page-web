@@ -55,7 +55,8 @@ function Search() {
 
     // 每次修改表达的值都要重置表单 才能获取最新的初始值  因为异步的原因还要手动延迟一下
     useEffect(()=> {
-        setTimeout(() => form.resetFields(), 100)
+        if (editSearchData!==undefined)
+            setTimeout(() => form.resetFields(), 100)
     },[editSearchData])
 
     // 点击搜索按钮 或回车触发的事件
@@ -85,7 +86,12 @@ function Search() {
                 async onOk() {
                     if (rightClickMenu === SEARCH_OPTION) {
                         const res = await deleteSearchEngine([searchOptions.find(option => option.name === rightClickName).id])
-                        return res && setSearchOptions(searchOptions.filter(option => option.name!== rightClickName))
+                        if (res) {
+                            setSearchOptions(searchOptions.filter(option => option.name !== rightClickName))
+                            // 如果被删除的是选中的搜索引擎，就设置为当前列表的第一个搜索引擎
+                            if(rightClickName === searchStore.searchEngines)
+                                searchStore.setSearchEngines(searchOptions[0].name === rightClickName?searchOptions[1].name:searchOptions[0].name)
+                        }
                     }
                     else {
                         const res = await deleteSearchEngine([quickSearch.find(option=>option.name===rightClickName).id])
