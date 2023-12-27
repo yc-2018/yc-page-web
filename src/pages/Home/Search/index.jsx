@@ -28,7 +28,7 @@ function Search() {
 
     const [form] = Form.useForm();      // 创建一个表单域
     const [modal, contextHolder] = Modal.useModal();
-    const items = [{label: '编辑', key: EDIT}, {label: '删除', key: DELETE}];
+    const items = UserStore.jwt? [{label: '编辑', key: EDIT}, {label: '删除', key: DELETE}]: [{label: '登录后可以删除/编辑', key: 'login',disabled: true}]
 
     useEffect(() => {
 
