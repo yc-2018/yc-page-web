@@ -3,8 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite'
 import { ThunderboltOutlined, PlusOutlined } from '@ant-design/icons';
 
+import {
+    addSearchEngine,
+    deleteSearchEngine,
+    getSearchEngineList,
+    updateSearchEngine
+} from "../../../request/homeRequest";
 import MySearch from '../../../compontets/MySearch';
-import {addSearchEngine, deleteSearchEngine, getSearchEngineList} from "../../../request/homeRequest";
 import searchStore from '../../../store/SearchEnginesStore';
 import {searchData} from '../../../store/NoLoginData';
 import UserStore from "../../../store/UserStore";
@@ -114,19 +119,26 @@ function Search() {
     const modalOnOk = () => {
         form.validateFields()
             .then(async values => {
-                if(modalType === 0 && searchOptions.filter(item => item.name === values.name).length!==0)
+                // 普通搜索引擎不能有相同的名字 但是修改搜索引擎可以就是本来的名字
+                if(modalType === 0 && searchOptions.filter(item => item.name === values.name).length!==0 && values.name !== editSearchData?.name)
                     return message.error("普通搜索引擎名称不允许有相同的")
-                if(modalType === 1 && quickSearch.filter(item => item.name === values.name).length!==0)
+                if(modalType === 1 && quickSearch.filter(item => item.name === values.name).length!==0 && values.name !== editSearchData?.name)
                     return message.error("快速搜索引擎名称不允许有相同的")
+
                 setModalLoading(true)
-                const aSearch = {...values,isQuickSearch:modalType};
-                const response = await addSearchEngine(aSearch)
+                const aSearch = editSearchData?.id? [{...editSearchData, ...values}] : {...values, isQuickSearch:modalType};   // 编辑 还是 添加
+                const response = editSearchData?.id? await updateSearchEngine(aSearch) : await addSearchEngine(aSearch)
                 setModalLoading(false)
                 if (response) {
-                    setEditSearchData(undefined)
                     // 不从云获取了直接在本地添加算了
-                    if (modalType === 0) setSearchOptions([...searchOptions, {...aSearch,id:response}])
-                    else setQuickSearch([...quickSearch, {...aSearch,id:response}])
+                    if(editSearchData?.id)
+                        if (editSearchData.isQuickSearch === 0) setSearchOptions(updateList(...aSearch,searchOptions))
+                        else setQuickSearch(updateList(...aSearch,quickSearch))
+                    else
+                        if (modalType === 0) setSearchOptions([...searchOptions, {...aSearch,id:response}])
+                        else setQuickSearch([...quickSearch, {...aSearch,id:response}])
+
+                    setEditSearchData(undefined)  // 关闭模态框
                 }
             })
             .catch(() => setModalLoading(false));
@@ -221,3 +233,12 @@ function Search() {
     )
 }
 export default observer(Search)
+
+
+/** 更新列表中的对象的 name 和 URL 属性 ==>不想重新刷新界面就这样干的啦 */
+const updateList = (obj,objList) => {
+    return  objList.map(item => {
+        if (item.id === obj.id) return { ...item, name: obj.name, engineUrl: obj.engineUrl };
+        return item;
+    });
+};

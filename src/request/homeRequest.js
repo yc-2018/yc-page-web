@@ -151,11 +151,6 @@ export async function updateSearchEngine(bodyList) {
     CommonStore.setLoading(true);
     try {
         const {data:{data}} = await myAxios({url:'/searchEngines',method: 'put', data : bodyList});
-        // 如果data字符串中全部的true就是成功 有true有false就是部分成功  只有false就是失败
-        if (data.indexOf('true') === -1) {
-            CommonStore.setLoading(false,"部分修改成功",'error');
-            return false;
-        }
         data._ || CommonStore.setLoading(false,"修改成功",'success');
         return data;
     } catch (error) {CommonStore.setLoading(false)}
