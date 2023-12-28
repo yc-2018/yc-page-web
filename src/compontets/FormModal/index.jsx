@@ -3,6 +3,8 @@ import {Modal, Input, Radio, Space, Divider, message, ConfigProvider} from 'antd
 import {saveOrUpdateToDoItem} from "../../request/homeRequest";
 const { TextArea } = Input;
 /**
+ * 新增/编辑备忘录弹窗
+ *
  * @param {boolean}     isOpen          弹窗是否显示
  * @param {function}    setOpen         关闭弹窗
  * @param {object}      data            编辑的数据
@@ -53,7 +55,7 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType=4}) => {
                             <Radio.Button value={6}>工作</Radio.Button>
                             <Radio.Button value={7}>其他</Radio.Button>
                         </Radio.Group>
-                        <TextArea rows={4} maxLength={2000} showCount placeholder="请输入备忘内容" value={formData?.content} onChange={(e)=>setFormData({...formData,content:e.target.value})}/>
+                        <TextArea rows={16} maxLength={2000} showCount placeholder="请输入备忘内容" value={formData?.content} onChange={(e)=>setFormData({...formData,content:e.target.value})}/>
                     </Space>
                 </Divider>
             </Modal>
