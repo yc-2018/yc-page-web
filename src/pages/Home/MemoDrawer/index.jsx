@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
-import {Drawer, List, Skeleton, Button, Tag, Spin, Tooltip, Select, Divider, Badge, Space, Dropdown} from "antd";
-import {CaretDownOutlined, PlusOutlined, SyncOutlined} from "@ant-design/icons";
+import {Drawer, List, Skeleton, Button, Tag, Spin, Tooltip, Select, Divider, Badge, Space, Dropdown, Modal} from "antd";
+import {BookOutlined, CaretDownOutlined, PlusOutlined, SyncOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 
 import showOrNot from "../../../store/ShowOrNot";
@@ -9,6 +9,7 @@ import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../../request/
 import FormModal from "../../../compontets/FormModal";
 import './MemoDrawer.css'
 import ShowOrNot from "../../../store/ShowOrNot";
+import TextArea from "antd/es/input/TextArea";
 
 let total = -1;    // 初始化待办总数
 // 待办类型映射
@@ -37,6 +38,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         const [loopId, setLoopId] = useState();                  // 设置循环待办的id
         const [loopData, setLoopData] = useState();             // 设置循环待办的数据
 
+        const [lookModal, contextHolder] = Modal.useModal();
 
 
         useEffect(() => {
@@ -137,6 +139,21 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         const itemObj = list.find(item => item.id === parseInt(id));
 
         switch(action) {
+            case 'see':
+                // 双击查看
+                if (event.type==='dblclick'){
+                    lookModal.info({
+                        title: '查看备忘',
+                        maskClosable:true,
+                        okText:'看完了',
+                        width: 600,
+                        closable:true,
+                        icon:<BookOutlined />,
+                        content: <TextArea rows={14} value={itemObj.content} style={{margin:'0 0 0 -14px'}}/>
+                    })
+                }
+                break;
+
             case 'edit':
                 setFModalData(itemObj)
                 setFormModal(true)
@@ -261,6 +278,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                 {UserStore.jwt ?
                     <List
                         onClick={listHandleAction} // 在这里设置事件监听器
+                        onDoubleClick={listHandleAction} // 在这里设置事件监听器
                         className="demo-loadmore-list"
                         loading={initLoading}
                         itemLayout="horizontal"
@@ -272,7 +290,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                                     <List.Item.Meta
                                         description={
                                             <div data-id={item.id}>
-                                                {item.content}
+                                                <span data-action="see">{item.content}</span>
                                                 <br/>
 
                                                 {item.itemType === 1?
@@ -305,6 +323,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     </div>
                 }
                 </Spin>
+                {contextHolder}
             </Drawer>
 
         )
