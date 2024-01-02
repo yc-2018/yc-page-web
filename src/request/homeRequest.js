@@ -108,6 +108,13 @@ export async function delToDoItem(id) {
     } catch (error) {console.error('待办请求失败:', error)}
 }
 
+export async function selectLoopMemoTimeList(id) {
+    try {
+        const response = await myAxios.get(`/loopMemoTimes/${id}`);
+        return response.data.data.records;
+    }catch (error) {console.log('待办请求失败:', error)}
+}
+
 
 /** 上传页面配置信息到云端 */
 export async function uploadInfo(Info) {

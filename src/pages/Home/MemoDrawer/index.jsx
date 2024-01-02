@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
-import {Drawer, List, Skeleton, Button, Tag, Spin, Tooltip, Select, Divider, Badge,Space} from "antd";
-import {PlusOutlined, SyncOutlined} from "@ant-design/icons";
+import {Drawer, List, Skeleton, Button, Tag, Spin, Tooltip, Select, Divider, Badge, Space, Dropdown} from "antd";
+import {CaretDownOutlined, PlusOutlined, SyncOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 
 import showOrNot from "../../../store/ShowOrNot";
@@ -30,10 +30,12 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         const [list, setList] = useState([]);     // 待办展示列表
         const [page, setPage] = useState(1);    // 待办翻页
         const [type, setType] = useState(0);    // 待办类型
-        const [unFinishCounts, setUnFinishCounts] = useState();       // 待办未完成计数
+        const [unFinishCounts, setUnFinishCounts] = useState();      // 待办未完成计数
         const [completed, setCompleted] = useState(0);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
         const [formModal, setFormModal] = useState(false); // 是否显示新增或编辑的模态框。
         const [fModalData, setFModalData] = useState();           // 设置模态框数据
+        const [loopId, setLoopId] = useState();                  // 设置循环待办的id
+        const [loopData, setLoopData] = useState();             // 设置循环待办的数据
 
 
 
@@ -112,7 +114,20 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     <Tag className='pointer' color={color ?? "processing"} onClick={()=>setType(TypeNum)} >{typeName}</Tag>
                 </Badge>
 
-
+    const item = [{key: '0', label: <><SyncOutlined spin /> 正在加载中</>}]
+    // 获取循环备忘录时间列表
+    const getLoopMemoTimeList = (id,updateTime) =>
+        <Dropdown
+            trigger={['click']}
+            menu={{ items : loopId? loopData: item }}
+            onOpenChange={open => {console.log(open,id)}}
+        >
+            <span className='pointer'>
+                &nbsp;&nbsp;&nbsp;<CaretDownOutlined />{updateTime}<CaretDownOutlined />
+            </span>
+    </Dropdown>
+    
+    
     /** 处理待办列表的操作 */
     const listHandleAction = async(event) => {
 
@@ -270,7 +285,8 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
 
                                                 <div style={{fontSize: 10}}>
                                                     创建于:{item?.createTime?.replace('T', ' ')}
-                                                    {item.createTime !== item.updateTime? ` ${item.completed?'完成':'修改'}于:`+item.updateTime?.replace('T', ' '):null}
+                                                    {item.createTime !== item.updateTime && item.itemType!== 1? ` ${item.completed?'完成':'修改'}于:`+item.updateTime?.replace('T', ' '):null}
+                                                    {item.createTime !== item.updateTime && item.itemType=== 1?getLoopMemoTimeList(item.id, item.updateTime?.replace('T', ' ')):null}
                                                 </div>
                                             </div>
                                         }
