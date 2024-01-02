@@ -8,6 +8,7 @@ import UserStore from "../../../store/UserStore";
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../../request/homeRequest"
 import FormModal from "../../../compontets/FormModal";
 import './MemoDrawer.css'
+import ShowOrNot from "../../../store/ShowOrNot";
 
 let total = -1;    // 初始化待办总数
 // 待办类型映射
@@ -56,6 +57,11 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                 setList(data.records);
                 total = data.total;
                 if(completed===0) setUnFinishCounts(map.groupToDoItemsCounts)
+                // 如果刚打开时有未完成的紧急备忘，就直接打开备忘录而且跳到紧急备忘的位置
+                if(initLoading && map.groupToDoItemsCounts['3'] > 0 && type!==3) {
+                    setType(3)
+                    ShowOrNot.setMemoDrawerShow(true)
+                }
                 setInitLoading(false);
                 setWebLoading(false);
             })();
