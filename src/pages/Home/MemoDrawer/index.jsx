@@ -274,8 +274,8 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                             {getTag(3, "紧急")}
                             {getTag(6, "工作")}
                             {getTag(7, "其他")}
-                            {getTag(2, "长期","warning")}
                             {getTag(1, "循环","warning")}
+                            {getTag(2, "长期","warning")}
                             {getTag(5, "日记","default")}
                         </Space>
                     </Spin>
