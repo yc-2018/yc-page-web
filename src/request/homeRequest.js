@@ -110,7 +110,7 @@ export async function delToDoItem(id) {
 
 export async function selectLoopMemoTimeList(id) {
     try {
-        const response = await myAxios.get(`/loopMemoTimes/${id}`);
+        const response = await myAxios.get(`/loopMemoTime/${id}`);
         return response.data.data.records;
     }catch (error) {console.log('待办请求失败:', error)}
 }

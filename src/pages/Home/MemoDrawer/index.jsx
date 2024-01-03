@@ -5,7 +5,7 @@ import React, {useEffect, useState} from "react";
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../../request/homeRequest"
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../../request/homeRequest"
 import FormModal from "../../../compontets/FormModal";
 import './MemoDrawer.css'
 import ShowOrNot from "../../../store/ShowOrNot";
@@ -22,91 +22,91 @@ const tagNameMapper = {
     6: "工作",
     7: "其他"
 }
+const item = [{key: '0', label: <><SyncOutlined spin /> 正在加载中</>}]
+
 const MemoDrawer = observer(({setModalIsOpen}) => {
-        const [initLoading, setInitLoading] = useState(true);       // 初始化加载
-        const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
-        const [webLoading, setWebLoading] = useState(false);        // 网络加载
-        const [refreshTrigger, setRefreshTrigger] = useState(true); // 刷新触发(值无意义，改变即刷新
-        const [data, setData] = useState([]);     // 待办列表数据
-        const [list, setList] = useState([]);     // 待办展示列表
-        const [page, setPage] = useState(1);    // 待办翻页
-        const [type, setType] = useState(0);    // 待办类型
-        const [unFinishCounts, setUnFinishCounts] = useState();      // 待办未完成计数
-        const [completed, setCompleted] = useState(0);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
-        const [formModal, setFormModal] = useState(false); // 是否显示新增或编辑的模态框。
-        const [fModalData, setFModalData] = useState();           // 设置模态框数据
-        const [loopId, setLoopId] = useState();                  // 设置循环待办的id
-        const [loopData, setLoopData] = useState();             // 设置循环待办的数据
+    const [initLoading, setInitLoading] = useState(true);       // 初始化加载
+    const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
+    const [webLoading, setWebLoading] = useState(false);        // 网络加载
+    const [refreshTrigger, setRefreshTrigger] = useState(true); // 刷新触发(值无意义，改变即刷新
+    const [data, setData] = useState([]);     // 待办列表数据
+    const [list, setList] = useState([]);     // 待办展示列表
+    const [page, setPage] = useState(1);    // 待办翻页
+    const [type, setType] = useState(0);    // 待办类型
+    const [unFinishCounts, setUnFinishCounts] = useState();      // 待办未完成计数
+    const [completed, setCompleted] = useState(0);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+    const [formModal, setFormModal] = useState(false); // 是否显示新增或编辑的模态框。
+    const [fModalData, setFModalData] = useState();           // 设置模态框数据
+    const [items, setItems] = useState(item);    // 设置循环待办的数据
 
-        const [lookModal, contextHolder] = Modal.useModal();
+    const [lookModal, contextHolder] = Modal.useModal();
 
-
-        useEffect(() => {
-            if (UserStore.jwt) (async () => {
-                setFModalData(null)     // 模态框数据重置 null和 undefined 来回切换
-                setWebLoading(true)     // 网络加载
-                setUnFinishCounts(null) // 待办未完成计数重置
-                setList([]);            // 待办列表重置
-                setPage(1)              // 待办翻页重置
-                total = -1;                   // 待办总数重置
-                // 使用 axios 发起请求 获取又一次初始化待办列表
-                const resp = await getToDoItems(type, 1, completed);
-                if (!(resp?.code === 1)) {
-                    setInitLoading(false);
-                    setWebLoading(false);
-                    return;
-                }
-                const {data, map} = resp;
-                setData(data.records);
-                setList(data.records);
-                total = data.total;
-                if(completed===0) setUnFinishCounts(map.groupToDoItemsCounts)
-                // 如果刚打开时有未完成的紧急备忘，就直接打开备忘录而且跳到紧急备忘的位置
-                if(initLoading && map.groupToDoItemsCounts['3'] > 0 && type!==3) {
-                    setType(3)
-                    ShowOrNot.setMemoDrawerShow(true)
-                }
+    useEffect(() => {
+        if (UserStore.jwt) (async () => {
+            setFModalData(null)     // 模态框数据重置 null和 undefined 来回切换
+            setWebLoading(true)     // 网络加载
+            setUnFinishCounts(null) // 待办未完成计数重置
+            setList([]);            // 待办列表重置
+            setPage(1)              // 待办翻页重置
+            total = -1;                   // 待办总数重置
+            // 使用 axios 发起请求 获取又一次初始化待办列表
+            const resp = await getToDoItems(type, 1, completed);
+            if (!(resp?.code === 1)) {
                 setInitLoading(false);
                 setWebLoading(false);
-            })();
+                return;
+            }
+            const {data, map} = resp;
+            setData(data.records);
+            setList(data.records);
+            total = data.total;
+            if(completed===0) setUnFinishCounts(map.groupToDoItemsCounts)
+            // 如果刚打开时有未完成的紧急备忘，就直接打开备忘录而且跳到紧急备忘的位置
+            if(initLoading && map.groupToDoItemsCounts['3'] > 0 && type!==3) {
+                setType(3)
+                ShowOrNot.setMemoDrawerShow(true)
+            }
+            setInitLoading(false);
+            setWebLoading(false);
+        })();
 
-        }, [UserStore.jwt, type,completed,refreshTrigger]);
-
-
-        /** 点击加载更多数据触发 */
-        const onLoadMore = async () => {
-            setItemItemLoading(true);
-            setList(
-                data.concat(
-                    [...new Array(2)].map(() => ({
-                        loading: true,
-                        content: undefined,
-                        createTime: undefined,
-                    })),
-                ),
-            );
-
-            // 使用 axios 发起请求
-            const {data:respData} = await getToDoItems(type, page + 1,completed);
-            // 结合旧数据和新数据
-            const newData = data.concat(respData.records);
-            setData(newData);
-            setList(newData);
-            setItemItemLoading(false);
-            setPage(page + 1);  // 异步放前面也没用
-            // 触发 resize 事件
-            // window.dispatchEvent(new Event('resize'));
-
-        };
+    }, [UserStore.jwt, type,completed,refreshTrigger]);
 
 
-        /** 判断 显示《加载更多》《到底了》还是什么都不显示 */
-        const loadMore =
-            !initLoading && !itemLoading && list.length < total ? (
-                <div className="loadMore">
-                    <Button block onClick={onLoadMore}>加载更多</Button>
-                </div>
-            ) : !itemLoading && list.length && <Divider className='loadMore' plain>🥺到底啦🐾</Divider>;
+    /** 点击加载更多数据触发 */
+    const onLoadMore = async () => {
+        setItemItemLoading(true);
+        setList(
+            data.concat(
+                [...new Array(2)].map(() => ({
+                    loading: true,
+                    content: undefined,
+                    createTime: undefined,
+                })),
+            ),
+        );
+
+        // 使用 axios 发起请求
+        const {data:respData} = await getToDoItems(type, page + 1,completed);
+        // 结合旧数据和新数据
+        const newData = data.concat(respData.records);
+        setData(newData);
+        setList(newData);
+        setItemItemLoading(false);
+        setPage(page + 1);  // 异步放前面也没用
+        // 触发 resize 事件
+        // window.dispatchEvent(new Event('resize'));
+
+    };
+
+
+    /** 判断 显示《加载更多》《到底了》还是什么都不显示 */
+    const loadMore =
+        !initLoading && !itemLoading && list.length < total ? (
+            <div className="loadMore">
+                <Button block onClick={onLoadMore}>加载更多</Button>
+            </div>
+        ) : !itemLoading && list.length && <Divider className='loadMore' plain>🥺到底啦🐾</Divider>;
 
 
     // 标签生成
@@ -116,16 +116,23 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     <Tag className='pointer' color={color ?? "processing"} onClick={()=>setType(TypeNum)} >{typeName}</Tag>
                 </Badge>
 
-    const item = [{key: '0', label: <><SyncOutlined spin /> 正在加载中</>}]
+
     // 获取循环备忘录时间列表
     const getLoopMemoTimeList = (id,updateTime) =>
         <Dropdown
             trigger={['click']}
-            menu={{ items : loopId? loopData: item }}
-            onOpenChange={open => {console.log(open,id)}}
+            menu={{ items }}
+            onOpenChange={async open => {
+                if(open) {
+                    const resp = await selectLoopMemoTimeList(id);
+                    if (resp?.length > 0)
+                        setItems(resp.map(item => ({key: item.id, label: <span style={{color: '#9f9f9f'}}>{item.memoDate.replace('T', ' ')}</span>})))
+                    else setItems([{key: '-1', label: <>数据获取失败</>}]);
+                }else setItems(item)
+            }}
         >
             <span className='pointer'>
-                &nbsp;&nbsp;&nbsp;<CaretDownOutlined />{updateTime}<CaretDownOutlined />
+                &nbsp;&nbsp;&nbsp;<CaretDownOutlined />循环:{updateTime}<CaretDownOutlined />
             </span>
     </Dropdown>
     
