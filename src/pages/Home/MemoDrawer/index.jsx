@@ -127,7 +127,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                     const resp = await selectLoopMemoTimeList(id);
                     if (resp?.length > 0)
                         setItems(resp.map(item => ({key: item.id, label: <span style={{color: '#9f9f9f'}}>{item.memoDate.replace('T', ' ')}</span>})))
-                    else setItems([{key: '-1', label: <>数据获取失败</>}]);
+                    else setItems([{key: '-1', label: <span style={{color: '#fcabab'}}>暂无循环记录</span>}]);
                 }else setItems(item)
             }}
         >
