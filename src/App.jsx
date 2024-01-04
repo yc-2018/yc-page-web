@@ -1,10 +1,10 @@
+import {useRoutes} from 'react-router-dom'
+
 import './App.css';
-import Home from './pages/Home';
+import routes from "./routes";
 
 export default function App() {
-    return (
-        /* 方便后续做路由 */
-        <Home/> 
-    );
+    //根据路由表生成对应的路由规则
+    return useRoutes(routes)
 }
 
