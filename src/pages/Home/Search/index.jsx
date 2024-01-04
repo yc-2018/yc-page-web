@@ -19,6 +19,7 @@ const SEARCH_OPTION= 'searchOption'
 const QUICK_SEARCH = 'quickSearch'
 const EDIT = '0'
 const DELETE = '1'
+let isNull = true   // 搜索框为空还要点搜索
 function Search() {
     const setSearchValue = value => setSearchVal(value)            // 输入框的值改变的回调(直接传setSearchVal给子组件会报错：Rendered more hooks than during the previous render.)
     const [searchValue, setSearchVal] = useState();     // 搜索框的值
@@ -59,11 +60,20 @@ function Search() {
             setTimeout(() => form.resetFields(), 100)
     },[editSearchData])
 
-    // 点击搜索按钮 或回车触发的事件
-    const onSearch = () => {
-        // 通过搜索引擎名字找到他对应的URL=》这就要求名字在一个用户中是唯一的
-        const engineUrl = searchOptions.find(option => option.name === searchStore.searchEngines).engineUrl;
-        window.open(engineUrl.replace('@@@', searchValue), '_blank');
+    // 点击搜索按钮 或回车触发的事件 及快速搜索事件
+    const onSearch = quickSearchUrl => {
+        if (!searchValue && isNull) {
+            isNull = false
+            setTimeout(() => isNull = true, 3000)
+            return message.info('检测到搜索框内容为空哦~ 真想为空搜索三秒内再次点击');
+        }
+        if (quickSearchUrl) {  // 点击的是快速搜索
+            window.open(quickSearchUrl.replace('@@@', searchValue ?? ''), '_blank')
+        }else {
+            // 通过搜索引擎名字找到他对应的URL=》这就要求名字在一个用户中是唯一的
+            const engineUrl = searchOptions.find(option => option.name === searchStore.searchEngines).engineUrl;
+            window.open(engineUrl.replace('@@@', searchValue ?? ''), '_blank');
+        }
     }
 
 
@@ -178,7 +188,7 @@ function Search() {
                     <Dropdown menu={{items,onClick}} trigger={['contextMenu']} onContextMenu={onContextMenu} key={item.id}>
                         <Button
                             className={"searchButton"}
-                            onClick={() => window.open(item.engineUrl.replace('@@@', searchValue), '_blank')}
+                            onClick={() => onSearch(item.engineUrl)}
                             icon={<ThunderboltOutlined />}
                         >
                             {item.name}

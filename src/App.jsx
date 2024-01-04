@@ -8,7 +8,7 @@ export default function App() {
     const element = useRoutes(routes)
     return (
         <>
-            {window.location.pathname === '/home' ? null : <div>头部啊</div>}
+            {window.location.pathname === '/' ? null : <div>头部啊</div>}
             {element}
         </>
     )
