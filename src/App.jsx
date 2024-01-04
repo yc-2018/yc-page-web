@@ -5,6 +5,12 @@ import routes from "./routes";
 
 export default function App() {
     //根据路由表生成对应的路由规则
-    return useRoutes(routes)
+    const element = useRoutes(routes)
+    return (
+        <>
+            {window.location.pathname === '/home' ? null : <div>头部啊</div>}
+            {element}
+        </>
+    )
 }
 

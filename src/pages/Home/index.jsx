@@ -9,8 +9,10 @@ import {
     UserOutlined,
     SyncOutlined,
     DownloadOutlined,
-    HomeTwoTone, PoweroffOutlined, SettingOutlined, CloudUploadOutlined, CloudDownloadOutlined
+    HomeTwoTone, PoweroffOutlined, SettingOutlined, CloudUploadOutlined, CloudDownloadOutlined, QuestionCircleTwoTone
 } from "@ant-design/icons";
+import {useNavigate} from 'react-router-dom'
+
 import Search from './Search';
 import showOrNot from '../../store/ShowOrNot';
 import EnglishDrawer from "./EnglishDrawer";
@@ -30,6 +32,7 @@ function Home() {
     const [images, setImages] = useState('/Default-wallpaper.jpg');// 背景背景
     const [messageApi, contextHolder] = message.useMessage();       // Hooks 调用全局提示（antd推荐）因为静态Message方法无法消费上下文，因而 ConfigProvider 的数据也不会生效。
 
+    const navigate = useNavigate()   // 路由跳转
     let backgroundImage = localStorage.getItem('backgroundImages'); // 尝试获取本地存储的背景URL
     let {jwt} = UserStore;
 
@@ -252,6 +255,15 @@ function Home() {
                             />
                         )
                     }
+
+                    {/*跳转到帮助*/}
+                    <FloatButton
+                        onClick={() => navigate('/help') }
+                        icon={<QuestionCircleTwoTone />}
+                        tooltip="帮助"
+                        style={{ right: 190 }}
+                        className='buttonOpacity'
+                    />
 
                     {/* 侧边半透明的边 移动到上面显示抽屉 */}
                     <div
