@@ -1,5 +1,20 @@
 import {observer} from 'mobx-react-lite'
-import {Drawer, List, Skeleton, Button, Tag, Spin, Tooltip, Select, Divider, Badge, Space, Dropdown, Modal} from "antd";
+import {
+    Drawer,
+    List,
+    Skeleton,
+    Button,
+    Tag,
+    Spin,
+    Tooltip,
+    Select,
+    Divider,
+    Badge,
+    Space,
+    Dropdown,
+    Modal,
+    message
+} from "antd";
 import {BookOutlined, CaretDownOutlined, PlusOutlined, SyncOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 
@@ -12,6 +27,7 @@ import ShowOrNot from "../../../store/ShowOrNot";
 import TextArea from "antd/es/input/TextArea";
 
 let total = -1;    // 初始化待办总数
+let isQueryOnClick = false; // 防止点太快了
 // 待办类型映射
 const tagNameMapper = {
     0: "普通",
@@ -144,6 +160,16 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
         const action = target.getAttribute('data-action');
         const id = target.parentElement.getAttribute('data-id');
         const itemObj = list.find(item => item.id === parseInt(id));
+        const confirmAction = Array.from(target.classList).some(className => className.startsWith('confirm-'))  // 防止快速重复点
+
+        if (! action) return;
+        // 防止点太快了
+        if(isQueryOnClick && confirmAction)
+                return message.warning('哇，你点的好快呀👍');
+        if(confirmAction) {
+            isQueryOnClick = true
+            window.setTimeout(()=>isQueryOnClick = false,1000)
+        }
 
         switch(action) {
             case 'see':
