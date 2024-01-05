@@ -236,7 +236,7 @@ function Search() {
                     <Form.Item label="引擎URL" name="engineUrl"
                         rules={[
                             {required: true, message: '请输入引擎URL'},
-                            {max: 100, message: '引擎URL不能超过100个字符'},
+                            {max: 255, message: '引擎URL不能超过255个字符'},
                             {pattern: /^(http|https):\/\/.*@@@.*$/, message: 'URL必须以 http:// 或 https:// 开头，并且包含 "@@@"'}
                         ]}
                     >
