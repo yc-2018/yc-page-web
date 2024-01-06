@@ -1,9 +1,12 @@
 import React from 'react';
-import {Avatar, Layout} from "antd";
+import {Avatar, Col, Layout, Menu, Row} from "antd";
 import {Header} from "antd/es/layout/layout";
+import {items} from "../../store/NoLoginData";
+import {useNavigate} from "react-router-dom";
+import {UserOutlined} from "@ant-design/icons";
 
 const Head = () => {
-
+    const navigate = useNavigate()   // 路由跳转
     return (
         <Layout>
             <Header style={{
@@ -13,7 +16,11 @@ const Head = () => {
                 boxShadow: '0 9px 66px 1px #39487061',
 
             }}>
-                <Avatar src="/favicon.ico" />
+                <Row style={{width: '100%'}}>
+                    <Col span={1}><Avatar src="/favicon.ico" onClick={() => navigate('/')} style={{cursor: 'pointer'}}/></Col>
+                    <Col span={22}><Menu mode="horizontal" items={items} style={{background: '#ffffff00'}}/></Col>
+                    <Col span={1}><Avatar icon={<UserOutlined />} size={40}/></Col>
+                </Row>
             </Header>
         </Layout>
     );

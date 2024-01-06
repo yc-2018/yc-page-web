@@ -1,3 +1,5 @@
+import React from "react";
+
 export const searchData =[
     {id:1,  isQuickSearch:0, name: '百度', engineUrl: 'https://www.baidu.com/s?wd=@@@' },
     {id:2,  isQuickSearch:0, name: 'Bing', engineUrl: 'https://www.bing.com/search?q=@@@' },
@@ -20,4 +22,48 @@ export const searchData =[
     {id:18, isQuickSearch:1, name: 'GitHub', engineUrl: 'https://github.com/search?q=@@@&type=repositories' },
     {id:19, isQuickSearch:1, name: '百度翻译', engineUrl: 'https://fanyi.baidu.com/#auto/en/@@@' },
     {id:20, isQuickSearch:1, name: 'deepl翻译', engineUrl: 'https://www.deepl.com/translator#auto/en/@@@' },
+];
+
+/** 头部导航测试数据 */
+export const items = [
+    {
+        label: '菜单一',
+        key: '111',
+    },
+    {
+        label: '导航二',
+        key: '222',
+        disabled: true,
+    },
+    {
+        label: '导航三-子菜单',
+        key: '333',
+        children: [
+            {
+                type: 'group',
+                label: '项目1',
+                children: [
+                    {
+                        label: '选项1',
+                        key: '3331',
+                    },
+                    {
+                        label: '选项2',
+                        key: '3332',
+                    },
+                ],
+            },
+            {
+                label: '项目2',
+            },
+        ],
+    },
+    {
+        label: (
+            <a href="http://localhost:3000/" target="_blank" rel="noopener noreferrer">
+                导航四-链接
+            </a>
+        ),
+        key: '444',
+    },
 ];
