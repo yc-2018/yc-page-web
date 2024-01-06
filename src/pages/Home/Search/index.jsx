@@ -67,10 +67,9 @@ function Search() {
             setTimeout(() => isNull = true, 3000)
             return message.info('检测到搜索框内容为空哦~ 真想为空搜索三秒内再次点击');
         }
-        if (quickSearchUrl) {  // 点击的是快速搜索
+        if (quickSearchUrl)   // 点击的是快速搜索
             window.open(quickSearchUrl.replace('@@@', searchValue ?? ''), '_blank')
-        }else {
-            // 通过搜索引擎名字找到他对应的URL=》这就要求名字在一个用户中是唯一的
+        else {    // 不是快速搜索  通过搜索引擎名字找到他对应的URL=》这就要求名字在一个用户中是唯一的
             const engineUrl = searchOptions.find(option => option.name === searchStore.searchEngines).engineUrl;
             window.open(engineUrl.replace('@@@', searchValue ?? ''), '_blank');
         }
@@ -178,7 +177,7 @@ function Search() {
             }
             <br />
             {/* 搜索框 */}
-            <MySearch onSearch={onSearch} setSearchValue={setSearchValue} />
+            <MySearch onSearch={()=>onSearch()} setSearchValue={setSearchValue} />
 
 
             <br />
