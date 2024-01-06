@@ -22,3 +22,8 @@ export default [
     //     element:<Navigate to="/home"/>
     // }
 ]
+
+export const routesName = {
+    '/': '仰晨首页',
+    '/help': '仰晨首页-帮助页',
+}
