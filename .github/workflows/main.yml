@@ -34,4 +34,4 @@ jobs:
         git checkout -b build
         git add -f build/*
         git commit -m "Build for main branch"
-        git push origin build
+        git push origin build -f
