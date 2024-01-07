@@ -21,11 +21,11 @@ jobs:
 
     # 安装项目依赖
     - name: Install Dependencies
-      run: npm install
+      run: yarn install
 
     # 执行构建脚本，这里假设你的 package.json 中有一个名为 'build' 的脚本
     - name: Build
-      run: npm run build
+      run: yarn run build
 
     # 推送构建结果到 build 分支
     - name: Push to Build Branch
