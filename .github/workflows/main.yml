@@ -17,7 +17,12 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '16'
+        node-version: 16
+
+    # 安装 Yarn
+    - name: Setup Yarn
+      uses: snyk/actions/yarn-install@master
+
 
     # 安装项目依赖
     - name: Install Dependencies
