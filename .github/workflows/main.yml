@@ -21,7 +21,7 @@ jobs:
 
     # 安装 Yarn
     - name: Setup Yarn
-      uses: snyk/actions/yarn-install@master
+      uses: actions/yarn-install@master
 
 
     # 安装项目依赖
