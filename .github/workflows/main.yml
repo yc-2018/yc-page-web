@@ -21,7 +21,7 @@ jobs:
 
     # 安装项目依赖
     - name: Install Dependencies
-      run: CI=false yarn install
+      run: CI= yarn install
 
     # 执行构建脚本，这里假设你的 package.json 中有一个名为 'build' 的脚本
     - name: Build
