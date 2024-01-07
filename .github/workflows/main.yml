@@ -1,0 +1,53 @@
+name: Build and Deploy
+
+# 当代码被推送到 main 分支时触发此工作流程
+on:
+  push:
+  branches: [main]
+
+jobs:
+  build:
+  # 由于 GitHub Actions 没有直接提供 CentOS 环境，因此使用最新版的 Ubuntu 环境
+  runs-on: ubuntu-latest
+
+  # 使用 CentOS 7 Docker 容器
+  container:
+    image: centos:7
+
+  steps:
+    # 检出代码到工作流程的运行环境中
+    - uses: actions/checkout@v2
+
+    # 设置 Node.js 环境，版本为 16
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+      node-version: '16'
+
+    # 安装项目依赖
+    - name: Install Dependencies
+      run: npm install
+
+    # 执行构建脚本，这里假设你的 package.json 中有一个名为 'build' 的脚本
+    - name: Build
+      run: npm run build
+
+    # 推送构建结果到 build 分支
+    - name: Push to Build Branch
+      run: |
+      # 设置 Git 用户信息
+      git config --local user.email "action@github.com"
+      git config --local user.name "GitHub Action"
+      
+      # 创建或切换到 build 分支
+      git checkout -b build
+      
+      # 添加构建目录下的所有文件到 Git
+      # 'build' 是 create-react-app 默认的构建目录
+      git add -f build/*
+      
+      # 提交更改
+      git commit -m "Build for main branch"
+      
+      # 将更改推送到远程的 build 分支
+      git push origin build
