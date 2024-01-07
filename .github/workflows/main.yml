@@ -9,10 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-  # 使用 CentOS 7 Docker 容器
-  container:
-    image: centos:7
-
   steps:
     # 检出代码到工作流程的运行环境中
   - uses: actions/checkout@v2
