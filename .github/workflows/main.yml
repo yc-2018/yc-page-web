@@ -34,9 +34,9 @@ jobs:
         git checkout -b build
         git fetch
         # 检查远程分支状态
-        if [[ -d "build" ]]; then
+        if git ls-remote origin build >/dev/null 2>&1; then
         echo "Deleting remote build directory."
-        git rm -rf build
+        git rm -rf --cached build
         fi
         git subtree add --prefix=build main master
         git commit -m "Build for main branch"
