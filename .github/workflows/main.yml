@@ -35,19 +35,19 @@ jobs:
     # 推送构建结果到 build 分支
     - name: Push to Build Branch
       run: |
-      # 设置 Git 用户信息
-      git config --local user.email "action@github.com"
-      git config --local user.name "GitHub Action"
-      
-      # 创建或切换到 build 分支
-      git checkout -b build
-      
-      # 添加构建目录下的所有文件到 Git
-      # 'build' 是 create-react-app 默认的构建目录
-      git add -f build/*
-      
-      # 提交更改
-      git commit -m "Build for main branch"
-      
-      # 将更改推送到远程的 build 分支
-      git push origin build
+        # 设置 Git 用户信息
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # 创建或切换到 build 分支
+        git checkout -b build
+        
+        # 添加构建目录下的所有文件到 Git
+        # 'build' 是 create-react-app 默认的构建目录
+        git add -f build/*
+        
+        # 提交更改
+        git commit -m "Build for main branch"
+        
+        # 将更改推送到远程的 build 分支
+        git push origin build
