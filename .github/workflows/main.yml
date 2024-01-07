@@ -31,14 +31,9 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git checkout -b build
-        git fetch
-        # 检查远程分支状态
-        if git ls-remote origin build >/dev/null 2>&1; then
-        echo "Deleting remote build directory."
-        git rm -rf --cached build
-        fi
-        git subtree add --prefix=build main master
+        git checkout --orphan temp-build
+        git rm -rf .
+        mv build/* .
+        git add -f *
         git commit -m "Build for main branch"
-        git commit -m "Build for main branch"
-        git push origin build -f
+        git push origin HEAD:build -f
