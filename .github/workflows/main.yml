@@ -3,12 +3,11 @@ name: Build and Deploy
 # 当代码被推送到 main 分支时触发此工作流程
 on:
   push:
-  branches: [main]
+    branches: [main]
 
 jobs:
   build:
-  # 由于 GitHub Actions 没有直接提供 CentOS 环境，因此使用最新版的 Ubuntu 环境
-  runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
   # 使用 CentOS 7 Docker 容器
   container:
