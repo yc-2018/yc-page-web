@@ -32,6 +32,6 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git checkout -b build
-        git add build/*
+        git subtree add --prefix=build main master
         git commit -m "Build for main branch"
         git push origin build -f
