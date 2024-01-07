@@ -9,30 +9,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-  steps:
-    # 检出代码到工作流程的运行环境中
-  - uses: actions/checkout@v2
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
 
-  # 设置 Node.js 环境，版本为 16
-  - name: Setup Node.js
-    uses: actions/setup-node@v2
-    with:
-      node-version: '16'
+    # 设置 Node.js 环境，版本为 16
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
 
-  # 安装项目依赖
-  - name: Install Dependencies
-    run: npm install
+    # 安装项目依赖
+    - name: Install Dependencies
+      run: npm install
 
-  # 执行构建脚本，这里假设你的 package.json 中有一个名为 'build' 的脚本
-  - name: Build
-    run: npm run build
+    # 执行构建脚本，这里假设你的 package.json 中有一个名为 'build' 的脚本
+    - name: Build
+      run: npm run build
 
-  # 推送构建结果到 build 分支
-  - name: Push to Build Branch
-    run: |
-      git config --local user.email "action@github.com"
-      git config --local user.name "GitHub Action"
-      git checkout -b build
-      git add -f build/*
-      git commit -m "Build for main branch"
-      git push origin build
+    # 推送构建结果到 build 分支
+    - name: Push to Build Branch
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git checkout -b build
+        git add -f build/*
+        git commit -m "Build for main branch"
+        git push origin build
