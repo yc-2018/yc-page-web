@@ -24,13 +24,11 @@ const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined, Notification
     };
 });
 const Blog = () => {
-    const {
-        token: {colorBgContainer, borderRadiusLG},
-    } = theme.useToken();
+    const {token: {colorBgContainer}} = theme.useToken();
     return (
         <Layout style={{maxHeight: 'calc(100vh - 64px)'}}>
             {/*------- 页面左侧 -------*/}
-            <Sider width={200} style={{background: colorBgContainer,overflow: 'auto'}}>
+            <Sider width={200} className={styles.scrollbar} style={{background: colorBgContainer,overflow: 'auto'}}>
                 <Menu
                     mode="inline"
                     defaultSelectedKeys={['1']}
@@ -50,16 +48,7 @@ const Blog = () => {
                 </Breadcrumb>
 
                 {/*------ 页面内容 -------*/}
-                <Content
-                    style={{
-                        padding: 24,
-                        margin: 0,
-                        minHeight: 280,
-                        background: colorBgContainer,
-                        borderRadius: borderRadiusLG,
-                        overflow: 'auto'
-                    }}
-                >
+                <Content className={[styles.scrollbar, styles.content].join(' ')}>
                     Content
                     <p className={styles.testContent}>Content</p>
                     <p>Content</p>
