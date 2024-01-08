@@ -1,6 +1,6 @@
 import React from 'react';
 import {LaptopOutlined, NotificationOutlined, UserOutlined} from '@ant-design/icons';
-import {Breadcrumb, Layout, Menu, theme} from 'antd';
+import {Layout, Menu, theme} from 'antd';
 import styles from './blog.module.css'
 
 const {Content, Sider} = Layout;
@@ -40,14 +40,7 @@ const Blog = () => {
 
             {/*------ 页面右侧 -------*/}
             <Layout style={{padding: '0 24px 24px'}}>
-                {/*------ 面包屑 -------*/}
-                <Breadcrumb style={{margin: '16px 0',}}>
-                    <Breadcrumb.Item>Home</Breadcrumb.Item>
-                    <Breadcrumb.Item>List</Breadcrumb.Item>
-                    <Breadcrumb.Item>App</Breadcrumb.Item>
-                </Breadcrumb>
-
-                {/*------ 页面内容 -------*/}
+                <br/>
                 <Content className={[styles.scrollbar, styles.content].join(' ')}>
                     Content
                     <p className={styles.testContent}>Content</p>

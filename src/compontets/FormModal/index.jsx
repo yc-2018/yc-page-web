@@ -43,7 +43,7 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType=4}) => {
     return (
         <Modal title={data?"编辑备忘":"新增备忘"} open={isOpen} onOk={handleOk} onCancel={()=>setOpen(false)} confirmLoading={confirmLoading}>
             <Divider plain>
-                <Space direction={'vertical'} block style={{marginBottom:20}}>
+                <Space direction={'vertical'} style={{marginBottom:20}}>
                     <Radio.Group onChange={(e)=>{setFormData({...formData,itemType:e.target.value})}} defaultValue={formData?.itemType} value={formData?.itemType} buttonStyle="solid">
                         <Radio.Button value={0}>普通</Radio.Button>
                         <Radio.Button value={1}>循环</Radio.Button>
