@@ -36,7 +36,7 @@ function EnglishDrawer() {
                     <p>Layout 布局</p>
                 </List>
                 :
-                <div className='loadMore' onClick={() => console.log('████████████████把弹出抽出来吧████████████████████')}>
+                <div className='loadMore' onClick={() => UserStore.setOpenModal(true)}>
                     <Divider plain>🥺<Button type="link">请先登录</Button>🐾</Divider>
 
                     <Skeleton/>

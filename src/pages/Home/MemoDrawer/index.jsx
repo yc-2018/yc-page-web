@@ -39,7 +39,7 @@ const tagNameMapper = {
 }
 const item = [{key: '0', label: <><SyncOutlined spin /> 正在加载中</>}]
 
-const MemoDrawer = observer(({setModalIsOpen}) => {
+const MemoDrawer = observer(() => {
     const [initLoading, setInitLoading] = useState(true);       // 初始化加载
     const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
     const [webLoading, setWebLoading] = useState(false);        // 网络加载
@@ -344,7 +344,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                         )}
                     />
                     :
-                    <div className='loadMore' onClick={() => setModalIsOpen(true)}>
+                    <div className='loadMore' onClick={() => UserStore.setOpenModal(true)}>
                         <Divider plain>🥺<Button type="link">请先登录</Button>🐾</Divider>
 
                         <Skeleton/>

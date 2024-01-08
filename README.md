@@ -1,46 +1,28 @@
-# Getting Started with Create React App
+# 欢迎来到仰晨主页
+## 1. 项目简介
+这算是毕设项目，也是我本来想做的一个项目。只是我没想到我会用react来写这个项目。
+因为有这个想法的时候,我还不会写react,也不会写vue,只是刚好进了公司要求学了react,于是就顺便开始写了这个项目。又顺便用来当毕设.
+这个项目只要是用来当浏览器主页导航的还有写备忘/待办事项的,登录要通过微信订阅号来实现,后面还会有个人博客和一些其他的东西.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 2. 项目主要结构
+```
+.                                                                                                                                                                                                                
+├── public : 静态文件  
+├── src : 项目源码
+│   ├── components : 组件
+│   ├── pages : 页面
+│   ├── router : 路由
+│   ├── store : 状态管理
+│   ├── utils : 工具类   
+│   ├── request : 请求整合在此
+├── package.json : 包管理文件
+├── yarn.lock : 项目使用yarn管理依赖  
+```
+## 3. 项目运行
+依赖安装
+`yarn install`
 
-## Available Scripts
+运行项目
+`yarn start`
 
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+项目很多数据都是通过后端项目来获取的,所以项目需要配合后端项目一起使用,[后端项目在这里](https://gitee.com/yc556/yc-page).
