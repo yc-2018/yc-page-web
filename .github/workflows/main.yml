@@ -30,7 +30,7 @@ jobs:
     - name: Push to Build Branch
       run: |
         git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config --local user.name "Yc Action"
         git checkout --orphan temp-build
         git rm -rf .
         rm -rf node_modules  # 移除 node_modules
