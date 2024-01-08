@@ -33,8 +33,8 @@ jobs:
         git config --local user.name "GitHub Action"
         git checkout --orphan temp-build
         git rm -rf .
+        echo "/node_modules" > .gitignore
         mv build/* .
-        rm -rf node_modules  # 移除 node_modules
         git add -f *
         git commit -m "Build for main branch"
         git push origin HEAD:build -f

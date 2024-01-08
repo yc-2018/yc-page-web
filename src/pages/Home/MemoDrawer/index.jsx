@@ -311,7 +311,6 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                         onClick={listHandleAction} // 在这里设置事件监听器
                         onDoubleClick={listHandleAction} // 在这里设置事件监听器
                         className="demo-loadmore-list"
-                        loading={initLoading}
                         itemLayout="horizontal"
                         loadMore={loadMore}
                         dataSource={list}
