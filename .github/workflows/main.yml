@@ -30,7 +30,7 @@ jobs:
     - name: Push to Build Branch
       run: |
         git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config --local user.name "yc556"
         git checkout --orphan temp-build
         git rm -rf .
         mv build/* .
