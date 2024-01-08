@@ -164,8 +164,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
 
         if (! action) return;
         // 防止点太快了
-        if(isQueryOnClick && confirmAction)
-                return message.warning('哇，你点的好快呀👍');
+        if(isQueryOnClick && confirmAction) return // message.warning('哇，你点的好快呀👍');
         if(confirmAction) {
             isQueryOnClick = true
             window.setTimeout(()=>isQueryOnClick = false,1000)
