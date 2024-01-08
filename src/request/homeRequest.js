@@ -75,10 +75,11 @@ export async function login(loginCode,expireTime='bt') {
 }
 
 
-/** 获取一个类型的待办列表 */
+/** 获取一个类型的待办列表 循环的先默认给个30条其他的还是默认10条*/
 export async function getToDoItems(type=0, page=1,completed=0) {
     try {
-        const response = await myAxios.get(`/toDoItems/${type}?page=${page}&completed=${completed}`);
+        const response = await myAxios
+            .get(`/toDoItems/${type}?page=${page}&completed=${completed}${type===1?'&pageSize=30':''}`);
         return response.data;
     } catch (error) {
         console.error('待办请求失败:', error);
