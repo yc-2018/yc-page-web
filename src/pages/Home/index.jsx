@@ -2,14 +2,20 @@ import React, { useState ,useEffect  } from 'react';
 import axios from "axios";
 import Bookmarks from './Bookmarks';
 import { observer } from 'mobx-react-lite'
-import {Button, FloatButton, Input, message, Modal, Space, Radio, Spin} from "antd";
+import {Button, FloatButton, Input, Modal, Space, Radio, Spin} from "antd";
 import {
     PictureTwoTone,
     SnippetsTwoTone,
     UserOutlined,
     SyncOutlined,
     DownloadOutlined,
-    HomeTwoTone, PoweroffOutlined, SettingOutlined, CloudUploadOutlined, CloudDownloadOutlined, QuestionCircleTwoTone
+    HomeTwoTone,
+    PoweroffOutlined,
+    SettingOutlined,
+    CloudUploadOutlined,
+    CloudDownloadOutlined,
+    QuestionCircleTwoTone,
+    SmileTwoTone
 } from "@ant-design/icons";
 import {useNavigate} from 'react-router-dom'
 
@@ -19,8 +25,9 @@ import EnglishDrawer from "./EnglishDrawer";
 import MemoDrawer from "./MemoDrawer";
 import {reImagesUrl, login, uploadInfo, getPageInfo} from "../../request/homeRequest";
 import UserStore from "../../store/UserStore";
-import JWTUtils from  "../../utils/JWTUtils"
 import CommonStore from "../../store/CommonStore";
+import JWTUtils from  "../../utils/JWTUtils"
+import Msg from "../../store/Msg";
 import "./Home.css"
 
 
@@ -30,7 +37,6 @@ function Home() {
     const [loginCaptcha, setLoginCaptcha] = useState(undefined);            // 登录验证码
     const [expireTime, setExpireTime] = useState(undefined);               // 登录有效时间
     const [images, setImages] = useState('/Default-wallpaper.jpg');// 背景背景
-    const [messageApi, contextHolder] = message.useMessage();       // Hooks 调用全局提示（antd推荐）因为静态Message方法无法消费上下文，因而 ConfigProvider 的数据也不会生效。
 
     const navigate = useNavigate()   // 路由跳转
     let backgroundImage = localStorage.getItem('backgroundImages'); // 尝试获取本地存储的背景URL
@@ -51,7 +57,7 @@ function Home() {
     const reImages = async(bzType) => {
         const imgUrl = await reImagesUrl(bzType);
         if (imgUrl) setBgImage(imgUrl, '获取背景成功，喜欢的话请手动点击上传到云端☁');
-        else messageApi.info('获取背景出错');
+        else Msg.msg.info('获取背景出错');
     }
 
     /**  获取本地记录背景URL */
@@ -61,7 +67,7 @@ function Home() {
     const setBgImage = (backgroundUrl,msg=null)=> {
         localStorage.setItem('backgroundImages', backgroundUrl);
         setImages(backgroundUrl);
-        return msg && messageApi.info(msg);
+        return msg && Msg.msg.info(msg);
     }
 
     /**
@@ -70,7 +76,7 @@ function Home() {
     const goLogin = async() => {
         // 校验 loginCaptcha 是否为6位数字
         if (loginCaptcha?.length!== 6) {
-            messageApi.error('验证码格式有误');
+            Msg.msg.error('验证码格式有误');
             return;
         }
         setLoginLoading(true);
@@ -95,8 +101,6 @@ function Home() {
                 backgroundImage: `linear-gradient( rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.4)),url(${getBgImage()})`,
             }}
         >
-            {/* 全局提示 */}
-            {contextHolder}
 
             {/* 《为了打开英语抽屉漂浮在底层透明背景》用做 点击右键显示 抽屉 只能放在这上面，放到下面去写会挡住按钮 不知道为啥。*/}
             <div
@@ -108,7 +112,7 @@ function Home() {
             />
 
             {/* 书签 */}
-            <Bookmarks messageApi={messageApi} />
+            <Bookmarks/>
 
             {/* 居中部分 */}
             <div className="App">
@@ -147,7 +151,7 @@ function Home() {
                                     onClick={async()=> {
                                         const {backgroundUrl} = await getPageInfo()
                                         if (backgroundUrl) setBgImage(backgroundUrl,'获取背景成功')   // 设置背景
-                                         else messageApi.error('您还没有上传过背景到服务器哦');
+                                         else Msg.msg.error('您还没有上传过背景到服务器哦');
                                     }}
                                 />
 
@@ -203,7 +207,7 @@ function Home() {
                                 <Input placeholder="自定义背景链接，回车加载" onPressEnter={event => {
                                     if (/^(http|https):\/\/.+/.test(event.target.value))
                                         setBgImage(event.target.value,'正在设置中...') // 设置背景
-                                    else messageApi.error('请输入正确的链接');
+                                    else Msg.msg.error('请输入正确的链接');
                                 }}/>
                                 </div> }
                             className='buttonOpacity'
@@ -236,7 +240,7 @@ function Home() {
                                     style={{ right: 135 }}
                                     className='buttonOpacity'
                                     onClick={() => {
-                                        messageApi.info('还没写呢...');
+                                        Msg.msg.info('还没写呢...');
                                     }}
                                 />
                             </FloatButton.Group>
@@ -262,6 +266,15 @@ function Home() {
                         icon={<QuestionCircleTwoTone />}
                         tooltip="帮助"
                         style={{ right: 190 }}
+                        className='buttonOpacity'
+                    />
+
+                    {/*跳转到博客*/}
+                    <FloatButton
+                        onClick={() => navigate('/blog') }
+                        icon={<SmileTwoTone />}
+                        tooltip="博客"
+                        style={{ right: 245 }}
                         className='buttonOpacity'
                     />
 

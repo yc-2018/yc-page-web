@@ -1,7 +1,8 @@
 import { Button, Dropdown, Space } from 'antd';
+import Msg from "../../../store/Msg";
 
 
-export default function Bookmarks({ messageApi }) {
+export default function Bookmarks() {
     const items = [
         {
             key: '1',
@@ -10,7 +11,7 @@ export default function Bookmarks({ messageApi }) {
                     下拉菜单 Dropdown - Ant Design
                 </a>
             ),
-            icon: <img src="https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png" width={10} />,
+            icon: <img alt src="https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png" width={10} />,
         },
         {
             key: '2',
@@ -19,7 +20,7 @@ export default function Bookmarks({ messageApi }) {
                     2nd menu item (disabled)
                 </a>
             ),
-            icon: <img src="https://g.csdnimg.cn/static/logo/favicon32.ico" width={10} />,
+            icon: <img alt src="https://g.csdnimg.cn/static/logo/favicon32.ico" width={10} />,
         },
         {
             key: '3',
@@ -28,12 +29,12 @@ export default function Bookmarks({ messageApi }) {
                     gpt一年
                 </a>
             ),
-            icon: <img src="https://x.chatmindai.net/Logo.png" width={10} />,
+            icon: <img alt src="https://x.chatmindai.net/Logo.png" width={10} />,
         },
         {
             key: '4',
             label: 'a danger item',
-            icon: <img src="https://x.chatmindai.net/Logo.png" width={10} />,
+            icon: <img alt src="https://x.chatmindai.net/Logo.png" width={10} />,
         },
 
 
@@ -58,7 +59,7 @@ export default function Bookmarks({ messageApi }) {
             <Dropdown
                 dropdownRender={() =>
                     <div>
-                        <div><img src="https://x.chatmindai.net/Logo.png" width={10} />自定义内容</div>
+                        <div><img alt src="https://x.chatmindai.net/Logo.png" width={10} />自定义内容</div>
                         <div>自定义内容</div>
                         <div>自定义内容</div>
                         <div>自定义内容</div>
@@ -69,9 +70,9 @@ export default function Bookmarks({ messageApi }) {
             </Dropdown>
 
 
-            <Dropdown onClick={() => { messageApi.info('微信和电脑是没有反应的,【要手机浏览器打开哇】') }}
+            <Dropdown onClick={() => { Msg.msg.info('微信和电脑是没有反应的,【要手机浏览器打开哇】') }}
                 dropdownRender={() =>
-                    <img src="https://x.chatmindai.net/Logo.png" width={50} />
+                    <img alt src="https://x.chatmindai.net/Logo.png" width={50} />
                 }
             >
                 <Button ghost type="dashed" size='small' href={"dingtalk://dingtalkclient/page/link?url=http://m.hrm.timeexpress.com.cn/M_OrderDinner/QrCode"}>
@@ -80,7 +81,7 @@ export default function Bookmarks({ messageApi }) {
             </Dropdown>
 
 
-            <Dropdown dropdownRender={() => <div />} onClick={() => { messageApi.info('微信和电脑是没有反应的,【要手机浏览器打开哇】') }}>
+            <Dropdown dropdownRender={() => <div />} onClick={() => { Msg.msg.info('微信和电脑是没有反应的,【要手机浏览器打开哇】') }}>
                 <a rel="noopener noreferrer"  href='dingtalk://dingtalkclient/page/link?url=http://m.hrm.timeexpress.com.cn/M_OrderDinner'>约饭</a>
             </Dropdown>
 

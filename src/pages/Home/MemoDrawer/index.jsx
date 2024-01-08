@@ -12,8 +12,7 @@ import {
     Badge,
     Space,
     Dropdown,
-    Modal,
-    message
+    Modal
 } from "antd";
 import {BookOutlined, CaretDownOutlined, PlusOutlined, SyncOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
@@ -164,8 +163,7 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
 
         if (! action) return;
         // 防止点太快了
-        if(isQueryOnClick && confirmAction)
-                return message.warning('哇，你点的好快呀👍');
+        if(isQueryOnClick && confirmAction) return // message.warning('哇，你点的好快呀👍');
         if(confirmAction) {
             isQueryOnClick = true
             window.setTimeout(()=>isQueryOnClick = false,1000)
@@ -313,7 +311,6 @@ const MemoDrawer = observer(({setModalIsOpen}) => {
                         onClick={listHandleAction} // 在这里设置事件监听器
                         onDoubleClick={listHandleAction} // 在这里设置事件监听器
                         className="demo-loadmore-list"
-                        loading={initLoading}
                         itemLayout="horizontal"
                         loadMore={loadMore}
                         dataSource={list}

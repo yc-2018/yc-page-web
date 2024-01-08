@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx'
-import {message} from 'antd'
+import Msg from "./Msg";
 
 class CommonStore {
     // 壁纸加载都用这个
@@ -15,7 +15,7 @@ class CommonStore {
     //设置jwt
     setLoading(statuses, msg=null, type="info") {
         this.loading = statuses
-        if (msg) return  type==="success"? message.success(msg): type==="error"?message.error(msg): message.info(msg)
+        if (msg) return  type==="success"? Msg.msg.success(msg): type==="error"?Msg.msg.error(msg): Msg.msg.info(msg)
     }
 
 
