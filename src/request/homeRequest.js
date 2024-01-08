@@ -1,8 +1,8 @@
 import axios from 'axios';
-import {message} from 'antd'
 import UserStore from '../store/UserStore';
 import CommonStore from "../store/CommonStore";
 import myAxios  from "./myAxios";
+import Msg from "../store/Msg";
 
 
 /** 异步获取百度联想列表 */
@@ -60,15 +60,15 @@ export async function login(loginCode,expireTime='bt') {
         if (code === 1) {
             // 存储 JWT
             UserStore.setJwt(data);
-            message.success("登录成功");
+            Msg.msg.success("登录成功");
             return true;
         } else if (code === 0) {
             // 显示消息
-            message.error(msg);
+            Msg.msg.error(msg);
         }
         return false;
     } catch (error) {
-        message.error('请求失败');
+        Msg.msg.error('请求失败');
         console.error('请求失败:', error);
         return false;
     }
@@ -92,7 +92,7 @@ export async function saveOrUpdateToDoItem(body,requestType='post') {
     try {
         const response = await myAxios({url: '/toDoItems',method: requestType, data : body});
         if (response.data.code === 1) {
-            message.success("成功");
+            Msg.msg.success("成功");
             return true;
         }
     } catch (error) {console.error('待办请求失败:', error)}
@@ -103,7 +103,7 @@ export async function delToDoItem(id) {
     try {
         const response = await myAxios.delete(`/toDoItems/${id}`);
         if (response.data.code === 1) {
-            message.success("删除成功");
+            Msg.msg.success("删除成功");
             return true;
         }
     } catch (error) {console.error('待办请求失败:', error)}

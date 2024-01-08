@@ -1,4 +1,4 @@
-import {Segmented, Flex, Button, Modal, Form, Input, message, Alert, Divider, Dropdown} from 'antd'
+import {Segmented, Flex, Button, Modal, Form, Input, Alert, Divider, Dropdown} from 'antd'
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite'
 import { ThunderboltOutlined, PlusOutlined } from '@ant-design/icons';
@@ -13,6 +13,7 @@ import MySearch from '../../../compontets/MySearch';
 import searchStore from '../../../store/SearchEnginesStore';
 import {searchData} from '../../../store/NoLoginData';
 import UserStore from "../../../store/UserStore";
+import Msg from "../../../store/Msg";
 import "./Search.css"
 
 const SEARCH_OPTION= 'searchOption'
@@ -65,7 +66,7 @@ function Search() {
         if (!searchValue && isNull) {
             isNull = false
             setTimeout(() => isNull = true, 3000)
-            return message.info('检测到搜索框内容为空哦~ 真想为空搜索三秒内再次点击');
+            return Msg.msg.info('检测到搜索框内容为空哦~ 真想为空搜索三秒内再次点击');
         }
         if (quickSearchUrl)   // 点击的是快速搜索
             window.open(quickSearchUrl.replace('@@@', searchValue ?? ''), '_blank')
@@ -86,7 +87,7 @@ function Search() {
     const onClick = ({ key }) => {
         // 长度超过10或者有换行的就小细节
         if (rightClickName.length > 10 || rightClickName.includes('\n'))
-            return message.info('这么细的边都被你点到了，哈哈哈，往里面点点看');
+            return Msg.msg.info('这么细的边都被你点到了，哈哈哈，往里面点点看');
 
         if (key === DELETE)
             modal.confirm({
@@ -136,9 +137,9 @@ function Search() {
             .then(async values => {
                 // 普通搜索引擎不能有相同的名字 但是修改搜索引擎可以就是本来的名字
                 if(modalType === 0 && searchOptions.filter(item => item.name === values.name).length!==0 && values.name !== editSearchData?.name)
-                    return message.error("普通搜索引擎名称不允许有相同的")
+                    return Msg.msg.error("普通搜索引擎名称不允许有相同的")
                 if(modalType === 1 && quickSearch.filter(item => item.name === values.name).length!==0 && values.name !== editSearchData?.name)
-                    return message.error("快速搜索引擎名称不允许有相同的")
+                    return Msg.msg.error("快速搜索引擎名称不允许有相同的")
 
                 setModalLoading(true)
                 const aSearch = editSearchData?.id? [{...editSearchData, ...values}] : {...values, isQuickSearch:modalType};   // 编辑 还是 添加

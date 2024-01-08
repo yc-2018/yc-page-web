@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
-import {Modal, Input, Radio, Space, Divider, message, ConfigProvider} from 'antd';
+import {Modal, Input, Radio, Space, Divider} from 'antd';
 import {saveOrUpdateToDoItem} from "../../request/homeRequest";
+import Msg from "../../store/Msg";
 const { TextArea } = Input;
 /**
  * 新增/编辑备忘录弹窗
@@ -14,7 +15,6 @@ const { TextArea } = Input;
 const FormModal = ({isOpen,setOpen,data,reList,currentMemoType=4}) => {
     const [formData, setFormData] = useState(null);
     const [confirmLoading, setConfirmLoading] = useState(false);
-    const [messageApi, contextHolder] = message.useMessage();
     useEffect(()=> {
         if(data) setFormData(data)
         else setFormData({
@@ -23,8 +23,8 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType=4}) => {
         })
     },[data])
     const handleOk = async() => {
-        if(!formData.itemType?.toString())return messageApi.error('备忘类型不能为空')
-        if(!formData.content)return messageApi.error('备忘内容不能为空')
+        if(!formData.itemType?.toString())return Msg.msg.error('备忘类型不能为空')
+        if(!formData.content)return Msg.msg.error('备忘内容不能为空')
 
         setConfirmLoading(true);
         // 构造请求体
@@ -41,26 +41,22 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType=4}) => {
     };
 
     return (
-        <ConfigProvider theme={{components: {Message: {zIndexPopup: 9999999}}}}>
-            <Modal title={data?"编辑备忘":"新增备忘"} open={isOpen} onOk={handleOk} onCancel={()=>setOpen(false)} confirmLoading={confirmLoading}>
-                <Divider plain>
-                    {contextHolder}
-                    <Space direction={'vertical'} block style={{marginBottom:20}}>
-                        <Radio.Group onChange={(e)=>{setFormData({...formData,itemType:e.target.value})}} defaultValue={formData?.itemType} value={formData?.itemType} buttonStyle="solid">
-                            <Radio.Button value={0}>普通</Radio.Button>
-                            <Radio.Button value={1}>循环</Radio.Button>
-                            <Radio.Button value={2}>长期</Radio.Button>
-                            <Radio.Button value={3}>紧急</Radio.Button>
-                            <Radio.Button value={5}>日记</Radio.Button>
-                            <Radio.Button value={6}>工作</Radio.Button>
-                            <Radio.Button value={7}>其他</Radio.Button>
-                        </Radio.Group>
-                        <TextArea rows={16} maxLength={2000} showCount placeholder="请输入备忘内容" value={formData?.content} onChange={(e)=>setFormData({...formData,content:e.target.value})}/>
-                    </Space>
-                </Divider>
-            </Modal>
-        </ConfigProvider>
-
+        <Modal title={data?"编辑备忘":"新增备忘"} open={isOpen} onOk={handleOk} onCancel={()=>setOpen(false)} confirmLoading={confirmLoading}>
+            <Divider plain>
+                <Space direction={'vertical'} block style={{marginBottom:20}}>
+                    <Radio.Group onChange={(e)=>{setFormData({...formData,itemType:e.target.value})}} defaultValue={formData?.itemType} value={formData?.itemType} buttonStyle="solid">
+                        <Radio.Button value={0}>普通</Radio.Button>
+                        <Radio.Button value={1}>循环</Radio.Button>
+                        <Radio.Button value={2}>长期</Radio.Button>
+                        <Radio.Button value={3}>紧急</Radio.Button>
+                        <Radio.Button value={5}>日记</Radio.Button>
+                        <Radio.Button value={6}>工作</Radio.Button>
+                        <Radio.Button value={7}>其他</Radio.Button>
+                    </Radio.Group>
+                    <TextArea rows={16} maxLength={2000} showCount placeholder="请输入备忘内容" value={formData?.content} onChange={(e)=>setFormData({...formData,content:e.target.value})}/>
+                </Space>
+            </Divider>
+        </Modal>
     );
 };
 export default FormModal;
