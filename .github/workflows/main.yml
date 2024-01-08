@@ -36,5 +36,5 @@ jobs:
         rm -rf node_modules  # 移除 node_modules
         mv build/* .
         git add -f *
-        git commit -m "yc自动打包"
+        git commit -m "yc自动打包 - $(date +"%Y-%m-%d %H:%M:%S")"
         git push origin HEAD:build -f
