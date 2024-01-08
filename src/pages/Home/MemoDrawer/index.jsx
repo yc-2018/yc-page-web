@@ -12,8 +12,7 @@ import {
     Badge,
     Space,
     Dropdown,
-    Modal,
-    message
+    Modal
 } from "antd";
 import {BookOutlined, CaretDownOutlined, PlusOutlined, SyncOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
