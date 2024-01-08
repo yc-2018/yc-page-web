@@ -9,7 +9,13 @@ import {
     UserOutlined,
     SyncOutlined,
     DownloadOutlined,
-    HomeTwoTone, PoweroffOutlined, SettingOutlined, CloudUploadOutlined, CloudDownloadOutlined, QuestionCircleTwoTone
+    HomeTwoTone,
+    PoweroffOutlined,
+    SettingOutlined,
+    CloudUploadOutlined,
+    CloudDownloadOutlined,
+    QuestionCircleTwoTone,
+    SmileTwoTone
 } from "@ant-design/icons";
 import {useNavigate} from 'react-router-dom'
 
@@ -262,6 +268,15 @@ function Home() {
                         icon={<QuestionCircleTwoTone />}
                         tooltip="帮助"
                         style={{ right: 190 }}
+                        className='buttonOpacity'
+                    />
+
+                    {/*跳转到博客*/}
+                    <FloatButton
+                        onClick={() => navigate('/blog') }
+                        icon={<SmileTwoTone />}
+                        tooltip="博客"
+                        style={{ right: 245 }}
                         className='buttonOpacity'
                     />
 

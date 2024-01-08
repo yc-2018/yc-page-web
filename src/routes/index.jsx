@@ -15,7 +15,7 @@ export default [
         element:<Help/>
     },
     {
-        path:'/bolg',
+        path:'/blog',
         element:<Blog/>
     },
     {
@@ -31,6 +31,6 @@ export default [
 export const routesName = {
     '/': '仰晨首页',
     '/help': '仰晨-帮助页',
-    '/bolg': '仰晨-博客',
+    '/blog': '仰晨-博客',
 
 }
