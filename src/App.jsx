@@ -6,6 +6,7 @@ import './App.css';
 import routes, {routesName} from "./routes";
 import Head from "./compontets/Head";
 import Msg from "./store/Msg";
+import LoginModal from "./compontets/LoginModal";
 
 export default function App() {
     const element = useRoutes(routes);   //根据路由表生成对应的路由规则
@@ -22,6 +23,7 @@ export default function App() {
             {contextMsg}
             {window.location.pathname === '/' ? null : <Head/>}
             {element}
+            <LoginModal/>
         </ConfigProvider>
     )
 }
