@@ -38,3 +38,17 @@ jobs:
         git add -f *
         git commit -m "yc自动打包 - $(date +"%Y-%m-%d %H:%M:%S")"
         git push origin HEAD:build -f
+
+      # 构建成功后发送邮件
+    - name: Send Email on Success
+      if: success() # 这会确保只在成功时发送邮件
+      uses: dawidd6/action-send-mail@v2
+      with: # 以下是发送邮件需要提供的一些配置信息
+        server_address: smtp.qq.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: 构建成功 - yc自动打包
+        to: ${{ secrets.TO_EMAIL }}
+        from: GitHub Actions
+        body: 构建成功。构建时间：$(date +"%Y-%m-%d %H:%M:%S")
