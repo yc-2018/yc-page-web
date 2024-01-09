@@ -8,17 +8,19 @@ import {getToDoItems} from "../../../request/homeRequest";
 import EmptyList from "../../../compontets/special/EmptyList";
 import {tagList} from "../../../store/NoLoginData";
 import MyButton from "../../../compontets/MyButton";
-import {DeleteOutlined, EditOutlined} from "@ant-design/icons";
+import {DeleteOutlined, EditOutlined, SyncOutlined} from "@ant-design/icons";
 import styles from "../../../common.module.css"
+import Msg from "../../../store/Msg";
 
 let total = 0;    // 初始化待办总数
-let init = true // 第一次加载
+let init = true  // 第一次加载
+let page = 1     // 页码
+let listData = [] // 列表数据
 
 function EnglishDrawer() {
-    const [page, setPage] = useState(1);                         // 待办翻页
-    const [listData, setListData] = useState([]);                  // 待办展示列表数据
     const [webLoading, setWebLoading] = useState(false);        // 网络加载
-    const [refreshTrigger, setRefreshTrigger] = useState(true); // 刷新触发(值无意义，改变即刷新
+
+    const {msg} = Msg
 
     /** 初始化第一次打开时刷新列表数据 */
     useEffect(() => {
@@ -34,17 +36,25 @@ function EnglishDrawer() {
         const resp = await getToDoItems(4, page)
         setWebLoading(false)    // 网络加载
         if (resp?.code === 1) {
-            setListData([...listData, ...resp.data?.records])
+            listData = ([...listData, ...resp.data?.records])
             total = resp.data.total;
-            setPage(page + 1)
+            page++
         }
+    }
+
+    /** 刷新 */
+    const refresh = () => {
+        if (webLoading) return msg.info('正在加载中....')
+        listData = []
+        page = 1
+        getListData()
     }
 
     /** 获取尾部 */
     const getTail = () =>
         webLoading ? <Skeleton/>    // 加载中占位组件
             :
-            total > listData.length ?
+            total > listData?.length ?
                 <div className="loadMore">
                     <MyButton onClick={() => getListData()}>加载更多</MyButton>
                 </div>
@@ -59,7 +69,7 @@ function EnglishDrawer() {
         </Tag>
 
     /** 英语列表生成器 */
-    const buildList = () => listData.map(item => (
+    const buildList = () => listData?.map(item => (
             <Space key={item.id} className={styles.topBottMargin5}>
                 <Space.Compact>
                     <Button icon={<EditOutlined />} /> {/*查看时是编辑按钮 添加时是完成按钮*/}
@@ -78,7 +88,12 @@ function EnglishDrawer() {
                 style={{opacity: 0.8}}
                 open={showOrNot.englishDrawerShow}
                 onClose={() => showOrNot.setEnglishDrawerShow(false)}
-                title={<>备忘英语</>}
+                title={
+                    <>
+                        <SyncOutlined className='refresh' spin={webLoading} onClick={refresh}/>
+                        备忘英语
+                    </>
+                }
         >
             {UserStore.jwt ?
                 <>
