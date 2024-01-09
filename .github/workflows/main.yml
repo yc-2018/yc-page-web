@@ -51,4 +51,4 @@ jobs:
         subject: 构建成功 - yc自动打包
         to: ${{ secrets.TO_EMAIL }}
         from: GitHub Actions
-        body: 构建成功。构建时间：$(date +"%Y-%m-%d %H:%M:%S")
+        body: 构建成功。构建时间:$(date +"%Y-%m-%d %H:%M:%S")
