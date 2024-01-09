@@ -29,7 +29,7 @@ export default [
 ]
 
 export const routesName = {
-    '/': '仰晨首页',
+    '/': 'Open备忘第一页',
     '/help': '仰晨-帮助页',
     '/blog': '仰晨-博客',
 
