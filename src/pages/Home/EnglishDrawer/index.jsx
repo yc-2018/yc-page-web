@@ -1,28 +1,29 @@
 import {observer} from 'mobx-react-lite'
 import React, {useEffect, useState} from "react";
-import {Button, Divider, Drawer, Skeleton} from "antd";
+import {Button, Divider, Drawer, Input, Skeleton, Space, Tag} from "antd";
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
 import {getToDoItems} from "../../../request/homeRequest";
 import EmptyList from "../../../compontets/special/EmptyList";
+import {tagList} from "../../../store/NoLoginData";
+import MyButton from "../../../compontets/MyButton";
 
 let total = 0;    // 初始化待办总数
 let init = true // 第一次加载
+
 function EnglishDrawer() {
     const [page, setPage] = useState(1);                         // 待办翻页
     const [listData, setListData] = useState([]);                  // 待办展示列表数据
     const [webLoading, setWebLoading] = useState(false);        // 网络加载
     const [refreshTrigger, setRefreshTrigger] = useState(true); // 刷新触发(值无意义，改变即刷新
-    const [fModalData, setFModalData] = useState();            // 设置模态框数据
-    const [formModal, setFormModal] = useState(false); // 是否显示新增或编辑的模态框。
 
     useEffect(() => {
         if (init && showOrNot.englishDrawerShow && UserStore.jwt) {
             init = false;
             getListData()
         }
-    }, [showOrNot.englishDrawerShow])
+    }, [showOrNot.englishDrawerShow, UserStore.jwt])
 
     /** 获取列表数据 */
     const getListData = async () => {
@@ -41,11 +42,26 @@ function EnglishDrawer() {
             :
             total > listData.length ?
                 <div className="loadMore">
-                    <Button block onClick={() => getListData()}>加载更多</Button>
+                    <MyButton onClick={() => getListData()}>加载更多</MyButton>
                 </div>
                 :
                 total ? <Divider className='loadMore' plain>🥺到底啦🐾</Divider>
                     : <EmptyList/>   // 没有数据
+
+    const buildTag=(value, color="processing", bordered=false)=>
+        <Tag key={value} bordered={bordered} color={color}>
+            {value}
+        </Tag>
+
+    const buildList = () => listData.map(item =>
+        (<Space key={item.id} >
+            <Space.Compact size="large">
+                <Button></Button>   {/*查看时是编辑按钮 添加时是完成按钮*/}
+                <Input defaultValue={item?.content?.split("@@@")?.[0]} placeholder="英文"/>
+                <Input defaultValue={item?.content?.split("@@@")?.[1]} placeholder="中文"/>
+                <Button></Button>   {/*查看时是删除按钮 编辑时是取消按钮*/}
+            </Space.Compact>
+        </Space>))
 
 
     return (
@@ -58,7 +74,10 @@ function EnglishDrawer() {
         >
             {UserStore.jwt ?
                 <>
-                    { /*获取列表数据*/ listData.map(item => <p key={item.id}>{item.content}</p>)}
+                    <Space size={[0, 'small']} wrap>
+                        { /*渲染26个字母*/ tagList.map(item => buildTag(item.value, item.color))}
+                        { /*渲染列表*/ buildList()}
+                    </Space>
                     { /*获取尾巴*/ getTail()}
                 </>
                 :

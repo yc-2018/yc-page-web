@@ -1,5 +1,6 @@
 import React from "react";
 
+/** 搜索引擎数据 */
 export const searchData =[
     {id:1,  isQuickSearch:0, name: '百度', engineUrl: 'https://www.baidu.com/s?wd=@@@' },
     {id:2,  isQuickSearch:0, name: 'Bing', engineUrl: 'https://www.bing.com/search?q=@@@' },
@@ -66,4 +67,34 @@ export const items = [
         ),
         key: '444',
     },
+];
+
+/** 英语标签 26个字母 26个颜色 */
+export const tagList = [
+    {'value': 'a', 'color': 'processing'},
+    {'value': 'b', 'color':'success'},
+    {'value': 'c', 'color': 'error'},
+    {'value': 'd', 'color': 'warning'},
+    {'value': 'e', 'color': 'magenta'},
+    {'value': 'f', 'color': 'red'},
+    {'value': 'g', 'color': 'volcano'},
+    {'value': 'h', 'color': 'orange'},
+    {'value': 'i', 'color': 'gold'},
+    {'value': 'j', 'color': 'lime'},
+    {'value': 'k', 'color': 'green'},
+    {'value': 'l', 'color': 'cyan'},
+    {'value':'m', 'color': 'blue'},
+    {'value': 'n', 'color': 'geekblue'},
+    {'value': 'o', 'color': 'purple'},
+    {'value': 'p', 'color': 'default'},
+    {'value': 'q', 'color': 'processing'},
+    {'value': 'r', 'color': 'success'},
+    {'value':'s', 'color': 'error'},
+    {'value': 't', 'color': 'warning'},
+    {'value': 'u', 'color': 'magenta'},
+    {'value': 'v', 'color': 'red'},
+    {'value': 'w', 'color': 'volcano'},
+    {'value': 'x', 'color': 'orange'},
+    {'value': 'y', 'color': 'gold'},
+    {'value': 'z', 'color': 'lime'},
 ];
