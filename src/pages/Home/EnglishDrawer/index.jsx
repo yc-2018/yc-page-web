@@ -8,6 +8,7 @@ import {getToDoItems} from "../../../request/homeRequest";
 import EmptyList from "../../../compontets/special/EmptyList";
 import {tagList} from "../../../store/NoLoginData";
 import MyButton from "../../../compontets/MyButton";
+import {DeleteOutlined, EditOutlined} from "@ant-design/icons";
 
 let total = 0;    // 初始化待办总数
 let init = true // 第一次加载
@@ -53,15 +54,17 @@ function EnglishDrawer() {
             {value}
         </Tag>
 
-    const buildList = () => listData.map(item =>
-        (<Space key={item.id} >
-            <Space.Compact size="large">
-                <Button></Button>   {/*查看时是编辑按钮 添加时是完成按钮*/}
-                <Input defaultValue={item?.content?.split("@@@")?.[0]} placeholder="英文"/>
-                <Input defaultValue={item?.content?.split("@@@")?.[1]} placeholder="中文"/>
-                <Button></Button>   {/*查看时是删除按钮 编辑时是取消按钮*/}
-            </Space.Compact>
-        </Space>))
+    const buildList = () => listData.map(item => (
+            <Space key={item.id}>
+                <Space.Compact>
+                    <Button icon={<EditOutlined />} /> {/*查看时是编辑按钮 添加时是完成按钮*/}
+                    <Input value={item?.content?.split("@@@")?.[0]} placeholder="请输入英文"/>
+                    <Input value={item?.content?.split("@@@")?.[1]} placeholder="请输入中文"/>
+                    <Button icon={<DeleteOutlined />} /> {/*查看时是删除按钮 编辑时是取消按钮*/}
+                </Space.Compact>
+            </Space>
+        )
+    )
 
 
     return (
@@ -76,8 +79,8 @@ function EnglishDrawer() {
                 <>
                     <Space size={[0, 'small']} wrap>
                         { /*渲染26个字母*/ tagList.map(item => buildTag(item.value, item.color))}
-                        { /*渲染列表*/ buildList()}
                     </Space>
+                    { /*渲染列表*/ buildList()}
                     { /*获取尾巴*/ getTail()}
                 </>
                 :
