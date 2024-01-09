@@ -279,6 +279,13 @@ function Home() {
             </div>
             {/* 加载动画 */}
             <Spin spinning={CommonStore.loading} fullscreen />
+            <Button type="link"
+                    href="https://beian.miit.gov.cn"
+                    target="_blank"
+                    className={'aButton'}
+            >
+                粤ICP备2024164470号
+            </Button>
         </div>
 
     );

@@ -12,7 +12,7 @@ const { TextArea } = Input;
  * @param {function}    reList          刷新列表
  * @param {number}      currentMemoType 当前备忘类型,编辑的不用，新增的才要
  * */
-const FormModal = ({isOpen,setOpen,data,reList,currentMemoType=4}) => {
+const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
     const [formData, setFormData] = useState(null);
     const [confirmLoading, setConfirmLoading] = useState(false);
     useEffect(()=> {
