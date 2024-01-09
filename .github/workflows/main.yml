@@ -39,10 +39,10 @@ jobs:
         git commit -m "yc自动打包 - $(date +"%Y-%m-%d %H:%M:%S")"
         git push origin HEAD:build -f
 
-    # 先获取当前时间
-    - name: Get Current Time
-      id: current_time
-      run: echo "CURRENT_TIME=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
+    # 先设置时区并获取东八区当前时间
+    - name: Get Beijing Time
+      id: beijing_time
+      run: echo "BEIJING_TIME=$(TZ=Asia/Shanghai date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
 
       # 构建成功后发送邮件
     - name: Send Email on Success
@@ -56,4 +56,4 @@ jobs:
         subject: 构建成功 - yc自动打包
         to: ${{ secrets.TO_EMAIL }}
         from: GitHub Actions
-        body: 构建成功。构建时间：${{ env.CURRENT_TIME }}
+        body: 构建成功。构建时间：${{ env.BEIJING_TIME }}
