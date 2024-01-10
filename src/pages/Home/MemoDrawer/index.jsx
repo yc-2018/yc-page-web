@@ -21,9 +21,10 @@ import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../../request/homeRequest"
 import FormModal from "../../../compontets/FormModal";
-import './MemoDrawer.css'
 import ShowOrNot from "../../../store/ShowOrNot";
 import TextArea from "antd/es/input/TextArea";
+import './MemoDrawer.css'
+import styles from '../../../common.module.css'
 
 let total = -1;    // 初始化待办总数
 let isQueryOnClick = false; // 防止点太快了
@@ -128,7 +129,7 @@ const MemoDrawer = observer(() => {
     const getTag = (TypeNum,typeName,color) =>
             type===TypeNum?undefined:
                 <Badge count={unFinishCounts?.[TypeNum]} size="small" offset={[-5, 2]} title={"未完成的条数"}>
-                    <Tag className='pointer' color={color ?? "processing"} onClick={()=>setType(TypeNum)} >{typeName}</Tag>
+                    <Tag className={styles.pointer} color={color ?? "processing"} onClick={()=>setType(TypeNum)} >{typeName}</Tag>
                 </Badge>
 
 
@@ -146,7 +147,7 @@ const MemoDrawer = observer(() => {
                 }else setItems(item)
             }}
         >
-            <span className='pointer'>
+            <span className={styles.pointer}>
                 &nbsp;&nbsp;&nbsp;<CaretDownOutlined />循环:{updateTime}<CaretDownOutlined />
             </span>
     </Dropdown>

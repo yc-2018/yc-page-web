@@ -1,0 +1,17 @@
+.select-none-left > [class="ant-select-selector"]{
+    border-left: none !important;
+}
+.select-icon{
+    transition: all 0.5s ;
+    border-top: 1px solid #d9d9d9;  /* 顶部边框 */
+    border-bottom: 1px solid #d9d9d9; /* 底部边框 */
+    border-left: 1px solid #d9d9d9;       /* 左侧边框 */
+    color: #c5c5c5;
+    border-radius: 4px 0 0 4px;
+}
+.sParent:hover > .select-icon{
+    border-top: 1px solid #2080f0;  /* 顶部边框 */
+    border-bottom: 1px solid #2080f0; /* 底部边框 */
+    border-left: 1px solid #2080f0;       /* 左侧边框 */
+    color: #6ed3f3;
+}

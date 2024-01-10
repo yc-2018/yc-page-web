@@ -17,3 +17,9 @@ code {
 
 /* 右边圆角6 */
 .rightRadius6 {border-radius: 0 6px 6px 0 !important;}
+
+/*鼠标变小手*/
+.pointer{
+  cursor: pointer;
+  user-select: none;
+}

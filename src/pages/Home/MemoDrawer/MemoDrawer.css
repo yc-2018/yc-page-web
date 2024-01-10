@@ -7,10 +7,6 @@
     height: 32px;
     line-height: 32px;
 }
-/*鼠标变小手*/
-.pointer{
-    cursor: pointer;
-}
 
 /*给备忘录刷新按钮添加样式*/
 .refresh{
@@ -115,5 +111,8 @@
     margin: 0 10px;
 }
 
+[data-action] {
+    user-select: none;  /* 文字不可选中 */
+}
 
 
