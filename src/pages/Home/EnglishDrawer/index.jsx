@@ -6,11 +6,12 @@ import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
 import {getToDoItems} from "../../../request/homeRequest";
 import EmptyList from "../../../compontets/special/EmptyList";
-import {tagList} from "../../../store/NoLoginData";
+import {englishSortingOptions, tagList} from "../../../store/NoLoginData";
 import MyButton from "../../../compontets/MyButton";
 import {DeleteOutlined, EditOutlined, SyncOutlined} from "@ant-design/icons";
-import styles from "../../../common.module.css"
 import Msg from "../../../store/Msg";
+import SortSelect from "../../../compontets/SortSelect";
+import styles from "../../../common.module.css"
 
 let total = 0;    // 初始化待办总数
 let init = true  // 第一次加载
@@ -64,7 +65,7 @@ function EnglishDrawer() {
 
     /** 标签生成器 */
     const buildTag=(value, color="processing", bordered=false)=>
-        <Tag key={value} bordered={bordered} color={color}>
+        <Tag key={value} bordered={bordered} color={color} className={styles.pointer}>
             {value}
         </Tag>
 
@@ -92,6 +93,11 @@ function EnglishDrawer() {
                     <>
                         <SyncOutlined className='refresh' spin={webLoading} onClick={refresh}/>
                         备忘英语
+                        <SortSelect
+                            defaultValue={'5'}
+                            onChange={(value) => console.log(`selected ${value}`)}
+                              options={englishSortingOptions}
+                        />
                     </>
                 }
         >

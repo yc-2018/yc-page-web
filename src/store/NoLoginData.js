@@ -98,3 +98,38 @@ export const tagList = [
     {'value': 'y', 'color': 'gold'},
     {'value': 'z', 'color': 'lime'},
 ];
+
+/** 待办排序 */
+export const sortingOptions = [
+    {
+        value: '1',
+        label: '修改↓',
+    },
+    {
+        value: '2',
+        label: '修改↑',
+    },
+    {
+        value: '3',
+        label: '创建↓',
+    },
+    {
+        value: '4',
+        label: '创建↑',
+    }
+]
+
+
+/** 英语排序 */
+export const englishSortingOptions = [
+    {
+        value: '5',
+        label: 'A↓',
+    },
+    {
+        value: '6',
+        label: 'Z↓',
+    },
+    ...sortingOptions
+]
+
