@@ -9,8 +9,9 @@ import './SortSelect.css'
  * @param {[]}       options 选项
  * @param {number}  width   选项框宽度
  * @param {string} defaultValue 默认值
+ * @param {boolean} loading 是否显示加载中
  * */
-const SortSelect = ({onChange, options,defaultValue , width}) =>
+const SortSelect = ({onChange, options,defaultValue , width,loading}) =>
     <Space style={{margin:'0 8px'}}>
         <Space.Compact className={'sParent'}>
             <SwapOutlined rotate={90} className={'select-icon'}/>
@@ -18,10 +19,10 @@ const SortSelect = ({onChange, options,defaultValue , width}) =>
                 icon={<SwapOutlined rotate={90}/>}
                 size={'small'}
                 defaultValue={defaultValue}
-                style={{width: width ?? 80}}
+                style={{width}}
                 onChange={onChange}
                 options={options}
-                className={'select-none-left'}
+                loading={loading}
             />
         </Space.Compact>
     </Space>

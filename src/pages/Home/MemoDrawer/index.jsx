@@ -11,8 +11,7 @@ import {
     Divider,
     Badge,
     Space,
-    Dropdown,
-    Modal
+    Dropdown
 } from "antd";
 import {BookOutlined, CaretDownOutlined, PlusOutlined, SyncOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
@@ -25,6 +24,7 @@ import ShowOrNot from "../../../store/ShowOrNot";
 import TextArea from "antd/es/input/TextArea";
 import './MemoDrawer.css'
 import styles from '../../../common.module.css'
+import Msg from "../../../store/Msg";
 
 let total = -1;    // 初始化待办总数
 let isQueryOnClick = false; // 防止点太快了
@@ -54,8 +54,6 @@ const MemoDrawer = observer(() => {
     const [formModal, setFormModal] = useState(false); // 是否显示新增或编辑的模态框。
     const [fModalData, setFModalData] = useState();           // 设置模态框数据
     const [items, setItems] = useState(item);    // 设置循环待办的数据
-
-    const [lookModal, contextHolder] = Modal.useModal();
 
     useEffect(() => {
         if (UserStore.jwt) (async () => {
@@ -174,7 +172,7 @@ const MemoDrawer = observer(() => {
             case 'see':
                 // 双击查看
                 if (event.type==='dblclick'){
-                    lookModal.info({
+                    Msg.md.info({
                         title: '查看备忘',
                         maskClosable:true,
                         okText:'看完了',
@@ -321,7 +319,9 @@ const MemoDrawer = observer(() => {
                                     <List.Item.Meta
                                         description={
                                             <div data-id={item.id}>
-                                                <span data-action="see">{item.content}</span>
+                                                <span data-action="see" style={{userSelect:'auto'}}>
+                                                    {item.content}
+                                                </span>
                                                 <br/>
 
                                                 {item.itemType === 1?
@@ -354,7 +354,6 @@ const MemoDrawer = observer(() => {
                     </div>
                 }
                 </Spin>
-                {contextHolder}
             </Drawer>
 
         )

@@ -70,19 +70,19 @@ export default function Bookmarks() {
             </Dropdown>
 
 
-            <Dropdown onClick={() => { Msg.msg.info('微信和电脑是没有反应的,【要手机浏览器打开哇】') }}
+            <Dropdown onClick={() => { Msg.msg.info('不知道怎么写好，害') }}
                 dropdownRender={() =>
                     <img alt src="https://x.chatmindai.net/Logo.png" width={50} />
                 }
             >
-                <Button ghost type="dashed" size='small' href={"dingtalk://dingtalkclient/page/link?url=http://m.hrm.timeexpress.com.cn/M_OrderDinner/QrCode"}>
+                <Button ghost type="dashed" size='small' >
                     吃饭码
                 </Button>
             </Dropdown>
 
 
-            <Dropdown dropdownRender={() => <div />} onClick={() => { Msg.msg.info('微信和电脑是没有反应的,【要手机浏览器打开哇】') }}>
-                <a rel="noopener noreferrer"  href='dingtalk://dingtalkclient/page/link?url=http://m.hrm.timeexpress.com.cn/M_OrderDinner'>约饭</a>
+            <Dropdown dropdownRender={() => <div />}>
+                <a rel="noopener noreferrer"  href='https://ant-design.gitee.io/components/select-cn'>antd选择器</a>
             </Dropdown>
 
         </Space>
