@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
 import React, {useEffect, useState} from "react";
-import {Button, Divider, Drawer, Input, Skeleton, Space, Tag} from "antd";
+import {Button, Divider, Drawer, Input, Skeleton, Space, Tag, Tooltip} from "antd";
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
@@ -13,7 +13,7 @@ import {
     CloseOutlined,
     DeleteOutlined,
     EditOutlined,
-    ExclamationCircleFilled,
+    ExclamationCircleFilled, PlusOutlined,
     SyncOutlined
 } from "@ant-design/icons";
 import Msg from "../../../store/Msg";
@@ -61,23 +61,38 @@ function EnglishDrawer() {
         getListData()
     }
 
-    /** 编辑 or 保存 */
+    /*添加一个单词的输入框而已*/
+    const addEnglish = () => {
+        if (!editId) return;  // 防止点太快了
+        ++total
+        listData = [{id: undefined}, ...listData]
+        setEditId(undefined)
+        setEditEnglish(undefined)
+        setEditChinese(editChinese === undefined ? null : undefined) // 有效驱动页面变化
+    }
+
+    /** 编辑|新增 and 保存 */
     const editOrSave = item => {
         const {id, content} = item
-        const [english, chinese] = content.split('@@@')
+        const [english, chinese] = content?.split('@@@')??[undefined, undefined]
         if (id===editId) {  // 编辑完成保存了
-            if(editEnglish?.trim()?.length > 100 || editChinese?.trim()?.length > 100) return msg.info('输入框最多100个字符')
-            if(english?.trim()===editEnglish?.trim() && chinese?.trim()===editChinese?.trim()) {
-                setEditId(-1)
-                return msg.info('没有变化')
+            if(!editEnglish?.trim() || !editChinese?.trim()) return msg.warning('输入框不能为空')
+            if(editEnglish?.trim()?.length > 100 || editChinese?.trim()?.length > 100) return msg.warning('输入框最多100个字符')
+            if(english?.trim()===editEnglish?.trim() && chinese?.trim()===editChinese?.trim()) return msg.info('没有变化',setEditId(-1))
+
+            if(!editId) {
+                msg.info('新增')
+                item.id = Math.random()
             }
 
-
             msg.info(`█████████发请求${id}${editEnglish}${editChinese}`)
+            // todo 失败就减 --total
             item.content=`███${editEnglish??''}@@@███${editChinese??''}`
+
             setEditId(-1)
         }   // 进入编辑状态
         else {
+            !editId && listData.shift()
             setEditId(id)
             setEditChinese(chinese)
             setEditEnglish(english)
@@ -86,25 +101,27 @@ function EnglishDrawer() {
     /** 删除 or 取消*/
     const deleteOrCancel = item => {
         const {id} = item
-        if (id === editId)   // 取消编辑
+        if (id === editId) {   // 取消编辑
+            !editId && listData.shift() && msg.info('取消新增') && --total
             setEditId(-1)
+        }
         else              // 请求删除
             md.confirm({
                 title: '确定删除吗?',
                 icon: <ExclamationCircleFilled />,
                 content: '删除了就会消失了',
                 onOk() {
+                    --total
                     setEditId(-1 * id)  // 驱动页面变化，因为listData不是状态，无法驱动页面的改变,异步的放前面就行
                     listData = listData.filter(item => item.id !== id)
                     msg.info('█████████删除成功'+id)
-                },
-                onCancel() {},
+                }
             });
     }
 
     /** 获取尾部 */
     const getTail = () =>
-        webLoading ? <Skeleton/>    // 加载中占位组件
+        webLoading ? <><Skeleton active/><Skeleton active/><Skeleton active/></>    // 加载中占位组件
             :
             total > listData?.length ?
                 <div className="loadMore">
@@ -122,16 +139,23 @@ function EnglishDrawer() {
 
     /** 英语列表生成器 */
     const buildList = () => listData?.map(item => (
-            <Space key={item.id} className={styles.topBottMargin5}>
+            <Space key={item.id} className={[styles.topBottMargin5, item.id===editId? styles.borderLight:''].join(' ')} >
                 <Space.Compact>
+                    {/*查看时是编辑按钮 添加时是完成按钮*/}
                     <Button icon={editId===item.id?<CheckOutlined /> : <EditOutlined />}
-                            onClick={() => {editOrSave(item)}}/> {/*查看时是编辑按钮 添加时是完成按钮*/}
-                    <Input value={item.id===editId? editEnglish : item?.content?.split("@@@")?.[0]} placeholder="请输入英文"
+                            onClick={() => {editOrSave(item)}}/>
+
+                    <Input value={item.id===editId? editEnglish : item?.content?.split("@@@")?.[0]?? ''}
+                           placeholder="请输入英文"
                            onChange={e => item.id===editId && setEditEnglish(e.target.value)}/>
-                    <Input value={item.id === editId? editChinese :item?.content?.split("@@@")?.[1]} placeholder="请输入中文"
+                    <Input value={item.id === editId? editChinese :item?.content?.split("@@@")?.[1]?? ''}
+                           placeholder="请输入中文"
                            onChange={e=> item.id === editId && setEditChinese(e.target.value)}/>
+
+                    {/*查看时是删除按钮 编辑时是取消按钮*/}
                     <Button icon={editId===item.id?<CloseOutlined /> : <DeleteOutlined />}
-                            onClick={() => {deleteOrCancel(item)}} className={styles.rightRadius6}/> {/*查看时是删除按钮 编辑时是取消按钮*/}
+                            className={styles.rightRadius6}
+                            onClick={() => {deleteOrCancel(item)}} />
                 </Space.Compact>
             </Space>
         )
@@ -146,8 +170,15 @@ function EnglishDrawer() {
                 onClose={() => showOrNot.setEnglishDrawerShow(false)}
                 title={
                     <>
-                        <SyncOutlined className='refresh' spin={webLoading} onClick={refresh}/>
+                        <SyncOutlined className='refresh' spin={webLoading} onClick={refresh}/> {/*刷新图标*/}
                         备忘英语
+                        <Tooltip title={'添加一个单词'} mouseEnterDelay={1}>                      {/*添加图标*/}
+                            <Button className={"addItemButton"} style={{visibility: editId?'visible': 'hidden'}}
+                                    icon={<PlusOutlined/>} size={"small"}
+                                    onClick={addEnglish}
+                            />
+                        </Tooltip>
+                                                                                        {/*自己搞的《排序下拉框》*/}
                         <SortSelect
                             defaultValue={'5'}
                             onChange={(value) => console.log(`selected ${value}`)}
@@ -161,6 +192,7 @@ function EnglishDrawer() {
                 <>
                     <Space size={[0, 'small']} wrap>
                         { /*渲染26个字母*/ tagList.map(item => buildTag(item.value, item.color))}
+                        { /*总数 */ buildTag(`条总数:${total}`)}
                     </Space>
                     { /*渲染列表*/ buildList()}
                     { /*获取尾巴*/ getTail()}

@@ -314,12 +314,12 @@ const MemoDrawer = observer(() => {
                         loadMore={loadMore}
                         dataSource={list}
                         renderItem={(item) => (
-                            <List.Item key={item.id} className={item.completed&&'finish'}>
+                            <List.Item key={item.id} className={item.completed && 'finish'}>
                                 <Skeleton avatar title={false} loading={item.loading} active>
                                     <List.Item.Meta
                                         description={
                                             <div data-id={item.id}>
-                                                <span data-action="see" style={{userSelect:'auto'}}>
+                                                <span data-action="see" style={{userSelect:'auto'}} className={item.itemType === 3 && !item.completed && styles.gradientText}>
                                                     {item.content}
                                                 </span>
                                                 <br/>
