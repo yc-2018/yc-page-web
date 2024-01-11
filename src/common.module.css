@@ -18,8 +18,21 @@ code {
 /* 右边圆角6 */
 .rightRadius6 {border-radius: 0 6px 6px 0 !important;}
 
-/*鼠标变小手*/
+/* 鼠标变小手 */
 .pointer{
   cursor: pointer;
   user-select: none;
+}
+
+/* 边框发光 */
+.borderLight {
+  border-radius: 6px;
+  box-shadow: 0 0 5px 1px #00800038;
+}
+
+/* 渐变文字 */
+.gradientText {
+  background: -webkit-linear-gradient(61deg, #f12c32, rgb(153 0 255));  /* 背景渐变 */
+  -webkit-background-clip: text;                                        /* 背景剪辑:文字 */
+  -webkit-text-fill-color: transparent;                                 /* 文字颜色透明 */
 }
