@@ -46,6 +46,11 @@ jobs:
         git commit -m "yc自动打包 - ${{ env.BEIJING_TIME }}"
         git push origin HEAD:build -f
 
+    # 请求脚本并获取返回值
+    - name: Run Script and Get Output
+      run: |
+        echo "SCRIPT_OUTPUT=$(curl -s \"${{ secrets.URL }}\")" >> $GITHUB_ENV
+
       # 构建成功后发送邮件
     - name: Send Email on Success
       if: success() # 这会确保只在成功时发送邮件
@@ -58,4 +63,4 @@ jobs:
         subject: 构建成功 - yc自动打包
         to: ${{ secrets.TO_EMAIL }}
         from: GitHub Actions
-        body: 构建成功。构建时间：${{ env.BEIJING_TIME }}
+        body: 构建成功。构建时间：${{ env.BEIJING_TIME }}。脚本输出：${{ env.SCRIPT_OUTPUT }}
