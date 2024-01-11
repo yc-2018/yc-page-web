@@ -1,6 +1,6 @@
 import {useRoutes,useLocation} from 'react-router-dom'
 import React, { useEffect } from 'react';
-import {ConfigProvider, message} from "antd";
+import {ConfigProvider, message, Modal} from "antd";
 
 import './App.css';
 import routes, {routesName} from "./routes";
@@ -12,8 +12,10 @@ export default function App() {
     const element = useRoutes(routes);   //根据路由表生成对应的路由规则
     const location = useLocation();         // 获取当前的路由
     const [messageApi, contextMsg] = message.useMessage();   // 使用message组件
+    const [modal, contextMd] = Modal.useModal();
 
     Msg.setMsg(messageApi); // 将message组件挂载到store中
+    Msg.setMd(modal)
 
     useEffect(() => {
         document.title = routesName[location.pathname]??'未找到页面';
@@ -23,6 +25,7 @@ export default function App() {
             {contextMsg}
             {window.location.pathname === '/' ? null : <Head/>}
             {element}
+            {contextMd}
             <LoginModal/>
         </ConfigProvider>
     )

@@ -33,8 +33,8 @@ function Search() {
     const [rightClickName, setRightClickName] = useState('');   // 右键菜单选中的搜索引擎名字
  // const [searchEngines, setSearchEngines] = useState("Bing");  //放mobx去了
 
-    const [form] = Form.useForm();      // 创建一个表单域
-    const [modal, contextHolder] = Modal.useModal();
+    const {msg, md} = Msg                             // 获取在App组件的上下文的这2货
+    const [form] = Form.useForm(); // 创建一个表单域
     const items = UserStore.jwt? [{label: '编辑', key: EDIT}, {label: '删除', key: DELETE}]: [{label: '登录后可以删除/编辑', key: 'login',disabled: true}]
 
     useEffect(() => {
@@ -66,7 +66,7 @@ function Search() {
         if (!searchValue && isNull) {
             isNull = false
             setTimeout(() => isNull = true, 3000)
-            return Msg.msg.info('检测到搜索框内容为空哦~ 真想为空搜索三秒内再次点击');
+            return msg.info('检测到搜索框内容为空哦~ 真想为空搜索三秒内再次点击');
         }
         if (quickSearchUrl)   // 点击的是快速搜索
             window.open(quickSearchUrl.replace('@@@', searchValue ?? ''), '_blank')
@@ -87,10 +87,10 @@ function Search() {
     const onClick = ({ key }) => {
         // 长度超过10或者有换行的就小细节
         if (rightClickName.length > 10 || rightClickName.includes('\n'))
-            return Msg.msg.info('这么细的边都被你点到了，哈哈哈，往里面点点看');
+            return msg.info('这么细的边都被你点到了，哈哈哈，往里面点点看');
 
         if (key === DELETE)
-            modal.confirm({
+            md.confirm({
                 title: `确定删除 ${rightClickName} 吗?`,
                 content: `${rightClickMenu===SEARCH_OPTION?'搜索引擎':'快速搜索'}删除了就找不回来了...`,
                 async onOk() {
@@ -137,9 +137,9 @@ function Search() {
             .then(async values => {
                 // 普通搜索引擎不能有相同的名字 但是修改搜索引擎可以就是本来的名字
                 if(modalType === 0 && searchOptions.filter(item => item.name === values.name).length!==0 && values.name !== editSearchData?.name)
-                    return Msg.msg.error("普通搜索引擎名称不允许有相同的")
+                    return msg.error("普通搜索引擎名称不允许有相同的")
                 if(modalType === 1 && quickSearch.filter(item => item.name === values.name).length!==0 && values.name !== editSearchData?.name)
-                    return Msg.msg.error("快速搜索引擎名称不允许有相同的")
+                    return msg.error("快速搜索引擎名称不允许有相同的")
 
                 setModalLoading(true)
                 const aSearch = editSearchData?.id? [{...editSearchData, ...values}] : {...values, isQuickSearch:modalType};   // 编辑 还是 添加
@@ -244,7 +244,6 @@ function Search() {
                     </Form.Item>
                 </Form>
             </Modal>
-            {contextHolder}
         </>
     )
 }

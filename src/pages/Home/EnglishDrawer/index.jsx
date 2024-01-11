@@ -8,7 +8,14 @@ import {getToDoItems} from "../../../request/homeRequest";
 import EmptyList from "../../../compontets/special/EmptyList";
 import {englishSortingOptions, tagList} from "../../../store/NoLoginData";
 import MyButton from "../../../compontets/MyButton";
-import {DeleteOutlined, EditOutlined, SyncOutlined} from "@ant-design/icons";
+import {
+    CheckOutlined,
+    CloseOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    ExclamationCircleFilled,
+    SyncOutlined
+} from "@ant-design/icons";
 import Msg from "../../../store/Msg";
 import SortSelect from "../../../compontets/SortSelect";
 import styles from "../../../common.module.css"
@@ -20,8 +27,11 @@ let listData = [] // 列表数据
 
 function EnglishDrawer() {
     const [webLoading, setWebLoading] = useState(false);        // 网络加载
+    const [editId, setEditId] = useState(-1)                    // 编辑的id
+    const [editEnglish, setEditEnglish] = useState(null)                // 编辑英语
+    const [editChinese, setEditChinese] = useState(null)                // 编辑中文
 
-    const {msg} = Msg
+    const {msg,md} = Msg
 
     /** 初始化第一次打开时刷新列表数据 */
     useEffect(() => {
@@ -51,6 +61,47 @@ function EnglishDrawer() {
         getListData()
     }
 
+    /** 编辑 or 保存 */
+    const editOrSave = item => {
+        const {id, content} = item
+        const [english, chinese] = content.split('@@@')
+        if (id===editId) {  // 编辑完成保存了
+            if(editEnglish?.trim()?.length > 100 || editChinese?.trim()?.length > 100) return msg.info('输入框最多100个字符')
+            if(english?.trim()===editEnglish?.trim() && chinese?.trim()===editChinese?.trim()) {
+                setEditId(-1)
+                return msg.info('没有变化')
+            }
+
+
+            msg.info(`█████████发请求${id}${editEnglish}${editChinese}`)
+            item.content=`███${editEnglish??''}@@@███${editChinese??''}`
+            setEditId(-1)
+        }   // 进入编辑状态
+        else {
+            setEditId(id)
+            setEditChinese(chinese)
+            setEditEnglish(english)
+        }
+    }
+    /** 删除 or 取消*/
+    const deleteOrCancel = item => {
+        const {id} = item
+        if (id === editId)   // 取消编辑
+            setEditId(-1)
+        else              // 请求删除
+            md.confirm({
+                title: '确定删除吗?',
+                icon: <ExclamationCircleFilled />,
+                content: '删除了就会消失了',
+                onOk() {
+                    setEditId(-1 * id)  // 驱动页面变化，因为listData不是状态，无法驱动页面的改变,异步的放前面就行
+                    listData = listData.filter(item => item.id !== id)
+                    msg.info('█████████删除成功'+id)
+                },
+                onCancel() {},
+            });
+    }
+
     /** 获取尾部 */
     const getTail = () =>
         webLoading ? <Skeleton/>    // 加载中占位组件
@@ -73,10 +124,14 @@ function EnglishDrawer() {
     const buildList = () => listData?.map(item => (
             <Space key={item.id} className={styles.topBottMargin5}>
                 <Space.Compact>
-                    <Button icon={<EditOutlined />} /> {/*查看时是编辑按钮 添加时是完成按钮*/}
-                    <Input value={item?.content?.split("@@@")?.[0]} placeholder="请输入英文"/>
-                    <Input value={item?.content?.split("@@@")?.[1]} placeholder="请输入中文"/>
-                    <Button icon={<DeleteOutlined />} className={styles.rightRadius6}/> {/*查看时是删除按钮 编辑时是取消按钮*/}
+                    <Button icon={editId===item.id?<CheckOutlined /> : <EditOutlined />}
+                            onClick={() => {editOrSave(item)}}/> {/*查看时是编辑按钮 添加时是完成按钮*/}
+                    <Input value={item.id===editId? editEnglish : item?.content?.split("@@@")?.[0]} placeholder="请输入英文"
+                           onChange={e => item.id===editId && setEditEnglish(e.target.value)}/>
+                    <Input value={item.id === editId? editChinese :item?.content?.split("@@@")?.[1]} placeholder="请输入中文"
+                           onChange={e=> item.id === editId && setEditChinese(e.target.value)}/>
+                    <Button icon={editId===item.id?<CloseOutlined /> : <DeleteOutlined />}
+                            onClick={() => {deleteOrCancel(item)}} className={styles.rightRadius6}/> {/*查看时是删除按钮 编辑时是取消按钮*/}
                 </Space.Compact>
             </Space>
         )
@@ -96,7 +151,8 @@ function EnglishDrawer() {
                         <SortSelect
                             defaultValue={'5'}
                             onChange={(value) => console.log(`selected ${value}`)}
-                              options={englishSortingOptions}
+                            options={englishSortingOptions}
+                            loading={webLoading}
                         />
                     </>
                 }
