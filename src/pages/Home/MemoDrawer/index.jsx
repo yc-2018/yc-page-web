@@ -319,7 +319,7 @@ const MemoDrawer = observer(() => {
                                     <List.Item.Meta
                                         description={
                                             <div data-id={item.id}>
-                                                <span data-action="see" style={{userSelect:'auto'}} className={item.itemType === 3 && !item.completed && styles.gradientText}>
+                                                <span data-action="see" style={{userSelect:'auto'}} className={(item.itemType === 3 && !item.completed && styles.gradientText) || null}>
                                                     {item.content}
                                                 </span>
                                                 <br/>

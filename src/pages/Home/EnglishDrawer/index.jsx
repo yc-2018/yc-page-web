@@ -4,7 +4,7 @@ import {Button, Divider, Drawer, Input, Skeleton, Space, Tag, Tooltip} from "ant
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
-import {getToDoItems} from "../../../request/homeRequest";
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../../request/homeRequest";
 import EmptyList from "../../../compontets/special/EmptyList";
 import {englishSortingOptions, tagList} from "../../../store/NoLoginData";
 import MyButton from "../../../compontets/MyButton";
@@ -72,34 +72,43 @@ function EnglishDrawer() {
     }
 
     /** 编辑|新增 and 保存 */
-    const editOrSave = item => {
-        const {id, content} = item
-        const [english, chinese] = content?.split('@@@')??[undefined, undefined]
-        if (id===editId) {  // 编辑完成保存了
+    const editOrSave = async item => {
+        const {id} = item
+        const [english, chinese] = item?.content?.split('@@@')??[undefined, undefined]
+        const content = `${editEnglish?.trim()??''}@@@${editChinese?.trim()??''}`
+        if (id === editId) {  // 编辑完成保存了
             if(!editEnglish?.trim() || !editChinese?.trim()) return msg.warning('输入框不能为空')
             if(editEnglish?.trim()?.length > 100 || editChinese?.trim()?.length > 100) return msg.warning('输入框最多100个字符')
-            if(english?.trim()===editEnglish?.trim() && chinese?.trim()===editChinese?.trim()) return msg.info('没有变化',setEditId(-1))
+            if(content === item.content) return msg.info('没有变化',setEditId(-1))
 
-            if(!editId) {
-                msg.info('新增')
-                item.id = Math.random()
+            if(!editId) {   // 新增请求
+                // todo 加载样式
+                const saveResp = await saveOrUpdateToDoItem({itemType: 4,content})
+                // todo 加载样式
+                if(saveResp) {
+                    item.id = saveResp
+                    item.content = content
+                    setEditId(-1)
+                }
+            }else{          // 修改请求
+                // todo 加载样式
+                const updateResp = await saveOrUpdateToDoItem({id: item.id,content},'put')
+                // todo 加载样式
+                if(updateResp) {
+                    setEditId(-1)
+                    item.content = `${editEnglish ?? ''}@@@${editChinese ?? ''}`
+                }
             }
-
-            msg.info(`█████████发请求${id}${editEnglish}${editChinese}`)
-            // todo 失败就减 --total
-            item.content=`███${editEnglish??''}@@@███${editChinese??''}`
-
-            setEditId(-1)
         }   // 进入编辑状态
         else {
-            !editId && listData.shift()
+            !editId && listData.shift() && --total
             setEditId(id)
             setEditChinese(chinese)
             setEditEnglish(english)
         }
     }
     /** 删除 or 取消*/
-    const deleteOrCancel = item => {
+    const deleteOrCancel =async item => {
         const {id} = item
         if (id === editId) {   // 取消编辑
             !editId && listData.shift() && msg.info('取消新增') && --total
@@ -110,11 +119,17 @@ function EnglishDrawer() {
                 title: '确定删除吗?',
                 icon: <ExclamationCircleFilled />,
                 content: '删除了就会消失了',
-                onOk() {
-                    --total
-                    setEditId(-1 * id)  // 驱动页面变化，因为listData不是状态，无法驱动页面的改变,异步的放前面就行
-                    listData = listData.filter(item => item.id !== id)
-                    msg.info('█████████删除成功'+id)
+                onOk () {
+                    (async ()=>{
+                        // todo 加载样式
+                        const delResp = await delToDoItem(id)
+                        // todo 加载样式
+                        if (delResp) {
+                            --total
+                            setEditId(-1 * id)  // 驱动页面变化，因为listData不是状态，无法驱动页面的改变,异步的放前面就行
+                            listData = listData.filter(item => item.id !== id)
+                        }
+                    })()
                 }
             });
     }
@@ -139,7 +154,7 @@ function EnglishDrawer() {
 
     /** 英语列表生成器 */
     const buildList = () => listData?.map(item => (
-            <Space key={item.id} className={[styles.topBottMargin5, item.id===editId? styles.borderLight:''].join(' ')} >
+            <Space key={item.id} className={[styles.topBottMargin5, (item.id===editId && styles.borderLight)||''].join(' ')} >
                 <Space.Compact>
                     {/*查看时是编辑按钮 添加时是完成按钮*/}
                     <Button icon={editId===item.id?<CheckOutlined /> : <EditOutlined />}

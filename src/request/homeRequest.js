@@ -92,8 +92,8 @@ export async function saveOrUpdateToDoItem(body,requestType='post') {
     try {
         const response = await myAxios({url: '/toDoItems',method: requestType, data : body});
         if (response.data.code === 1) {
-            Msg.msg.success("成功");
-            return true;
+            Msg.msg.success(`${requestType === 'post'?'添加':'修改'}成功`);
+            return response.data.data;
         }
     } catch (error) {console.error('待办请求失败:', error)}
 }
