@@ -1,4 +1,4 @@
-.select-none-left > [class="ant-select-selector"]{
+.sParent > span+div > div{
     border-left: none !important;
 }
 .select-icon{
