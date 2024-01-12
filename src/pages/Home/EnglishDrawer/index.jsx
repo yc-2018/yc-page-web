@@ -1,6 +1,13 @@
 import {observer} from 'mobx-react-lite'
 import React, {useEffect, useState} from "react";
-import {Button, Divider, Drawer, Input, Skeleton, Space, Spin, Tag} from "antd";
+import {Button, Divider, Drawer, Input, Skeleton, Space, Spin, Tag, Tooltip} from "antd";
+import {
+    CheckOutlined,
+    CloseOutlined, DashboardOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    ExclamationCircleFilled, PlusCircleOutlined, SyncOutlined, ZoomInOutlined
+} from "@ant-design/icons";
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
@@ -8,13 +15,6 @@ import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../../request/
 import EmptyList from "../../../compontets/common/EmptyList";
 import {englishSortingOptions, tagList} from "../../../store/NoLoginData";
 import MyButton from "../../../compontets/MyButton";
-import {
-    CheckOutlined,
-    CloseOutlined, DashboardOutlined,
-    DeleteOutlined,
-    EditOutlined,
-    ExclamationCircleFilled, PlusCircleOutlined, SyncOutlined
-} from "@ant-design/icons";
 import Msg from "../../../store/Msg";
 import SortSelect from "../../../compontets/SortSelect";
 import styles from "../../../common.module.css"
@@ -25,7 +25,9 @@ let init = true  // 第一次加载
 let page = 1     // 页码
 let listData = [] // 列表数据
 
-let orderBy = 5; // 《表单》默认排序方式
+let orderBy = 5;     // 《表单》默认排序方式
+let firstLetter = null; // 《表单》首字母
+let keyword = null;     // 《表单》关键词
 
 function EnglishDrawer() {
     const [webLoading, setWebLoading] = useState(false);        // 网络加载(加载列表和刷新用
@@ -47,7 +49,7 @@ function EnglishDrawer() {
     /** 获取列表数据 */
     const getListData = async () => {
         setWebLoading(true)     // 网络加载
-        const resp = await getToDoItems({type:4, page,orderBy})
+        const resp = await getToDoItems({type:4, page,orderBy, firstLetter, keyword})
         setWebLoading(false)    // 网络加载
         if (resp?.code === 1) {
             listData = ([...listData, ...resp.data?.records])
@@ -59,6 +61,14 @@ function EnglishDrawer() {
     /** 刷新 */
     const refresh = () => {
         if (webLoading) return msg.info('正在加载中....')
+        orderBy = 5;        // 《表单》默认排序方式
+        firstLetter = null; // 《表单》首字母
+        keyword = null;     // 《表单》关键词
+        reset()
+    }
+
+    /** 不重置条件获取列表数据 */
+    const reset = () => {
         listData = []
         page = 1
         getListData()
@@ -139,6 +149,7 @@ function EnglishDrawer() {
             });
     }
 
+
     /** 获取尾部 */
     const getTail = () =>
         webLoading ? <><Skeleton active/><Skeleton active/><Skeleton active/></>    // 加载中占位组件
@@ -152,7 +163,7 @@ function EnglishDrawer() {
                     : <EmptyList/>   // 没有数据
 
     /** 标签生成器 */
-    const buildTag=(value, color="processing",icon, bordered=false, onClick)=>
+    const buildTag=(value, color="processing",icon, onClick, bordered=false)=>
         <Tag key={value} bordered={bordered} color={color} icon={icon} className={styles.pointer} onClick={onClick}>
             {value}
         </Tag>
@@ -175,7 +186,7 @@ function EnglishDrawer() {
                     {/*查看时是删除按钮 编辑时是取消按钮*/}
                     <Button icon={editId===item.id?<CloseOutlined /> : <DeleteOutlined />}
                             className={styles.rightRadius6}
-                            onClick={() => {deleteOrCancel(item)}} />
+                            onClick={() => deleteOrCancel(item)} />
                 </Space.Compact>
             </Space>
         )
@@ -184,13 +195,6 @@ function EnglishDrawer() {
 
     return (
         <Drawer placement="left"
-                extra={/*自己搞的《排序下拉框》*/
-                    <SortSelect
-                        defaultValue={'5'}
-                        onChange={(value) => console.log(`selected ${value}`)}
-                        options={englishSortingOptions}
-                        loading={webLoading}
-                    />}
                 width={450}
                 closeIcon={false}
                 style={{opacity: 0.8}}
@@ -202,13 +206,31 @@ function EnglishDrawer() {
                         备忘英语
                     </Spin>
                 }
+                extra={<>
+                    {/*筛选的字母*/ firstLetter &&
+                        <Tooltip placement="bottomLeft" title={'点击取消筛选'+firstLetter}>                        {/*↓这不是参数，就是赋值↓*/}
+                            {buildTag(firstLetter, 'success', <ZoomInOutlined />, () => reset(firstLetter=undefined))}
+                        </Tooltip>
+                    }
+                    <SortSelect             /*自己搞的《排序下拉框》*/
+                        value={orderBy}
+                        onChange={value => reset(orderBy = value)/*这不是传参，就是赋值*/}
+                        options={englishSortingOptions}
+                        loading={webLoading}
+                    />
+                </>}
         >
             {UserStore.jwt ?
                 <Spin indicator={<LoaderWhite/>} spinning={reqLoading}>
                     <Space size={[0, 'small']} wrap>
-                        { /*渲染26个字母*/ tagList.map(item => buildTag(item.value, item.color))}
-                        { /*添加一条 */ buildTag(`添加一条`, '#75b659', <PlusCircleOutlined />, false, addEnglish)}
-                        { /*总数 */ buildTag(`条总数:${total}`, '#55acee', <DashboardOutlined />)}
+                        { /*渲染26个字母*/ tagList.map(item => buildTag(item.value, item.color,undefined,()=> {
+                            if (item.value === firstLetter) return msg.info(`${item.value}字母已选中`)
+                            firstLetter = item.value
+                            reset()
+                        }))}
+                        { /*添加一条 */ buildTag(`添加一条`, '#75b659', <PlusCircleOutlined />, addEnglish)}
+                        { /*重置列表 */ buildTag('重置列表', '#fa575c', <SyncOutlined spin={webLoading}/>, refresh)}
+                        { /*总数 */ buildTag(`总数:${total}`, '#55acee', <DashboardOutlined />)}
                     </Space>
                     { /*渲染列表*/ buildList()}
                     { /*获取尾巴*/ getTail()}
