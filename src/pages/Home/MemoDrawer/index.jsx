@@ -64,7 +64,7 @@ const MemoDrawer = observer(() => {
             setPage(1)              // 待办翻页重置
             total = -1;                   // 待办总数重置
             // 使用 axios 发起请求 获取又一次初始化待办列表
-            const resp = await getToDoItems(type, 1, completed);
+            const resp = await getToDoItems({type, page:1, completed});
             if (!(resp?.code === 1)) {
                 setInitLoading(false);
                 setWebLoading(false);
@@ -101,7 +101,7 @@ const MemoDrawer = observer(() => {
         );
 
         // 使用 axios 发起请求
-        const {data:respData} = await getToDoItems(type, page + 1,completed);
+        const {data:respData} = await getToDoItems({type, page: page+1, completed});
         // 结合旧数据和新数据
         const newData = data.concat(respData.records);
         setData(newData);

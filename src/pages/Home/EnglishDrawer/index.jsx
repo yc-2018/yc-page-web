@@ -1,11 +1,11 @@
 import {observer} from 'mobx-react-lite'
 import React, {useEffect, useState} from "react";
-import {Button, Divider, Drawer, Input, Skeleton, Space, Tag, Tooltip} from "antd";
+import {Button, Divider, Drawer, Input, Skeleton, Space, Spin, Tag, Tooltip} from "antd";
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../../request/homeRequest";
-import EmptyList from "../../../compontets/special/EmptyList";
+import EmptyList from "../../../compontets/common/EmptyList";
 import {englishSortingOptions, tagList} from "../../../store/NoLoginData";
 import MyButton from "../../../compontets/MyButton";
 import {
@@ -19,14 +19,18 @@ import {
 import Msg from "../../../store/Msg";
 import SortSelect from "../../../compontets/SortSelect";
 import styles from "../../../common.module.css"
+import LoaderWhite from "../../../compontets/common/LoaderWhite";
 
 let total = 0;    // 初始化待办总数
 let init = true  // 第一次加载
 let page = 1     // 页码
 let listData = [] // 列表数据
 
+let orderBy = 5; // 《表单》默认排序方式
+
 function EnglishDrawer() {
-    const [webLoading, setWebLoading] = useState(false);        // 网络加载
+    const [webLoading, setWebLoading] = useState(false);        // 网络加载(加载列表和刷新用
+    const [reqLoading, setReqLoading] = useState(false);        // 网络请求（单个处理
     const [editId, setEditId] = useState(-1)                    // 编辑的id
     const [editEnglish, setEditEnglish] = useState(null)                // 编辑英语
     const [editChinese, setEditChinese] = useState(null)                // 编辑中文
@@ -44,7 +48,7 @@ function EnglishDrawer() {
     /** 获取列表数据 */
     const getListData = async () => {
         setWebLoading(true)     // 网络加载
-        const resp = await getToDoItems(4, page)
+        const resp = await getToDoItems({type:4, page,orderBy})
         setWebLoading(false)    // 网络加载
         if (resp?.code === 1) {
             listData = ([...listData, ...resp.data?.records])
@@ -61,7 +65,7 @@ function EnglishDrawer() {
         getListData()
     }
 
-    /*添加一个单词的输入框而已*/
+    /** 添加一个单词的输入框而已 */
     const addEnglish = () => {
         if (!editId) return;  // 防止点太快了
         ++total
@@ -82,18 +86,18 @@ function EnglishDrawer() {
             if(content === item.content) return msg.info('没有变化',setEditId(-1))
 
             if(!editId) {   // 新增请求
-                // todo 加载样式
+                setReqLoading(true)
                 const saveResp = await saveOrUpdateToDoItem({itemType: 4,content})
-                // todo 加载样式
+                setReqLoading(false)
                 if(saveResp) {
                     item.id = saveResp
                     item.content = content
                     setEditId(-1)
                 }
             }else{          // 修改请求
-                // todo 加载样式
+                setReqLoading(true)
                 const updateResp = await saveOrUpdateToDoItem({id: item.id,content},'put')
-                // todo 加载样式
+                setReqLoading(false)
                 if(updateResp) {
                     setEditId(-1)
                     item.content = `${editEnglish ?? ''}@@@${editChinese ?? ''}`
@@ -119,17 +123,18 @@ function EnglishDrawer() {
                 title: '确定删除吗?',
                 icon: <ExclamationCircleFilled />,
                 content: '删除了就会消失了',
+                confirmLoading: true,
                 onOk () {
-                    (async ()=>{
-                        // todo 加载样式
+                    return new Promise(async (resolve, reject)=>{
                         const delResp = await delToDoItem(id)
-                        // todo 加载样式
                         if (delResp) {
                             --total
                             setEditId(-1 * id)  // 驱动页面变化，因为listData不是状态，无法驱动页面的改变,异步的放前面就行
                             listData = listData.filter(item => item.id !== id)
+                            return resolve()    // 成功,关闭按钮加载 关闭窗口
                         }
-                    })()
+                        return reject() // 失败，关闭按钮加载,关闭窗口
+                    })
                 }
             });
     }
@@ -184,7 +189,7 @@ function EnglishDrawer() {
                 open={showOrNot.englishDrawerShow}
                 onClose={() => showOrNot.setEnglishDrawerShow(false)}
                 title={
-                    <>
+                    <Spin indicator={<></>} spinning={reqLoading}>
                         <SyncOutlined className='refresh' spin={webLoading} onClick={refresh}/> {/*刷新图标*/}
                         备忘英语
                         <Tooltip title={'添加一个单词'} mouseEnterDelay={1}>                      {/*添加图标*/}
@@ -200,18 +205,18 @@ function EnglishDrawer() {
                             options={englishSortingOptions}
                             loading={webLoading}
                         />
-                    </>
+                    </Spin>
                 }
         >
             {UserStore.jwt ?
-                <>
+                <Spin indicator={<LoaderWhite/>} spinning={reqLoading}>
                     <Space size={[0, 'small']} wrap>
                         { /*渲染26个字母*/ tagList.map(item => buildTag(item.value, item.color))}
                         { /*总数 */ buildTag(`条总数:${total}`)}
                     </Space>
                     { /*渲染列表*/ buildList()}
                     { /*获取尾巴*/ getTail()}
-                </>
+                </Spin>
                 :
                 <div className='loadMore' onClick={() => UserStore.setOpenModal(true)}>
                     <Divider plain>🥺<Button type="link">请先登录</Button>🐾</Divider>

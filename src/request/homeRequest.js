@@ -75,11 +75,25 @@ export async function login(loginCode,expireTime='bt') {
 }
 
 
-/** 获取一个类型的待办列表 循环的先默认给个30条其他的还是默认10条*/
-export async function getToDoItems(type=0, page=1,completed=0) {
+/** 获取一个类型的待办列表 循环的先默认给个30条其他的还是默认10条
+* @param page      第几页
+* @param pageSize  每页多少条
+* @param completed 想看的完成类型 0 未完成 1 已完成 -1 全部
+* @param type      待办类型
+* @param orderBy  排序方式 1：更新时间↓ 2：更新时间↑ 3：创建时间↓ 4：创建时间↑ 5：A↓ 6：Z↓
+* @param firstLetter 从哪个字母开始查询
+* @param keyword  搜索关键词
+*/
+export async function getToDoItems({type = 0, page = 1, completed = 0, orderBy, firstLetter, keyword}) {
+    const pageSize = type === 1?'&pageSize=30':'';   // 如果是循环待办就默认30条
+    page = `?page=${page}`;
+    completed= `&completed=${completed}`;                   // 完成?
+    orderBy = orderBy?`&orderBy=${orderBy}`:'';             // 排序
+    firstLetter = firstLetter?`&firstLetter=${firstLetter}`:'';
+    keyword = keyword ?`&keyword=${keyword}`:'';
     try {
         const response = await myAxios
-            .get(`/toDoItems/${type}?page=${page}&completed=${completed}${type===1?'&pageSize=30':''}`);
+            .get(`/toDoItems/${type + page + completed + pageSize + orderBy + firstLetter + keyword}`);
         return response.data;
     } catch (error) {
         console.error('待办请求失败:', error);
