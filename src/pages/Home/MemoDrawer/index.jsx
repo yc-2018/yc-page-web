@@ -258,6 +258,7 @@ const MemoDrawer = observer(() => {
                     onClose={() => showOrNot.setMemoDrawerShow(false)}
                     open={showOrNot.memoDrawerShow}
                     style={{opacity: 0.8}}
+                    width={450}
                     closeIcon={false}
                     title={<>
                     <Spin spinning={webLoading} indicator={<></>}>

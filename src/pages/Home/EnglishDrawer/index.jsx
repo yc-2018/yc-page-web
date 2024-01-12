@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
 import React, {useEffect, useState} from "react";
-import {Button, Divider, Drawer, Input, Skeleton, Space, Spin, Tag, Tooltip} from "antd";
+import {Button, Divider, Drawer, Input, Skeleton, Space, Spin, Tag} from "antd";
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
@@ -10,11 +10,10 @@ import {englishSortingOptions, tagList} from "../../../store/NoLoginData";
 import MyButton from "../../../compontets/MyButton";
 import {
     CheckOutlined,
-    CloseOutlined,
+    CloseOutlined, DashboardOutlined,
     DeleteOutlined,
     EditOutlined,
-    ExclamationCircleFilled, PlusOutlined,
-    SyncOutlined
+    ExclamationCircleFilled, PlusCircleOutlined, SyncOutlined
 } from "@ant-design/icons";
 import Msg from "../../../store/Msg";
 import SortSelect from "../../../compontets/SortSelect";
@@ -63,11 +62,12 @@ function EnglishDrawer() {
         listData = []
         page = 1
         getListData()
+        setEditId(-1)
     }
 
     /** 添加一个单词的输入框而已 */
     const addEnglish = () => {
-        if (!editId) return;  // 防止点太快了
+        if (!editId) return msg.info('请在列表一个条输入');  // 防止点太快了
         ++total
         listData = [{id: undefined}, ...listData]
         setEditId(undefined)
@@ -152,14 +152,14 @@ function EnglishDrawer() {
                     : <EmptyList/>   // 没有数据
 
     /** 标签生成器 */
-    const buildTag=(value, color="processing", bordered=false)=>
-        <Tag key={value} bordered={bordered} color={color} className={styles.pointer}>
+    const buildTag=(value, color="processing",icon, bordered=false, onClick)=>
+        <Tag key={value} bordered={bordered} color={color} icon={icon} className={styles.pointer} onClick={onClick}>
             {value}
         </Tag>
 
     /** 英语列表生成器 */
     const buildList = () => listData?.map(item => (
-            <Space key={item.id} className={[styles.topBottMargin5, (item.id===editId && styles.borderLight)||''].join(' ')} >
+            <Space key={item.id?? 'newItem'} className={[styles.topBottMargin5, (item.id===editId && styles.borderLight)||''].join(' ')} >
                 <Space.Compact>
                     {/*查看时是编辑按钮 添加时是完成按钮*/}
                     <Button icon={editId===item.id?<CheckOutlined /> : <EditOutlined />}
@@ -184,6 +184,14 @@ function EnglishDrawer() {
 
     return (
         <Drawer placement="left"
+                extra={/*自己搞的《排序下拉框》*/
+                    <SortSelect
+                        defaultValue={'5'}
+                        onChange={(value) => console.log(`selected ${value}`)}
+                        options={englishSortingOptions}
+                        loading={webLoading}
+                    />}
+                width={450}
                 closeIcon={false}
                 style={{opacity: 0.8}}
                 open={showOrNot.englishDrawerShow}
@@ -192,19 +200,6 @@ function EnglishDrawer() {
                     <Spin indicator={<></>} spinning={reqLoading}>
                         <SyncOutlined className='refresh' spin={webLoading} onClick={refresh}/> {/*刷新图标*/}
                         备忘英语
-                        <Tooltip title={'添加一个单词'} mouseEnterDelay={1}>                      {/*添加图标*/}
-                            <Button className={"addItemButton"} style={{visibility: editId?'visible': 'hidden'}}
-                                    icon={<PlusOutlined/>} size={"small"}
-                                    onClick={addEnglish}
-                            />
-                        </Tooltip>
-                                                                                        {/*自己搞的《排序下拉框》*/}
-                        <SortSelect
-                            defaultValue={'5'}
-                            onChange={(value) => console.log(`selected ${value}`)}
-                            options={englishSortingOptions}
-                            loading={webLoading}
-                        />
                     </Spin>
                 }
         >
@@ -212,7 +207,8 @@ function EnglishDrawer() {
                 <Spin indicator={<LoaderWhite/>} spinning={reqLoading}>
                     <Space size={[0, 'small']} wrap>
                         { /*渲染26个字母*/ tagList.map(item => buildTag(item.value, item.color))}
-                        { /*总数 */ buildTag(`条总数:${total}`)}
+                        { /*添加一条 */ buildTag(`添加一条`, '#75b659', <PlusCircleOutlined />, false, addEnglish)}
+                        { /*总数 */ buildTag(`条总数:${total}`, '#55acee', <DashboardOutlined />)}
                     </Space>
                     { /*渲染列表*/ buildList()}
                     { /*获取尾巴*/ getTail()}
