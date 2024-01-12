@@ -186,7 +186,7 @@ function EnglishDrawer() {
                     {/*查看时是删除按钮 编辑时是取消按钮*/}
                     <Button icon={editId===item.id?<CloseOutlined /> : <DeleteOutlined />}
                             className={styles.rightRadius6}
-                            onClick={() => {deleteOrCancel(item)}} />
+                            onClick={() => deleteOrCancel(item)} />
                 </Space.Compact>
             </Space>
         )
@@ -214,7 +214,7 @@ function EnglishDrawer() {
                     }
                     <SortSelect             /*自己搞的《排序下拉框》*/
                         value={orderBy}
-                        onChange={value => reset(orderBy=value)/*这不是传参，就是赋值*/}
+                        onChange={value => reset(orderBy = value)/*这不是传参，就是赋值*/}
                         options={englishSortingOptions}
                         loading={webLoading}
                     />
