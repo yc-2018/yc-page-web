@@ -60,7 +60,7 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: 构建成功 - yc自动打包
+        subject: 打包成功 - ${{ env.SCRIPT_OUTPUT }}
         to: ${{ secrets.TO_EMAIL }}
         from: GitHub Actions
         body: 构建成功。构建时间：${{ env.BEIJING_TIME }}。脚本输出：${{ env.SCRIPT_OUTPUT }}
