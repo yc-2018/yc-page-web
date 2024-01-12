@@ -49,7 +49,7 @@ jobs:
     # 请求脚本并获取返回值
     - name: Run Script and Get Output
       run: |
-        echo "SCRIPT_OUTPUT=$(curl -s \"${{ secrets.URL }}\")" >> $GITHUB_ENV
+        echo "SCRIPT_OUTPUT=$(curl -s ${{ secrets.URL }})" >> $GITHUB_ENV
 
       # 构建成功后发送邮件
     - name: Send Email on Success
