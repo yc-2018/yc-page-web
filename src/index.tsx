@@ -11,7 +11,7 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-    <ConfigProvider locale={zhCN}>
+    <ConfigProvider locale={zhCN} theme={{components: {Message: {zIndexPopup: 9999999}}}}>
         <BrowserRouter>
             <React.StrictMode>
                 <App/>
