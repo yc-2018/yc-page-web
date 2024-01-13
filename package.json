@@ -12,6 +12,7 @@
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "antd": "^5.11.1",
+    "antd-mobile": "^5.34.0",
     "axios": "^1.6.2",
     "mobx": "^6.11.0",
     "mobx-react-lite": "^4.0.5",
