@@ -40,7 +40,8 @@ jobs:
         git config --local user.name "Yc Action"
         git checkout --orphan temp-build
         git rm -rf .
-        rm -rf node_modules  # 移除 node_modules
+        rm -rf node_modules                       # 移除 node_modules
+        find . -name "*s.map" -exec rm -f {} \;   # 移除所有js.map和css.map文件
         mv build/* .
         git add -f *
         git commit -m "yc自动打包 - ${{ env.BEIJING_TIME }}"
