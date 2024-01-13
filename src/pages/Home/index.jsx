@@ -2,7 +2,7 @@ import React, { useState ,useEffect  } from 'react';
 import axios from "axios";
 import Bookmarks from './Bookmarks';
 import { observer } from 'mobx-react-lite'
-import {Button, FloatButton, Input, Spin} from "antd";
+import {Button, FloatButton, Input} from "antd";
 import {
     PictureTwoTone,
     SnippetsTwoTone,
@@ -27,13 +27,13 @@ import {reImagesUrl, uploadInfo, getPageInfo} from "../../request/homeRequest";
 import UserStore from "../../store/UserStore";
 import CommonStore from "../../store/CommonStore";
 import JWTUtils from  "../../utils/JWTUtils"
-import Msg from "../../store/Msg";
 import "./Home.css"
 
 
 function Home() {
     const [images, setImages] = useState('/Default-wallpaper.jpg');// 背景背景
 
+    const { msg } = CommonStore;
     const navigate = useNavigate()   // 路由跳转
     let backgroundImage = localStorage.getItem('backgroundImages'); // 尝试获取本地存储的背景URL
     let {jwt} = UserStore;
@@ -53,7 +53,7 @@ function Home() {
     const reImages = async(bzType) => {
         const imgUrl = await reImagesUrl(bzType);
         if (imgUrl) setBgImage(imgUrl, '获取背景成功，喜欢的话请手动点击上传到云端☁');
-        else Msg.msg.info('获取背景出错');
+        else msg.info('获取背景出错');
     }
 
     /**  获取本地记录背景URL */
@@ -63,7 +63,7 @@ function Home() {
     const setBgImage = (backgroundUrl,msg=null)=> {
         localStorage.setItem('backgroundImages', backgroundUrl);
         setImages(backgroundUrl);
-        return msg && Msg.msg.info(msg);
+        return msg && CommonStore.msg.info(msg);
     }
 
 
@@ -130,7 +130,7 @@ function Home() {
                                     onClick={async()=> {
                                         const {backgroundUrl} = await getPageInfo()
                                         if (backgroundUrl) setBgImage(backgroundUrl,'获取背景成功')   // 设置背景
-                                         else Msg.msg.error('您还没有上传过背景到服务器哦');
+                                         else msg.error('您还没有上传过背景到服务器哦');
                                     }}
                                 />
 
@@ -186,7 +186,7 @@ function Home() {
                                 <Input placeholder="自定义背景链接，回车加载" onPressEnter={event => {
                                     if (/^(http|https):\/\/.+/.test(event.target.value))
                                         setBgImage(event.target.value,'正在设置中...') // 设置背景
-                                    else Msg.msg.error('请输入正确的链接');
+                                    else msg.error('请输入正确的链接');
                                 }}/>
                                 </div> }
                             className='buttonOpacity'
@@ -219,7 +219,7 @@ function Home() {
                                     style={{ right: 135 }}
                                     className='buttonOpacity'
                                     onClick={() => {
-                                        Msg.msg.info('还没写呢...');
+                                        msg.info('还没写呢...');
                                     }}
                                 />
                             </FloatButton.Group>
@@ -277,8 +277,6 @@ function Home() {
                     <EnglishDrawer />
                 </div>
             </div>
-            {/* 加载动画 */}
-            <Spin spinning={CommonStore.loading} fullscreen />
             <Button type="link"
                     href="https://beian.miit.gov.cn"
                     target="_blank"

@@ -1,10 +1,8 @@
 import { makeAutoObservable } from 'mobx'
-import Msg from "./Msg";
 
 class CommonStore {
-    // 壁纸加载都用这个
-    loading = false
-
+    loading = false // 壁纸加载都用这个
+    msg                     // 消息提示
 
     //构造函数
     constructor() {
@@ -15,11 +13,10 @@ class CommonStore {
     //设置jwt
     setLoading(statuses, msg=null, type="info") {
         this.loading = statuses
-        if (msg) return  type==="success"? Msg.msg.success(msg): type==="error"?Msg.msg.error(msg): Msg.msg.info(msg)
+        if (msg) return type === "success" ? this.msg.success(msg) : type === "error" ? this.msg.error(msg) : this.msg.info(msg)
     }
 
-
-
+    setMsg(msg) {this.msg = msg}
 }
 
 export default new CommonStore()
