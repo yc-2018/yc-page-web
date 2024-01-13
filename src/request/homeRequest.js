@@ -2,7 +2,6 @@ import axios from 'axios';
 import UserStore from '../store/UserStore';
 import CommonStore from "../store/CommonStore";
 import myAxios  from "./myAxios";
-import Msg from "../store/Msg";
 
 
 /** 异步获取百度联想列表 */
@@ -52,25 +51,21 @@ export async function reImagesUrl(bzType="风景") {
 
 
 /** 登录 */
-export async function login(loginCode,expireTime='bt') {
+export async function login(loginCode,expireTime='bt', loading) {
     try {
+        loading && loading(true)
         const response = await axios.post(`/api/users/login?key=${loginCode}&expireTime=${expireTime}`);
+        loading && loading(false)
         const {code,msg,data} = response.data;
 
         if (code === 1) {
             // 存储 JWT
             UserStore.setJwt(data);
-            Msg.msg.success("登录成功");
+            CommonStore.msg.success("登录成功");
             return true;
-        } else if (code === 0) {
-            // 显示消息
-            Msg.msg.error(msg);
-        }
-        return false;
+        } else if (code === 0) CommonStore.msg.error(msg);  // 显示消息
     } catch (error) {
-        Msg.msg.error('请求失败');
-        console.error('请求失败:', error);
-        return false;
+        CommonStore.msg.error('请求失败');
     }
 }
 
@@ -106,7 +101,7 @@ export async function saveOrUpdateToDoItem(body,requestType='post') {
     try {
         const response = await myAxios({url: '/toDoItems',method: requestType, data : body});
         if (response.data.code === 1) {
-            Msg.msg.success(`${requestType === 'post'?'添加':'修改'}成功`);
+            CommonStore.msg.success('成功');
             return response.data.data;
         }
     } catch (error) {console.error('待办请求失败:', error)}
@@ -117,7 +112,7 @@ export async function delToDoItem(id) {
     try {
         const response = await myAxios.delete(`/toDoItems/${id}`);
         if (response.data.code === 1) {
-            Msg.msg.success("删除成功");
+            CommonStore.msg.success("删除成功");
             return true;
         }
     } catch (error) {console.error('待办请求失败:', error)}

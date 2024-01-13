@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from "react";
-import {Modal, Input, Radio, Space, Divider} from 'antd';
+import {Modal, Input, Radio, Space, Divider, App} from 'antd';
 import {saveOrUpdateToDoItem} from "../../request/homeRequest";
-import Msg from "../../store/Msg";
 const { TextArea } = Input;
 /**
  * 新增/编辑备忘录弹窗
@@ -15,6 +14,9 @@ const { TextArea } = Input;
 const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
     const [formData, setFormData] = useState(null);
     const [confirmLoading, setConfirmLoading] = useState(false);
+
+    const { message } = App.useApp();
+
     useEffect(()=> {
         if(data) setFormData(data)
         else setFormData({
@@ -23,8 +25,8 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
         })
     },[data])
     const handleOk = async() => {
-        if(!formData.itemType?.toString())return Msg.msg.error('备忘类型不能为空')
-        if(!formData.content)return Msg.msg.error('备忘内容不能为空')
+        if(!formData.itemType?.toString())return message.error('备忘类型不能为空')
+        if(!formData.content)return message.error('备忘内容不能为空')
 
         setConfirmLoading(true);
         // 构造请求体

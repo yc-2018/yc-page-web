@@ -11,7 +11,7 @@ import {
     Divider,
     Badge,
     Space,
-    Dropdown
+    Dropdown, App
 } from "antd";
 import {BookOutlined, CaretDownOutlined, PlusOutlined, SyncOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
@@ -24,7 +24,6 @@ import ShowOrNot from "../../../store/ShowOrNot";
 import TextArea from "antd/es/input/TextArea";
 import './MemoDrawer.css'
 import styles from '../../../common.module.css'
-import Msg from "../../../store/Msg";
 
 let total = -1;    // 初始化待办总数
 let isQueryOnClick = false; // 防止点太快了
@@ -55,6 +54,8 @@ const MemoDrawer = observer(() => {
     const [fModalData, setFModalData] = useState();           // 设置模态框数据
     const [items, setItems] = useState(item);    // 设置循环待办的数据
 
+    const {notification, modal} = App.useApp();
+
     useEffect(() => {
         if (UserStore.jwt) (async () => {
             setFModalData(null)     // 模态框数据重置 null和 undefined 来回切换
@@ -73,13 +74,33 @@ const MemoDrawer = observer(() => {
             const {data, map} = resp;
             setData(data.records);
             setList(data.records);
-            total = data.total;
+
             if(completed===0) setUnFinishCounts(map.groupToDoItemsCounts)
-            // 如果刚打开时有未完成的紧急备忘，就直接打开备忘录而且跳到紧急备忘的位置
-            if(initLoading && map.groupToDoItemsCounts['3'] > 0 && type!==3) {
-                setType(3)
-                ShowOrNot.setMemoDrawerShow(true)
+            // 如果刚打开时有未完成的紧急备忘 而且抽屉没打开 就弹出提醒
+            if(initLoading && !showOrNot.memoDrawerShow && map.groupToDoItemsCounts['3'] > 0 && total === -1) {
+                const key = `open${Date.now()}`;
+                notification.info({
+                    message: '有未完成的紧急备忘',
+                    description: '是否要打开查看',
+                    key,
+                    btn:(
+                        <Space>
+                            <Button type="link" size="small" onClick={() => notification.destroy(key)}>
+                                不看了
+                            </Button>
+                            <Button type="primary" size="small" onClick={() => {
+                                notification.destroy(key)
+                                setType(3)
+                                ShowOrNot.setMemoDrawerShow(true)
+                            }}>
+                                打开看看
+                            </Button>
+                        </Space>
+                    )
+                })
+
             }
+            total = data.total;
             setInitLoading(false);
             setWebLoading(false);
         })();
@@ -172,11 +193,11 @@ const MemoDrawer = observer(() => {
             case 'see':
                 // 双击查看
                 if (event.type==='dblclick'){
-                    Msg.md.info({
+                    modal.info({
                         title: '查看备忘',
                         maskClosable:true,
-                        okText:'看完了',
-                        width: 600,
+                        okText:'关闭',
+                        width: 800,
                         closable:true,
                         icon:<BookOutlined />,
                         content: <TextArea rows={14} value={itemObj.content} style={{margin:'0 0 0 -14px'}}/>

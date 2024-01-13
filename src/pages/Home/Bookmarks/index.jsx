@@ -1,5 +1,5 @@
 import { Button, Dropdown, Space } from 'antd';
-import Msg from "../../../store/Msg";
+import CommonStore from "../../../store/CommonStore";
 
 
 export default function Bookmarks() {
@@ -70,7 +70,7 @@ export default function Bookmarks() {
             </Dropdown>
 
 
-            <Dropdown onClick={() => { Msg.msg.info('不知道怎么写好，害') }}
+            <Dropdown onClick={() => { CommonStore.msg.info('不知道怎么写好，害') }}
                 dropdownRender={() =>
                     <img alt src="https://x.chatmindai.net/Logo.png" width={50} />
                 }

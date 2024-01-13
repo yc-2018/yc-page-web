@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
 import React, {useEffect, useState} from "react";
-import {Button, Divider, Drawer, Input, Skeleton, Space, Spin, Tag, Tooltip} from "antd";
+import {App, Button, Divider, Drawer, Input, Skeleton, Space, Spin, Tag, Tooltip} from "antd";
 import {
     CheckOutlined,
     CloseOutlined, DashboardOutlined,
@@ -15,7 +15,7 @@ import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../../request/
 import EmptyList from "../../../compontets/common/EmptyList";
 import {englishSortingOptions, tagList} from "../../../store/NoLoginData";
 import MyButton from "../../../compontets/MyButton";
-import Msg from "../../../store/Msg";
+import CommonStore from "../../../store/CommonStore";
 import SortSelect from "../../../compontets/SortSelect";
 import styles from "../../../common.module.css"
 import LoaderWhite from "../../../compontets/common/LoaderWhite";
@@ -36,7 +36,8 @@ function EnglishDrawer() {
     const [editEnglish, setEditEnglish] = useState(null)                // 编辑英语
     const [editChinese, setEditChinese] = useState(null)                // 编辑中文
 
-    const {msg,md} = Msg
+    const {msg} = CommonStore
+    const {  modal } = App.useApp();
 
     /** 初始化第一次打开时刷新列表数据 */
     useEffect(() => {
@@ -129,7 +130,7 @@ function EnglishDrawer() {
             setEditId(-1)
         }
         else              // 请求删除
-            md.confirm({
+            modal.confirm({
                 title: '确定删除吗?',
                 icon: <ExclamationCircleFilled />,
                 content: '删除了就会消失了',

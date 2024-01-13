@@ -1,4 +1,4 @@
-import {Segmented, Flex, Button, Modal, Form, Input, Alert, Divider, Dropdown} from 'antd'
+import {Segmented, Flex, Button, Modal, Form, Input, Alert, Divider, Dropdown, App} from 'antd'
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite'
 import { ThunderboltOutlined, PlusOutlined } from '@ant-design/icons';
@@ -13,7 +13,7 @@ import MySearch from '../../../compontets/MySearch';
 import searchStore from '../../../store/SearchEnginesStore';
 import {searchData} from '../../../store/NoLoginData';
 import UserStore from "../../../store/UserStore";
-import Msg from "../../../store/Msg";
+import CommonStore from "../../../store/CommonStore";
 import "./Search.css"
 
 const SEARCH_OPTION= 'searchOption'
@@ -33,7 +33,8 @@ function Search() {
     const [rightClickName, setRightClickName] = useState('');   // 右键菜单选中的搜索引擎名字
  // const [searchEngines, setSearchEngines] = useState("Bing");  //放mobx去了
 
-    const {msg, md} = Msg                             // 获取在App组件的上下文的这2货
+    const {msg} = CommonStore                    // 获取在MyApp组件的上下文的msg
+    const {modal} = App.useApp();      // 获取在App组件的上下文的modal
     const [form] = Form.useForm(); // 创建一个表单域
     const items = UserStore.jwt? [{label: '编辑', key: EDIT}, {label: '删除', key: DELETE}]: [{label: '登录后可以删除/编辑', key: 'login',disabled: true}]
 
@@ -90,7 +91,7 @@ function Search() {
             return msg.info('这么细的边都被你点到了，哈哈哈，往里面点点看');
 
         if (key === DELETE)
-            md.confirm({
+            modal.confirm({
                 title: `确定删除 ${rightClickName} 吗?`,
                 content: `${rightClickMenu===SEARCH_OPTION?'搜索引擎':'快速搜索'}删除了就找不回来了...`,
                 async onOk() {

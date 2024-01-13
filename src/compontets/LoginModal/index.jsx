@@ -1,28 +1,24 @@
-import {Button, Input, Modal, Radio, Space} from "antd";
+import {App, Button, Input, Modal, Radio, Space} from "antd";
 import { observer } from 'mobx-react-lite'
 import React, {useState} from "react";
 
 import UserStore from "../../store/UserStore";
-import Msg from "../../store/Msg";
 import {login} from "../../request/homeRequest";
 
 const LoginModal = () => {
     const [expireTime, setExpireTime] = useState(undefined);           // 登录有效时间
     const [loginCaptcha, setLoginCaptcha] = useState(undefined);       // 登录验证码
     const [loginLoading, setLoginLoading] = useState(false);  // 点击登录按钮加载
+    const {message} = App.useApp();
 
     /**
      * 登录请求
      */
     const goLogin = async() => {
         // 校验 loginCaptcha 是否为6位数字
-        if (loginCaptcha?.length!== 6) {
-            Msg.msg.error('验证码格式有误');
-            return;
-        }
-        setLoginLoading(true);
-        const isLogin =await login(loginCaptcha,expireTime);
-        setLoginLoading(false);
+        if (loginCaptcha?.length!== 6) return message.error('验证码格式有误');
+
+        const isLogin =await login(loginCaptcha, expireTime, setLoginLoading);
 
         if (isLogin) {
             setLoginCaptcha(undefined); // 验证码清空
