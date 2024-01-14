@@ -4,11 +4,19 @@ import Home from '../pages/Home'
 import Help from "../pages/Help";
 import NoPage from "../compontets/404/NoPage";
 import Blog from "../pages/Blog";
+import Mobile from "../pages/Mobile";
+
+// 判断是否是移动端
+const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+// 判断是否是移动窗口
+const isMobileViewport = isMobileDevice || (window?.matchMedia('(max-width: 767px)')?.matches);
+
+const isMobile = isMobileDevice || isMobileViewport;
 
 export default [
     {
         path:'/',
-        element:<Home/>
+        element: isMobile ? <Mobile/> : <Home/>
     },
     {
         path:'/help',
