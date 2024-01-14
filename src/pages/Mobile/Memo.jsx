@@ -93,7 +93,7 @@ export default () => {
                 {data.map(item => (
                     <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item.id)} onAction={onAction}>
                         <List.Item key={item.id}
-                                   style={{background: item.completed ? '#f2fff0' : '#fff'}}
+                                   style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
                                    onClick={() => {setVisible(item)}}
                                    clickable={false}
                         >
