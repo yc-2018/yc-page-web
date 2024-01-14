@@ -8,13 +8,13 @@ import {
     Button,
     Tag,
     Space,
-    Form,
     Radio,
     TextArea,
     Dialog
 } from 'antd-mobile'
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
 import {leftActions, rightActions} from "./data";
+import './mobileCommom.css'
 
 
 export default () => {
@@ -93,7 +93,7 @@ export default () => {
                 {data.map(item => (
                     <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item.id)} onAction={onAction}>
                         <List.Item key={item.id}
-                                   style={{background: item.completed ? '#f2fff0' : '#fff'}}
+                                   style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
                                    onClick={() => {setVisible(item)}}
                                    clickable={false}
                         >
@@ -145,33 +145,34 @@ export default () => {
                 onMaskClick={() => {setEditVisible(false)}}
                 onClose={() => {setEditVisible(false)}}
                 position='top'
-                bodyStyle={{ height: '70vh' }}
+                bodyStyle={{ height: '400px' }}
             >
 
-                <div>
+                <div style={{padding: '10px'}}>
                     <div><span style={{color: '#f00' }}>*</span>
                         内容
                     </div>
-                    <TextArea rows={16}
+                    <TextArea rows={6}
                               maxLength={2000} showCount
                               placeholder="请输入备忘内容"
                               value={content} onChange={value => setContent(value)}/>
-
+                    <br/>
                     <div><span style={{color: '#f00' }}>*</span>
                         请选择类型
                     </div>
 
                         <Radio.Group value={itemType} onChange={value => setItemType(value)}>
-                            <Radio value={0} style={{marginRight:15}}>普通</Radio>
-                            <Radio value={1} style={{marginRight:15}}>循环</Radio>
-                            <Radio value={2} style={{marginRight:15}}>长期</Radio>
-                            <Radio value={3} style={{marginRight:15}}>紧急</Radio>
-                            <Radio value={5} style={{marginRight:15}}>日记</Radio>
-                            <Radio value={6} style={{marginRight:15}}>工作</Radio>
-                            <Radio value={7} style={{marginRight:15}}>其他</Radio>
+                            <Radio value={0}  className={'█Radio'}>普通</Radio>
+                            <Radio value={1}  className={'█Radio'}>循环</Radio>
+                            <Radio value={2}  className={'█Radio'}>长期</Radio>
+                            <Radio value={3}  className={'█Radio'}>紧急</Radio>
+                            <Radio value={5}  className={'█Radio'}>日记</Radio>
+                            <Radio value={6}  className={'█Radio'}>工作</Radio>
+                            <Radio value={7}  className={'█Radio'}>其他</Radio>
                         </Radio.Group>
-
-
+                    <br/>
+                    <br/>
+                    <br/>
                     <Button block
                             onClick={async () => {
                                 if (content?.length === 0) return Toast.show({icon: 'fail', content: '内容不能为空'})
