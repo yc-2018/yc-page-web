@@ -7,23 +7,19 @@ import routes, {routesName} from "./routes";
 import Head from "./compontets/Head";
 import CommonStore from "./store/CommonStore";
 import LoginModal from "./compontets/LoginModal";
-import Mobile from "./pages/Mobile";
 
-export default function MyApp() {
+export default () => {
     const element = useRoutes(routes);   //根据路由表生成对应的路由规则
     const location = useLocation();         // 获取当前的路由
     const [messageApi, contextMsg] = message.useMessage();   // 使用message组件
 
-    // 判断是否是移动端
-    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    // 判断是否是移动窗口
-    const isMobileViewport = isMobileDevice || (window?.matchMedia('(max-width: 767px)')?.matches);
     CommonStore.setMsg(messageApi); // 将message组件挂载到store中
 
     useEffect(() => {
         document.title = routesName[location.pathname]??'未找到页面';
     }, [location]);
-    return ((isMobileViewport && <Mobile/>) ||
+
+    return (
             <App message={{maxCount: 5}}>
                 {contextMsg}
                 {window.location.pathname === '/' ? null : <Head/>}
