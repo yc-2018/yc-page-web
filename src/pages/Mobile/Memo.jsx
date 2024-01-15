@@ -52,7 +52,7 @@ export default () => {
                 const finishResp = await saveOrUpdateToDoItem({id, completed: text === '完成' ? 1 : 0}, 'put')
                 if(finishResp){
                     Toast.show({icon: 'success', content: '成功'})
-                    setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0} : item))
+                    setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0, updateTime: new Date().toLocaleString()} : item))
                     setVisible(undefined)
                 }else Toast.show({icon: 'fail', content: '失败'})
                 break;
@@ -63,7 +63,7 @@ export default () => {
                 const addOneResp = await saveOrUpdateToDoItem({id, numberOfRecurrences:777}, 'put')
                 if(addOneResp){
                     Toast.show({icon: 'success', content: '成功'})
-                    setData(val => val.map(item => item.id === id ? {...item, numberOfRecurrences:item.numberOfRecurrences +1 } : item))
+                    setData(val => val.map(item => item.id === id ? {...item, numberOfRecurrences:item.numberOfRecurrences +1, updateTime: new Date().toLocaleString() } : item))
                     setVisible(undefined)
                 }else Toast.show({icon: 'fail', content: '失败'})
                 break;
@@ -92,9 +92,6 @@ export default () => {
 
                     },
                 })
-                break;
-            default:
-                break;
         }
     }
 
@@ -232,11 +229,9 @@ export default () => {
                                     showLoading('success', '成功')
                                     setEditVisible(false);
                                      // 刷新列表
-                                    editVisible === '新增' && setData(data => [{...body,id: result},...data])
-                                    editVisible !== '新增' && setData(data => data.map(item => item.id === editVisible?.id ? {...item,itemType:body.itemType||item.itemType,content:body.content||item.content} : item))
-
+                                    editVisible === '新增' && setData(data => [{...body,id: result,createTime:new Date().toLocaleString(), updateTime:new Date().toLocaleString(),numberOfRecurrences:0},...data])
+                                    editVisible !== '新增' && setData(data => data.map(item => item.id === editVisible?.id ? {...item,itemType:body.itemType||item.itemType,content:body.content||item.content, updateTime:new Date().toLocaleString()} : item))
                                 }else showLoading('fail', '失败')
-
                             }}>
                         提交
                     </Button>
