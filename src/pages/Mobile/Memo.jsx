@@ -9,10 +9,10 @@ import {
     Tag,
     Radio,
     TextArea,
-    Dialog
+    Dialog, Picker
 } from 'antd-mobile'
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
-import {leftActions, rightActions} from "./data";
+import {columnNames, columns, leftActions, rightActions} from "./data";
 import styles from './mobile.module.css'
 
 let total;  // 总条数 给父组件显示
@@ -26,32 +26,33 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     const [data, setData] = useState([])
     const [hasMore, setHasMore] = useState(true)
     const [page, setPage] = useState(1);    // 待办翻页
-    const [completed, setCompleted] = useState(0);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
-    const [visible, setVisible] = useState(undefined);
-    const [editVisible, setEditVisible] = useState(undefined);
+    const [completed, setCompleted] = useState(0);       // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+    const [visible, setVisible] = useState(undefined);           // 查看弹窗的显示和隐藏
+    const [editVisible, setEditVisible] = useState(undefined);  // 编辑弹窗的显示和隐藏
+    const [pickerVisible, setPickerVisible] = useState(false)   // 待办状态选择器的显示和隐藏
 
     const [content, setContent] = useState('')    //表单内容
     const [itemType, setItemType] = useState(0) // 表单类型
 
-    useEffect(()=>{
-        if(type === changeType){
-            setPage(1)
-            setData([])
-            setHasMore(true)
-            // setCompleted(0)
-        }
-    },[changeType])
+    useEffect(()=>{type === changeType && resetList()},[changeType,completed])
+    useEffect(()=>{resetList()},[completed])
+
+    /** 重置列表 */
+    const resetList = () => {
+        setPage(1)
+        setData([])
+        setHasMore(true)
+    }
 
     async function loadMore() {
         const append = await getToDoItems({type, page, completed});
-        const {map} = append;
         setData(val => [...val, ...append.data.records])
         setHasMore(data.length < append.data.total)
         setPage(val => val + 1)
 
         total = append.data.total
         // 给父组件传值：未完成总数s
-        setIncompleteCounts(v=>({...v,...map.groupToDoItemsCounts, [type]: total}))
+        setIncompleteCounts(v=>({...v,...append?.map.groupToDoItemsCounts, [type]: total}))
     }
 
     /**
@@ -75,7 +76,9 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 const finishResp = await saveOrUpdateToDoItem({id, completed: text === '完成' ? 1 : 0}, 'put')
                 if(finishResp){
                     Toast.show({icon: 'success', content: '成功'})
-                    setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0, updateTime: new Date().toLocaleString()} : item))
+                    /*全部的还是要显示在列表上*/completed === -1 && setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0, updateTime: new Date().toLocaleString()} : item))
+                    /*类型变了不属于显示范畴了*/completed !== -1 && setData(val => val.filter(item => item.id !== id))
+
                     setVisible(undefined)
 
                     changeTotal(text === '完成' ? '--' : '++')// █给父组件传值：未完成总数s
@@ -124,7 +127,9 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
     return(
         <>
-            <Button block onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加一条</Button>
+            <Button onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加一条</Button>
+            <Button onClick={() => setPickerVisible(true)}>{columnNames(completed)}</Button>
+
             <List>
                 {data.map(item => (
                     <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item)} onAction={onAction}>
@@ -144,9 +149,10 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             {/* 查看详细弹出层*/}
             <Popup
                 visible={!!visible}
+                closeOnSwipe /* 组件内向下滑动关闭 */
                 onMaskClick={() => {setVisible(undefined)}}
                 onClose={() => {setVisible(undefined)}}
-                bodyStyle={{ height: '60vh', width: '95vw', padding: '10px'}}
+                bodyStyle={{ height: '60vh', width: '95vw', padding: '10px',overflow: 'scroll'}}
             >
                 {/*显示创建时间*/}
                 <Tag color='primary' fill='outline' style={{ '--border-radius': '6px', '--background-color': '#c5f1f7' }}>
@@ -163,10 +169,11 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                         {`循环次数: ${visible?.numberOfRecurrences}`}
                     </Tag>
                 }
-
-                <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px',height:'38vh',overflowY: 'scroll'}}>
-                    {visible?.content}
-                </pre>
+                <div style={{height:'38vh',overflowY: 'scroll'}}>
+                    <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px'}}>
+                        {visible?.content}
+                    </pre>
+                </div>
 
 
                 {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
@@ -210,14 +217,15 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 onMaskClick={() => {setEditVisible(false)}}
                 onClose={() => {setEditVisible(false)}}
                 position='top'
-                bodyStyle={{ height: '400px' }}
+                bodyStyle={{ height: '450px' }}
             >
 
                 <div style={{padding: '10px'}}>
                     <div><span style={{color: '#f00' }}>*</span>
                         内容
                     </div>
-                    <TextArea rows={6}
+                    <TextArea rows={13}
+                              style={{height: '250px'}}
                               maxLength={2000} showCount
                               placeholder="请输入备忘内容"
                               value={content} onChange={value => setContent(value)}/>
@@ -280,6 +288,15 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                     </Button>
                 </div>
             </Popup>
+
+
+            <Picker
+                columns={columns}
+                visible={pickerVisible}
+                onClose={() => setPickerVisible(false)}
+                value={[completed]}
+                onConfirm={v => setCompleted(v[0])}
+            />
         </>
     )
 

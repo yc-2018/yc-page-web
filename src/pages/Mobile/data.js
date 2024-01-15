@@ -4,18 +4,19 @@
  * @returns {Array}
  * */
 export const leftActions = item => [
-    {
-        key: 'success',
-        text: item.completed ? '取消完成' : '完成',
-        color: item.completed ? '#895aa8' : 'success',
-        id: item.id,
-    },
     item.itemType === 1 && {
         key: 'addOne',
         text: '+1',
         color: 'primary',
         id: item.id,
     },
+    {
+        key: 'success',
+        text: item.completed ? '取消完成' : '完成',
+        color: item.completed ? '#895aa8' : 'success',
+        id: item.id,
+    },
+
 ].filter(i => i);
 
 
@@ -34,3 +35,9 @@ export const rightActions = item => [
         completed: item.completed
     },
 ].filter(i => i);
+
+export const columns =[[
+    { label: '未完成', value: 0 },
+    { label: '完成', value: 1 },
+    { label: '全部', value: -1 }]]
+export const columnNames =column=> columns[0].find(i => i.value === column).label
