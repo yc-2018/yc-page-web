@@ -7,7 +7,6 @@ import {
     Toast,
     Button,
     Tag,
-    Space,
     Radio,
     TextArea,
     Dialog
@@ -18,12 +17,10 @@ import './mobileCommom.css'
 import styles from './mobile.module.css'
 
 
-export default () => {
+export default ({type}) => {
     const [data, setData] = useState([])
     const [hasMore, setHasMore] = useState(true)
     const [page, setPage] = useState(1);    // 待办翻页
-    const [type, setType] = useState(1);    // 待办类型
-    const [unFinishCounts, setUnFinishCounts] = useState();      // 待办未完成计数
     const [completed, setCompleted] = useState(-1);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
     const [visible, setVisible] = useState(undefined);
     const [editVisible, setEditVisible] = useState(undefined);
@@ -200,7 +197,7 @@ export default () => {
                         请选择类型
                     </div>
 
-                        <Radio.Group value={itemType} onChange={value => setItemType(value)}>
+                        <Radio.Group value={itemType} onChange={value => setItemType(()=>value)}>
                             <Radio value={0}  className={'█Radio'}>普通</Radio>
                             <Radio value={1}  className={'█Radio'}>循环</Radio>
                             <Radio value={2}  className={'█Radio'}>长期</Radio>
