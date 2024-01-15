@@ -95,7 +95,7 @@ export default ({type}) => {
 
     return(
         <>
-            <Button onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加</Button>
+            <Button block onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加一条</Button>
             <List>
                 {data.map(item => (
                     <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item)} onAction={onAction}>
