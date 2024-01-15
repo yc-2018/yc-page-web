@@ -77,7 +77,9 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 const finishResp = await saveOrUpdateToDoItem({id, completed: text === '完成' ? 1 : 0}, 'put')
                 if(finishResp){
                     Toast.show({icon: 'success', content: '成功'})
-                    setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0, updateTime: new Date().toLocaleString()} : item))
+                    /*全部的还是要显示在列表上*/completed === -1 && setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0, updateTime: new Date().toLocaleString()} : item))
+                    /*类型变了不属于显示范畴了*/completed !== -1 && setData(val => val.filter(item => item.id !== id))
+
                     setVisible(undefined)
 
                     changeTotal(text === '完成' ? '--' : '++')// █给父组件传值：未完成总数s
