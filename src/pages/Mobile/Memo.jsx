@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {
     InfiniteScroll,
     List,
@@ -7,35 +7,59 @@ import {
     Toast,
     Button,
     Tag,
-    Space,
     Radio,
     TextArea,
     Dialog
 } from 'antd-mobile'
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
 import {leftActions, rightActions} from "./data";
-import './mobileCommom.css'
+import styles from './mobile.module.css'
 
-
-export default () => {
+let total;  // 总条数 给父组件显示
+/**
+ * @param type 要渲染的待办类型
+ * @param setIncompleteCounts 给父组件传值：未完成总数s
+ * @param changeType 监控值，如果和类型相同 就 重置该待办列表
+ * @param setChangeType 如果新增或修改的类型不是目前待办的列表类型，就改变这个值为那个待办类型的值
+ * */
+export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     const [data, setData] = useState([])
     const [hasMore, setHasMore] = useState(true)
     const [page, setPage] = useState(1);    // 待办翻页
-    const [type, setType] = useState(0);    // 待办类型
-    const [unFinishCounts, setUnFinishCounts] = useState();      // 待办未完成计数
-    const [completed, setCompleted] = useState(-1);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+    const [completed, setCompleted] = useState(0);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
     const [visible, setVisible] = useState(undefined);
     const [editVisible, setEditVisible] = useState(undefined);
 
     const [content, setContent] = useState('')    //表单内容
     const [itemType, setItemType] = useState(0) // 表单类型
 
+    useEffect(()=>{
+        if(type === changeType){
+            setPage(1)
+            setData([])
+            setHasMore(true)
+            // setCompleted(0)
+        }
+    },[changeType])
 
     async function loadMore() {
         const append = await getToDoItems({type, page, completed});
+        const {map} = append;
         setData(val => [...val, ...append.data.records])
         setHasMore(data.length < append.data.total)
         setPage(val => val + 1)
+
+        total = append.data.total
+        // 给父组件传值：未完成总数s
+        setIncompleteCounts(v=>({...v,...map.groupToDoItemsCounts, [type]: total}))
+    }
+
+    /**
+     * 改变总数 给父组件传值：未完成总数s*/
+    const changeTotal = (add='++') => {
+        if(add==='++') ++total
+        else --total
+        setIncompleteCounts(v => ({...v, [type]: total}))
     }
 
 
@@ -49,16 +73,29 @@ export default () => {
             case 'success':
                 showLoading('loading', '加载中…')
                 const finishResp = await saveOrUpdateToDoItem({id, completed: text === '完成' ? 1 : 0}, 'put')
-                finishResp?showLoading('success', '成功'):showLoading('fail', '失败')
-                setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0} : item))
+                if(finishResp){
+                    Toast.show({icon: 'success', content: '成功'})
+                    setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0, updateTime: new Date().toLocaleString()} : item))
+                    setVisible(undefined)
+
+                    changeTotal(text === '完成' ? '--' : '++')// █给父组件传值：未完成总数s
+                }else Toast.show({icon: 'fail', content: '失败'})
                 break;
 
             // +1
             case 'addOne':
+                showLoading('loading', '加载中…')
+                const addOneResp = await saveOrUpdateToDoItem({id, numberOfRecurrences:777}, 'put')
+                if(addOneResp){
+                    Toast.show({icon: 'success', content: '成功'})
+                    setData(val => val.map(item => item.id === id ? {...item, numberOfRecurrences:item.numberOfRecurrences +1, updateTime: new Date().toLocaleString() } : item))
+                    setVisible(undefined)
+                }else Toast.show({icon: 'fail', content: '失败'})
                 break;
 
             // 编辑
             case 'edit':
+                setVisible(undefined)
                 const obj = data.find(item => item.id === id);
                 setEditVisible(obj);
                 setContent(obj.content);
@@ -75,23 +112,22 @@ export default () => {
                             Toast.show({icon: 'success', content: '删除成功'})
                             // 刷新列表
                             setData(val => val.filter(item => item.id !== id))
+                            setVisible(undefined)
+                            action.completed === 0 && changeTotal('--')// █给父组件传值：未完成总数s
                         }else Toast.show({icon: 'fail', content: '删除失败'})
 
                     },
                 })
-                break;
-            default:
-                break;
         }
     }
 
 
     return(
         <>
-            <Button onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加</Button>
+            <Button block onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加一条</Button>
             <List>
                 {data.map(item => (
-                    <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item.id)} onAction={onAction}>
+                    <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item)} onAction={onAction}>
                         <List.Item key={item.id}
                                    style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
                                    onClick={() => {setVisible(item)}}
@@ -112,30 +148,59 @@ export default () => {
                 onClose={() => {setVisible(undefined)}}
                 bodyStyle={{ height: '60vh', width: '95vw', padding: '10px'}}
             >
-                <Space>
-                    <Tag color='primary' fill='outline' style={{ '--border-radius': '6px', '--background-color': '#c5f1f7' }}>
-                        创建时间:{visible?.createTime?.replace('T', ' ')}
-                    </Tag>
+                {/*显示创建时间*/}
+                <Tag color='primary' fill='outline' style={{ '--border-radius': '6px', '--background-color': '#c5f1f7' }}>
+                    创建时间:{visible?.createTime?.replace('T', ' ')}
+                </Tag>
 
-                    {visible?.createTime !== visible?.updateTime && visible?.itemType!== 1?
-                        <Tag color='success' fill='outline' style={{ '--background-color': '#c8f7c5' }}>
-                            {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace('T', ' ')}
-                        </Tag>:null
-                    }
-                </Space>
-                <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px',height:'48vh',overflowY: 'scroll'}}>
+                {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
+                    <Tag color='success' fill='outline' style={{ '--background-color': '#c8f7c5', margin: '3px 10px' }}>
+                        {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace('T', ' ')}
+                    </Tag>
+                }
+                {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
+                    <Tag color='warning' fill='outline' style={{ '--background-color': '#fcecd8', '--border-radius': '6px' }}>
+                        {`循环次数: ${visible?.numberOfRecurrences}`}
+                    </Tag>
+                }
+
+                <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px',height:'38vh',overflowY: 'scroll'}}>
                     {visible?.content}
                 </pre>
 
-                <Button block color='primary' size='large'
-                        onClick={() => {
-                            setEditVisible(visible);setVisible(undefined)
-                            setContent(visible?.content);
-                            setItemType(visible?.itemType)
-                        }}
-                >
-                    修改
-                </Button>
+
+                {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
+                    <Button color='primary' className={styles.popupButton} onClick={() => onAction({key: 'edit', id: visible?.id})}>
+                        修改
+                    </Button>
+                }
+                {/*未完成的显示完成按钮 */ visible?.completed === 0 &&
+                    <Button color='success' className={styles.popupButton} onClick={() => onAction({key: 'success', text: '完成', id: visible?.id})}>
+                        完成
+                    </Button>
+                }
+
+                {/*完成的显示取消完成按钮 */ visible?.completed === 1 &&
+                    <Button className={styles.popupButton}
+                            style={{background: '#f6b234', border:'none',color: '#fff'}}
+                            onClick={() => onAction({key: 'success', text: '取消完成', id: visible?.id})}>
+                        取消完成
+                    </Button>
+                }
+
+                {/*显示删除按钮*/
+                    <Button color='danger' className={styles.popupButton} onClick={() => onAction({key: 'delete', id: visible?.id})}>
+                    删除
+                    </Button>
+                }
+
+                {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
+                    <Button className={styles.popupButton}
+                            style={{background: '#a934f6', border:'none',color: '#fff'}}
+                            onClick={() => onAction({key: 'addOne', id: visible?.id})}>
+                        +1
+                    </Button>
+                }
             </Popup>
 
 
@@ -161,7 +226,7 @@ export default () => {
                         请选择类型
                     </div>
 
-                        <Radio.Group value={itemType} onChange={value => setItemType(value)}>
+                        <Radio.Group value={itemType} onChange={value => setItemType(()=>value)}>
                             <Radio value={0}  className={'█Radio'}>普通</Radio>
                             <Radio value={1}  className={'█Radio'}>循环</Radio>
                             <Radio value={2}  className={'█Radio'}>长期</Radio>
@@ -189,12 +254,27 @@ export default () => {
                                 if(result) {
                                     showLoading('success', '成功')
                                     setEditVisible(false);
-                                     // 刷新列表
-                                    editVisible === '新增' && setData(data => [{...body,id: result},...data])
-                                    editVisible !== '新增' && setData(data => data.map(item => item.id === editVisible?.id ? {...item,itemType:body.itemType||item.itemType,content:body.content||item.content} : item))
-
+                                    if(!body.id){// 刷新列表
+                                        editVisible === '新增' && setData(data => [{
+                                            ...body,
+                                            id: result,
+                                            createTime: new Date().toLocaleString(),
+                                            updateTime: new Date().toLocaleString(),
+                                            numberOfRecurrences: 0
+                                        }, ...data])
+                                        /* █给父组件传值：未完成总数s */
+                                        editVisible === '新增' && changeTotal()
+                                        editVisible !== '新增' && setData(data => data.map(item => item.id === editVisible?.id ? {
+                                            ...item,
+                                            itemType: body.itemType || item.itemType,
+                                            content: body.content || item.content,
+                                            updateTime: new Date().toLocaleString()
+                                        } : item))
+                                    }else {
+                                        setChangeType(body.itemType)
+                                        body.id && setData(data => data.filter(item => item.id !== body.id))
+                                    }
                                 }else showLoading('fail', '失败')
-
                             }}>
                         提交
                     </Button>

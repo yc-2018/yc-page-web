@@ -13,3 +13,11 @@
 .█Radio>.adm-radio-content{
     padding: 0;
 }
+
+/* tab 标签头部 吸顶 */
+.█tabsContainer > .adm-tabs-header {
+    top: 0;
+    z-index: 1;
+    position: sticky;
+    background: #fff;
+}
