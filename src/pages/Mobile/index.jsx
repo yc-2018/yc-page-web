@@ -3,6 +3,7 @@ import UserStore from "../../store/UserStore";
 import Memos from "./Memos";
 import {observer} from "mobx-react-lite";
 import Login from "./Login";
+import './mobileCommom.css'
 
 export default observer(() => UserStore.jwt?(
         <>

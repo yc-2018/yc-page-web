@@ -19,9 +19,4 @@
     margin: 5px;
 }
 
-/* tab 标签头部*/
-.tabsContainer {
-    position: sticky;
-    top: 10px;
-}
 

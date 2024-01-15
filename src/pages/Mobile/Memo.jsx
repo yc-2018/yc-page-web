@@ -13,7 +13,6 @@ import {
 } from 'antd-mobile'
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
 import {leftActions, rightActions} from "./data";
-import './mobileCommom.css'
 import styles from './mobile.module.css'
 
 
