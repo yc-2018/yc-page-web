@@ -46,14 +46,13 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
     async function loadMore() {
         const append = await getToDoItems({type, page, completed});
-        const {map} = append;
         setData(val => [...val, ...append.data.records])
         setHasMore(data.length < append.data.total)
         setPage(val => val + 1)
 
         total = append.data.total
         // 给父组件传值：未完成总数s
-        setIncompleteCounts(v=>({...v,...map.groupToDoItemsCounts, [type]: total}))
+        setIncompleteCounts(v=>({...v,...append?.map.groupToDoItemsCounts, [type]: total}))
     }
 
     /**
@@ -150,9 +149,10 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             {/* 查看详细弹出层*/}
             <Popup
                 visible={!!visible}
+                closeOnSwipe /* 组件内向下滑动关闭 */
                 onMaskClick={() => {setVisible(undefined)}}
                 onClose={() => {setVisible(undefined)}}
-                bodyStyle={{ height: '60vh', width: '95vw', padding: '10px'}}
+                bodyStyle={{ height: '60vh', width: '95vw', padding: '10px',overflow: 'scroll'}}
             >
                 {/*显示创建时间*/}
                 <Tag color='primary' fill='outline' style={{ '--border-radius': '6px', '--background-color': '#c5f1f7' }}>
@@ -169,10 +169,11 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                         {`循环次数: ${visible?.numberOfRecurrences}`}
                     </Tag>
                 }
-
-                <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px',height:'38vh',overflowY: 'scroll'}}>
-                    {visible?.content}
-                </pre>
+                <div style={{height:'38vh',overflowY: 'scroll'}}>
+                    <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px'}}>
+                        {visible?.content}
+                    </pre>
+                </div>
 
 
                 {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
@@ -216,14 +217,15 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 onMaskClick={() => {setEditVisible(false)}}
                 onClose={() => {setEditVisible(false)}}
                 position='top'
-                bodyStyle={{ height: '400px' }}
+                bodyStyle={{ height: '450px' }}
             >
 
                 <div style={{padding: '10px'}}>
                     <div><span style={{color: '#f00' }}>*</span>
                         内容
                     </div>
-                    <TextArea rows={6}
+                    <TextArea rows={13}
+                              style={{height: '250px'}}
                               maxLength={2000} showCount
                               placeholder="请输入备忘内容"
                               value={content} onChange={value => setContent(value)}/>
