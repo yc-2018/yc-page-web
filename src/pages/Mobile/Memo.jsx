@@ -21,7 +21,7 @@ export default () => {
     const [data, setData] = useState([])
     const [hasMore, setHasMore] = useState(true)
     const [page, setPage] = useState(1);    // 待办翻页
-    const [type, setType] = useState(0);    // 待办类型
+    const [type, setType] = useState(1);    // 待办类型
     const [unFinishCounts, setUnFinishCounts] = useState();      // 待办未完成计数
     const [completed, setCompleted] = useState(-1);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
     const [visible, setVisible] = useState(undefined);
@@ -49,12 +49,18 @@ export default () => {
             case 'success':
                 showLoading('loading', '加载中…')
                 const finishResp = await saveOrUpdateToDoItem({id, completed: text === '完成' ? 1 : 0}, 'put')
-                finishResp?showLoading('success', '成功'):showLoading('fail', '失败')
-                setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0} : item))
+                finishResp ? showLoading('success', '成功') : showLoading('fail', '失败')
+                finishResp && setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0} : item))
                 break;
 
             // +1
             case 'addOne':
+                showLoading('loading', '加载中…')
+                const addOneResp = await saveOrUpdateToDoItem({id, numberOfRecurrences:777}, 'put')
+                if(addOneResp){
+                    Toast.show({icon: 'success', content: '成功'})
+                    setData(val => val.map(item => item.id === id ? {...item, numberOfRecurrences:item.numberOfRecurrences +1 } : item))
+                }else Toast.show({icon: 'fail', content: '失败'})
                 break;
 
             // 编辑
@@ -112,17 +118,22 @@ export default () => {
                 onClose={() => {setVisible(undefined)}}
                 bodyStyle={{ height: '60vh', width: '95vw', padding: '10px'}}
             >
-                <Space>
-                    <Tag color='primary' fill='outline' style={{ '--border-radius': '6px', '--background-color': '#c5f1f7' }}>
-                        创建时间:{visible?.createTime?.replace('T', ' ')}
-                    </Tag>
+                {/*显示创建时间*/}
+                <Tag color='primary' fill='outline' style={{ '--border-radius': '6px', '--background-color': '#c5f1f7' }}>
+                    创建时间:{visible?.createTime?.replace('T', ' ')}
+                </Tag>
 
-                    {visible?.createTime !== visible?.updateTime && visible?.itemType!== 1?
-                        <Tag color='success' fill='outline' style={{ '--background-color': '#c8f7c5' }}>
-                            {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace('T', ' ')}
-                        </Tag>:null
-                    }
-                </Space>
+                {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
+                    <Tag color='success' fill='outline' style={{ '--background-color': '#c8f7c5', margin: '3px 10px' }}>
+                        {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace('T', ' ')}
+                    </Tag>
+                }
+                {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
+                    <Tag color='warning' fill='outline' style={{ '--background-color': '#fcecd8', '--border-radius': '6px' }}>
+                        {`循环次数: ${visible?.numberOfRecurrences}`}
+                    </Tag>
+                }
+
                 <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px',height:'48vh',overflowY: 'scroll'}}>
                     {visible?.content}
                 </pre>
