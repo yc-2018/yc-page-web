@@ -35,3 +35,9 @@ export const rightActions = item => [
         completed: item.completed
     },
 ].filter(i => i);
+
+export const columns =[[
+    { label: '未完成', value: 0 },
+    { label: '完成', value: 1 },
+    { label: '全部', value: -1 }]]
+export const columnNames =column=> columns[0].find(i => i.value === column).label

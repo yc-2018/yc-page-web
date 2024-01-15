@@ -9,10 +9,10 @@ import {
     Tag,
     Radio,
     TextArea,
-    Dialog
+    Dialog, Picker
 } from 'antd-mobile'
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
-import {leftActions, rightActions} from "./data";
+import {columnNames, columns, leftActions, rightActions} from "./data";
 import styles from './mobile.module.css'
 
 let total;  // 总条数 给父组件显示
@@ -26,21 +26,23 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     const [data, setData] = useState([])
     const [hasMore, setHasMore] = useState(true)
     const [page, setPage] = useState(1);    // 待办翻页
-    const [completed, setCompleted] = useState(0);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
-    const [visible, setVisible] = useState(undefined);
-    const [editVisible, setEditVisible] = useState(undefined);
+    const [completed, setCompleted] = useState(0);       // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+    const [visible, setVisible] = useState(undefined);           // 查看弹窗的显示和隐藏
+    const [editVisible, setEditVisible] = useState(undefined);  // 编辑弹窗的显示和隐藏
+    const [pickerVisible, setPickerVisible] = useState(false)   // 待办状态选择器的显示和隐藏
 
     const [content, setContent] = useState('')    //表单内容
     const [itemType, setItemType] = useState(0) // 表单类型
 
-    useEffect(()=>{
-        if(type === changeType){
-            setPage(1)
-            setData([])
-            setHasMore(true)
-            // setCompleted(0)
-        }
-    },[changeType])
+    useEffect(()=>{type === changeType && resetList()},[changeType,completed])
+    useEffect(()=>{resetList()},[completed])
+
+    /** 重置列表 */
+    const resetList = () => {
+        setPage(1)
+        setData([])
+        setHasMore(true)
+    }
 
     async function loadMore() {
         const append = await getToDoItems({type, page, completed});
@@ -124,7 +126,9 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
     return(
         <>
-            <Button block onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加一条</Button>
+            <Button onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加一条</Button>
+            <Button onClick={() => setPickerVisible(true)}>{columnNames(completed)}</Button>
+
             <List>
                 {data.map(item => (
                     <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item)} onAction={onAction}>
@@ -280,6 +284,15 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                     </Button>
                 </div>
             </Popup>
+
+
+            <Picker
+                columns={columns}
+                visible={pickerVisible}
+                onClose={() => setPickerVisible(false)}
+                value={[completed]}
+                onConfirm={v => setCompleted(v[0])}
+            />
         </>
     )
 
