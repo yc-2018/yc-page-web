@@ -31,5 +31,6 @@ export const rightActions = item => [
         text: '删除',
         color: 'danger',
         id: item.id,
+        completed: item.completed
     },
 ].filter(i => i);

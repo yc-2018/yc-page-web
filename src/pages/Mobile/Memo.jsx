@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {
     InfiniteScroll,
     List,
@@ -15,24 +15,51 @@ import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/hom
 import {leftActions, rightActions} from "./data";
 import styles from './mobile.module.css'
 
-
-export default ({type}) => {
+let total;  // 总条数 给父组件显示
+/**
+ * @param type 要渲染的待办类型
+ * @param setIncompleteCounts 给父组件传值：未完成总数s
+ * @param changeType 监控值，如果和类型相同 就 重置该待办列表
+ * @param setChangeType 如果新增或修改的类型不是目前待办的列表类型，就改变这个值为那个待办类型的值
+ * */
+export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     const [data, setData] = useState([])
     const [hasMore, setHasMore] = useState(true)
     const [page, setPage] = useState(1);    // 待办翻页
-    const [completed, setCompleted] = useState(-1);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+    const [completed, setCompleted] = useState(0);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
     const [visible, setVisible] = useState(undefined);
     const [editVisible, setEditVisible] = useState(undefined);
 
     const [content, setContent] = useState('')    //表单内容
     const [itemType, setItemType] = useState(0) // 表单类型
 
+    useEffect(()=>{
+        if(type === changeType){
+            setPage(1)
+            setData([])
+            setHasMore(true)
+            // setCompleted(0)
+        }
+    },[changeType])
 
     async function loadMore() {
         const append = await getToDoItems({type, page, completed});
+        const {map} = append;
         setData(val => [...val, ...append.data.records])
         setHasMore(data.length < append.data.total)
         setPage(val => val + 1)
+
+        total = append.data.total
+        // 给父组件传值：未完成总数s
+        setIncompleteCounts(v=>({...v,...map.groupToDoItemsCounts, [type]: total}))
+    }
+
+    /**
+     * 改变总数 给父组件传值：未完成总数s*/
+    const changeTotal = (add='++') => {
+        if(add==='++') ++total
+        else --total
+        setIncompleteCounts(v => ({...v, [type]: total}))
     }
 
 
@@ -50,6 +77,8 @@ export default ({type}) => {
                     Toast.show({icon: 'success', content: '成功'})
                     setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0, updateTime: new Date().toLocaleString()} : item))
                     setVisible(undefined)
+
+                    changeTotal(text === '完成' ? '--' : '++')// █给父组件传值：未完成总数s
                 }else Toast.show({icon: 'fail', content: '失败'})
                 break;
 
@@ -84,6 +113,7 @@ export default ({type}) => {
                             // 刷新列表
                             setData(val => val.filter(item => item.id !== id))
                             setVisible(undefined)
+                            action.completed === 0 && changeTotal('--')// █给父组件传值：未完成总数s
                         }else Toast.show({icon: 'fail', content: '删除失败'})
 
                     },
@@ -224,9 +254,26 @@ export default ({type}) => {
                                 if(result) {
                                     showLoading('success', '成功')
                                     setEditVisible(false);
-                                     // 刷新列表
-                                    editVisible === '新增' && setData(data => [{...body,id: result,createTime:new Date().toLocaleString(), updateTime:new Date().toLocaleString(),numberOfRecurrences:0},...data])
-                                    editVisible !== '新增' && setData(data => data.map(item => item.id === editVisible?.id ? {...item,itemType:body.itemType||item.itemType,content:body.content||item.content, updateTime:new Date().toLocaleString()} : item))
+                                    if(!body.id){// 刷新列表
+                                        editVisible === '新增' && setData(data => [{
+                                            ...body,
+                                            id: result,
+                                            createTime: new Date().toLocaleString(),
+                                            updateTime: new Date().toLocaleString(),
+                                            numberOfRecurrences: 0
+                                        }, ...data])
+                                        /* █给父组件传值：未完成总数s */
+                                        editVisible === '新增' && changeTotal()
+                                        editVisible !== '新增' && setData(data => data.map(item => item.id === editVisible?.id ? {
+                                            ...item,
+                                            itemType: body.itemType || item.itemType,
+                                            content: body.content || item.content,
+                                            updateTime: new Date().toLocaleString()
+                                        } : item))
+                                    }else {
+                                        setChangeType(body.itemType)
+                                        body.id && setData(data => data.filter(item => item.id !== body.id))
+                                    }
                                 }else showLoading('fail', '失败')
                             }}>
                         提交
