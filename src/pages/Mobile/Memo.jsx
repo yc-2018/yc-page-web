@@ -15,6 +15,7 @@ import {
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
 import {leftActions, rightActions} from "./data";
 import './mobileCommom.css'
+import styles from './mobile.module.css'
 
 
 export default () => {
@@ -140,36 +141,41 @@ export default () => {
                     </Tag>
                 }
 
-                <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px',height:'48vh',overflowY: 'scroll'}}>
+                <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px',height:'38vh',overflowY: 'scroll'}}>
                     {visible?.content}
                 </pre>
 
-                {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
-                    <Button color='primary' size='large' onClick={() => onAction({key: 'addOne', id: visible?.id})}>
-                        +1
-                    </Button>
-                }
 
                 {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
-                    <Button color='primary' size='large' onClick={() => onAction({key: 'edit', id: visible?.id})}>
+                    <Button color='primary' className={styles.popupButton} onClick={() => onAction({key: 'edit', id: visible?.id})}>
                         修改
                     </Button>
                 }
                 {/*未完成的显示完成按钮 */ visible?.completed === 0 &&
-                    <Button color='success' size='large' onClick={() => onAction({key: 'success', text: '完成', id: visible?.id})}>
+                    <Button color='success' className={styles.popupButton} onClick={() => onAction({key: 'success', text: '完成', id: visible?.id})}>
                         完成
                     </Button>
                 }
 
                 {/*完成的显示取消完成按钮 */ visible?.completed === 1 &&
-                    <Button color='success' size='large' onClick={() => onAction({key: 'success', text: '取消完成', id: visible?.id})}>
+                    <Button className={styles.popupButton}
+                            style={{background: '#f6b234', border:'none',color: '#fff'}}
+                            onClick={() => onAction({key: 'success', text: '取消完成', id: visible?.id})}>
                         取消完成
                     </Button>
                 }
 
                 {/*显示删除按钮*/
-                    <Button color='danger' size='large' onClick={() => onAction({key: 'delete', id: visible?.id})}>
+                    <Button color='danger' className={styles.popupButton} onClick={() => onAction({key: 'delete', id: visible?.id})}>
                     删除
+                    </Button>
+                }
+
+                {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
+                    <Button className={styles.popupButton}
+                            style={{background: '#a934f6', border:'none',color: '#fff'}}
+                            onClick={() => onAction({key: 'addOne', id: visible?.id})}>
+                        +1
                     </Button>
                 }
             </Popup>
