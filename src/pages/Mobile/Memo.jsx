@@ -49,8 +49,11 @@ export default () => {
             case 'success':
                 showLoading('loading', '加载中…')
                 const finishResp = await saveOrUpdateToDoItem({id, completed: text === '完成' ? 1 : 0}, 'put')
-                finishResp ? showLoading('success', '成功') : showLoading('fail', '失败')
-                finishResp && setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0} : item))
+                if(finishResp){
+                    Toast.show({icon: 'success', content: '成功'})
+                    setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0} : item))
+                    setVisible(undefined)
+                }else Toast.show({icon: 'fail', content: '失败'})
                 break;
 
             // +1
@@ -60,11 +63,13 @@ export default () => {
                 if(addOneResp){
                     Toast.show({icon: 'success', content: '成功'})
                     setData(val => val.map(item => item.id === id ? {...item, numberOfRecurrences:item.numberOfRecurrences +1 } : item))
+                    setVisible(undefined)
                 }else Toast.show({icon: 'fail', content: '失败'})
                 break;
 
             // 编辑
             case 'edit':
+                setVisible(undefined)
                 const obj = data.find(item => item.id === id);
                 setEditVisible(obj);
                 setContent(obj.content);
@@ -81,6 +86,7 @@ export default () => {
                             Toast.show({icon: 'success', content: '删除成功'})
                             // 刷新列表
                             setData(val => val.filter(item => item.id !== id))
+                            setVisible(undefined)
                         }else Toast.show({icon: 'fail', content: '删除失败'})
 
                     },
@@ -97,7 +103,7 @@ export default () => {
             <Button onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加</Button>
             <List>
                 {data.map(item => (
-                    <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item.id)} onAction={onAction}>
+                    <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item)} onAction={onAction}>
                         <List.Item key={item.id}
                                    style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
                                    onClick={() => {setVisible(item)}}
@@ -138,15 +144,34 @@ export default () => {
                     {visible?.content}
                 </pre>
 
-                <Button block color='primary' size='large'
-                        onClick={() => {
-                            setEditVisible(visible);setVisible(undefined)
-                            setContent(visible?.content);
-                            setItemType(visible?.itemType)
-                        }}
-                >
-                    修改
-                </Button>
+                {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
+                    <Button color='primary' size='large' onClick={() => onAction({key: 'addOne', id: visible?.id})}>
+                        +1
+                    </Button>
+                }
+
+                {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
+                    <Button color='primary' size='large' onClick={() => onAction({key: 'edit', id: visible?.id})}>
+                        修改
+                    </Button>
+                }
+                {/*未完成的显示完成按钮 */ visible?.completed === 0 &&
+                    <Button color='success' size='large' onClick={() => onAction({key: 'success', text: '完成', id: visible?.id})}>
+                        完成
+                    </Button>
+                }
+
+                {/*完成的显示取消完成按钮 */ visible?.completed === 1 &&
+                    <Button color='success' size='large' onClick={() => onAction({key: 'success', text: '取消完成', id: visible?.id})}>
+                        取消完成
+                    </Button>
+                }
+
+                {/*显示删除按钮*/
+                    <Button color='danger' size='large' onClick={() => onAction({key: 'delete', id: visible?.id})}>
+                    删除
+                    </Button>
+                }
             </Popup>
 
 

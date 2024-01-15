@@ -10,26 +10,26 @@ export const leftActions = item => [
         color: item.completed ? '#895aa8' : 'success',
         id: item.id,
     },
-    item.itemType === 1 ? {
+    item.itemType === 1 && {
         key: 'addOne',
         text: '+1',
         color: 'primary',
         id: item.id,
-    } : undefined,
+    },
 ].filter(i => i);
 
 
-export const rightActions = id => [
-    {
+export const rightActions = item => [
+    item.completed === 0 && {
         key: 'edit',
         text: '编辑',
         color: '#5f81c5',
-        id,
+        id: item.id,
     },
     {
         key: 'delete',
         text: '删除',
         color: 'danger',
-        id,
+        id: item.id,
     },
-];
+].filter(i => i);
