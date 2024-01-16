@@ -24,6 +24,7 @@ import ShowOrNot from "../../../store/ShowOrNot";
 import TextArea from "antd/es/input/TextArea";
 import './MemoDrawer.css'
 import styles from '../../../common.module.css'
+import JWTUtils from "../../../utils/JWTUtils";
 
 let total = -1;    // 初始化待办总数
 let isQueryOnClick = false; // 防止点太快了
@@ -57,7 +58,7 @@ const MemoDrawer = observer(() => {
     const {notification, modal} = App.useApp();
 
     useEffect(() => {
-        if (UserStore.jwt) (async () => {
+        if (!JWTUtils.isExpired()) (async () => {
             setFModalData(null)     // 模态框数据重置 null和 undefined 来回切换
             setWebLoading(true)     // 网络加载
             setUnFinishCounts(null) // 待办未完成计数重置
