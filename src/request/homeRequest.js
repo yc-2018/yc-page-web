@@ -7,7 +7,7 @@ import myAxios  from "./myAxios";
 /** 异步获取百度联想列表 */
 export async function getThinkList(param) {
     if (!param) return;
-    const {data} = await axios.get(`/bd/sugrec?ie=utf-&prod=pc&from=pc_web&wd=${param}`);
+    const {data} = await axios.get(`https://yc556.cn/bd/sugrec?ie=utf-&prod=pc&from=pc_web&wd=${param}`);
 
     return data.g?.map(item => ({ value: item.q }));
 }
@@ -21,14 +21,14 @@ export async function reImagesUrl(bzType="风景") {
     CommonStore.setLoading(true);
     try {
         async function jfApi() {
-            const { data: [image] } = await axios.get('/jfApi/home/bg/ajaxbg');
+            const { data: [image] } = await axios.get('https://yc556.cn/jfApi/home/bg/ajaxbg');
             CommonStore.setLoading(false,"获取风景/科技壁纸成功,正在加载...");
             return 'https://i0.wp.com/www.jianfast.com' + image.replace('/400', '');
         }
 
         async function bz1Api() {
             // https://api.btstu.cn/sjbz/api.php?lx=dongman&format=json
-            const {data:{imgurl}} = await axios.get('/bz1Api/sjbz/api.php?format=json');
+            const {data:{imgurl}} = await axios.get('https://yc556.cn/bz1Api/sjbz/api.php?format=json');
             CommonStore.setLoading(false,"获取随机壁纸成功,正在缓慢加载中...");
             return imgurl;
         }
@@ -36,7 +36,7 @@ export async function reImagesUrl(bzType="风景") {
         async function bz2Api() {
             // 如诗 - API接口文档 https://api.likepoems.com/
             // https://api.likepoems.com/img/pc/?type=json
-            const {data:{url}} = await axios.get('/bz2Api/img/pc/?type=json');
+            const {data:{url}} = await axios.get('https://yc556.cn/bz2Api/img/pc/?type=json');
             CommonStore.setLoading(false,"获取动画壁纸成功,正在加载...");
             return url;
         }
@@ -54,7 +54,7 @@ export async function reImagesUrl(bzType="风景") {
 export async function login(loginCode,expireTime='bt', loading) {
     try {
         loading && loading(true)
-        const response = await axios.post(`/api/users/login?key=${loginCode}&expireTime=${expireTime}`);
+        const response = await axios.post(`https://yc556.cn/api/users/login?key=${loginCode}&expireTime=${expireTime}`);
         loading && loading(false)
         const {code,msg,data} = response.data;
 
