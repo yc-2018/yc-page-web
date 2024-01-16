@@ -39,7 +39,7 @@ function Home() {
     let {jwt} = UserStore;
 
     useEffect(() => {
-        if(jwt)(async()=> {
+        if(!JWTUtils.isExpired())(async()=> {
             // 获取云端保存的页面信息
             const info = await getPageInfo()
             if (info?.backgroundUrl) setBgImage(info.backgroundUrl);

@@ -19,8 +19,6 @@ myAxios.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`; // 如果存在 JWT，则添加到请求头
             return config; // 返回配置，这样请求就会带上这些设置
         }
-        CommonStore.msg.error('未登录或登录已过期，请重新登录。');
-        UserStore.clearJwt();
         return Promise.reject(new Error('Token expired'));
     },
     error => {

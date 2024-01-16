@@ -1,21 +1,21 @@
 import { makeAutoObservable } from 'mobx'
+import JWTUtils from "../utils/JWTUtils";
 
 class UserStore {
     // jwt
-    jwt = localStorage.getItem('jwt')
+    _jwt = localStorage.getItem('jwt')
     openModal = false // 用户登录弹窗
 
-
     //构造函数
-    constructor() {
-      makeAutoObservable(this)  //自动化数据管理
-    }
-  
-  
+    constructor() {makeAutoObservable(this)  /*自动化数据管理*/}
+
     //设置jwt
-    setJwt(jwt) {
-      localStorage.setItem('jwt', jwt)
-      this.jwt = jwt
+    set jwt(jwt) {
+        localStorage.setItem('jwt', jwt)
+        this._jwt = jwt
+    }
+    get jwt() {
+        return this._jwt;
     }
 
     setOpenModal(openModal) {
@@ -25,8 +25,10 @@ class UserStore {
     // 清除jwt
     clearJwt() {
       localStorage.removeItem('jwt')
-      this.jwt = null
+      this._jwt = null
     }
+
+
   
   }
   

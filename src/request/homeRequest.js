@@ -60,7 +60,7 @@ export async function login(loginCode,expireTime='bt', loading) {
 
         if (code === 1) {
             // 存储 JWT
-            UserStore.setJwt(data);
+            UserStore.jwt = data;
             CommonStore.msg.success("登录成功");
             return true;
         } else if (code === 0) CommonStore.msg.error(msg);  // 显示消息

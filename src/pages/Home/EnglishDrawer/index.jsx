@@ -19,6 +19,7 @@ import CommonStore from "../../../store/CommonStore";
 import SortSelect from "../../../compontets/SortSelect";
 import styles from "../../../common.module.css"
 import LoaderWhite from "../../../compontets/common/LoaderWhite";
+import JWTUtils from "../../../utils/JWTUtils";
 
 let total = 0;    // 初始化待办总数
 let init = true  // 第一次加载
@@ -41,7 +42,7 @@ function EnglishDrawer() {
 
     /** 初始化第一次打开时刷新列表数据 */
     useEffect(() => {
-        if (init && showOrNot.englishDrawerShow && UserStore.jwt) {
+        if (init && showOrNot.englishDrawerShow && !JWTUtils.isExpired()) {
             init = false;
             getListData()
         }
@@ -221,7 +222,7 @@ function EnglishDrawer() {
                     />
                 </>}
         >
-            {UserStore.jwt ?
+            {!JWTUtils.isExpired() ?
                 <Spin indicator={<LoaderWhite/>} spinning={reqLoading}>
                     <Space size={[0, 'small']} wrap>
                         { /*渲染26个字母*/ tagList.map(item => buildTag(item.value, item.color,undefined,()=> {
