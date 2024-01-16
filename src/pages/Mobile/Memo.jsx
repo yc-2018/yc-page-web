@@ -9,13 +9,12 @@ import {
     Tag,
     Radio,
     TextArea,
-    Dialog, Picker
+    Dialog, Picker, PullToRefresh
 } from 'antd-mobile'
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
 import {columnNames, columns, leftActions, rightActions} from "./data";
 import styles from './mobile.module.css'
 
-let total;  // 总条数 给父组件显示
 /**
  * @param type 要渲染的待办类型
  * @param setIncompleteCounts 给父组件传值：未完成总数s
@@ -23,6 +22,8 @@ let total;  // 总条数 给父组件显示
  * @param setChangeType 如果新增或修改的类型不是目前待办的列表类型，就改变这个值为那个待办类型的值
  * */
 export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
+    let total;  // 总条数 给父组件显示
+
     const [data, setData] = useState([])
     const [hasMore, setHasMore] = useState(true)
     const [page, setPage] = useState(1);    // 待办翻页
@@ -37,13 +38,16 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     useEffect(()=>{type === changeType && resetList()},[changeType,completed])
     useEffect(()=>{resetList()},[completed])
 
-    /** 重置列表 */
+    /** 重置列表* */
     const resetList = () => {
         setPage(1)
         setData([])
         setHasMore(true)
     }
 
+    /**
+    * 加载更多
+    * */
     async function loadMore() {
         const append = await getToDoItems({type, page, completed});
         setData(val => [...val, ...append.data.records])
@@ -130,6 +134,12 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             <Button onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加一条</Button>
             <Button onClick={() => setPickerVisible(true)}>{columnNames(completed)}</Button>
 
+            <PullToRefresh
+                pullingText={'用点力拉🤤'}
+                canReleaseText={'忍住，别放开🥺'}
+                completeText={'哎呦，你干嘛🥴'}
+                onRefresh={async () => resetList()}
+            >
             <List>
                 {data.map(item => (
                     <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item)} onAction={onAction}>
@@ -144,6 +154,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                     </SwipeAction>
                 ))}
             </List>
+            </PullToRefresh>
             <InfiniteScroll loadMore={loadMore} hasMore={hasMore}/>
 
             {/* 查看详细弹出层*/}
