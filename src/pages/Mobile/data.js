@@ -1,3 +1,5 @@
+import {sortingOptions} from "../../store/NoLoginData";
+
 /**
  * 备忘列表左边操作
  * @param {Object} item 对象
@@ -39,5 +41,6 @@ export const rightActions = item => [
 export const columns =[[
     { label: '未完成', value: 0 },
     { label: '完成', value: 1 },
-    { label: '全部', value: -1 }]]
-export const columnNames =column=> columns[0].find(i => i.value === column).label
+    { label: '全部', value: -1 }],sortingOptions]
+export const finishName =(column)=> columns[0].find(i => i.value === column).label
+export const orderByName =(column)=> columns[1].find(i => i.value === column).label
