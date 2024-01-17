@@ -146,11 +146,10 @@ const MemoDrawer = observer(() => {
 
 
     // 标签生成
-    const getTag = (TypeNum,typeName,color) =>
-            type===TypeNum?undefined:
-                <Badge count={unFinishCounts?.[TypeNum]} size="small" offset={[-5, 2]} title={"未完成的条数"}>
-                    <Tag className={styles.pointer} color={color ?? "processing"} onClick={()=>setType(TypeNum)} >{typeName}</Tag>
-                </Badge>
+    const getTag = (TypeNum, typeName, color) =>
+        <Badge count={unFinishCounts?.[TypeNum]} size="small" offset={[-5, 2]} title={"未完成的条数"}>
+            <Tag className={`${styles.pointer} ${type===TypeNum?styles.currentTag:''}`} color={color ?? "processing"} onClick={() => setType(TypeNum)}>{typeName}</Tag>
+        </Badge>
 
 
     // 获取循环备忘录时间列表
