@@ -2,6 +2,7 @@ import React, { useRef } from 'react'
 import {Form, Input, Radio, Button, Toast} from 'antd-mobile'
 import {login} from "../../request/homeRequest";
 import styles from './mobile.module.css'
+import {getWelcomePic} from "./data";
 
 export default function () {
     const formRef = useRef()
@@ -21,7 +22,7 @@ export default function () {
             <span style={{ textAlign: 'center', display: 'block', margin: '0 auto' }}>
                 <p style={{ fontSize: 20 }}>欢迎来到Open备忘第一页</p>
                 <p style={{ color: '#fa5555' }}>请关注<strong>仰晨</strong>，并回复“<strong>登录</strong>” 获取验证码进行登录</p>
-                <img src="https://i.niupic.com/images/2024/01/14/fhhB.jpg"  alt="仰晨公众号二维码" className={styles.qrCode}/>
+                <img src={getWelcomePic()}  alt="仰晨公众号二维码" className={styles.qrCode}/>
             </span>
             <Form ref={formRef}
                   footer={

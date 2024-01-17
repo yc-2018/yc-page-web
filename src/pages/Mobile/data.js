@@ -44,3 +44,26 @@ export const columns =[[
     { label: '全部', value: -1 }],sortingOptions]
 export const finishName =(column)=> columns[0].find(i => i.value === column).label
 export const orderByName =(column)=> columns[1].find(i => i.value === column).label
+
+/*列表随机返回一张欢迎图*/
+export const getWelcomePic = () => {
+    const welcomePicList = [
+        'https://i.niupic.com/images/2024/01/18/fq2S.png',
+        'https://i.niupic.com/images/2024/01/18/fq1O.png',
+        'https://i.niupic.com/images/2024/01/18/fqnk.png',
+        'https://i.niupic.com/images/2024/01/18/fqnu.png',
+        'https://i.niupic.com/images/2024/01/18/fqnB.png',
+        'https://i.niupic.com/images/2024/01/18/fqnK.png',
+        'https://i.niupic.com/images/2024/01/18/fqnP.png',
+        'https://i.niupic.com/images/2024/01/18/fqnV.png',
+        'https://i.niupic.com/images/2024/01/18/fqo3.png',
+        'https://i.niupic.com/images/2024/01/18/fqo9.png',
+        'https://i.niupic.com/images/2024/01/18/fqog.png',
+        'https://i.niupic.com/images/2024/01/18/fqoo.png',
+        'https://i.niupic.com/images/2024/01/18/fqoP.png',
+        'https://i.niupic.com/images/2024/01/18/fqoW.png',
+    ]
+    return welcomePicList[Math.floor(Math.random() * welcomePicList.length)]
+    // 在列表中随机返回一张图片
+
+}
