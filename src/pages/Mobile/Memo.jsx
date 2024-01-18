@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {
     InfiniteScroll,
     List,
@@ -38,6 +38,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
     useEffect(()=>{type === changeType && resetList()},[changeType])
     useEffect(()=>{resetList()},[completed,orderBy])
+    const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
 
     /** 重置列表* */
     const resetList = () => {
@@ -108,6 +109,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 setEditVisible(obj);
                 setContent(obj.content);
                 setItemType(obj.itemType)
+                window.setTimeout(() => textRef.current?.focus(), 100) // 点击添加按钮后自动获得焦点,但是没在页面上所以要延迟一点点
                 break;
 
             // 删除
@@ -129,10 +131,19 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
         }
     }
 
+    /*打开添加弹窗*/
+    const openAdd = () => {
+        setEditVisible('新增');
+        setContent('');
+        setItemType(type);
+        window.setTimeout(() => textRef.current?.focus(), 100) // 点击添加按钮后自动获得焦点,但是没在页面上所以要延迟一点点
+
+    }
+
 
     return(
         <>
-            <Button onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加一条</Button>
+            <Button onClick={openAdd}>添加一条</Button>
             <Button onClick={() => setPickerVisible(true)}>状态:{finishName(completed)} _  排序:{orderByName(orderBy)}</Button>
 
             <PullToRefresh
@@ -237,6 +248,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                         内容
                     </div>
                     <TextArea rows={13}
+                              ref={textRef}
                               style={{height: '250px'}}
                               maxLength={2000} showCount
                               placeholder="请输入备忘内容"
@@ -267,6 +279,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                                 let body = {};
                                 body.content = content === editVisible?.content ? null : content;       // 内容不一致时才更新
                                 body.itemType = itemType === editVisible?.itemType ? null : itemType;   // 内容不一致时才更新
+                                if (!body.content && !body.itemType) return Toast.show({icon: 'fail', content: '没有变化'}) && setEditVisible(false)
                                 body.id = editVisible?.id;
                                 showLoading('loading', '处理中…')
                                 let result = await saveOrUpdateToDoItem(body, editVisible === '新增' ? 'post' : "put");
@@ -274,25 +287,30 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                                 if(result) {
                                     showLoading('success', '成功')
                                     setEditVisible(false);
-                                    if(!body.id){// 刷新列表
-                                        editVisible === '新增' && setData(data => [{
+
+                                    if (editVisible === '新增') {
+                                        if (type !== editVisible.itemType) return setChangeType(body.itemType);  /* 新增的待办不是当前类型，那个重置的数据 */
+                                        // 新增的待办是当前类型，那么更新本地数据
+                                        setData(data => [{
                                             ...body,
                                             id: result,
                                             createTime: new Date().toLocaleString(),
                                             updateTime: new Date().toLocaleString(),
-                                            numberOfRecurrences: 0
+                                            numberOfRecurrences: 0,
+                                            completed:0
                                         }, ...data])
-                                        /* █给父组件传值：未完成总数s */
-                                        editVisible === '新增' && changeTotal()
-                                        editVisible !== '新增' && setData(data => data.map(item => item.id === editVisible?.id ? {
+                                        changeTotal('++')/* █给父组件传值：未完成总数s */
+                                    // 修改 而且修改的待办是当前类型，那么更新本地数据
+                                    } else if (body.itemType === null)
+                                        setData(data => data.map(item => item.id === editVisible?.id ? {
                                             ...item,
                                             itemType: body.itemType || item.itemType,
                                             content: body.content || item.content,
                                             updateTime: new Date().toLocaleString()
                                         } : item))
-                                    }else {
+                                    else {  // 把类型修改到别的地方去了 就不要它了
+                                        setData(data => data.filter(item => item.id !== body.id))
                                         setChangeType(body.itemType)
-                                        body.id && setData(data => data.filter(item => item.id !== body.id))
                                     }
                                 }else showLoading('fail', '失败')
                             }}>
@@ -302,14 +320,14 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             </Popup>
 
 
-            <Picker  /*待办条件 选择器*/
+            <Picker  /*待办条件 选择器(筛选)*/
                 columns={columns}
                 visible={pickerVisible}
                 onClose={() => setPickerVisible(false)}
                 value={[completed,orderBy]}
                 onConfirm={v => {
-                    setCompleted(v[0])
-                    setOrderBy(v[1])
+                    setCompleted(v[0])  // 完成状态
+                    setOrderBy(v[1])    // 排序
                 }}
             />
         </>
