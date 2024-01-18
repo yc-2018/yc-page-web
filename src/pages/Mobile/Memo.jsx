@@ -274,25 +274,30 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                                 if(result) {
                                     showLoading('success', '成功')
                                     setEditVisible(false);
-                                    if(!body.id){// 刷新列表
-                                        editVisible === '新增' && setData(data => [{
+
+                                    if (editVisible === '新增') {
+                                        if (type !== editVisible.itemType) return setChangeType(body.itemType);  /* 新增的待办不是当前类型，那个重置的数据 */
+                                        // 新增的待办是当前类型，那么更新本地数据
+                                        setData(data => [{
                                             ...body,
                                             id: result,
                                             createTime: new Date().toLocaleString(),
                                             updateTime: new Date().toLocaleString(),
-                                            numberOfRecurrences: 0
+                                            numberOfRecurrences: 0,
+                                            completed:0
                                         }, ...data])
-                                        /* █给父组件传值：未完成总数s */
-                                        editVisible === '新增' && changeTotal()
-                                        editVisible !== '新增' && setData(data => data.map(item => item.id === editVisible?.id ? {
+                                        changeTotal('++')/* █给父组件传值：未完成总数s */
+                                    // 修改 而且修改的待办是当前类型，那么更新本地数据
+                                    } else if (body.itemType === null)
+                                        setData(data => data.map(item => item.id === editVisible?.id ? {
                                             ...item,
                                             itemType: body.itemType || item.itemType,
                                             content: body.content || item.content,
                                             updateTime: new Date().toLocaleString()
                                         } : item))
-                                    }else {
+                                    else {  // 把类型修改到别的地方去了 就不要它了
+                                        setData(data => data.filter(item => item.id !== body.id))
                                         setChangeType(body.itemType)
-                                        body.id && setData(data => data.filter(item => item.id !== body.id))
                                     }
                                 }else showLoading('fail', '失败')
                             }}>
@@ -302,14 +307,14 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             </Popup>
 
 
-            <Picker  /*待办条件 选择器*/
+            <Picker  /*待办条件 选择器(筛选)*/
                 columns={columns}
                 visible={pickerVisible}
                 onClose={() => setPickerVisible(false)}
                 value={[completed,orderBy]}
                 onConfirm={v => {
-                    setCompleted(v[0])
-                    setOrderBy(v[1])
+                    setCompleted(v[0])  // 完成状态
+                    setOrderBy(v[1])    // 排序
                 }}
             />
         </>
