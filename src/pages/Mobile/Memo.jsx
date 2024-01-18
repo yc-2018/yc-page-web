@@ -279,6 +279,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                                 let body = {};
                                 body.content = content === editVisible?.content ? null : content;       // 内容不一致时才更新
                                 body.itemType = itemType === editVisible?.itemType ? null : itemType;   // 内容不一致时才更新
+                                if (!body.content && !body.itemType) return Toast.show({icon: 'fail', content: '没有变化'}) && setEditVisible(false)
                                 body.id = editVisible?.id;
                                 showLoading('loading', '处理中…')
                                 let result = await saveOrUpdateToDoItem(body, editVisible === '新增' ? 'post' : "put");
