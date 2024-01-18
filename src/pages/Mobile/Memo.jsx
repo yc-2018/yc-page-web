@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {
     InfiniteScroll,
     List,
@@ -38,6 +38,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
     useEffect(()=>{type === changeType && resetList()},[changeType])
     useEffect(()=>{resetList()},[completed,orderBy])
+    const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
 
     /** 重置列表* */
     const resetList = () => {
@@ -108,6 +109,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 setEditVisible(obj);
                 setContent(obj.content);
                 setItemType(obj.itemType)
+                window.setTimeout(() => textRef.current?.focus(), 100) // 点击添加按钮后自动获得焦点,但是没在页面上所以要延迟一点点
                 break;
 
             // 删除
@@ -129,10 +131,19 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
         }
     }
 
+    /*打开添加弹窗*/
+    const openAdd = () => {
+        setEditVisible('新增');
+        setContent('');
+        setItemType(type);
+        window.setTimeout(() => textRef.current?.focus(), 100) // 点击添加按钮后自动获得焦点,但是没在页面上所以要延迟一点点
+
+    }
+
 
     return(
         <>
-            <Button onClick={() => {setEditVisible('新增');setContent('');setItemType(type)}}>添加一条</Button>
+            <Button onClick={openAdd}>添加一条</Button>
             <Button onClick={() => setPickerVisible(true)}>状态:{finishName(completed)} _  排序:{orderByName(orderBy)}</Button>
 
             <PullToRefresh
@@ -237,6 +248,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                         内容
                     </div>
                     <TextArea rows={13}
+                              ref={textRef}
                               style={{height: '250px'}}
                               maxLength={2000} showCount
                               placeholder="请输入备忘内容"
