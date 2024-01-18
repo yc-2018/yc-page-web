@@ -1,4 +1,6 @@
 import {sortingOptions} from "../../store/NoLoginData";
+import {BookOutlined, UnorderedListOutlined, UserOutlined} from "@ant-design/icons";
+import React from "react";
 
 /**
  * 备忘列表左边操作
@@ -64,6 +66,23 @@ export const getWelcomePic = () => {
         'https://i.niupic.com/images/2024/01/18/fqoW.png',
     ]
     return welcomePicList[Math.floor(Math.random() * welcomePicList.length)]
-    // 在列表中随机返回一张图片
-
 }
+
+/*底部导航*/
+export const tabs = [
+    {
+        key: 'Memos',
+        title: '待办',
+        icon: <UnorderedListOutlined />,
+    },
+    {
+        key: 'Blog',
+        title: '博客',
+        icon: <BookOutlined />,
+    },
+    {
+        key:'Me',
+        title: '我的',
+        icon: <UserOutlined />,
+    },
+]

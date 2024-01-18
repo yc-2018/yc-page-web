@@ -13,7 +13,7 @@ const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined, Notification
     return {
         key: `sub${key}`,
         icon: React.createElement(icon),
-        label: `subnav ${key}`,
+        label: `subNav ${key}`,
         children: new Array(4).fill(null).map((_, j) => {
             const subKey = index * 4 + j + 1;
             return {
@@ -28,13 +28,19 @@ const Blog = () => {
     return (
         <Layout style={{maxHeight: 'calc(100vh - 64px)'}}>
             {/*------- 页面左侧 -------*/}
-            <Sider width={200} className={styles.scrollbar} style={{background: colorBgContainer,overflow: 'auto'}}>
+            <Sider width={200}
+                   theme={'light'}
+                   className={styles.scrollbar}
+                   style={{background: colorBgContainer,overflow: 'auto'}}
+                   collapsible
+            >
                 <Menu
                     mode="inline"
                     defaultSelectedKeys={['1']}
                     defaultOpenKeys={['sub1']}
                     style={{height: '100%', borderRight: 0}}
                     items={items2}
+                    inlineCollapsed={true}
                 />
             </Sider>
 
@@ -44,8 +50,8 @@ const Blog = () => {
                 <Content className={[styles.scrollbar, styles.content].join(' ')}>
                     Content
                     <p className={styles.testContent}>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
+                    <p>电脑用这个组件</p>
+                    <p>手机再创建一个</p>
                     <p>Content</p>
                     <p>Content</p>
                     <p>Content</p>
