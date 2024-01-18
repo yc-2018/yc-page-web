@@ -5,18 +5,18 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import zhCN from 'antd/locale/zh_CN';
 import { ConfigProvider } from 'antd';
-import { BrowserRouter } from'react-router-dom';
+import { HashRouter } from'react-router-dom';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
     <ConfigProvider locale={zhCN} theme={{components: {Message: {zIndexPopup: 9999999}}}}>
-        <BrowserRouter>
+        <HashRouter>
             <React.StrictMode>
                 <App/>
             </React.StrictMode>
-        </BrowserRouter>
+        </HashRouter>
     </ConfigProvider>
 
 );

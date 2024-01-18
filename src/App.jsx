@@ -19,10 +19,12 @@ export default () => {
         document.title = routesName[location.pathname]??'未找到页面';
     }, [location]);
 
+    const hashPath = window.location.hash.split('?')[0].replace('#', '');
+
     return (
             <App message={{maxCount: 5}}>
                 {contextMsg}
-                {window.location.pathname === '/' ? null : <Head/>}
+                {hashPath === '/' || hashPath==='' ? null : <Head/>}
                 {element}
                 <LoginModal/>
                 <Spin spinning={CommonStore.loading} fullscreen />{/* 加载动画 */}
