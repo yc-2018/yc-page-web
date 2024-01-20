@@ -1,32 +1,27 @@
-import {observer} from 'mobx-react-lite'
-import {
-    Drawer,
-    List,
-    Skeleton,
-    Button,
-    Tag,
-    Spin,
-    Tooltip,
-    Select,
-    Divider,
-    Badge,
-    Space,
-    Dropdown, App
-} from "antd";
 import {BookOutlined, CaretDownOutlined, PlusOutlined, SyncOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
+import {observer} from 'mobx-react-lite'
+import {
+    Drawer, List, Skeleton, Button, Tag,
+    Spin, Tooltip, Select, Divider,
+    Badge, Space, Dropdown, App
+} from "antd";
 
 import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../../request/homeRequest"
 import FormModal from "../../../compontets/FormModal";
 import ShowOrNot from "../../../store/ShowOrNot";
 import TextArea from "antd/es/input/TextArea";
+import JWTUtils from "../../../utils/JWTUtils";
+import {sortingOptions} from "../../../store/NoLoginData";
+import SortSelect from "../../../compontets/SortSelect";
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../../request/homeRequest"
+
 import './MemoDrawer.css'
 import styles from '../../../common.module.css'
-import JWTUtils from "../../../utils/JWTUtils";
 
 let total = -1;    // 初始化待办总数
+let orderBy = 5;   // 《表单》默认排序方式
 let isQueryOnClick = false; // 防止点太快了
 // 待办类型映射
 const tagNameMapper = {
@@ -49,11 +44,11 @@ const MemoDrawer = observer(() => {
     const [list, setList] = useState([]);     // 待办展示列表
     const [page, setPage] = useState(1);    // 待办翻页
     const [type, setType] = useState(0);    // 待办类型
-    const [unFinishCounts, setUnFinishCounts] = useState();      // 待办未完成计数
-    const [completed, setCompleted] = useState(0);      // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
-    const [formModal, setFormModal] = useState(false); // 是否显示新增或编辑的模态框。
-    const [fModalData, setFModalData] = useState();           // 设置模态框数据
-    const [items, setItems] = useState(item);    // 设置循环待办的数据
+    const [unFinishCounts, setUnFinishCounts] = useState();        // 待办未完成计数
+    const [completed, setCompleted] = useState(0);         // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+    const [formModal, setFormModal] = useState(false);    // 是否显示新增或编辑的模态框。
+    const [fModalData, setFModalData] = useState();              // 设置模态框数据
+    const [items, setItems] = useState(item);    // 设置循环待办的循环时间数据
 
     const {notification, modal} = App.useApp();
 
@@ -66,7 +61,7 @@ const MemoDrawer = observer(() => {
             setPage(1)              // 待办翻页重置
             total = -1;                   // 待办总数重置
             // 使用 axios 发起请求 获取又一次初始化待办列表
-            const resp = await getToDoItems({type, page:1, completed});
+            const resp = await getToDoItems({type, page:1, completed,orderBy});
             if (!(resp?.code === 1)) {
                 setInitLoading(false);
                 setWebLoading(false);
@@ -289,49 +284,54 @@ const MemoDrawer = observer(() => {
                     style={{opacity: 0.8}}
                     width={450}
                     closeIcon={false}
-                    title={<>
-                    <Spin spinning={webLoading} indicator={<></>}>
-                        <div style={{marginBottom: 8}}>
-                            {/*新增和编辑表单*/}
-                            <FormModal isOpen={formModal} setOpen={setFormModal} data={fModalData} reList={setRefreshTrigger} currentMemoType={type}/>
-                            <Tooltip title={'刷新当前待办'} mouseEnterDelay={0.6}>
-                                <SyncOutlined className='refresh' spin={webLoading} onClick={()=> setRefreshTrigger(!refreshTrigger)}/>
-                            </Tooltip>
-                            备忘录
-                            {/*下拉框选择看那种待办*/}
-                            <Select
-                                value={completed}
-                                options={[
-                                    {label: '未完成', value: 0, disabled:completed===0},
-                                    {label: '已完成', value: 1, disabled:completed===1},
-                                    {label: '全部', value: -1, disabled:completed===-1}
-                                ]}
-                                size='small'
-                                onChange={value => setCompleted(value)}
-                                style={{width: '6em'}}
-                            />
-                            <Tooltip title={'添加一个待办'} mouseEnterDelay={1}>
-                                <Button
-                                    icon={<PlusOutlined />}
-                                    onClick={() => {
-                                        setFModalData(undefined)
-                                        setFormModal(true)
-                                    }}
-                                    size={"small"} className={"addItemButton"}
-                                />
-                            </Tooltip>
-                        </div>
-                        <Space>
-                            {getTag(0, "普通")}
-                            {getTag(3, "紧急")}
-                            {getTag(6, "工作")}
-                            {getTag(7, "其他")}
-                            {getTag(1, "循环","warning")}
-                            {getTag(2, "长期","warning")}
-                            {getTag(5, "日记","default")}
-                        </Space>
-                    </Spin>
-                    </>}
+                    title={
+                        <>
+                            <Spin spinning={webLoading} indicator={<></>}>
+                                <div style={{marginBottom: 8}}>
+                                    {/*新增和编辑表单*/}
+                                    <FormModal isOpen={formModal} setOpen={setFormModal} data={fModalData} reList={setRefreshTrigger} currentMemoType={type}/>
+                                    <Tooltip title={'刷新当前待办'} mouseEnterDelay={0.6}>
+                                        <SyncOutlined className='refresh' spin={webLoading} onClick={() => setRefreshTrigger(!refreshTrigger)}/>
+                                    </Tooltip>
+                                    备忘录
+
+                                    <SortSelect             /*自己搞的《排序下拉框》*/
+                                        value={orderBy}
+                                        onChange={value => setRefreshTrigger(orderBy = value)/*这不是传参，就是赋值*/}
+                                        options={sortingOptions}
+                                        loading={webLoading}
+                                    />
+
+                                    <Select                 /*下拉框看《待办状态》*/
+                                        size='small'
+                                        value={completed}
+                                        style={{width: '6em'}}
+                                        onChange={value => setCompleted(value)}
+                                        options={[{label: '未完成', value: 0}, {label: '已完成', value: 1}, {label: '全部', value: -1}]}
+                                    />
+                                    <Tooltip title={'添加一个待办'} mouseEnterDelay={1}>
+                                        <Button
+                                            icon={<PlusOutlined/>}
+                                            onClick={() => {
+                                                setFModalData(undefined)
+                                                setFormModal(true)
+                                            }}
+                                            size={"small"} className={"addItemButton"}
+                                        />
+                                    </Tooltip>
+                                </div>
+                                <Space>
+                                    {getTag(0, "普通")}
+                                    {getTag(3, "紧急")}
+                                    {getTag(6, "工作")}
+                                    {getTag(7, "其他")}
+                                    {getTag(1, "循环", "warning")}
+                                    {getTag(2, "长期", "warning")}
+                                    {getTag(5, "日记", "default")}
+                                </Space>
+                            </Spin>
+                        </>
+                    }
             >
                 <Spin spinning={webLoading} tip={'正在加载'+tagNameMapper[type]+'待办'}>
                 {UserStore.jwt ?
