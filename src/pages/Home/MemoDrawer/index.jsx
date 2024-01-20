@@ -21,7 +21,7 @@ import './MemoDrawer.css'
 import styles from '../../../common.module.css'
 
 let total = -1;    // 初始化待办总数
-let orderBy = 5;   // 《表单》默认排序方式
+let orderBy = 1;   // 《表单》默认排序方式
 let isQueryOnClick = false; // 防止点太快了
 // 待办类型映射
 const tagNameMapper = {
