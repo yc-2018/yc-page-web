@@ -40,7 +40,7 @@ code {
 /*备忘录的当前标签 加个环*/
 .currentTag:before{
   content: "";
-  border: 2px solid green; /* 设置透明边框 */
+  border: 2px solid green;
   border-radius: 6px;
   width: 49px;
   height: 30px;
@@ -61,4 +61,16 @@ code {
   80% {border-color: #cc52f5}
   90% {border-color: #f552c1}
   100% {border-color: #f55252}
+}
+/*英语备忘录的当前标签 加个环*/
+.eCurrentTag:before{
+  content: "";
+  border: 1px solid green;
+  border-radius: 6px;
+  width: 28px;
+  height: 26px;
+  position: absolute;
+  top: -3px;
+  left: -4px;
+  animation: colorRotate 5s linear infinite; /* 应用动画 */
 }
