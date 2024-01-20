@@ -147,8 +147,16 @@ const MemoDrawer = observer(() => {
 
     // 标签生成
     const getTag = (TypeNum, typeName, color) =>
-        <Badge count={unFinishCounts?.[TypeNum]} size="small" offset={[-5, 2]} title={"未完成的条数"}>
-            <Tag className={`${styles.pointer} ${type===TypeNum?styles.currentTag:''}`} color={color ?? "processing"} onClick={() => setType(TypeNum)}>{typeName}</Tag>
+        <Badge size="small" offset={[-5, 2]}
+               title={"未完成的条数"}
+               count={type === TypeNum && total > 0 ? total : unFinishCounts?.[TypeNum]}
+        >
+            <Tag className={`${styles.pointer} ${type===TypeNum?styles.currentTag:''}`}
+                 color={color ?? "processing"}
+                 onClick={() => setType(TypeNum)}
+            >
+                {typeName}
+            </Tag>
         </Badge>
 
 
@@ -290,7 +298,6 @@ const MemoDrawer = observer(() => {
                                 <SyncOutlined className='refresh' spin={webLoading} onClick={()=> setRefreshTrigger(!refreshTrigger)}/>
                             </Tooltip>
                             备忘录
-                            <Tag bordered={false} color="success" className={'ripple-tag'}>{`当前：${tagNameMapper[type] + (total> 0? '×' + total:'')}`}</Tag>
                             {/*下拉框选择看那种待办*/}
                             <Select
                                 value={completed}
