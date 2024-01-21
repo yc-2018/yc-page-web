@@ -1,12 +1,9 @@
 import {observer} from 'mobx-react-lite'
 import React, {useEffect, useState} from "react";
-import {App, Button, Divider, Drawer, Input, Skeleton, Space, Spin, Tag, Tooltip} from "antd";
+import {App, Button, Divider, Drawer, Input, Skeleton, Space, Spin, Tag} from "antd";
 import {
-    CheckOutlined,
-    CloseOutlined, DashboardOutlined,
-    DeleteOutlined,
-    EditOutlined,
-    ExclamationCircleFilled, PlusCircleOutlined, SyncOutlined, ZoomInOutlined
+    CheckOutlined, CloseOutlined, DashboardOutlined, DeleteOutlined, EditOutlined,
+    ExclamationCircleFilled, PlusCircleOutlined, SyncOutlined
 } from "@ant-design/icons";
 
 import showOrNot from "../../../store/ShowOrNot";
@@ -17,9 +14,11 @@ import {englishSortingOptions, tagList} from "../../../store/NoLoginData";
 import MyButton from "../../../compontets/MyButton";
 import CommonStore from "../../../store/CommonStore";
 import SortSelect from "../../../compontets/SortSelect";
-import styles from "../../../common.module.css"
 import LoaderWhite from "../../../compontets/common/LoaderWhite";
 import JWTUtils from "../../../utils/JWTUtils";
+
+import styles from "../../../common.module.css"
+
 
 let total = 0;    // 初始化待办总数
 let init = true  // 第一次加载
@@ -166,7 +165,13 @@ function EnglishDrawer() {
 
     /** 标签生成器 */
     const buildTag=(value, color="processing",icon, onClick, bordered=false)=>
-        <Tag key={value} bordered={bordered} color={color} icon={icon} className={styles.pointer} onClick={onClick}>
+        <Tag key={value}
+             icon={icon}
+             color={color}
+             onClick={onClick}
+             bordered={bordered}
+             className={`${styles.pointer} ${firstLetter===value? styles.eCurrentTag: ''}`}
+        >
             {value}
         </Tag>
 
@@ -209,11 +214,6 @@ function EnglishDrawer() {
                     </Spin>
                 }
                 extra={<>
-                    {/*筛选的字母*/ firstLetter &&
-                        <Tooltip placement="bottomLeft" title={'点击取消筛选'+firstLetter}>                        {/*↓这不是参数，就是赋值↓*/}
-                            {buildTag(firstLetter, 'success', <ZoomInOutlined />, () => reset(firstLetter=undefined))}
-                        </Tooltip>
-                    }
                     <SortSelect             /*自己搞的《排序下拉框》*/
                         value={orderBy}
                         onChange={value => reset(orderBy = value)/*这不是传参，就是赋值*/}
@@ -226,7 +226,7 @@ function EnglishDrawer() {
                 <Spin indicator={<LoaderWhite/>} spinning={reqLoading}>
                     <Space size={[0, 'small']} wrap>
                         { /*渲染26个字母*/ tagList.map(item => buildTag(item.value, item.color,undefined,()=> {
-                            if (item.value === firstLetter) return msg.info(`${item.value}字母已选中`)
+                            if (item.value === firstLetter) return reset(firstLetter=undefined)
                             firstLetter = item.value
                             reset()
                         }))}
