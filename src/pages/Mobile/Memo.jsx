@@ -9,7 +9,7 @@ import {
     Tag,
     Radio,
     TextArea,
-    Dialog, Picker, PullToRefresh
+    Dialog, Picker, PullToRefresh, SearchBar
 } from 'antd-mobile'
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data";
@@ -25,12 +25,13 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     let total;  // 总条数 给父组件显示
 
     const [data, setData] = useState([])
-    const [hasMore, setHasMore] = useState(true)
+    const [hasMore, setHasMore] = useState(true)        // 是否自动翻页
     const [page, setPage] = useState(1);    // 待办翻页
     const [completed, setCompleted] = useState(0);       // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
     const [orderBy,setOrderBy] = useState(1)             // 排序
+    const [keyword, setKeyword] = useState(null)                 // 搜索关键字
     const [visible, setVisible] = useState(undefined);           // 查看弹窗的显示和隐藏
-    const [editVisible, setEditVisible] = useState(undefined);  // 编辑弹窗的显示和隐藏
+    const [editVisible, setEditVisible] = useState(undefined);   // 编辑弹窗的显示和隐藏
     const [pickerVisible, setPickerVisible] = useState(false)   // 待办状态选择器的显示和隐藏
 
     const [content, setContent] = useState('')    //表单内容
@@ -49,7 +50,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
     /** 加载更多 */
     const loadMore = async() => {
-        const append = await getToDoItems({type, page, completed,orderBy});
+        const append = await getToDoItems({type, page, completed,orderBy,keyword});
         if (!append) return showLoading('fail', '获取数据失败') || setHasMore(false)
         setData(val => [...val, ...append.data.records])
         setHasMore(data.length < append.data.total)
@@ -185,11 +186,22 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
 
 
-
     return(
         <>
             <Button onClick={openAdd}>添加一条</Button>
-            <Button onClick={() => setPickerVisible(true)}>状态:{finishName(completed)} _  排序:{orderByName(orderBy)}</Button>
+            <Button onClick={() => setPickerVisible(true)}>状态:{finishName(completed)} & 排序:{orderByName(orderBy)}</Button>
+
+            {/*有数据时显示搜索框*/ (data?.length > 0 || keyword) &&
+                <SearchBar cancelText={'清空'}
+                           placeholder='要搜索内容吗😶‍🌫️'
+                           onSearch={e => setKeyword(e) || resetList()}
+                        // onBlur={onSearch}  // 输入框失去焦点时触发（搜索也会触发 如果想就可以改成e.target.value
+                           onCancel={() => keyword && (setKeyword(null) || resetList())}
+                           onClear={() => keyword && (setKeyword(null) || resetList())}
+                           showCancelButton
+                           maxLength={100}
+                />
+            }
 
             <PullToRefresh
                 pullingText={'用点力拉🤤'}
