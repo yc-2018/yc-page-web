@@ -138,6 +138,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
     }
 
+    /** 编辑或新增的提交表单 */
     const submit = async () => {
         if (content?.length === 0) return Toast.show({icon: 'fail', content: '内容不能为空'})
         // if (!itemType) return Toast.show({icon: 'fail', content: '类型不能为空'})
@@ -155,7 +156,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             setEditVisible(false);
 
             if (editVisible === '新增') {
-                if (type !== editVisible.itemType) return setChangeType(body.itemType);  /* 新增的待办不是当前类型，那个重置的数据 */
+                if (type !== body.itemType) return setChangeType(body.itemType);  /* 新增的待办不是当前类型，那个重置的数据 */
                 // 新增的待办是当前类型，那么更新本地数据
                 setData(data => [{
                     ...body,
