@@ -9,7 +9,7 @@ import {
     Tag,
     Radio,
     TextArea,
-    Dialog, Picker, PullToRefresh
+    Dialog, Picker, PullToRefresh, SearchBar
 } from 'antd-mobile'
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data";
@@ -25,12 +25,13 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     let total;  // 总条数 给父组件显示
 
     const [data, setData] = useState([])
-    const [hasMore, setHasMore] = useState(true)
+    const [hasMore, setHasMore] = useState(true)        // 是否自动翻页
     const [page, setPage] = useState(1);    // 待办翻页
     const [completed, setCompleted] = useState(0);       // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
     const [orderBy,setOrderBy] = useState(1)             // 排序
+    const [keyword, setKeyword] = useState(null)                 // 搜索关键字
     const [visible, setVisible] = useState(undefined);           // 查看弹窗的显示和隐藏
-    const [editVisible, setEditVisible] = useState(undefined);  // 编辑弹窗的显示和隐藏
+    const [editVisible, setEditVisible] = useState(undefined);   // 编辑弹窗的显示和隐藏
     const [pickerVisible, setPickerVisible] = useState(false)   // 待办状态选择器的显示和隐藏
 
     const [content, setContent] = useState('')    //表单内容
@@ -40,18 +41,17 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     useEffect(()=>{resetList()},[completed,orderBy])
     const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
 
-    /** 重置列表* */
+    /** 重置列表 */
     const resetList = () => {
         setPage(1)
         setData([])
         setHasMore(true)
     }
 
-    /**
-    * 加载更多
-    * */
-    async function loadMore() {
-        const append = await getToDoItems({type, page, completed,orderBy});
+    /** 加载更多 */
+    const loadMore = async() => {
+        const append = await getToDoItems({type, page, completed,orderBy,keyword});
+        if (!append) return showLoading('fail', '获取数据失败') || setHasMore(false)
         setData(val => [...val, ...append.data.records])
         setHasMore(data.length < append.data.total)
         setPage(val => val + 1)
@@ -140,11 +140,68 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
     }
 
+    /** 编辑或新增的提交表单 */
+    const submit = async () => {
+        if (content?.length === 0) return Toast.show({icon: 'fail', content: '内容不能为空'})
+        // if (!itemType) return Toast.show({icon: 'fail', content: '类型不能为空'})
+
+        // 构造请求体
+        let body = {};
+        body.content = content === editVisible?.content ? null : content;       // 内容不一致时才更新
+        body.itemType = itemType === editVisible?.itemType ? null : itemType;   // 内容不一致时才更新
+        if (!body.content && !body.itemType) return Toast.show({icon: 'fail', content: '没有变化'}) && setEditVisible(false)
+        body.id = editVisible?.id;
+        showLoading('loading', '处理中…')
+        let result = await saveOrUpdateToDoItem(body, editVisible === '新增' ? 'post' : "put");
+        if(result) {
+            showLoading('success', '成功')
+            setEditVisible(false);
+
+            if (editVisible === '新增') {
+                if (type !== body.itemType) return setChangeType(body.itemType);  /* 新增的待办不是当前类型，那个重置的数据 */
+                // 新增的待办是当前类型，那么更新本地数据
+                setData(data => [{
+                    ...body,
+                    id: result,
+                    createTime: new Date().toLocaleString(),
+                    updateTime: new Date().toLocaleString(),
+                    numberOfRecurrences: 0,
+                    completed:0
+                }, ...data])
+                changeTotal('++')/* █给父组件传值：未完成总数s */
+                // 修改 而且修改的待办是当前类型，那么更新本地数据
+            } else if (body.itemType === null)
+                setData(data => data.map(item => item.id === editVisible?.id ? {
+                    ...item,
+                    itemType: body.itemType || item.itemType,
+                    content: body.content || item.content,
+                    updateTime: new Date().toLocaleString()
+                } : item))
+            else {  // 把类型修改到别的地方去了 就不要它了
+                setData(data => data.filter(item => item.id !== body.id))
+                setChangeType(body.itemType)
+            }
+        }else showLoading('fail', '失败')
+    }
+
+
 
     return(
         <>
             <Button onClick={openAdd}>添加一条</Button>
-            <Button onClick={() => setPickerVisible(true)}>状态:{finishName(completed)} _  排序:{orderByName(orderBy)}</Button>
+            <Button onClick={() => setPickerVisible(true)}>状态:{finishName(completed)} & 排序:{orderByName(orderBy)}</Button>
+
+            {/*有数据时显示搜索框*/ (data?.length > 0 || keyword) &&
+                <SearchBar cancelText={'清空'}
+                           placeholder='要搜索内容吗😶‍🌫️'
+                           onSearch={e => setKeyword(e) || resetList()}
+                        // onBlur={onSearch}  // 输入框失去焦点时触发（搜索也会触发 如果想就可以改成e.target.value
+                           onCancel={() => keyword && (setKeyword(null) || resetList())}
+                           onClear={() => keyword && (setKeyword(null) || resetList())}
+                           showCancelButton
+                           maxLength={100}
+                />
+            }
 
             <PullToRefresh
                 pullingText={'用点力拉🤤'}
@@ -152,22 +209,21 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 completeText={'哎呦，你干嘛🥴'}
                 onRefresh={async () => resetList()}
             >
-            <List>
-                {data.map(item => (
-                    <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item)} onAction={onAction}>
-                        <List.Item key={item.id}
-                                   style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
-                                   onClick={() => {setVisible(item)}}
-                                   clickable={false}
-                        >
-
-                            <span style={{width: '100%'}}>{item.content}</span>
-                        </List.Item>
-                    </SwipeAction>
-                ))}
-            </List>
+                <List>
+                    {data.map(item => (
+                        <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item)} onAction={onAction}>
+                            <List.Item key={item.id}
+                                       style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
+                                       onClick={() => setVisible(item)}
+                                       clickable={false}>
+                                <span style={{width: '100%'}}>{item.content}</span>
+                            </List.Item>
+                        </SwipeAction>
+                    ))}
+                </List>
+                <InfiniteScroll loadMore={loadMore} hasMore={hasMore}/>
+                <br/>
             </PullToRefresh>
-            <InfiniteScroll loadMore={loadMore} hasMore={hasMore}/>
 
             {/* 查看详细弹出层*/}
             <Popup
@@ -270,52 +326,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                     <br/>
                     <br/>
                     <br/>
-                    <Button block
-                            onClick={async () => {
-                                if (content?.length === 0) return Toast.show({icon: 'fail', content: '内容不能为空'})
-                                // if (!itemType) return Toast.show({icon: 'fail', content: '类型不能为空'})
-
-                                // 构造请求体
-                                let body = {};
-                                body.content = content === editVisible?.content ? null : content;       // 内容不一致时才更新
-                                body.itemType = itemType === editVisible?.itemType ? null : itemType;   // 内容不一致时才更新
-                                if (!body.content && !body.itemType) return Toast.show({icon: 'fail', content: '没有变化'}) && setEditVisible(false)
-                                body.id = editVisible?.id;
-                                showLoading('loading', '处理中…')
-                                let result = await saveOrUpdateToDoItem(body, editVisible === '新增' ? 'post' : "put");
-                                console.log('提交表单', body)
-                                if(result) {
-                                    showLoading('success', '成功')
-                                    setEditVisible(false);
-
-                                    if (editVisible === '新增') {
-                                        if (type !== editVisible.itemType) return setChangeType(body.itemType);  /* 新增的待办不是当前类型，那个重置的数据 */
-                                        // 新增的待办是当前类型，那么更新本地数据
-                                        setData(data => [{
-                                            ...body,
-                                            id: result,
-                                            createTime: new Date().toLocaleString(),
-                                            updateTime: new Date().toLocaleString(),
-                                            numberOfRecurrences: 0,
-                                            completed:0
-                                        }, ...data])
-                                        changeTotal('++')/* █给父组件传值：未完成总数s */
-                                    // 修改 而且修改的待办是当前类型，那么更新本地数据
-                                    } else if (body.itemType === null)
-                                        setData(data => data.map(item => item.id === editVisible?.id ? {
-                                            ...item,
-                                            itemType: body.itemType || item.itemType,
-                                            content: body.content || item.content,
-                                            updateTime: new Date().toLocaleString()
-                                        } : item))
-                                    else {  // 把类型修改到别的地方去了 就不要它了
-                                        setData(data => data.filter(item => item.id !== body.id))
-                                        setChangeType(body.itemType)
-                                    }
-                                }else showLoading('fail', '失败')
-                            }}>
-                        提交
-                    </Button>
+                    <Button block onClick={submit}> 提交 </Button>
                 </div>
             </Popup>
 

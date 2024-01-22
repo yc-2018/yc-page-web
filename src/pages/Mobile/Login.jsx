@@ -1,20 +1,17 @@
 import React, { useRef } from 'react'
-import {Form, Input, Radio, Button, Toast} from 'antd-mobile'
+import {Form, Input, Button, Toast, Selector} from 'antd-mobile'
 import {login} from "../../request/homeRequest";
 import styles from './mobile.module.css'
-import {getWelcomePic} from "./data";
+import {getWelcomePic, loginTime} from "./data";
 
 export default function () {
     const formRef = useRef()
     const [loginLoading, setLoginLoading] = React.useState(false)
 
     const handleSubmit = () => {
-        formRef.current.validateFields().then(values => {
-            // 获取表单数据去登录
-            login(values.code, values.duration, setLoginLoading);
-        }).catch(_ => {
-            Toast.show({icon: 'fail', content: '请输入按提示输入表单'})
-        })
+        formRef.current.validateFields()
+            .then(values => {login(values.code, values.duration, setLoginLoading);})    // 获取表单数据去登录
+            .catch(_ => {Toast.show({icon: 'fail', content: '请输入按提示输入表单'})})
     }
 
     return (
@@ -30,23 +27,18 @@ export default function () {
                           登录
                       </Button>
                   }
-
             >
-                <Form.Item
-                    name="code"
-                    label="登录验证码"
-                    rules={[{ required: true, len: 6, message: '请输入6位数字' }]}
-                >
+                <Form.Item name="code"
+                           label="登录验证码"
+                           rules={[{ required: true, len: 6, message: '请输入6位数字' }]}>
                     <Input type="number" placeholder="请输入6位数字" />
                 </Form.Item>
-                <Form.Item name="duration" label="登录有效期" initialValue="bt">
-                    <Radio.Group>
-                        <Radio value="bt">半天&nbsp;</Radio>
-                        <Radio value="yt">一天&nbsp;</Radio>
-                        <Radio value="yz">一周&nbsp;</Radio>
-                        <Radio value="yy">一个月&nbsp;</Radio>
-                        <Radio value="yn">一年</Radio>
-                    </Radio.Group>
+
+                <Form.Item name="duration"
+                           label="登录有效期"
+                           initialValue="yt"
+                           rules={[{ required: true, message: '请选择登录时间' }]}>
+                    <Selector options={loginTime}/>
                 </Form.Item>
             </Form>
         </>

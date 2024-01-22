@@ -16,29 +16,27 @@ const isMobile = isMobileDevice || isMobileViewport;
 export default [
     {
         path:'/',
-        element: isMobile ? <Mobile/> : <Home/>
+        element: isMobile ? <Mobile/> : <Home/>,
+        title:'Open备忘第一页',
     },
     {
         path:'/help',
-        element:<Help/>
+        element:<Help/>,
+        title:'仰晨-帮助页',
     },
     {
         path:'/blog',
-        element:<Blog/>
+        element:<Blog/>,
+        title:'仰晨-博客',
     },
     {
         path:'/*',
-        element:<NoPage/>
+        element:<NoPage/>,
+        title:'未知页面',
+
     },
     // {
     //     path:'/',
     //     element:<Navigate to="/home"/>
     // }
 ]
-
-export const routesName = {
-    '/': 'Open备忘第一页',
-    '/help': '仰晨-帮助页',
-    '/blog': '仰晨-博客',
-
-}

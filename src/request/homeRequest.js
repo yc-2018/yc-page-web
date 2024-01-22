@@ -90,10 +90,7 @@ export async function getToDoItems({type = 0, page = 1, completed = 0, orderBy, 
         const response = await myAxios
             .get(`/toDoItems/${type + page + completed + pageSize + orderBy + firstLetter + keyword}`);
         return response.data;
-    } catch (error) {
-        console.error('待办请求失败:', error);
-        return {};
-    }
+    } catch (error) {console.error('待办请求失败:', error)}
 }
 
 /** 保存或修改一个待办 */
