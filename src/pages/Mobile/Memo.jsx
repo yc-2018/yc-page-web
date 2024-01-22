@@ -40,17 +40,15 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     useEffect(()=>{resetList()},[completed,orderBy])
     const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
 
-    /** 重置列表* */
+    /** 重置列表 */
     const resetList = () => {
         setPage(1)
         setData([])
         setHasMore(true)
     }
 
-    /**
-    * 加载更多
-    * */
-    async function loadMore() {
+    /** 加载更多 */
+    const loadMore = async() => {
         const append = await getToDoItems({type, page, completed,orderBy});
         setData(val => [...val, ...append.data.records])
         setHasMore(data.length < append.data.total)
@@ -140,6 +138,51 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
     }
 
+    const submit = async () => {
+        if (content?.length === 0) return Toast.show({icon: 'fail', content: '内容不能为空'})
+        // if (!itemType) return Toast.show({icon: 'fail', content: '类型不能为空'})
+
+        // 构造请求体
+        let body = {};
+        body.content = content === editVisible?.content ? null : content;       // 内容不一致时才更新
+        body.itemType = itemType === editVisible?.itemType ? null : itemType;   // 内容不一致时才更新
+        if (!body.content && !body.itemType) return Toast.show({icon: 'fail', content: '没有变化'}) && setEditVisible(false)
+        body.id = editVisible?.id;
+        showLoading('loading', '处理中…')
+        let result = await saveOrUpdateToDoItem(body, editVisible === '新增' ? 'post' : "put");
+        if(result) {
+            showLoading('success', '成功')
+            setEditVisible(false);
+
+            if (editVisible === '新增') {
+                if (type !== editVisible.itemType) return setChangeType(body.itemType);  /* 新增的待办不是当前类型，那个重置的数据 */
+                // 新增的待办是当前类型，那么更新本地数据
+                setData(data => [{
+                    ...body,
+                    id: result,
+                    createTime: new Date().toLocaleString(),
+                    updateTime: new Date().toLocaleString(),
+                    numberOfRecurrences: 0,
+                    completed:0
+                }, ...data])
+                changeTotal('++')/* █给父组件传值：未完成总数s */
+                // 修改 而且修改的待办是当前类型，那么更新本地数据
+            } else if (body.itemType === null)
+                setData(data => data.map(item => item.id === editVisible?.id ? {
+                    ...item,
+                    itemType: body.itemType || item.itemType,
+                    content: body.content || item.content,
+                    updateTime: new Date().toLocaleString()
+                } : item))
+            else {  // 把类型修改到别的地方去了 就不要它了
+                setData(data => data.filter(item => item.id !== body.id))
+                setChangeType(body.itemType)
+            }
+        }else showLoading('fail', '失败')
+    }
+
+
+
 
     return(
         <>
@@ -152,22 +195,21 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 completeText={'哎呦，你干嘛🥴'}
                 onRefresh={async () => resetList()}
             >
-            <List>
-                {data.map(item => (
-                    <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item)} onAction={onAction}>
-                        <List.Item key={item.id}
-                                   style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
-                                   onClick={() => {setVisible(item)}}
-                                   clickable={false}
-                        >
-
-                            <span style={{width: '100%'}}>{item.content}</span>
-                        </List.Item>
-                    </SwipeAction>
-                ))}
-            </List>
+                <List>
+                    {data.map(item => (
+                        <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item)} onAction={onAction}>
+                            <List.Item key={item.id}
+                                       style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
+                                       onClick={() => setVisible(item)}
+                                       clickable={false}>
+                                <span style={{width: '100%'}}>{item.content}</span>
+                            </List.Item>
+                        </SwipeAction>
+                    ))}
+                </List>
+                <InfiniteScroll loadMore={loadMore} hasMore={hasMore}/>
+                <br/>
             </PullToRefresh>
-            <InfiniteScroll loadMore={loadMore} hasMore={hasMore}/>
 
             {/* 查看详细弹出层*/}
             <Popup
@@ -270,52 +312,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                     <br/>
                     <br/>
                     <br/>
-                    <Button block
-                            onClick={async () => {
-                                if (content?.length === 0) return Toast.show({icon: 'fail', content: '内容不能为空'})
-                                // if (!itemType) return Toast.show({icon: 'fail', content: '类型不能为空'})
-
-                                // 构造请求体
-                                let body = {};
-                                body.content = content === editVisible?.content ? null : content;       // 内容不一致时才更新
-                                body.itemType = itemType === editVisible?.itemType ? null : itemType;   // 内容不一致时才更新
-                                if (!body.content && !body.itemType) return Toast.show({icon: 'fail', content: '没有变化'}) && setEditVisible(false)
-                                body.id = editVisible?.id;
-                                showLoading('loading', '处理中…')
-                                let result = await saveOrUpdateToDoItem(body, editVisible === '新增' ? 'post' : "put");
-                                console.log('提交表单', body)
-                                if(result) {
-                                    showLoading('success', '成功')
-                                    setEditVisible(false);
-
-                                    if (editVisible === '新增') {
-                                        if (type !== editVisible.itemType) return setChangeType(body.itemType);  /* 新增的待办不是当前类型，那个重置的数据 */
-                                        // 新增的待办是当前类型，那么更新本地数据
-                                        setData(data => [{
-                                            ...body,
-                                            id: result,
-                                            createTime: new Date().toLocaleString(),
-                                            updateTime: new Date().toLocaleString(),
-                                            numberOfRecurrences: 0,
-                                            completed:0
-                                        }, ...data])
-                                        changeTotal('++')/* █给父组件传值：未完成总数s */
-                                    // 修改 而且修改的待办是当前类型，那么更新本地数据
-                                    } else if (body.itemType === null)
-                                        setData(data => data.map(item => item.id === editVisible?.id ? {
-                                            ...item,
-                                            itemType: body.itemType || item.itemType,
-                                            content: body.content || item.content,
-                                            updateTime: new Date().toLocaleString()
-                                        } : item))
-                                    else {  // 把类型修改到别的地方去了 就不要它了
-                                        setData(data => data.filter(item => item.id !== body.id))
-                                        setChangeType(body.itemType)
-                                    }
-                                }else showLoading('fail', '失败')
-                            }}>
-                        提交
-                    </Button>
+                    <Button block onClick={submit}> 提交 </Button>
                 </div>
             </Popup>
 

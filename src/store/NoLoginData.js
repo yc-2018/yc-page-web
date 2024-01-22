@@ -28,8 +28,12 @@ export const searchData =[
 /** 头部导航测试数据 */
 export const items = [
     {
-        label: '菜单一',
-        key: '111',
+        label: '博客',
+        key: 'blog',
+    },
+    {
+        label: '帮助',
+        key: 'help',
     },
     {
         label: '导航二',
@@ -66,6 +70,28 @@ export const items = [
             </a>
         ),
         key: '444',
+    },
+    {
+        label: '工具',
+        key: 'util',
+        children: [
+            {
+                label: (
+                    <a href="https://yc556.gitee.io/business-code-generator/" target="_blank" rel="noopener noreferrer">
+                        业务代码生成器
+                    </a>
+                ),
+                key: 'businessCodeGenerator',
+            },
+            {
+                label: (
+                    <a href="https://yc556.gitee.io/grid/" target="_blank" rel="noopener noreferrer">
+                        CSS网格布局生成器
+                    </a>
+                ),
+                key: 'cssGridLayoutGenerator',
+            },
+        ],
     },
 ];
 
