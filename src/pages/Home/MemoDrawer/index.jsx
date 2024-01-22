@@ -13,7 +13,7 @@ import FormModal from "../../../compontets/FormModal";
 import ShowOrNot from "../../../store/ShowOrNot";
 import TextArea from "antd/es/input/TextArea";
 import JWTUtils from "../../../utils/JWTUtils";
-import {sortingOptions} from "../../../store/NoLoginData";
+import {sortingOptions, tagNameMapper} from "../../../store/NoLoginData";
 import SortSelect from "../../../compontets/SortSelect";
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../../request/homeRequest"
 
@@ -23,16 +23,7 @@ import styles from '../../../common.module.css'
 let total = -1;    // 初始化待办总数
 let orderBy = 1;   // 《表单》默认排序方式
 let isQueryOnClick = false; // 防止点太快了
-// 待办类型映射
-const tagNameMapper = {
-    0: "普通",
-    1: "循环",
-    2: "长期",
-    3: "紧急",
-    5: "日记",
-    6: "工作",
-    7: "其他"
-}
+
 const item = [{key: '0', label: <><SyncOutlined spin /> 正在加载中</>}]
 
 const MemoDrawer = observer(() => {
@@ -71,7 +62,7 @@ const MemoDrawer = observer(() => {
             setData(data.records);
             setList(data.records);
 
-            if(completed===0) setUnFinishCounts(map.groupToDoItemsCounts)
+            if (completed === 0) setUnFinishCounts(map.groupToDoItemsCounts)
             // 如果刚打开时有未完成的紧急备忘 而且抽屉没打开 就弹出提醒
             if(initLoading && !showOrNot.memoDrawerShow && map.groupToDoItemsCounts['3'] > 0 && total === -1) {
                 const key = `open${Date.now()}`;
@@ -118,13 +109,14 @@ const MemoDrawer = observer(() => {
         );
 
         // 使用 axios 发起请求
-        const {data:respData} = await getToDoItems({type, page: page+1, completed});
+        const {data: respData} = await getToDoItems({type, page: page + 1, completed});
+        if (!respData) return;      // 保持代码的健壮性
         // 结合旧数据和新数据
         const newData = data.concat(respData.records);
         setData(newData);
         setList(newData);
         setItemItemLoading(false);
-        setPage(page + 1);  // 异步放前面也没用
+        setPage(page + 1);      // 异步放前面也没用
         // 触发 resize 事件
         // window.dispatchEvent(new Event('resize'));
 
@@ -333,7 +325,7 @@ const MemoDrawer = observer(() => {
                         </>
                     }
             >
-                <Spin spinning={webLoading} tip={'正在加载'+tagNameMapper[type]+'待办'}>
+                <Spin spinning={webLoading} tip={'正在加载' + tagNameMapper[type] + '待办'}>
                 {UserStore.jwt ?
                     <List
                         onClick={listHandleAction} // 在这里设置事件监听器
@@ -363,8 +355,8 @@ const MemoDrawer = observer(() => {
 
                                                 <div style={{fontSize: 10}}>
                                                     创建于:{item?.createTime?.replace('T', ' ')}
-                                                    {item.createTime !== item.updateTime && item.itemType!== 1? ` ${item.completed?'完成':'修改'}于:`+item.updateTime?.replace('T', ' '):null}
-                                                    {item.createTime !== item.updateTime && item.itemType=== 1?getLoopMemoTimeList(item.id, item.updateTime?.replace('T', ' ')):null}
+                                                    {item.createTime !== item.updateTime && item.itemType !== 1 ? ` ${item.completed ? '完成' : '修改'}于:` + item.updateTime?.replace('T', ' ') : null}
+                                                    {item.createTime !== item.updateTime && item.itemType === 1 ? getLoopMemoTimeList(item.id, item.updateTime?.replace('T', ' ')) : null}
                                                 </div>
                                             </div>
                                         }
