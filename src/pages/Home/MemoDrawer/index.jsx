@@ -119,6 +119,7 @@ const MemoDrawer = observer(() => {
 
         // 使用 axios 发起请求
         const {data:respData} = await getToDoItems({type, page: page+1, completed});
+        if (!respData) return; // 保持代码的健壮性
         // 结合旧数据和新数据
         const newData = data.concat(respData.records);
         setData(newData);
