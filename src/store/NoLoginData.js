@@ -159,3 +159,13 @@ export const englishSortingOptions = [
     ...sortingOptions
 ]
 
+/** 待办类型映射 */
+export const tagNameMapper = {
+    0: "普通",
+    1: "循环",
+    2: "长期",
+    3: "紧急",
+    5: "日记",
+    6: "工作",
+    7: "其他"
+}
