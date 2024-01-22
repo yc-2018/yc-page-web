@@ -50,6 +50,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     /** 加载更多 */
     const loadMore = async() => {
         const append = await getToDoItems({type, page, completed,orderBy});
+        if (!append) return showLoading('fail', '获取数据失败') || setHasMore(false)
         setData(val => [...val, ...append.data.records])
         setHasMore(data.length < append.data.total)
         setPage(val => val + 1)
