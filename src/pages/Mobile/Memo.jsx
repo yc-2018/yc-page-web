@@ -189,7 +189,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     return(
         <>
             <Button onClick={openAdd}>添加一条</Button>
-            <Button onClick={() => setPickerVisible(true)}>状态:{finishName(completed)} & 排序:{orderByName(orderBy)}</Button>
+            <Button onClick={() => setPickerVisible(true)}>{/*状态:*/}{finishName(completed)} & {/*排序:*/}{orderByName(orderBy)}</Button>
 
             {/*有数据时显示搜索框*/ (data?.length > 0 || keyword) &&
                 <SearchBar cancelText={'清空'}
