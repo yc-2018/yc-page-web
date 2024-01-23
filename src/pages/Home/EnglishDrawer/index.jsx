@@ -2,7 +2,7 @@ import {observer} from 'mobx-react-lite'
 import React, {useEffect, useState} from "react";
 import {App, Button, Divider, Drawer, Input, Skeleton, Space, Spin, Tag} from "antd";
 import {
-    CheckOutlined, CloseOutlined, DashboardOutlined, DeleteOutlined, EditOutlined,
+    CheckOutlined, CloseOutlined, DashboardOutlined, DeleteOutlined, DeleteTwoTone, EditOutlined,
     ExclamationCircleFilled, PlusCircleOutlined, SyncOutlined
 } from "@ant-design/icons";
 
@@ -24,10 +24,10 @@ let total = 0;    // 初始化待办总数
 let init = true  // 第一次加载
 let page = 1     // 页码
 let listData = [] // 列表数据
+let keyword = ''   // 异步太讨厌了   还得多用一个变量
 
 let orderBy = 5;     // 《表单》默认排序方式
 let firstLetter = null; // 《表单》首字母
-let keyword = null;     // 《表单》关键词
 
 function EnglishDrawer() {
     const [webLoading, setWebLoading] = useState(false);        // 网络加载(加载列表和刷新用
@@ -35,6 +35,8 @@ function EnglishDrawer() {
     const [editId, setEditId] = useState(-1)                    // 编辑的id
     const [editEnglish, setEditEnglish] = useState(null)                // 编辑英语
     const [editChinese, setEditChinese] = useState(null)                // 编辑中文
+    const [searchEmpty, setSearchEmpty] = useState(true);      // 搜索框为空（搜索框有值没点搜索？）
+    const [word,setWord] = useState(null)                              // 《表单》关键词
 
     const {msg} = CommonStore
     const {  modal } = App.useApp();
@@ -64,7 +66,10 @@ function EnglishDrawer() {
         if (webLoading) return msg.info('正在加载中....')
         orderBy = 5;        // 《表单》默认排序方式
         firstLetter = null; // 《表单》首字母
-        keyword = null;     // 《表单》关键词
+
+        keyword = null              // 《表单》关键词
+        setSearchEmpty(true) // 搜索框为空（搜索框有值没点搜索？）
+        setWord(null)       //  《表单》关键词同步
         reset()
     }
 
@@ -75,6 +80,7 @@ function EnglishDrawer() {
         getListData()
         setEditId(-1)
     }
+
 
     /** 添加一个单词的输入框而已 */
     const addEnglish = () => {
@@ -213,7 +219,7 @@ function EnglishDrawer() {
                         备忘英语
                     </Spin>
                 }
-                extra={<>
+                extra={!JWTUtils.isExpired() && <>
                     <SortSelect             /*自己搞的《排序下拉框》*/
                         value={orderBy}
                         onChange={value => reset(orderBy = value)/*这不是传参，就是赋值*/}
@@ -221,6 +227,26 @@ function EnglishDrawer() {
                         loading={webLoading}
                     />
                 </>}
+
+                /* 底部搜索框*/
+                footer={!JWTUtils.isExpired() &&
+                    <Space style={{display: 'grid', justifyContent: 'center'}}>    {/*居中*/}
+                        <Space.Compact>
+                            <Button icon={searchEmpty ? <DeleteOutlined/> : <DeleteTwoTone twoToneColor={'red'}/>}
+                                    onClick={()=>{
+                                        keyword = null
+                                        !searchEmpty && reset()
+                                        setSearchEmpty(true)
+                                        setWord(null)
+                                    }}/>
+                            <Input.Search placeholder="要搜索内容吗😶‍🌫️"
+                                          value={word}
+                                          style={{width: 300}}
+                                          onChange={v => setWord(v.target.value) || (keyword = v.target.value)}
+                                          onSearch={() => word && ((reset() || setSearchEmpty(false)))}/>
+                        </Space.Compact>
+                    </Space>
+                }
         >
             {!JWTUtils.isExpired() ?
                 <Spin indicator={<LoaderWhite/>} spinning={reqLoading}>
