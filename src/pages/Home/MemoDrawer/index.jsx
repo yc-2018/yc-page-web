@@ -1,4 +1,9 @@
-import {BookOutlined, CaretDownOutlined, PlusOutlined, SyncOutlined} from "@ant-design/icons";
+import {
+    BookOutlined,
+    CaretDownOutlined,
+    PlusOutlined,
+    SyncOutlined
+} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import {observer} from 'mobx-react-lite'
 import {
@@ -19,6 +24,7 @@ import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList}
 
 import './MemoDrawer.css'
 import styles from '../../../common.module.css'
+import SearchBox from "../../../compontets/common/SearchBox";
 
 let total = -1;    // 初始化待办总数
 let orderBy = 1;   // 《表单》默认排序方式
@@ -40,6 +46,10 @@ const MemoDrawer = observer(() => {
     const [formModal, setFormModal] = useState(false);    // 是否显示新增或编辑的模态框。
     const [fModalData, setFModalData] = useState();              // 设置模态框数据
     const [items, setItems] = useState(item);    // 设置循环待办的循环时间数据
+    const [keyword, setKeyword] = useState('');             // 搜索关键字
+
+
+
 
     const {notification, modal} = App.useApp();
 
@@ -52,7 +62,7 @@ const MemoDrawer = observer(() => {
             setPage(1)              // 待办翻页重置
             total = -1;                   // 待办总数重置
             // 使用 axios 发起请求 获取又一次初始化待办列表
-            const resp = await getToDoItems({type, page:1, completed,orderBy});
+            const resp = await getToDoItems({type, page:1, completed,orderBy,keyword});
             if (!(resp?.code === 1)) {
                 setInitLoading(false);
                 setWebLoading(false);
@@ -109,7 +119,7 @@ const MemoDrawer = observer(() => {
         );
 
         // 使用 axios 发起请求
-        const {data: respData} = await getToDoItems({type, page: page + 1, completed});
+        const {data: respData} = await getToDoItems({type, page: page + 1, completed,orderBy,keyword});
         if (!respData) return;      // 保持代码的健壮性
         // 结合旧数据和新数据
         const newData = data.concat(respData.records);
@@ -165,8 +175,8 @@ const MemoDrawer = observer(() => {
                 &nbsp;&nbsp;&nbsp;<CaretDownOutlined />循环:{updateTime}<CaretDownOutlined />
             </span>
     </Dropdown>
-    
-    
+
+
     /** 处理待办列表的操作 */
     const listHandleAction = async(event) => {
 
@@ -269,14 +279,13 @@ const MemoDrawer = observer(() => {
 
 
         return (
-
             <Drawer placement="right"
                     onClose={() => showOrNot.setMemoDrawerShow(false)}
                     open={showOrNot.memoDrawerShow}
                     style={{opacity: 0.8}}
                     width={450}
                     closeIcon={false}
-                    title={
+                    title={JWTUtils.isExpired() ? '备忘录' :
                         <>
                             <Spin spinning={webLoading} indicator={<></>}>
                                 <div style={{marginBottom: 8}}>
@@ -323,6 +332,10 @@ const MemoDrawer = observer(() => {
                                 </Space>
                             </Spin>
                         </>
+                    }
+                    /* 底部搜索框*/
+                    footer={!JWTUtils.isExpired() &&
+                        <SearchBox keyword={keyword} setKeyword={setKeyword} setRefreshTrigger={setRefreshTrigger} />
                     }
             >
                 <Spin spinning={webLoading} tip={'正在加载' + tagNameMapper[type] + '待办'}>
