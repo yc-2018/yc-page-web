@@ -47,7 +47,7 @@ const MemoDrawer = observer(() => {
     const [fModalData, setFModalData] = useState();              // 设置模态框数据
     const [items, setItems] = useState(item);    // 设置循环待办的循环时间数据
     const [keyword, setKeyword] = useState('');             // 搜索关键字
-
+    const [searchEmpty, setSearchEmpty] = useState(true); // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
 
 
 
@@ -150,7 +150,11 @@ const MemoDrawer = observer(() => {
         >
             <Tag className={`${styles.pointer} ${type===TypeNum?styles.currentTag:''}`}
                  color={color ?? "processing"}
-                 onClick={() => setType(TypeNum)}
+                 onClick={() => {
+                     setSearchEmpty(true)    // 搜索框为空重置
+                     setKeyword('')          // 搜索关键字重置
+                     setType(TypeNum)
+                 }}
             >
                 {typeName}
             </Tag>
@@ -335,7 +339,11 @@ const MemoDrawer = observer(() => {
                     }
                     /* 底部搜索框*/
                     footer={!JWTUtils.isExpired() &&
-                        <SearchBox keyword={keyword} setKeyword={setKeyword} setRefreshTrigger={setRefreshTrigger} />
+                        <SearchBox keyword={keyword}
+                                   setKeyword={setKeyword}
+                                   setRefreshTrigger={setRefreshTrigger}
+                                   searchEmpty={searchEmpty}
+                                   setSearchEmpty={setSearchEmpty} />
                     }
             >
                 <Spin spinning={webLoading} tip={'正在加载' + tagNameMapper[type] + '待办'}>
