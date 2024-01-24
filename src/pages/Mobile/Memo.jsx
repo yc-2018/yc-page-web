@@ -25,8 +25,8 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     let total;  // 总条数 给父组件显示
 
     const [data, setData] = useState([])
-    const [hasMore, setHasMore] = useState(true)        // 是否自动翻页
-    const [page, setPage] = useState(1);    // 待办翻页
+    const [hasMore, setHasMore] = useState(true)         // 是否自动翻页
+    const [page, setPage] = useState(1);                 // 待办翻页
     const [completed, setCompleted] = useState(0);       // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
     const [orderBy,setOrderBy] = useState(1)             // 排序
     const [keyword, setKeyword] = useState(null)                 // 搜索关键字
@@ -34,7 +34,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     const [editVisible, setEditVisible] = useState(undefined);   // 编辑弹窗的显示和隐藏
     const [pickerVisible, setPickerVisible] = useState(false)   // 待办状态选择器的显示和隐藏
 
-    const [content, setContent] = useState('')    //表单内容
+    const [content, setContent] = useState('')   // 表单内容
     const [itemType, setItemType] = useState(0) // 表单类型
 
     useEffect(()=>{type === changeType && resetList()},[changeType])
@@ -190,6 +190,8 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
         <>
             <Button onClick={openAdd}>添加一条</Button>
             <Button onClick={() => setPickerVisible(true)}>{/*状态:*/}{finishName(completed)} & {/*排序:*/}{orderByName(orderBy)}</Button>
+            {/*todo：状态和排序可以改成下来菜单*/}
+
 
             {/*有数据时显示搜索框*/ (data?.length > 0 || keyword) &&
                 <SearchBar cancelText={'清空'}
