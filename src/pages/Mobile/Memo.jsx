@@ -9,7 +9,7 @@ import {
     Tag,
     Radio,
     TextArea,
-    Dialog, Picker, PullToRefresh, SearchBar
+    Dialog, Picker, PullToRefresh, SearchBar, Badge
 } from 'antd-mobile'
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data";
@@ -218,7 +218,9 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                                        style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
                                        onClick={() => setVisible(item)}
                                        clickable={false}>
-                                <span style={{width: '100%'}}>{item.content}</span>
+                                <Badge content={type === 1 && item.numberOfRecurrences} color={'#6ad59d'}> {/*循环待办显示次数*/}
+                                    <span style={{width: '100%'}}>{item.content}</span>
+                                </Badge>
                             </List.Item>
                         </SwipeAction>
                     ))}
