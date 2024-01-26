@@ -46,6 +46,14 @@ jobs:
         git add -f *
         git commit -m "yc自动打包 - ${{ env.BEIJING_TIME }}"
         git push origin HEAD:build -f
+        
+        # 推送构建结果到 Gitee
+    - name: Push to Gitee
+      env:
+        GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+      run: |
+        git remote add gitee https://gitee.com/yc556/yc556.git
+        git push gitee HEAD:build -f
 
     # 请求脚本并获取返回值
     - name: Run Script and Get Output
