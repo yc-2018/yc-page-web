@@ -304,7 +304,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             >
 
                 <div style={{padding: '10px'}}>
-                    <div><span style={{color: '#f00' }}>*</span>
+                    <div className={'█required'}>
                         内容
                     </div>
                     <TextArea rows={13}
@@ -314,7 +314,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                               placeholder="请输入备忘内容"
                               value={content} onChange={value => setContent(value)}/>
                     <br/>
-                    <div><span style={{color: '#f00' }}>*</span>
+                    <div className={'█required'}>
                         请选择类型
                     </div>
 
