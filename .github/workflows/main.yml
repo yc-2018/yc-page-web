@@ -49,11 +49,9 @@ jobs:
         
         # 推送构建结果到 Gitee
     - name: Push to Gitee
-      env:
-        GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
       run: |
-        git remote add gitee https://gitee.com/yc556/yc556.git
-        git push https://${{ secrets.GITEE_TOKEN }}@gitee.com/yc556/yc556.git HEAD:build -f
+        git remote set-url gitee https://yc556:${{ secrets.GITEE_TOKEN }}@/yc556/yc556.git 
+        git push gitee HEAD:build -f
 
     # 请求脚本并获取返回值
     - name: Run Script and Get Output
