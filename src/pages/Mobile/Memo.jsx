@@ -1,19 +1,14 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {
-    InfiniteScroll,
-    List,
-    Popup,
-    SwipeAction,
-    Toast,
-    Button,
-    Tag,
-    Radio,
-    TextArea,
-    Dialog, Picker, PullToRefresh, SearchBar, Badge
+    InfiniteScroll, List, Popup, SwipeAction, Toast,
+    Button, Tag, Radio, TextArea, Dialog, Picker,
+    PullToRefresh, SearchBar, Badge
 } from 'antd-mobile'
+
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/homeRequest";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data";
 import styles from './mobile.module.css'
+
 
 /**
  * @param type 要渲染的待办类型
@@ -33,14 +28,20 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     const [visible, setVisible] = useState(undefined);           // 查看弹窗的显示和隐藏
     const [editVisible, setEditVisible] = useState(undefined);   // 编辑弹窗的显示和隐藏
     const [loopTime, setLoopTime] = useState(undefined)          // 循环时间弹窗的显示和隐藏(用数据来控制)
-    const [pickerVisible, setPickerVisible] = useState(false)   // 待办状态选择器的显示和隐藏
+    const [loopTimeHasMore, setLoopTimeHasMore] = useState(null) // 循环时间是否自动翻页(布尔值bug有时无法启动副作用的启动)
+    const [loopTimePage, setLoopTimePage] = useState(1);          // 循环时间页数
+    const [pickerVisible, setPickerVisible] = useState(false)    // 待办状态选择器的显示和隐藏
 
     const [content, setContent] = useState('')   // 表单内容
     const [itemType, setItemType] = useState(0) // 表单类型
 
     useEffect(()=>{type === changeType && resetList()},[changeType])
     useEffect(()=>{resetList()},[completed,orderBy])
+    useEffect(()=>{loopTimeHasMore && showLoopTime(visible.id)},[loopTimeHasMore])
+
+
     const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
+    const loading = useRef()          // 显示加载中
 
     /** 重置列表 */
     const resetList = () => {
@@ -190,10 +191,16 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
      * 获取循环时间显示
      * */
     const showLoopTime = async id => {
-        const resp = await selectLoopMemoTimeList(id);
-        if (resp?.length > 0) setLoopTime(resp)
+        if (!id) id = loopTime?.[0]?.toDoItemId
+        const resp = await selectLoopMemoTimeList(id, loopTimePage);
+        loading.current?.close()    // 关闭加载蒙版
+        if (resp?.records?.length > 0) {
+            setLoopTimePage(i=> i + 1)
+            setLoopTime(list=> [...list??[], ...resp.records])
+        }
         else Toast.show({icon: 'fail', content: '获取失败'})
-
+        if (resp?.records?.length % 10 !== 0 && (loopTime?.length ?? 0 + resp?.records?.length > resp?.total ?? 0))
+            setLoopTimeHasMore(false)
     }
 
     return(
@@ -260,7 +267,16 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
                     <Tag color='warning'
                          fill='outline'
-                         onClick={() => showLoopTime(visible.id)}
+                         onClick={() => {
+                             setLoopTime([])
+                             setLoopTimeHasMore(visible.id)
+                             setLoopTimePage(1)
+                             loading.current = Toast.show({
+                                 icon: 'loading',
+                                 content: '加载中…',
+                                 duration: 0,
+                             })
+                         }}
                          style={{ '--background-color': '#fcecd8', '--border-radius': '6px' }}>
                         {`循环次数: ${visible?.numberOfRecurrences}▼`}
                     </Tag>
@@ -350,11 +366,17 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             <Popup      /* 循环时间的弹出层 */
                 visible={!!loopTime}
                 onMaskClick={() => setLoopTime(undefined)}
-                bodyStyle={{ height: '20vh', overflow: 'scroll'}}
+                bodyStyle={{ height: '30vh', overflow: 'scroll'}}
             >
-                <div style={{ padding: '16px', height: '20vh' }}>
-                    {loopTime?.map(item => <div key={item.id}> {item.memoDate.replace('T', ' ')} </div>)}
-                </div>
+                {loopTime?.length > 0 && <div style={{height: '100px'}}>
+                    <List>
+                        {loopTime?.map((item, index) =>
+                            <List.Item key={item.id}>{index + 1}：{item.memoDate.replace('T', ' ')} </List.Item>)
+                        }
+                    </List>
+                    <InfiniteScroll loadMore={showLoopTime} hasMore={loopTime?.length % 10 === 0 && !!loopTimeHasMore}/>
+                    </div>
+                }
             </Popup>
 
 
