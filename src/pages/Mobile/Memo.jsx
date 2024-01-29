@@ -11,7 +11,7 @@ import {
     TextArea,
     Dialog, Picker, PullToRefresh, SearchBar, Badge
 } from 'antd-mobile'
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/homeRequest";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data";
 import styles from './mobile.module.css'
 
@@ -32,6 +32,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     const [keyword, setKeyword] = useState(null)                 // 搜索关键字
     const [visible, setVisible] = useState(undefined);           // 查看弹窗的显示和隐藏
     const [editVisible, setEditVisible] = useState(undefined);   // 编辑弹窗的显示和隐藏
+    const [loopTime, setLoopTime] = useState(undefined)          // 循环时间弹窗的显示和隐藏(用数据来控制)
     const [pickerVisible, setPickerVisible] = useState(false)   // 待办状态选择器的显示和隐藏
 
     const [content, setContent] = useState('')   // 表单内容
@@ -185,6 +186,15 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     }
 
 
+    /**
+     * 获取循环时间显示
+     * */
+    const showLoopTime = async id => {
+        const resp = await selectLoopMemoTimeList(id);
+        if (resp?.length > 0) setLoopTime(resp)
+        else Toast.show({icon: 'fail', content: '获取失败'})
+
+    }
 
     return(
         <>
@@ -229,8 +239,8 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 <br/>
             </PullToRefresh>
 
-            {/* 查看详细弹出层*/}
-            <Popup
+
+            <Popup    /* 查看详细弹出层*/
                 visible={!!visible}
                 closeOnSwipe /* 组件内向下滑动关闭 */
                 onMaskClick={() => {setVisible(undefined)}}
@@ -248,8 +258,11 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                     </Tag>
                 }
                 {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
-                    <Tag color='warning' fill='outline' style={{ '--background-color': '#fcecd8', '--border-radius': '6px' }}>
-                        {`循环次数: ${visible?.numberOfRecurrences}`}
+                    <Tag color='warning'
+                         fill='outline'
+                         onClick={() => showLoopTime(visible.id)}
+                         style={{ '--background-color': '#fcecd8', '--border-radius': '6px' }}>
+                        {`循环次数: ${visible?.numberOfRecurrences}▼`}
                     </Tag>
                 }
                 <div style={{height:'38vh',overflowY: 'scroll'}}>
@@ -294,8 +307,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             </Popup>
 
 
-            {/* 编辑弹出层 */}
-            <Popup
+            <Popup      /* 编辑弹出层 */
                 visible={!!editVisible}
                 onMaskClick={() => {setEditVisible(false)}}
                 onClose={() => {setEditVisible(false)}}
@@ -331,6 +343,17 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                     <br/>
                     <br/>
                     <Button block onClick={submit}> 提交 </Button>
+                </div>
+            </Popup>
+
+
+            <Popup      /* 循环时间的弹出层 */
+                visible={!!loopTime}
+                onMaskClick={() => setLoopTime(undefined)}
+                bodyStyle={{ height: '20vh', overflow: 'scroll'}}
+            >
+                <div style={{ padding: '16px', height: '20vh' }}>
+                    {loopTime?.map(item => <div key={item.id}> {item.memoDate.replace('T', ' ')} </div>)}
                 </div>
             </Popup>
 
