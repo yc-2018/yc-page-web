@@ -69,5 +69,5 @@ jobs:
     # 推送构建结果到 Gitee
     - name: Push to Gitee
       run: |
-        git remote add git https://yc556:${{ secrets.GITEE_TOKEN }}@gitee.com/yc556/yc556.git
+        git remote add gitee https://yc556:${{ secrets.GITEE_TOKEN }}@gitee.com/yc556/yc556.git
         git push gitee HEAD:build -f
