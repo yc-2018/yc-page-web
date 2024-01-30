@@ -43,10 +43,8 @@ jobs:
         git remote add gitee https://yc556:${{ secrets.GITEE_TOKEN }}@gitee.com/yc556/yc556.git
         git push gitee HEAD:build -f
 
-    
 
-      # 构建成功后发送邮件
-    - name: Send Email on Success
+    - name: 构建成功后发送邮件
       uses: dawidd6/action-send-mail@v2
       with: # 以下是发送邮件需要提供的一些配置信息
         server_address: smtp.qq.com
