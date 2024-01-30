@@ -1,0 +1,60 @@
+name: Build and Deploy
+
+# 当代码被推送到 gitee-build 分支时触发此工作流程
+on:
+  push:
+    branches: [gitee-build]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: 设置 Node.js 环境，版本为 16
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    - name: 安装项目依赖
+      run: yarn install
+
+    - name: 执行构建脚本
+      run: yarn run build
+
+
+    - name: 先设置时区并获取东八区当前时间
+      id: beijing_time
+      run: echo "BEIJING_TIME=$(TZ=Asia/Shanghai date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
+
+
+    - name: 推送构建结果到gitee的 build 分支
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "Yc Action"
+        git checkout --orphan temp-build
+        git rm -rf .
+        rm -rf node_modules                       # 移除 node_modules
+        find . -name "*s.map" -exec rm -f {} \;   # 移除所有js.map和css.map文件
+        mv build/* .
+        git add -f *
+        git commit -m "GitHub Actions自动打包 - ${{ env.BEIJING_TIME }}"
+        git remote add gitee https://yc556:${{ secrets.GITEE_TOKEN }}@gitee.com/yc556/yc556.git
+        git push gitee HEAD:build -f
+
+    
+
+      # 构建成功后发送邮件
+    - name: Send Email on Success
+      uses: dawidd6/action-send-mail@v2
+      with: # 以下是发送邮件需要提供的一些配置信息
+        server_address: smtp.qq.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: 推送到gitee成功 - ${{ env.SCRIPT_OUTPUT }}
+        to: ${{ secrets.TO_EMAIL }}
+        from: GitHub Actions
+        body: 推送成功。请自己去更新构建内容，时间：${{ env.BEIJING_TIME }}。脚本输出：${{ env.SCRIPT_OUTPUT }}
+
