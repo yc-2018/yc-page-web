@@ -1,19 +1,14 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {
-    InfiniteScroll,
-    List,
-    Popup,
-    SwipeAction,
-    Toast,
-    Button,
-    Tag,
-    Radio,
-    TextArea,
-    Dialog, Picker, PullToRefresh, SearchBar
+    InfiniteScroll, List, Popup, SwipeAction, Toast,
+    Button, Tag, Radio, TextArea, Dialog, Picker,
+    PullToRefresh, SearchBar, Badge
 } from 'antd-mobile'
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/homeRequest";
+
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/homeRequest";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data";
 import styles from './mobile.module.css'
+
 
 /**
  * @param type 要渲染的待办类型
@@ -25,21 +20,28 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     let total;  // 总条数 给父组件显示
 
     const [data, setData] = useState([])
-    const [hasMore, setHasMore] = useState(true)        // 是否自动翻页
-    const [page, setPage] = useState(1);    // 待办翻页
+    const [hasMore, setHasMore] = useState(true)         // 是否自动翻页
+    const [page, setPage] = useState(1);                 // 待办翻页
     const [completed, setCompleted] = useState(0);       // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
     const [orderBy,setOrderBy] = useState(1)             // 排序
     const [keyword, setKeyword] = useState(null)                 // 搜索关键字
     const [visible, setVisible] = useState(undefined);           // 查看弹窗的显示和隐藏
     const [editVisible, setEditVisible] = useState(undefined);   // 编辑弹窗的显示和隐藏
-    const [pickerVisible, setPickerVisible] = useState(false)   // 待办状态选择器的显示和隐藏
+    const [loopTime, setLoopTime] = useState(undefined)          // 循环时间弹窗的显示和隐藏(用数据来控制)
+    const [loopTimeHasMore, setLoopTimeHasMore] = useState(null) // 循环时间是否自动翻页(布尔值bug有时无法启动副作用的启动)
+    const [loopTimePage, setLoopTimePage] = useState(1);          // 循环时间页数
+    const [pickerVisible, setPickerVisible] = useState(false)    // 待办状态选择器的显示和隐藏
 
-    const [content, setContent] = useState('')    //表单内容
+    const [content, setContent] = useState('')   // 表单内容
     const [itemType, setItemType] = useState(0) // 表单类型
 
     useEffect(()=>{type === changeType && resetList()},[changeType])
     useEffect(()=>{resetList()},[completed,orderBy])
+    useEffect(()=>{loopTimeHasMore && showLoopTime(visible.id)},[loopTimeHasMore])
+
+
     const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
+    const loading = useRef()          // 显示加载中
 
     /** 重置列表 */
     const resetList = () => {
@@ -185,11 +187,28 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     }
 
 
+    /**
+     * 获取循环时间显示
+     * */
+    const showLoopTime = async id => {
+        if (!id) id = loopTime?.[0]?.toDoItemId
+        const resp = await selectLoopMemoTimeList(id, loopTimePage);
+        loading.current?.close()    // 关闭加载蒙版
+        if (resp?.records?.length > 0) {
+            setLoopTimePage(i=> i + 1)
+            setLoopTime(list=> [...list??[], ...resp.records])
+        }
+        else Toast.show({icon: 'fail', content: '获取失败'})
+        if (resp?.records?.length % 10 !== 0 && (loopTime?.length ?? 0 + resp?.records?.length > resp?.total ?? 0))
+            setLoopTimeHasMore(false)
+    }
 
     return(
         <>
             <Button onClick={openAdd}>添加一条</Button>
             <Button onClick={() => setPickerVisible(true)}>{/*状态:*/}{finishName(completed)} & {/*排序:*/}{orderByName(orderBy)}</Button>
+            {/*todo：状态和排序可以改成下来菜单*/}
+
 
             {/*有数据时显示搜索框*/ (data?.length > 0 || keyword) &&
                 <SearchBar cancelText={'清空'}
@@ -216,7 +235,9 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                                        style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
                                        onClick={() => setVisible(item)}
                                        clickable={false}>
-                                <span style={{width: '100%'}}>{item.content}</span>
+                                <Badge content={type === 1 && item.numberOfRecurrences} color={'#6ad59d'}> {/*循环待办显示次数*/}
+                                    <span style={{width: '100%'}}>{item.content}</span>
+                                </Badge>
                             </List.Item>
                         </SwipeAction>
                     ))}
@@ -225,8 +246,8 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 <br/>
             </PullToRefresh>
 
-            {/* 查看详细弹出层*/}
-            <Popup
+
+            <Popup    /* 查看详细弹出层*/
                 visible={!!visible}
                 closeOnSwipe /* 组件内向下滑动关闭 */
                 onMaskClick={() => {setVisible(undefined)}}
@@ -244,8 +265,20 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                     </Tag>
                 }
                 {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
-                    <Tag color='warning' fill='outline' style={{ '--background-color': '#fcecd8', '--border-radius': '6px' }}>
-                        {`循环次数: ${visible?.numberOfRecurrences}`}
+                    <Tag color='warning'
+                         fill='outline'
+                         onClick={() => {
+                             setLoopTime([])
+                             setLoopTimeHasMore(visible.id)
+                             setLoopTimePage(1)
+                             loading.current = Toast.show({
+                                 icon: 'loading',
+                                 content: '加载中…',
+                                 duration: 0,
+                             })
+                         }}
+                         style={{ '--background-color': '#fcecd8', '--border-radius': '6px' }}>
+                        {`循环次数: ${visible?.numberOfRecurrences}▼`}
                     </Tag>
                 }
                 <div style={{height:'38vh',overflowY: 'scroll'}}>
@@ -290,8 +323,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             </Popup>
 
 
-            {/* 编辑弹出层 */}
-            <Popup
+            <Popup      /* 编辑弹出层 */
                 visible={!!editVisible}
                 onMaskClick={() => {setEditVisible(false)}}
                 onClose={() => {setEditVisible(false)}}
@@ -300,7 +332,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             >
 
                 <div style={{padding: '10px'}}>
-                    <div><span style={{color: '#f00' }}>*</span>
+                    <div className={'█required'}>
                         内容
                     </div>
                     <TextArea rows={13}
@@ -310,7 +342,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                               placeholder="请输入备忘内容"
                               value={content} onChange={value => setContent(value)}/>
                     <br/>
-                    <div><span style={{color: '#f00' }}>*</span>
+                    <div className={'█required'}>
                         请选择类型
                     </div>
 
@@ -328,6 +360,22 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                     <br/>
                     <Button block onClick={submit}> 提交 </Button>
                 </div>
+            </Popup>
+
+
+            <Popup      /* 循环时间的弹出层 */
+                visible={!!loopTime}
+                onMaskClick={() => setLoopTime(undefined)}
+                bodyStyle={{ height: '55vh', overflow: 'scroll'}}
+            >
+                {loopTime?.length > 0 && <>
+                    <List>
+                        {loopTime?.map((item, index) =>
+                            <List.Item key={item.id}>{index + 1}：{item.memoDate.replace('T', ' ')} </List.Item>)
+                        }
+                    </List>
+                    <InfiniteScroll loadMore={showLoopTime} hasMore={loopTime?.length % 10 === 0 && !!loopTimeHasMore}/></>
+                }
             </Popup>
 
 

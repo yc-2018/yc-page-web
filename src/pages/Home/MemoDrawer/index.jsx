@@ -169,8 +169,8 @@ const MemoDrawer = observer(() => {
             onOpenChange={async open => {
                 if(open) {
                     const resp = await selectLoopMemoTimeList(id);
-                    if (resp?.length > 0)
-                        setItems(resp.map(item => ({key: item.id, label: <span style={{color: '#9f9f9f'}}>{item.memoDate.replace('T', ' ')}</span>})))
+                    if (resp?.records?.length > 0)
+                        setItems(resp.records.map(item => ({key: item.id, label: <span style={{color: '#9f9f9f'}}>{item.memoDate.replace('T', ' ')}</span>})))
                     else setItems([{key: '-1', label: <span style={{color: '#fcabab'}}>暂无循环记录</span>}]);
                 }else setItems(item)
             }}

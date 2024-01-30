@@ -21,3 +21,8 @@
     position: sticky;
     background: #fff;
 }
+/*必填红星前缀*/
+.█required:before{
+    content: "*";
+    color: red;
+}

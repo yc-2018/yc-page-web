@@ -115,10 +115,19 @@ export async function delToDoItem(id) {
     } catch (error) {console.error('待办请求失败:', error)}
 }
 
-export async function selectLoopMemoTimeList(id) {
+/**
+ * 获取循环备忘录时间列表
+ *
+ * @param page {number}      第几页
+ * @param id {number}        待办id
+ *  param pageSize           页面大小 = 20
+ * @return {object}          待办时间对象或空
+ * @author ChenGuangLong
+ */
+export async function selectLoopMemoTimeList(id, page=1) {
     try {
-        const response = await myAxios.get(`/loopMemoTime/${id}`);
-        return response.data.data.records;
+        const response = await myAxios.get(`/loopMemoTime/${id}?page=${page}`);
+        return response?.data?.data;
     }catch (error) {console.log('待办请求失败:', error)}
 }
 
