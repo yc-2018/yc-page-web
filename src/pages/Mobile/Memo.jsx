@@ -366,16 +366,15 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             <Popup      /* 循环时间的弹出层 */
                 visible={!!loopTime}
                 onMaskClick={() => setLoopTime(undefined)}
-                bodyStyle={{ height: '30vh', overflow: 'scroll'}}
+                bodyStyle={{ height: '55vh', overflow: 'scroll'}}
             >
-                {loopTime?.length > 0 && <div style={{height: '100px'}}>
+                {loopTime?.length > 0 && <>
                     <List>
                         {loopTime?.map((item, index) =>
                             <List.Item key={item.id}>{index + 1}：{item.memoDate.replace('T', ' ')} </List.Item>)
                         }
                     </List>
-                    <InfiniteScroll loadMore={showLoopTime} hasMore={loopTime?.length % 10 === 0 && !!loopTimeHasMore}/>
-                    </div>
+                    <InfiniteScroll loadMore={showLoopTime} hasMore={loopTime?.length % 10 === 0 && !!loopTimeHasMore}/></>
                 }
             </Popup>
 
