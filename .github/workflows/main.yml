@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: 构建和推送
 
 # 当代码被推送到 gitee-build 分支时触发此工作流程
 on:
