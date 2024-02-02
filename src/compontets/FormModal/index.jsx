@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Modal, Input, Radio, Space, Divider, App} from 'antd';
 import {saveOrUpdateToDoItem} from "../../request/homeRequest";
 const { TextArea } = Input;
@@ -7,13 +7,15 @@ const { TextArea } = Input;
  *
  * @param {boolean}     isOpen          弹窗是否显示
  * @param {function}    setOpen         关闭弹窗
- * @param {object}      data            编辑的数据
+ * @param {object}      data            编辑的数据（不改变的）
  * @param {function}    reList          刷新列表
  * @param {number}      currentMemoType 当前备忘类型,编辑的不用，新增的才要
  * */
 const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
-    const [formData, setFormData] = useState(null);
+    const [formData, setFormData] = useState(null);    // 用来复制编辑的数据（改变的）
     const [confirmLoading, setConfirmLoading] = useState(false);
+
+    const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
 
     const { message } = App.useApp();
 
@@ -23,7 +25,12 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
             content:null,
             itemType:currentMemoType,
         })
+
+        // 点击编辑或新增按钮后自动获得焦点,但是弹窗没这么快出现在页面上，所以获取焦点也要延迟一点点
+        window.setTimeout(() => textRef.current?.focus(), 100)
     },[data])
+
+
     const handleOk = async() => {
         if(!formData.itemType?.toString())return message.error('备忘类型不能为空')
         if(!formData.content)return message.error('备忘内容不能为空')
@@ -55,7 +62,14 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
                         <Radio.Button value={6}>工作</Radio.Button>
                         <Radio.Button value={7}>其他</Radio.Button>
                     </Radio.Group>
-                    <TextArea rows={16} maxLength={2000} showCount placeholder="请输入备忘内容" value={formData?.content} onChange={(e)=>setFormData({...formData,content:e.target.value})}/>
+                    <TextArea rows={16}
+                              maxLength={2000}
+                              showCount
+                              placeholder="请输入备忘内容"
+                              value={formData?.content}
+                              ref={textRef}
+                              onChange={(e)=>setFormData({...formData,content:e.target.value})}
+                    />
                 </Space>
             </Divider>
         </Modal>
