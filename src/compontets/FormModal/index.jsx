@@ -20,8 +20,8 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
     const { message } = App.useApp();
 
     useEffect(()=> {
-        if(data) setFormData(data)
-        else setFormData({
+        if(data) setFormData(data)  // 编辑时，初始化数据
+        else setFormData({    // 新增时，初始化数据
             content:null,
             itemType:currentMemoType,
         })
@@ -31,6 +31,7 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
     },[data])
 
 
+    /** 确定按钮（编辑完成给后端发请求） */
     const handleOk = async() => {
         if(!formData.itemType?.toString())return message.error('备忘类型不能为空')
         if(!formData.content)return message.error('备忘内容不能为空')
