@@ -37,6 +37,7 @@ function EnglishDrawer() {
     const [editChinese, setEditChinese] = useState(null)                // 编辑中文
     const [searchEmpty, setSearchEmpty] = useState(true);      // 搜索框为空（搜索框有值没点搜索？）
     const [word,setWord] = useState(null)                              // 《表单》关键词
+    const [shouldFocus, setShouldFocus] = useState(false);    // 是否获取焦点（感觉ref有点消耗性能)
 
     const {msg} = CommonStore
     const {  modal } = App.useApp();
@@ -89,7 +90,8 @@ function EnglishDrawer() {
         listData = [{id: undefined}, ...listData]
         setEditId(undefined)
         setEditEnglish(undefined)
-        setEditChinese(editChinese === undefined ? null : undefined) // 有效驱动页面变化
+        setEditChinese(undefined)
+        setShouldFocus(true) // 让编辑框自动获得焦点  顺便驱动页面变化
     }
 
     /** 编辑|新增 and 保存 */
@@ -122,10 +124,11 @@ function EnglishDrawer() {
             }
         }   // 进入编辑状态
         else {
-            !editId && listData.shift() && --total
+            !editId && listData.shift() && --total  // 在新增状态下编辑，把新增没保存第第一条去掉
             setEditId(id)
             setEditChinese(chinese)
             setEditEnglish(english)
+            setShouldFocus(true) // 让编辑框自动获得焦点
         }
     }
     /** 删除 or 取消*/
@@ -191,7 +194,10 @@ function EnglishDrawer() {
 
                     <Input value={item.id===editId? editEnglish : item?.content?.split("@@@")?.[0]?? ''}
                            placeholder="请输入英文"
-                           onChange={e => item.id===editId && setEditEnglish(e.target.value)}/>
+                           onChange={e => item.id===editId && setEditEnglish(e.target.value)}
+                           ref={input => shouldFocus && item.id===editId && (setShouldFocus(false) || input?.focus() )}
+                    />
+
                     <Input value={item.id === editId? editChinese :item?.content?.split("@@@")?.[1]?? ''}
                            placeholder="请输入中文"
                            onChange={e=> item.id === editId && setEditChinese(e.target.value)}/>
