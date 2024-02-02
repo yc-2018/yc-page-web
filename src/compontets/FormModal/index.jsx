@@ -19,16 +19,21 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
 
     const { message } = App.useApp();
 
+    // 初始化数据
     useEffect(()=> {
         if(data) setFormData(data)  // 编辑时，初始化数据
         else setFormData({    // 新增时，初始化数据
             content:null,
             itemType:currentMemoType,
         })
-
-        // 点击编辑或新增按钮后自动获得焦点,但是弹窗没这么快出现在页面上，所以获取焦点也要延迟一点点
-        window.setTimeout(() => textRef.current?.focus(), 100)
     },[data])
+
+    // 打开后自动获得焦点
+    useEffect(()=> {
+        if(isOpen)
+            // 点击编辑或新增按钮后自动获得焦点,但是弹窗没这么快出现在页面上，所以获取焦点也要延迟一点点
+            window.setTimeout(() => textRef.current?.focus(), 100)
+    },[isOpen])
 
 
     /** 确定按钮（编辑完成给后端发请求） */
