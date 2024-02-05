@@ -39,7 +39,7 @@ const MemoDrawer = observer(() => {
     const [list, setList] = useState([]);     // 待办展示列表
     const [page, setPage] = useState(1);    // 待办翻页
     const [type, setType] = useState(0);    // 待办类型
-    const [loopTimeList, setLoopTimeList] = useState([])                     //
+    const [loopTimeList, setLoopTimeList] = useState([])                     // 循环时间列表
     const [loopTimePage, setLoopTimePage] = useState(1);                  // 循环时间页数
     const [loopTimeTotal, setLoopTimeTotal] = useState(0);               //循环时间总数
     const [loopTimeWebLoading, setLoopTimeWebLoading] = useState(true); // 循环时间网络加载
