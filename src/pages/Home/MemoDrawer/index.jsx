@@ -1,11 +1,12 @@
+import React, {useEffect, useState} from "react";
+import {observer} from 'mobx-react-lite'
+import TextArea from "antd/es/input/TextArea";
 import {
     BookOutlined,
     CaretDownOutlined,
     PlusOutlined,
     SyncOutlined
 } from "@ant-design/icons";
-import React, {useEffect, useState} from "react";
-import {observer} from 'mobx-react-lite'
 import {
     Drawer, List, Skeleton, Button, Tag,
     Spin, Tooltip, Select, Divider,
@@ -16,21 +17,18 @@ import showOrNot from "../../../store/ShowOrNot";
 import UserStore from "../../../store/UserStore";
 import FormModal from "../../../compontets/FormModal";
 import ShowOrNot from "../../../store/ShowOrNot";
-import TextArea from "antd/es/input/TextArea";
 import JWTUtils from "../../../utils/JWTUtils";
 import {sortingOptions, tagNameMapper} from "../../../store/NoLoginData";
 import SortSelect from "../../../compontets/SortSelect";
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../../request/homeRequest"
+import SearchBox from "../../../compontets/common/SearchBox";
 
 import './MemoDrawer.css'
 import styles from '../../../common.module.css'
-import SearchBox from "../../../compontets/common/SearchBox";
 
 let total = -1;    // 初始化待办总数
 let orderBy = 1;   // 《表单》默认排序方式
 let isQueryOnClick = false; // 防止点太快了
-
-const item = [{key: '0', label: <><SyncOutlined spin /> 正在加载中</>}]
 
 const MemoDrawer = observer(() => {
     const [initLoading, setInitLoading] = useState(true);       // 初始化加载
@@ -41,11 +39,14 @@ const MemoDrawer = observer(() => {
     const [list, setList] = useState([]);     // 待办展示列表
     const [page, setPage] = useState(1);    // 待办翻页
     const [type, setType] = useState(0);    // 待办类型
+    const [loopTimeList, setLoopTimeList] = useState([])                     //
+    const [loopTimePage, setLoopTimePage] = useState(1);                  // 循环时间页数
+    const [loopTimeTotal, setLoopTimeTotal] = useState(0);               //循环时间总数
+    const [loopTimeWebLoading, setLoopTimeWebLoading] = useState(true); // 循环时间网络加载
     const [unFinishCounts, setUnFinishCounts] = useState();        // 待办未完成计数
     const [completed, setCompleted] = useState(0);         // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
     const [formModal, setFormModal] = useState(false);    // 是否显示新增或编辑的模态框。
     const [fModalData, setFModalData] = useState();              // 设置模态框数据
-    const [items, setItems] = useState(item);    // 设置循环待办的循环时间数据
     const [keyword, setKeyword] = useState('');             // 搜索关键字
     const [searchEmpty, setSearchEmpty] = useState(true); // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
 
@@ -164,21 +165,51 @@ const MemoDrawer = observer(() => {
     // 获取循环备忘录时间列表
     const getLoopMemoTimeList = (id,updateTime) =>
         <Dropdown
+            destroyPopupOnHide   // 关闭销毁
             trigger={['click']}
-            menu={{ items }}
             onOpenChange={async open => {
                 if(open) {
-                    const resp = await selectLoopMemoTimeList(id);
-                    if (resp?.records?.length > 0)
-                        setItems(resp.records.map(item => ({key: item.id, label: <span style={{color: '#9f9f9f'}}>{item.memoDate.replace('T', ' ')}</span>})))
-                    else setItems([{key: '-1', label: <span style={{color: '#fcabab'}}>暂无循环记录</span>}]);
-                }else setItems(item)
+                    await getLoopMemoTimeData(id)
+                }else {
+                    setLoopTimeTotal(0)
+                    setLoopTimeList([])
+                    setLoopTimePage(1)
+                    setLoopTimeWebLoading(false)
+                }
             }}
+            dropdownRender={()=>
+                <div className={`ant-dropdown-menu ${styles['dropdown-menu']} ${styles['gun']}`} >
+                    {loopTimeList?.map(({id,memoDate}, index) =>
+                        <div key={id}>{index + 1}：{memoDate?.replace('T', ' ')} </div>)
+                    }
+                    {/* 尾部 */
+                        loopTimeWebLoading? <><SyncOutlined spin /> 正在加载中</> :
+                            loopTimeTotal <= loopTimeList.length ? <>到底了</>:
+                                <Button block size={'small'} onClick={() => getLoopMemoTimeData(id)}>继续加载</Button>
+                    }
+
+                </div>
+
+            }
         >
             <span className={styles.pointer}>
                 &nbsp;&nbsp;&nbsp;<CaretDownOutlined />循环:{updateTime}<CaretDownOutlined />
             </span>
     </Dropdown>
+
+    // 获取循环备忘录时间列表
+    const getLoopMemoTimeData = async (id) => {
+        setLoopTimeWebLoading(true)
+        const resp = await selectLoopMemoTimeList(id, loopTimePage);
+        setLoopTimeWebLoading(false)
+        if (resp?.records?.length > 0) {
+            setLoopTimeList(item => ([...item, ...resp.records]))
+            setLoopTimePage(v => v + 1)     // 页码增加
+            setLoopTimeTotal(resp.total)
+        }
+
+
+    }
 
 
     /** 处理待办列表的操作 */
