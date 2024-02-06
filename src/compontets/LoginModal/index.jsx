@@ -1,6 +1,6 @@
 import {App, Button, Input, Modal, Radio, Space} from "antd";
 import { observer } from 'mobx-react-lite'
-import React, {useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 
 import UserStore from "../../store/UserStore";
 import {login} from "../../request/homeRequest";
@@ -10,7 +10,12 @@ const LoginModal = () => {
     const [loginCaptcha, setLoginCaptcha] = useState(undefined);       // 登录验证码
     const [loginLoading, setLoginLoading] = useState(false);  // 点击登录按钮加载
     const {message} = App.useApp();
+    const textRef = useRef(null)  // 输入框的ref 让它能自动获得焦点
 
+    useEffect(()=> {
+        if (UserStore.openModal)
+            window.setTimeout(() => textRef.current?.focus(), 100) // 点击添加按钮后自动获得焦点,但是一开始没在页面上所以要延迟一点点
+    },[UserStore.openModal])
     /**
      * 登录请求
      */
@@ -21,7 +26,7 @@ const LoginModal = () => {
         const isLogin =await login(loginCaptcha, expireTime, setLoginLoading);
 
         if (isLogin) {
-            setLoginCaptcha(undefined); // 验证码清空
+            setLoginCaptcha(undefined);    // 验证码清空
             UserStore.setOpenModal(false);      // 关闭弹出弹窗
         }
     }
@@ -38,7 +43,7 @@ const LoginModal = () => {
                     <img src="/wxGzh.jpg"  alt="仰晨公众号二维码"/>
 
                     <Radio.Group
-                        defaultValue="bt"
+                        defaultValue="yt"
                         size="small"
                         style={{marginBottom:5}}
                         onChange={(e)=>setExpireTime(e.target.value)}
@@ -51,7 +56,12 @@ const LoginModal = () => {
                         <Radio.Button value="yn">一年</Radio.Button>
                     </Radio.Group>
                     <Space.Compact style={{ width: '80%' }} size={"large"}>
-                        <Input placeholder="请输入验证码" value={loginCaptcha} onChange={(e) => setLoginCaptcha(e.target.value)} />
+                        <Input placeholder="请输入验证码"
+                               value={loginCaptcha}
+                               onChange={e => setLoginCaptcha(e.target.value)}
+                               onPressEnter={goLogin}
+                               ref={textRef}
+                        />
                         <Button type="primary" onClick={goLogin} loading={loginLoading}>
                             验证登录
                         </Button>
