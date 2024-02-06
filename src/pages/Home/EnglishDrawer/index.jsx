@@ -196,11 +196,14 @@ function EnglishDrawer() {
                            placeholder="请输入英文"
                            onChange={e => item.id===editId && setEditEnglish(e.target.value)}
                            ref={input => shouldFocus && item.id===editId && (setShouldFocus(false) || input?.focus() )}
+                           onPressEnter={() => editOrSave(item)}
                     />
 
                     <Input value={item.id === editId? editChinese :item?.content?.split("@@@")?.[1]?? ''}
                            placeholder="请输入中文"
-                           onChange={e=> item.id === editId && setEditChinese(e.target.value)}/>
+                           onChange={e=> item.id === editId && setEditChinese(e.target.value)}
+                           onPressEnter={() => editOrSave(item)}
+                    />
 
                     {/*查看时是删除按钮 编辑时是取消按钮*/}
                     <Button icon={editId===item.id?<CloseOutlined /> : <DeleteOutlined />}
