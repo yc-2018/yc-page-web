@@ -2,6 +2,7 @@ import React from 'react';
 import {LaptopOutlined, NotificationOutlined, UserOutlined} from '@ant-design/icons';
 import {Layout, Menu, theme} from 'antd';
 import styles from './blog.module.css'
+import Dnd from "../../compontets/Dnd";
 
 const {Content, Sider} = Layout;
 ['1', '2', '3', '4'].map((key) => ({
@@ -52,6 +53,7 @@ const Blog = () => {
                     <p className={styles.testContent}>Content</p>
                     <p>电脑用这个组件</p>
                     <p>手机再创建一个</p>
+                    <Dnd/>
                     <p>Content</p>
                     <p>Content</p>
                     <p>Content</p>

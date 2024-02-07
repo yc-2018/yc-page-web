@@ -2,6 +2,16 @@
 
 .App-link {color: #61dafb;}
 
+/* 鼠标变小手 */
+.pointer{
+    cursor: pointer;
+    user-select: none;
+}
 
+/* 鼠标变移动 */
+.mouseMove{
+    cursor: move;
+    user-select: none;
+}
 
 
