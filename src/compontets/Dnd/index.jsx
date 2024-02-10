@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem'; // 假设你有一个SortableItem组件
 const initItems = [
     { id: "1hhh", name: 'Item 1' },
@@ -17,7 +17,7 @@ export default function SortableList() {
         // 使用自定义Hook来获取鼠标传感器数据
         useSensor(PointerSensor),
         // 使用自定义Hook来获取键盘传感器数据，并指定坐标获取器（暂时没用）
-        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+        // useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
 
@@ -25,7 +25,7 @@ export default function SortableList() {
     /**
      * 当拖拽结束时触发的回调函数
      * */
-    const handleDragEnd = (event) => {
+    const handleDragEnd = event => {
         const { active, over } = event;
 
         if (active.id !== over.id) {
