@@ -1,5 +1,6 @@
 import { Button, Dropdown, Space } from 'antd';
 import CommonStore from "../../../store/CommonStore";
+import Dnd from "../../../compontets/Dnd";
 
 
 export default function Bookmarks() {
@@ -58,11 +59,8 @@ export default function Bookmarks() {
 
             <Dropdown
                 dropdownRender={() =>
-                    <div>
-                        <div><img alt src="https://x.chatmindai.net/Logo.png" width={10} />自定义内容</div>
-                        <div>自定义内容</div>
-                        <div>自定义内容</div>
-                        <div>自定义内容</div>
+                    <div className={'ant-dropdown-menu'}>
+                        <Dnd/>
                     </div>
                 }
             >
