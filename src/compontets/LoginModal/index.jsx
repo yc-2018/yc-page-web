@@ -39,7 +39,7 @@ const LoginModal = () => {
             footer={<></>}
         >
                 <span style={{ textAlign: 'center', display: 'block', margin: '0 auto' }}>
-                    <p style={{ fontSize: 20 }}>请使用微信扫一扫关注登录</p>
+                    <p style={{ fontSize: 20 }}>请使用微信扫一扫关注(仰晨)登录</p>
                     <img src="/wxGzh.jpg"  alt="仰晨公众号二维码"/>
 
                     <Radio.Group

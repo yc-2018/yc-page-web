@@ -2,6 +2,10 @@ import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+/**
+ * 配置拖动元素
+ * @param {Object} obj
+ * */
 export function SortableItem({ obj }) {
     const {
         attributes,   // 拖动元素属性
