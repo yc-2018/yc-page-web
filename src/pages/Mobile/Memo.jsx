@@ -111,7 +111,11 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 setEditVisible(obj);
                 setContent(obj.content);
                 setItemType(obj.itemType)
-                window.setTimeout(() => textRef.current?.focus(), 100) // 点击添加按钮后自动获得焦点,但是没在页面上所以要延迟一点点
+                window.setTimeout(() => {
+                    textRef.current?.focus()                                            // 获得焦点
+                    const length = obj.content.length                                  // 获取输入框字符串的长度
+                    textRef.current.nativeElement.setSelectionRange(length, length)   // 设置光标位置在最后
+                }, 100)                                                       // 没在页面那么快，所以要延迟一点点
                 break;
 
             // 删除
