@@ -20,13 +20,13 @@ export default function Menu({ obj }) {
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        padding: '2px 10px',
+        padding: '1px 0',
     };
 
     return (
 
-        <span ref={setNodeRef} style={style} {...attributes}>
-            <span {...listeners} className={'mouseMove'}>☰</span>
+        <div ref={setNodeRef} style={style} {...attributes}>
+            <span {...listeners} className={'mouseMove'} style={{color:'#00000030'}}>☰</span>
             <Dropdown
                 dropdownRender={() =>
                     <div className={'ant-dropdown-menu'}>
@@ -43,7 +43,7 @@ export default function Menu({ obj }) {
                     {obj.name}
                 </Button>
             </Dropdown>
-        </span>
+        </div>
 
 
     );

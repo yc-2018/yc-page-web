@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { arrayMove, SortableContext } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem'; // 假设你有一个SortableItem组件
 const initItems = [
     { id: "1hhh", name: 'Item 1' },
@@ -50,12 +50,8 @@ export default function SortableList() {
          * strategy: 排序策略定义了项目排序的逻辑。verticalListSortingStrategy 是 @dnd-kit/sortable 提供的一个策略，用于垂直列表的排序。这个策略决定了项目如何根据拖拽操作重新排序。
          * */
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={items.map(item => item.id)}
-                             strategy={verticalListSortingStrategy}
-            >
-                {items.map(item =>
-                    <SortableItem key={item.id} obj={item} />
-                )}
+            <SortableContext items={items.map(item => item.id)} /*strategy={verticalListSortingStrategy}*/ >
+                {items.map(item => <SortableItem key={item.id} obj={item} />)}
             </SortableContext>
         </DndContext>
     );
