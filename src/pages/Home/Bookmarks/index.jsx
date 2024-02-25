@@ -11,7 +11,7 @@ import Menu from "./Menu";
 
 export default function Bookmarks() {
     const [items, setItems] = useState([
-        {id: "11hhh", name: 'Item 1111111'},
+        {id: "11hhh", name: 'Item 111111'},
         {id: "22hhh", name: 'Item 2222'},
         {id: "33hhh", name: 'Item 33'},
         {id: "43hhh", name: 'Item 44'},
@@ -59,7 +59,8 @@ export default function Bookmarks() {
     return (
         <div style={{
             display: 'flex',
-            flexDirection: 'row',
+            flexWrap: 'wrap',        // 启用换行
+            flexDirection: 'row',   // 子元素默认会在一行内排列，不会换行
             gap: '0' /* 根据需要调整间距 */}}>
             {/**
              * sensors:  传感器是用于处理拖拽输入的设备，例如鼠标、触摸屏或键盘。sensors 属性允许你定义用于拖拽操作的传感器数组。
