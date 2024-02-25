@@ -163,26 +163,6 @@ function Search() {
 
     return (
         <>
-            {/* 选择搜索引擎 */}
-            <Dropdown menu={{items,onClick}} trigger={['contextMenu']} >
-                <Segmented
-                    options={searchOptions.map(option => option.name)}
-                    value={searchStore.searchEngines}
-                    onChange={(value) => searchStore.setSearchEngines(value)}
-                    onContextMenu={onContextMenu}
-                />
-            </Dropdown>
-            {
-                /* 登录显示添加搜索引擎 */
-                UserStore.jwt&&
-                <Button icon={<PlusOutlined />} style={{ margin: '0 3px' }} className={"addButton"} onClick={()=> addSearch(0)}/>
-            }
-            <br />
-            {/* 搜索框 */}
-            <MySearch onSearch={()=>onSearch()} setSearchValue={setSearchValue} />
-
-
-            <br />
             {/*快速搜索*/}
             <Flex style={{ margin: "5px 80px" }} wrap="wrap" gap="small" justify='center'>
                 {quickSearch.map(item =>
@@ -203,6 +183,26 @@ function Search() {
                 }
             </Flex>
 
+
+            {/* 搜索框 */}
+            <MySearch onSearch={()=>onSearch()} setSearchValue={setSearchValue} />
+
+
+            <br />
+            {/* 选择搜索引擎 */}
+            <Dropdown menu={{items,onClick}} trigger={['contextMenu']} >
+                <Segmented
+                    options={searchOptions.map(option => option.name)}
+                    value={searchStore.searchEngines}
+                    onChange={(value) => searchStore.setSearchEngines(value)}
+                    onContextMenu={onContextMenu}
+                />
+            </Dropdown>
+            {
+                /* 登录显示添加搜索引擎 */
+                UserStore.jwt&&
+                <Button icon={<PlusOutlined />} style={{ margin: '0 3px' }} className={"addButton"} onClick={()=> addSearch(0)}/>
+            }
 
 
             <Modal
