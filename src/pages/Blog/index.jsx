@@ -3,6 +3,8 @@ import {LaptopOutlined, NotificationOutlined, UserOutlined} from '@ant-design/ic
 import {Layout, Menu, theme} from 'antd';
 import styles from './blog.module.css'
 import Dnd from "../../compontets/Dnd";
+import MyDnd from "../../compontets/MyDnd";
+import DndItem from "../../compontets/MyDnd/DndItem";
 
 const {Content, Sider} = Layout;
 ['1', '2', '3', '4'].map((key) => ({
@@ -26,6 +28,28 @@ const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined, Notification
 });
 const Blog = () => {
     const {token: {colorBgContainer}} = theme.useToken();
+    let items = [
+        {id: "11hhh", name: 'Item 111111'},
+        {id: "22hhh", name: 'Item 2222'},
+        {id: "33hhh", name: 'Item 33'},
+        {id: "43hhh", name: 'Item 44'},
+        {id: "5hhh", name: 'Item 55'},
+        {id: "6hhh", name: 'Item 66'},
+        {id: "37h", name: 'Item 77'},
+        {id: "338h", name: 'Item 88'},
+        {id: "33h9hh", name: 'Item 99'},
+        {id: "331hhh", name: 'Item aa'},
+        {id: "33h11hh", name: 'Item ss'},
+        {id: "33h12hh", name: 'Item dd'},
+        {id: "3314hhh", name: 'Item ff'},
+        {id: "33hh13h", name: 'Item gg'},
+        {id: "33h15hh", name: 'Item hh'},
+        {id: "dd", name: 'Item dd'},
+        {id: "cc", name: 'Item cc'},
+        {id: "zz", name: 'Item zz'},
+        {id: "vv", name: 'Item vv'},
+        {id: "tt", name: 'tt hh'},
+    ]
     return (
         <Layout style={{maxHeight: 'calc(100vh - 64px)'}}>
             {/*------- 页面左侧 -------*/}
@@ -54,7 +78,13 @@ const Blog = () => {
                     <p>电脑用这个组件</p>
                     <p>手机再创建一个</p>
                     <Dnd/>
-                    <p>Content</p>
+                    <MyDnd initItems={items} storageName={'ikun'}>
+                        {items.map(item =>
+                            <DndItem key={item.id} obj={item} drag={<span>████</span>}>
+                                {item.name}
+                            </DndItem>
+                        )}
+                    </MyDnd>
                     <p>Content</p>
                     <p>Content</p>
                     <p>Content</p>

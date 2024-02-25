@@ -2,8 +2,7 @@ import React, {useState} from "react";
 import {DndContext, closestCenter, PointerSensor, useSensor} from '@dnd-kit/core';
 import {
     arrayMove,
-    SortableContext,
-    horizontalListSortingStrategy
+    SortableContext
 } from '@dnd-kit/sortable';
 
 import Menu from "./Menu";
@@ -72,7 +71,7 @@ export default function Bookmarks() {
              * */}
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={items.map(item => item.id)}
-                                 strategy={horizontalListSortingStrategy}
+                                 // strategy={horizontalListSortingStrategy}
                 >
                     {items.map(item =>
                         <Menu key={item.id} obj={item}/>

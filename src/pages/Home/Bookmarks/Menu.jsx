@@ -8,7 +8,7 @@ import {Button, Dropdown} from "antd";
  * 配置拖动元素
  * @param {Object} obj
  * */
-export default function Menu({ obj }) {
+export default function({ obj }) {
     const {
         attributes,   // 拖动元素属性
         listeners,  // 拖动事件|手柄
