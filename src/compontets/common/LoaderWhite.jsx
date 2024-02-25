@@ -1,4 +1,5 @@
 import styles from './LoaderWhite.module.css'
+/** 自定义 加载动画 白色圈圈*/
 export default () => {
     return (
         <div className={styles.loader}>

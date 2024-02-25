@@ -84,7 +84,7 @@ function Home() {
             {/* 《为了打开英语抽屉漂浮在底层透明背景》用做 点击右键显示 抽屉 只能放在这上面，放到下面去写会挡住按钮 不知道为啥。*/}
             <div
                 style={{position: 'absolute',bottom: '10%',right: '20%',width: '60%', height: '80%', zIndex: 0}}
-                onContextMenu={(event) => {
+                onContextMenu={event => {
                     event.preventDefault();                 // 阻止默认的右键菜单弹出
                     showOrNot.setEnglishDrawerShow(true);  // 打开英语抽屉
                 }}
@@ -98,9 +98,9 @@ function Home() {
                 {/* antd居中输入框 */}
                 <div className="ant-input-group">
                     <div className="ant-input-group-addon">
-                        <i className="anticon anticon-user"></i>
+                        <i className="anticon anticon-user" />
                     </div>
-
+                    <br/>
                     {/*搜索框*/}
                     <Search />
 
