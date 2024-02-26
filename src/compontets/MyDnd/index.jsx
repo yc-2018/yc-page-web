@@ -1,19 +1,21 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { DndContext, closestCenter, PointerSensor, useSensor } from '@dnd-kit/core';
 import { arrayMove, SortableContext } from '@dnd-kit/sortable';
+import MyDndItem from "./MyDndItem";
 
 /**
- * @param {Array} initItems 对象数组 而且必须包涵id属性
- * @param {String} StorageName 存储在localStorage中的名字  如果是空的就不存储
- * @param {React.ReactNode} children 子组件
- * @param {Object} style 最外层样式（有默认值）
+ * @component
+ * @param {Array} items                         【必须】对象数组 而且必须包涵id属性
+ * @param {Function} setItems                   【必须】设置items的函数
+ * @param {String} storageName                  存储在localStorage中的名字  如果是空的就不存储
+ * @param {Object} style                        最外层样式（有默认值）
+ * @param {React.ReactNode|unknown[]} children  子组件
+ * @property {React.Component} MyDnd.Item       可用自带子组件
  * */
-export default function({initItems,storageName,style,children }) {
-    const [items, setItems] = useState(initItems);
+const MyDnd = ({items,setItems ,storageName,style,children }) => {
 
     // 使用自定义Hook来获取鼠标传感器数据
     const sensors = [useSensor(PointerSensor)]
-
 
     /**
      * 当拖拽结束时触发的回调函数
@@ -22,7 +24,7 @@ export default function({initItems,storageName,style,children }) {
         const { active, over } = event
 
         if (active.id !== over.id) {
-            setItems((items) => {
+            setItems(items => {
                 // 找到拖拽项目（active.id）的索引
                 const oldIndex = items.findIndex(item => item.id === active.id)
                 // 找到目标位置项目（over.id）的索引
@@ -58,3 +60,10 @@ export default function({initItems,storageName,style,children }) {
         </div>
     );
 }
+
+/**
+ * @type {{Item: (props: object) => JSX.Element}}
+ */
+MyDnd.Item = MyDndItem
+
+export default MyDnd
