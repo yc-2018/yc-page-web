@@ -29,7 +29,7 @@ export default function({ id, drag, children, styles={} }) {
 
     return drag?
         <div ref={setNodeRef} style={style} {...attributes}>
-             <span {...listeners} className={'mouseMove'}>{drag}</span> <span className={'pointer'}>{children}</span>
+             <span {...listeners} className={'mouseMove'}>{drag}</span><span className={'pointer'}>{children}</span>
         </div>
     :
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={'mouseMove'}>

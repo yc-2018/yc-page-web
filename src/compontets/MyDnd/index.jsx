@@ -5,14 +5,14 @@ import MyDndItem from "./MyDndItem";
 
 /**
  * @component
- * @param {Array} items                         【必须】对象数组 而且必须包涵id属性
+ * @param {Array} dndIds                         【必须】对象可拖动对象的ID数组  数组里面是 整个对象也行 但是这个对象必须包涵id属性
  * @param {Function} setItems                   【必须】设置items的函数
  * @param {String} storageName                  存储在localStorage中的名字  如果是空的就不存储
  * @param {Object} style                        最外层样式（有默认值）
  * @param {React.ReactNode|unknown[]} children  子组件
  * @property {React.Component} MyDnd.Item       可用自带子组件
  * */
-const MyDnd = ({items,setItems ,storageName,style,children }) => {
+const MyDnd = ({dndIds,setItems ,storageName,style,children }) => {
 
     // 使用自定义Hook来获取鼠标传感器数据
     const sensors = [useSensor(PointerSensor)]
@@ -53,7 +53,7 @@ const MyDnd = ({items,setItems ,storageName,style,children }) => {
              * strategy: 排序策略定义了项目排序的逻辑。verticalListSortingStrategy 是 @dnd-kit/sortable 提供的一个策略，用于垂直列表的排序。这个策略决定了项目如何根据拖拽操作重新排序。
              * */}
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={items.map(item => item.id)} /*strategy={verticalListSortingStrategy}*/ >
+                <SortableContext items={dndIds?.[0].id? dndIds.map(item => item.id) :dndIds} /*strategy={verticalListSortingStrategy}*/ >
                     {children}
                 </SortableContext>
             </DndContext>

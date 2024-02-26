@@ -77,9 +77,9 @@ const Blog = () => {
                     <p>电脑用这个组件</p>
                     <p>手机再创建一个</p>
                     <Dnd/>
-                    <MyDnd items={items} setItems={setItems} storageName={'ikun'}>
+                    <MyDnd dndIds={items} setItems={setItems} storageName={'ikun'}>
                         {items.map(item =>
-                            <MyDnd.Item key={item.id} id={item.id} >
+                            <MyDnd.Item key={item.id} id={item.id} drag={<>█</>}>
                                 {item.name}
                             </MyDnd.Item>
                         )}
