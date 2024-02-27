@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {LaptopOutlined, NotificationOutlined, UserOutlined} from '@ant-design/icons';
 import {Layout, Menu, theme} from 'antd';
 import styles from './blog.module.css'
-import Dnd from "../../compontets/Dnd";
 import MyDnd from "../../compontets/MyDnd";
 
 const {Content, Sider} = Layout;
@@ -76,7 +75,7 @@ const Blog = () => {
                     <p className={styles.testContent}>Content</p>
                     <p>电脑用这个组件</p>
                     <p>手机再创建一个</p>
-                    <Dnd/>
+
                     <MyDnd dndIds={items} setItems={setItems} storageName={'ikun'}>
                         {items.map(item =>
                             <MyDnd.Item key={item.id} id={item.id} drag={<>█</>}>
