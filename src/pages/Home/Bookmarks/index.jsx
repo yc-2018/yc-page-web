@@ -20,7 +20,8 @@ export default function Bookmarks() {
             // 获取所有书签组 并整理
             setBookmarkGroupList(() => {
                 const groups = bookmarks.filter(item => item.type === 1)
-                const order = bookmarks.find(item => item.type === 0).sort.split('/').map(id => parseInt(id))
+                const order = bookmarks.find(item => item.type === 0)?.sort?.split('/').map(id => parseInt(id))
+                if (groups.length===0 || !order) return []
                 return  groups.sort((a, b) => {
                     // 获取两个元素的id在排序顺序数组中的索引
                     const indexA = order.indexOf(a.id)
@@ -37,6 +38,7 @@ export default function Bookmarks() {
      * 分离并排序书签组里的书签
      */
     const getSortBookmarks = (bookmarks) => {
+        if (!bookmarks.sort) return []
         const Bookmarks = allBookmark.filter(item => item.type === 2 && parseInt(item.sort)===bookmarks.id)
         const order = bookmarks.sort.split('/').map(id => parseInt(id))
         return  Bookmarks.sort((a, b) => {
