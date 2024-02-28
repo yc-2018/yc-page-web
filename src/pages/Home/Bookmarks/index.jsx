@@ -1,84 +1,95 @@
-import React, {useState} from "react";
-import {DndContext, closestCenter, PointerSensor, useSensor} from '@dnd-kit/core';
-import {
-    arrayMove,
-    SortableContext
-} from '@dnd-kit/sortable';
+import React, {useEffect, useState} from "react";
+import {Button, Dropdown} from "antd";
+import {PlusOutlined} from "@ant-design/icons";
 
-import Menu from "./Menu";
-
+import BookmarksItem from "./BookmarksItem";
+import MyDnd from "../../../compontets/MyDnd";
+import {simulateBookmarks} from "../../../store/NoLoginData";
+import UserStore from "../../../store/UserStore";
+import JWTUtils from "../../../utils/JWTUtils";
 
 export default function Bookmarks() {
-    const [items, setItems] = useState([
-        {id: "11hhh", name: 'Item 111111'},
-        {id: "22hhh", name: 'Item 2222'},
-        {id: "33hhh", name: 'Item 33'},
-        {id: "43hhh", name: 'Item 44'},
-        {id: "5hhh", name: 'Item 55'},
-        {id: "6hhh", name: 'Item 66'},
-        {id: "37h", name: 'Item 77'},
-        {id: "338h", name: 'Item 88'},
-        {id: "33h9hh", name: 'Item 99'},
-        {id: "331hhh", name: 'Item aa'},
-        {id: "33h11hh", name: 'Item ss'},
-        {id: "33h12hh", name: 'Item dd'},
-        {id: "3314hhh", name: 'Item ff'},
-        {id: "33hh13h", name: 'Item gg'},
-        {id: "33h15hh", name: 'Item hh'},
-        {id: "dd", name: 'Item dd'},
-        {id: "cc", name: 'Item cc'},
-        {id: "zz", name: 'Item zz'},
-        {id: "vv", name: 'Item vv'},
-        {id: "tt", name: 'tt hh'},
-    ]);
+    const [allBookmark, setAllBookmark] = useState([])              // 所有书签
+    const [bookmarkGroupList, setBookmarkGroupList] = useState([])  // 书签组列表
 
-
-    // 使用自定义Hook来获取鼠标传感器数据
-    const sensors = [useSensor(PointerSensor)]
-
+    useEffect(() => {
+        // 登录后获取本用户全部书签
+        if (UserStore.jwt) (async()=>{
+            // 获取云端全部书签
+            const bookmarks = simulateBookmarks
+            // 获取所有书签组 并整理
+            setBookmarkGroupList(() => {
+                const groups = bookmarks.filter(item => item.type === 1)
+                const order = bookmarks.find(item => item.type === 0).sort.split('/').map(id => parseInt(id))
+                return  groups.sort((a, b) => {
+                    // 获取两个元素的id在排序顺序数组中的索引
+                    const indexA = order.indexOf(a.id)
+                    const indexB = order.indexOf(b.id)
+                    // 比较这两个索引来决定顺序
+                    return indexA - indexB
+                })
+            })
+            setAllBookmark(bookmarks)   // 保存所有书签 给书签组里面的书签用
+        })()
+    }, [UserStore.jwt])
 
     /**
-     * 当拖拽结束时触发的回调函数
-     * */
-    const handleDragEnd = event => {
-        const {active, over} = event;
+     * 分离并排序书签组里的书签
+     */
+    const getSortBookmarks = (bookmarks) => {
+        const Bookmarks = allBookmark.filter(item => item.type === 2 && parseInt(item.sort)===bookmarks.id)
+        const order = bookmarks.sort.split('/').map(id => parseInt(id))
+        return  Bookmarks.sort((a, b) => {
+            // 获取两个元素的id在排序顺序数组中的索引
+            const indexA = order.indexOf(a.id)
+            const indexB = order.indexOf(b.id)
+            // 比较这两个索引来决定顺序
+            return indexA - indexB
+        })
+    }
 
-        if (active.id !== over.id) {
-            setItems((items) => {
-                // 找到拖拽项目（active.id）的索引
-                const oldIndex = items.findIndex(item => item.id === active.id);
-                // 找到目标位置项目（over.id）的索引
-                const newIndex = items.findIndex(item => item.id === over.id);
-                console.log('███████newIndex>>>>', arrayMove(items, oldIndex, newIndex), '<<<<██████')
-                return arrayMove(items, oldIndex, newIndex);
-            });
+    /**
+     * 添加【书签组】按钮
+     */
+    const addBookmarkGroupButton = () =>
+        <Button type="dashed" ghost size={'small'}
+                style={{
+                    textShadow: ' 0px 0px 5px #abc9ec',
+                    borderColor: 'rgb(0 0 0 / 18%)',
+                    margin: '1px 7px',
+                    width:30
+                }}>
+            <PlusOutlined/> {/*加号➕*/}
+        </Button>
+
+    return <>
+        {!JWTUtils.isExpired() && bookmarkGroupList.length > 0 &&
+            <MyDnd dndIds={bookmarkGroupList} setItems={setBookmarkGroupList}>
+                {bookmarkGroupList.map(group =>
+                    <MyDnd.Item key={group.id} id={group.id} styles={{padding: '1px 0'}}
+                                drag={<span style={{color: '#00000030'}}>☰</span>}>
+                        <Dropdown
+                            dropdownRender={() =>
+                                <div className={'ant-dropdown-menu'}>
+                                    <BookmarksItem bookmarkItems={getSortBookmarks(group)}/>
+                                </div>
+                            }
+                        >
+                            <Button ghost           // 使按钮背景透明
+                                    type="dashed"
+                                    size='small'
+                                    href={group.url}
+                                    style={{textShadow: ' 0px 0px 5px #abc9ec', borderColor: 'rgb(0 0 0)'}}
+                                    target="_blank"
+                            >
+                                {group.name}
+                            </Button>
+                        </Dropdown>
+                    </MyDnd.Item>
+                )}
+                {/*添加书签组按钮*/ bookmarkGroupList.length < 16 && addBookmarkGroupButton()}
+            </MyDnd>
         }
-    };
-
-    return (
-        <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',        // 启用换行
-            flexDirection: 'row',   // 子元素默认会在一行内排列，不会换行
-            gap: '0' /* 根据需要调整间距 */}}>
-            {/**
-             * sensors:  传感器是用于处理拖拽输入的设备，例如鼠标、触摸屏或键盘。sensors 属性允许你定义用于拖拽操作的传感器数组。
-             * collisionDetection: 碰撞检测是确定拖拽项目在移动过程中与哪些项目发生交互的算法。
-             * onDragEnd: 当拖拽结束时触发的回调函数。
-             * ——————————
-             * items: 这个属性接受一个项目标识符的数组，定义了哪些项目是可排序的。这些标识符通常是字符串或数字，用于唯一标识每个可拖拽项目。
-             * strategy: 排序策略定义了项目排序的逻辑。verticalListSortingStrategy 是 @dnd-kit/sortable 提供的一个策略，用于垂直列表的排序。这个策略决定了项目如何根据拖拽操作重新排序。
-             * */}
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={items.map(item => item.id)}
-                                 // strategy={horizontalListSortingStrategy}
-                >
-                    {items.map(item =>
-                        <Menu key={item.id} obj={item}/>
-                    )}
-                </SortableContext>
-            </DndContext>
-        </div>
-
-    )
+        {/*添加书签组按钮*/ bookmarkGroupList.length === 0 && addBookmarkGroupButton()}
+    </>
 }
