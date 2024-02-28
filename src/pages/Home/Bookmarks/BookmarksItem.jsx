@@ -11,8 +11,8 @@ export default ({bookmarkItems}) => {
     return (items.length > 0 ?
         <MyDnd dndIds={items} setItems={setItems} style={{}}>
             {items.map(item =>
-                <MyDnd.Item key={item.id} id={item.id} drag={"█"} className={styles.dndItem}>
-                    <Button type="link" href={'https://www.baidu.com'} className={styles.dndContent} target="_blank">
+                <MyDnd.Item key={item.id} id={item.id} drag={"🔖"} className={styles.dndItem}>
+                    <Button type="link" href={item.url} className={styles.dndContent} target="_blank">
                         {item.name}
                     </Button>
                 </MyDnd.Item>
