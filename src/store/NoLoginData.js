@@ -169,3 +169,55 @@ export const tagNameMapper = {
     6: "工作",
     7: "其他"
 }
+
+
+export const simulateBookmarks = [
+    {
+        "id": 1,
+        "name": "卡斯蒂略集团",
+        "url": "",
+        "sort": "2/3",
+        "type": 0,
+        "icon": ""
+    },
+    {
+        "id": 2,
+        "name": "阿什利公司",
+        "url": "http://localhost:3000/",
+        "sort": "4",
+        "type": 1,
+        "icon": "https://placeimg.com/812/168/any"
+    },
+    {
+        "id": 3,
+        "name": "科尔公司",
+        "url": "https://www.hernandez-james.com/",
+        "sort": "5/6",
+        "type": 1,
+        "icon": "https://www.lorempixel.com/1011/970"
+    },
+    {
+        "id": 4,
+        "name": "Chase有限公司",
+        "url": "https://www.larson.com/",
+        "sort": "2",
+        "type": 2,
+        "icon": "https://dummyimage.com/1003x350"
+    },
+    {
+        "id": 5,
+        "name": "米尔斯公司",
+        "url": "http://fox-olsen.com/",
+        "sort": "3",
+        "type": 2,
+        "icon": "https://www.lorempixel.com/834/235"
+    },
+    {
+        "id": 6,
+        "name": "是Inc公司",
+        "url": "http://fox-olsen.com/",
+        "sort": "3",
+        "type": 2,
+        "icon": "https://www.lorempixel.com/834/235"
+    },
+]

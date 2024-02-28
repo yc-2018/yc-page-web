@@ -9,9 +9,10 @@ import { CSS } from '@dnd-kit/utilities';
  * @param drag {React.ReactNode}        是否单独拖动组件 就是前面拖动组件 后面正常组件 为空就是完全拖动
  * @param {React.ReactNode} children    子组件
  * @param styles {Object}               拖动元素 额外样式
+ * @param className {string}           最外层元素的class
  * @type {{Item: (props: object) => JSX.Element}}
  * */
-export default function({ id, drag, children, styles={} }) {
+export default function({ id, drag, children, styles={}, className=''}) {
     const {
         attributes,   // 拖动元素属性
         listeners,  // 拖动事件|手柄
@@ -28,11 +29,11 @@ export default function({ id, drag, children, styles={} }) {
     };
 
     return drag?
-        <div ref={setNodeRef} style={style} {...attributes}>
+        <div ref={setNodeRef} style={style} {...attributes} className={className}>
              <span {...listeners} className={'mouseMove'}>{drag}</span><span className={'pointer'}>{children}</span>
         </div>
     :
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={'mouseMove'}>
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`mouseMove${' ' + className}`}>
             {children}
         </div>
 }
