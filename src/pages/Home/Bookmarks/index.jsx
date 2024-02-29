@@ -4,13 +4,18 @@ import {PlusOutlined} from "@ant-design/icons";
 
 import BookmarksItem from "./BookmarksItem";
 import MyDnd from "../../../compontets/MyDnd";
+import FormModal from "./FormModal";
 import {simulateBookmarks} from "../../../store/NoLoginData";
 import UserStore from "../../../store/UserStore";
 import JWTUtils from "../../../utils/JWTUtils";
 
 export default function Bookmarks() {
     const [allBookmark, setAllBookmark] = useState([])              // 所有书签
+    const [bookmarkGroupOrder, setBookmarkGroupOrder] = useState()        // 书签组排序对象
     const [bookmarkGroupList, setBookmarkGroupList] = useState([])  // 书签组列表
+
+    const [openModal, setOpenModal] = useState(true)
+    const [editObj, setEditObj] = useState()
 
     useEffect(() => {
         // 登录后获取本用户全部书签
@@ -30,7 +35,8 @@ export default function Bookmarks() {
                     return indexA - indexB
                 })
             })
-            setAllBookmark(bookmarks)   // 保存所有书签 给书签组里面的书签用
+            setAllBookmark(bookmarks)                                       // 保存所有书签 给书签组里面的书签用
+            setBookmarkGroupOrder(bookmarks.find(item => item.type === 0))  // 保存书签组排序对象
         })()
     }, [UserStore.jwt])
 
@@ -60,11 +66,14 @@ export default function Bookmarks() {
                     borderColor: 'rgb(0 0 0 / 18%)',
                     margin: '1px 7px',
                     width:30
-                }}>
+                }}
+                onClick={() => setOpenModal(true)}
+        >
             <PlusOutlined/> {/*加号➕*/}
         </Button>
 
     return <>
+        <FormModal open={openModal} setOpen={setOpenModal} obj={editObj} type={1}/>
         {!JWTUtils.isExpired() && bookmarkGroupList.length > 0 &&
             <MyDnd dndIds={bookmarkGroupList} setItems={setBookmarkGroupList}>
                 {bookmarkGroupList.map(group =>
