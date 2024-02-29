@@ -8,24 +8,27 @@ import CommonStore from "../../../store/CommonStore";
  * @param {function} setOpen 【必须】设置open
  * @param {object} obj       编辑时需要数据
  * @param {number} type     【必须】类型 1:书签组 2:书签
+ * @param {function} addBookmark 【必须】添加书签方法
  */
-export default ({open, setOpen,obj,type}) => {
+export default ({open, setOpen,obj,type, addBookmark}) => {
     const [bookmarksForm] = Form.useForm()                       // 创建表单域
     const [confirmLoading, setConfirmLoading] = useState(false) // 是否加载中
     const {msg} = CommonStore
 
 
     /**点击确定按钮事件*/
-    const handleOk = () => {
+    const handleOk = async () => {
         bookmarksForm.validateFields().then(async (values) => {
             console.log('███████values>>>>', values,'<<<<██████')
             setConfirmLoading(true)
-            setTimeout(() => {
+            const result = await addBookmark(values)
+            setConfirmLoading(false)
+            if (!result){
+                msg.success('操作成功')
                 setOpen(false)
-                setConfirmLoading(false)
-            }, 2000)
-            bookmarksForm.resetFields()
-        }).catch(() => msg.error('请填写必填项'))
+                bookmarksForm.resetFields()
+            }else msg.error('操作失败')
+        }).catch((e) => console.log('█████████',e) || msg.error('请填写必填项'))
     }
 
     /**关闭弹窗事件*/

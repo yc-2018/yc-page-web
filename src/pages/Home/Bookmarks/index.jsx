@@ -5,24 +5,30 @@ import {PlusOutlined} from "@ant-design/icons";
 import BookmarksItem from "./BookmarksItem";
 import MyDnd from "../../../compontets/MyDnd";
 import FormModal from "./FormModal";
-import {simulateBookmarks} from "../../../store/NoLoginData";
 import UserStore from "../../../store/UserStore";
 import JWTUtils from "../../../utils/JWTUtils";
+import {addBookmarks, getBookmarks} from "../../../request/homeRequest";
+import CommonStore from "../../../store/CommonStore";
+
+let setCurrentGroupItems;   // 放在方法内会报错 应该是会重新变成空
 
 export default function Bookmarks() {
-    const [allBookmark, setAllBookmark] = useState([])              // 所有书签
-    const [bookmarkGroupOrder, setBookmarkGroupOrder] = useState()        // 书签组排序对象
-    const [bookmarkGroupList, setBookmarkGroupList] = useState([])  // 书签组列表
+    const [bookmarkGroupItems, setBookmarkGroupItems] = useState([])    // 初始不是书签组的书签列表
+    const [bookmarkGroupOrder, setBookmarkGroupOrder] = useState()           // 书签组排序对象（拖动拿ID)
+    const [bookmarkGroupList, setBookmarkGroupList] = useState([])     // 初始书签组列表
 
-    const [openModal, setOpenModal] = useState(true)    // 是否打开表单模态框
-    const [ModalType, setModalType] = useState(1)       // 表单模态框类型 书签还是书签组
+    const [openModal, setOpenModal] = useState(false)    // 是否打开表单模态框
+    const [ModalType, setModalType] = useState(1)        // 表单模态框类型 书签还是书签组
     const [editObj, setEditObj] = useState()                    // 表单模态框编辑对象
+    const [sort, setSort] = useState()                          // 那个书签组的新增点击了 它就是哪个书签组的id
+
+    const {msg} = CommonStore
 
     useEffect(() => {
         // 登录后获取本用户全部书签
         if (UserStore.jwt) (async()=>{
             // 获取云端全部书签
-            const bookmarks = simulateBookmarks
+            const bookmarks = await getBookmarks()
             // 获取所有书签组 并整理
             setBookmarkGroupList(() => {
                 const groups = bookmarks.filter(item => item.type === 1)
@@ -36,7 +42,7 @@ export default function Bookmarks() {
                     return indexA - indexB
                 })
             })
-            setAllBookmark(bookmarks)                                       // 保存所有书签 给书签组里面的书签用
+            setBookmarkGroupItems(bookmarks.filter(item => item.type !== 1)) // 保存不是书签组书签 给书签组里面的书签用
             setBookmarkGroupOrder(bookmarks.find(item => item.type === 0))  // 保存书签组排序对象
         })()
     }, [UserStore.jwt])
@@ -46,7 +52,7 @@ export default function Bookmarks() {
      */
     const getSortBookmarks = (bookmarks) => {
         if (!bookmarks.sort) return []
-        const Bookmarks = allBookmark.filter(item => item.type === 2 && parseInt(item.sort)===bookmarks.id)
+        const Bookmarks = bookmarkGroupItems.filter(item => item.type === 2 && parseInt(item.sort)===bookmarks.id)
         const order = bookmarks.sort.split('/').map(id => parseInt(id))
         return  Bookmarks.sort((a, b) => {
             // 获取两个元素的id在排序顺序数组中的索引
@@ -58,14 +64,35 @@ export default function Bookmarks() {
     }
 
     /**
-     * 打开表单模态框设置数据
+     * 打开表单模态框设置数据 没登录就弹出登录框
      */
     const setModal = (isOpen, type, obj) => {
-        setOpenModal(isOpen)
-        setEditObj(obj)
-        isOpen && setModalType(type)
+        if (JWTUtils.isExpired()){
+            UserStore.setOpenModal(true)
+            return msg.info('登录后可添加书签')
+        }else {
+            setOpenModal(isOpen)
+            setEditObj(obj)
+            isOpen && setModalType(type)
+        }
     }
 
+
+    const setGroup = (id,setItem) => {
+        setSort(id)
+        setCurrentGroupItems=setItem;
+    }
+
+    /**
+     * 添加书签|组请求
+     */
+    const addBookmark = async (formData) => {
+        const bookmark = {...formData, type: ModalType, sort};
+        const id = await addBookmarks(bookmark)
+        if (id && ModalType===1) setBookmarkGroupList(bookmarkGroups => [...bookmarkGroups, {...bookmark,id}])
+        else if (id && ModalType===2) setCurrentGroupItems(Items => [...Items, {...bookmark,id}])
+        else return '操作失败'
+    }
 
     /**
      * 添加【书签组】按钮
@@ -84,7 +111,7 @@ export default function Bookmarks() {
         </Button>
 
     return <>
-        <FormModal open={openModal} setOpen={setOpenModal} obj={editObj} type={ModalType}/>
+        <FormModal open={openModal} setOpen={setOpenModal} obj={editObj} type={ModalType} addBookmark={addBookmark}/>
         {!JWTUtils.isExpired() && bookmarkGroupList.length > 0 &&
             <MyDnd dndIds={bookmarkGroupList} setItems={setBookmarkGroupList}>
                 {bookmarkGroupList.map(group =>
@@ -93,7 +120,11 @@ export default function Bookmarks() {
                         <Dropdown
                             dropdownRender={() =>
                                 <div className={'ant-dropdown-menu'}>
-                                    <BookmarksItem bookmarkItems={getSortBookmarks(group)} setModal={setModal}/>
+                                    <BookmarksItem bookmarkItems={getSortBookmarks(group)}
+                                                   setModal={setModal}
+                                                   setGroup={setGroup} // 新增时表单要用
+                                                   groupId={group.id}
+                                    />
                                 </div>
                             }
                         >

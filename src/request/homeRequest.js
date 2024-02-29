@@ -188,3 +188,29 @@ export async function deleteSearchEngine(idList) {
         return data;
     } catch (error) {CommonStore.setLoading(false)}
 }
+
+/**
+ * 获取书签
+ *
+ * @return {promise<Array>} 当前用户的所有书签
+ * @author ChenGuangLong
+ * @since 2024/02/29 23:38
+ */
+export async function getBookmarks() {
+    const {data:{data}} = await myAxios.get('/bookmarks')
+    if (!data instanceof Array) return []
+    return data
+}
+
+/**
+ * 新增书签|组
+ *
+ * @param bookmark 书签
+ * @return {promise<number|undefined>} 新增的书签id
+ * @author ChenGuangLong
+ * @since 2024/03/1 00:14
+ */
+export async function addBookmarks(bookmark) {
+    const {data:{data}} = await myAxios({url:'/bookmarks',method: 'post', data : bookmark})
+    return data
+}
