@@ -14,8 +14,9 @@ export default function Bookmarks() {
     const [bookmarkGroupOrder, setBookmarkGroupOrder] = useState()        // 书签组排序对象
     const [bookmarkGroupList, setBookmarkGroupList] = useState([])  // 书签组列表
 
-    const [openModal, setOpenModal] = useState(true)
-    const [editObj, setEditObj] = useState()
+    const [openModal, setOpenModal] = useState(true)    // 是否打开表单模态框
+    const [ModalType, setModalType] = useState(1)       // 表单模态框类型 书签还是书签组
+    const [editObj, setEditObj] = useState()                    // 表单模态框编辑对象
 
     useEffect(() => {
         // 登录后获取本用户全部书签
@@ -57,6 +58,16 @@ export default function Bookmarks() {
     }
 
     /**
+     * 打开表单模态框设置数据
+     */
+    const setModal = (isOpen, type, obj) => {
+        setOpenModal(isOpen)
+        setEditObj(obj)
+        isOpen && setModalType(type)
+    }
+
+
+    /**
      * 添加【书签组】按钮
      */
     const addBookmarkGroupButton = () =>
@@ -67,13 +78,13 @@ export default function Bookmarks() {
                     margin: '1px 7px',
                     width:30
                 }}
-                onClick={() => setOpenModal(true)}
+                onClick={() => setModal(true, 1)}
         >
             <PlusOutlined/> {/*加号➕*/}
         </Button>
 
     return <>
-        <FormModal open={openModal} setOpen={setOpenModal} obj={editObj} type={1}/>
+        <FormModal open={openModal} setOpen={setOpenModal} obj={editObj} type={ModalType}/>
         {!JWTUtils.isExpired() && bookmarkGroupList.length > 0 &&
             <MyDnd dndIds={bookmarkGroupList} setItems={setBookmarkGroupList}>
                 {bookmarkGroupList.map(group =>
@@ -82,7 +93,7 @@ export default function Bookmarks() {
                         <Dropdown
                             dropdownRender={() =>
                                 <div className={'ant-dropdown-menu'}>
-                                    <BookmarksItem bookmarkItems={getSortBookmarks(group)}/>
+                                    <BookmarksItem bookmarkItems={getSortBookmarks(group)} setModal={setModal}/>
                                 </div>
                             }
                         >

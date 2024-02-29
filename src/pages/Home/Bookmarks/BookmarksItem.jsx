@@ -4,9 +4,9 @@ import {Button} from "antd";
 import styles from "./bookmark.module.css"
 import MyDnd from "../../../compontets/MyDnd";
 
-export default ({bookmarkItems}) => {
+export default ({bookmarkItems,setModal}) => {
     const [items, setItems] = useState(bookmarkItems)
-    const addItemButton = () => <Button type="dashed" block size={'small'}>➕</Button>
+    const addItemButton = () => <Button type="dashed" block size={'small'} onClick={() => setModal(true,2)}>➕</Button>
 
     return (items.length > 0 ?
         <MyDnd dndIds={items} setItems={setItems} style={{}}>
