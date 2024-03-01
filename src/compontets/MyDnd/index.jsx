@@ -9,11 +9,11 @@ import MyDndItem from "./MyDndItem";
  * @param {Function} setItems                   【必须】设置items的函数
  * @param {String} storageName                  存储在localStorage中的名字  如果是空的就不存储
  * @param {Object} style                        最外层样式（有默认值）
- * @param {Function|undefined} DragEndFunc      拖拽结束时触发的额外回调函数 而且会把拖动后的数组传进去
+ * @param {Function|undefined} dragEndFunc      拖拽结束时触发的额外回调函数 而且会把拖动后的数组传进去
  * @param {React.ReactNode|unknown[]} children  子组件
  * @property {React.Component} MyDnd.Item       可用自带子组件
  * */
-const MyDnd = ({dndIds,setItems ,storageName,style,children,DragEndFunc }) => {
+const MyDnd = ({dndIds,setItems ,storageName,style,children,dragEndFunc }) => {
 
     // 使用自定义Hook来获取鼠标传感器数据
     const sensors = [useSensor(PointerSensor)]
@@ -25,7 +25,7 @@ const MyDnd = ({dndIds,setItems ,storageName,style,children,DragEndFunc }) => {
         const { active, over } = event
 
         if (active.id !== over.id) {
-            setItems(items => {
+            setItems( items => {
                 // 找到拖拽项目（active.id）的索引
                 const oldIndex = items.findIndex(item => item.id === active.id)
                 // 找到目标位置项目（over.id）的索引
@@ -34,7 +34,7 @@ const MyDnd = ({dndIds,setItems ,storageName,style,children,DragEndFunc }) => {
                 console.log('███████newIndex>>>>', data,'<<<<██████')
                 // 要的话 把新数组的id 放到localStorage中
                 storageName && localStorage.setItem(storageName+'_idList', JSON.stringify(data.map(item=>item.id)))
-                DragEndFunc && DragEndFunc(data)    // 如果有传 就回调
+                dragEndFunc && dragEndFunc(data)    // 如果有传 就回调
                 return data
             });
         }

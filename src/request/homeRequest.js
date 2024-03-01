@@ -214,3 +214,14 @@ export async function addBookmarks(bookmark) {
     const {data:{data}} = await myAxios({url:'/bookmarks',method: 'post', data : bookmark})
     return data
 }
+
+/**
+ * 拖动排序
+ * @param bookmark 书签dto
+ */
+export async function dragSort(bookmark) {
+    CommonStore.setLoading(true);
+    const {data:{data}} = await myAxios({url:'/bookmarks/dragSort',method: 'put', data : bookmark})
+    CommonStore.setLoading(false);
+    return data
+}

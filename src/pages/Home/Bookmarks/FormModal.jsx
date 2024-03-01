@@ -19,7 +19,6 @@ export default ({open, setOpen,obj,type, addBookmark}) => {
     /**点击确定按钮事件*/
     const handleOk = async () => {
         bookmarksForm.validateFields().then(async (values) => {
-            console.log('███████values>>>>', values,'<<<<██████')
             setConfirmLoading(true)
             const result = await addBookmark(values)
             setConfirmLoading(false)
@@ -28,14 +27,12 @@ export default ({open, setOpen,obj,type, addBookmark}) => {
                 setOpen(false)
                 bookmarksForm.resetFields()
             }else msg.error('操作失败')
-        }).catch((e) => console.log('█████████',e) || msg.error('请填写必填项'))
+        }).catch((e) => console.log('表单有误=>',e) || msg.error('请填写必填项'))
     }
 
     /**关闭弹窗事件*/
-    const handleCancel = () => {
-        console.log('Clicked cancel button'+open)
-        setOpen(false)
-    }
+    const handleCancel = () => setOpen(false)
+
 
     /**类型*/
     const typeName = type===1?'书签组':'书签'
