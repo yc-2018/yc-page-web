@@ -53,7 +53,7 @@ export default function Bookmarks() {
     const getSortBookmarks = (bookmarks) => {
         if (!bookmarks.sort) return []
         const Bookmarks = bookmarkGroupItems.filter(item => item.type === 2 && parseInt(item.sort)===bookmarks.id)
-        const order = bookmarks.sort.split('/').map(id => parseInt(id))
+        const order = bookmarks.sort.toString().split('/').map(id => parseInt(id))
         return  Bookmarks.sort((a, b) => {
             // 获取两个元素的id在排序顺序数组中的索引
             const indexA = order.indexOf(a.id)
