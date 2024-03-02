@@ -181,12 +181,11 @@ export async function updateSearchEngine(bodyList) {
 
 /** 删除搜索引擎《支持批量》 */
 export async function deleteSearchEngine(idList) {
-    CommonStore.setLoading(true);
     try {
         const {data:{data}} = await myAxios({url:'/searchEngines',method: 'delete', data : idList});
         data._ || CommonStore.setLoading(false,"删除成功",'success');
         return data;
-    } catch (error) {CommonStore.setLoading(false)}
+    } catch (error) {console.log('删除搜索引擎错误=>', error)}
 }
 
 /**
@@ -221,7 +220,7 @@ export async function addBookmarks(bookmark) {
  */
 export async function dragSort(bookmark) {
     CommonStore.setLoading(true);
-    const {data:{data}} = await myAxios({url:'/bookmarks/dragSort',method: 'put', data : bookmark})
+    const {data: {data}={}} = await myAxios({url: '/bookmarks/dragSort', method: 'put', data: bookmark}) || {}
     CommonStore.setLoading(false);
     return data
 }

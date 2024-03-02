@@ -10,7 +10,7 @@ import JWTUtils from "../../../utils/JWTUtils";
 import {addBookmarks, dragSort, getBookmarks} from "../../../request/homeRequest";
 import CommonStore from "../../../store/CommonStore";
 
-let setCurrentGroupItems;   // 放在方法内会报错 应该是会重新变成空
+let setCurrentGroupItems;   //组内传过来的设置列表的方法 放在方法内会报错 应该是会重新变成空
 
 export default function Bookmarks() {
     const [bookmarkGroupItems, setBookmarkGroupItems] = useState([])    // 初始不是书签组的书签列表
@@ -114,9 +114,11 @@ export default function Bookmarks() {
      * 拖动后请求排序
      */
     const dragSortReq = async (dragEndList) => {
+        const oldList = [...bookmarkGroupList]
        const sort = dragEndList.map(item => item.id).join('/')
        const result = await dragSort({id:bookmarkGroupOrder.id, type: 0,sort})
-        result && msg.success('排序成功')
+        if(result) msg.success('排序成功')
+        else setBookmarkGroupList(oldList)
     }
 
     return <>
