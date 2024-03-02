@@ -2,6 +2,7 @@ import axios from 'axios';
 import UserStore from '../store/UserStore';
 import CommonStore from "../store/CommonStore";
 import myAxios  from "./myAxios";
+import bingWallpaperList from "../store/bingWallpaper";
 
 
 /** 异步获取百度联想列表 */
@@ -17,37 +18,37 @@ export async function getThinkList(param) {
  * 获取首页背景图（搞多几个做备份）
  * @returns {Promise<null|string>} 随机壁纸URL
  */
-export async function reImagesUrl(bzType="风景") {
+export async function reImagesUrl(bzType) {
     CommonStore.setLoading(true);
     try {
-        async function jfApi() {
-            const { data: [image] } = await axios.get('/jfApi/home/bg/ajaxbg');
-            CommonStore.setLoading(false,"获取风景/科技壁纸成功,正在加载...");
-            return 'https://i0.wp.com/www.jianfast.com' + image.replace('/400', '');
-        }
-
-        async function bz1Api() {
-            // https://api.btstu.cn/sjbz/api.php?lx=dongman&format=json
-            const {data:{imgurl}} = await axios.get('/bz1Api/sjbz/api.php?format=json');
-            CommonStore.setLoading(false,"获取随机壁纸成功,正在缓慢加载中...");
-            return imgurl;
-        }
-
-        async function bz2Api() {
-            // 如诗 - API接口文档 https://api.likepoems.com/
-            // https://api.likepoems.com/img/pc/?type=json
-            const {data:{url}} = await axios.get('/bz2Api/img/pc/?type=json');
-            CommonStore.setLoading(false,"获取动画壁纸成功,正在加载...");
-            return url;
-        }
-        return bzType === "风景"? jfApi():               
-               bzType === "动画"? bz2Api():            
-               bzType === "随机"? bz1Api():jfApi();     
-
-    } catch (error) {
-         CommonStore.setLoading(false,"获取壁纸失败了",'error');
-    }
+        CommonStore.setLoading(true);
+        const bgUrl = getBgFns[bzType]()
+        CommonStore.setLoading(false);
+        return bgUrl
+    } catch (error) {CommonStore.setLoading(false,"获取壁纸失败了",'error')}
 }
+const getBgFns = {
+    'bing': () => {
+        CommonStore.setLoading(false);
+        // 生成一个随机索引
+        const randomIndex = Math.floor(Math.random() * bingWallpaperList.length);
+        // 使用随机索引从列表中获取一项
+        const bingWallpaperID = bingWallpaperList[randomIndex].replace('-', '_ZH-CN');
+        return `https://www.bing.com/th?id=OHR.${bingWallpaperID}_1920x1080.jpg`;
+    },
+    '漫画': async () => {
+        // https://api.aa1.cn/doc/wdd-tp.html
+        const response = await axios.get('http://www.wudada.online/Api/ScTp');
+        return response.data.data;
+    },
+    '风景': async () => {
+        const {data: [image]} = await axios.get('/jfApi/home/bg/ajaxbg');
+        return 'https://i0.wp.com/www.jianfast.com' + image.replace('/400', '');
+    },
+}
+
+
+
 
 
 /** 登录 */
