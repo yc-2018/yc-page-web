@@ -121,6 +121,13 @@ export default function Bookmarks() {
         else setBookmarkGroupList(oldList)
     }
 
+    // 右键时的动作
+    const onContextMenu = (e) => {
+        e.preventDefault();  // 阻止浏览器的右键菜单
+        msg.info('hhh')
+
+    }
+
     return <>
         <FormModal open={openModal} setOpen={setOpenModal} obj={editObj} type={ModalType} addBookmark={addBookmark}/>
         {!JWTUtils.isExpired() && bookmarkGroupList.length > 0 &&
@@ -128,7 +135,7 @@ export default function Bookmarks() {
                 {bookmarkGroupList.map(group =>
                     <MyDnd.Item key={group.id} id={group.id} styles={{padding: '1px 0'}}
                                 drag={<span style={{color: '#00000030'}}>☰</span>}>
-                        <Dropdown
+                        <Dropdown // 下拉菜单
                             dropdownRender={() =>
                                 <div className={'ant-dropdown-menu'}>
                                     <BookmarksItem bookmarkItems={getSortBookmarks(group)}
@@ -139,15 +146,26 @@ export default function Bookmarks() {
                                 </div>
                             }
                         >
-                            <Button ghost           // 使按钮背景透明
-                                    type="dashed"
-                                    size='small'
-                                    href={group.url}
-                                    style={{textShadow: ' 0px 0px 5px #abc9ec', borderColor: 'rgb(0 0 0)'}}
-                                    target="_blank"
-                            >
-                                {group.name}
-                            </Button>
+                            <span style={{marginLeft: -5}}> {/*不加一层span 2个下拉菜单直接嵌套控制台会有警告*/}
+                                <Dropdown  // 右键菜单
+                                    trigger={['contextMenu']}
+                                    menu={{
+                                        items: [{label: '编辑', key: 'EDIT'}, {label: '删除', key: 'DELETE'}],
+                                        onClick: event => msg.info('草稿') && console.log('█████████', event)
+                                    }}
+                                    onContextMenu={onContextMenu}
+                                >
+                                    <Button ghost           // 使按钮背景透明
+                                            type="dashed"
+                                            size='small'
+                                            href={group.url}
+                                            style={{textShadow: ' 0px 0px 5px #abc9ec', borderColor: 'rgb(0 0 0)'}}
+                                            target="_blank"
+                                    >
+                                        {group.name}
+                                    </Button>
+                                </Dropdown>
+                            </span>
                         </Dropdown>
                     </MyDnd.Item>
                 )}
