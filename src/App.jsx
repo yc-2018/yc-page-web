@@ -7,8 +7,9 @@ import routes from "./routes";
 import Head from "./compontets/Head";
 import CommonStore from "./store/CommonStore";
 import LoginModal from "./compontets/LoginModal";
+import {observer} from "mobx-react-lite";
 
-export default () => {
+export default observer(() => {
     const element = useRoutes(routes);   //根据路由表生成对应的路由规则
     const [messageApi, contextMsg] = message.useMessage();   // 使用message组件
 
@@ -29,5 +30,5 @@ export default () => {
                 <Spin spinning={CommonStore.loading} fullscreen />{/* 加载动画 */}
             </App>
     )
-}
+})
 

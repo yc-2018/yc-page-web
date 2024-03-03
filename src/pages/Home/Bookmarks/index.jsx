@@ -7,10 +7,10 @@ import MyDnd from "../../../compontets/MyDnd";
 import FormModal from "./FormModal";
 import UserStore from "../../../store/UserStore";
 import JWTUtils from "../../../utils/JWTUtils";
-import {addBookmarks, getBookmarks} from "../../../request/homeRequest";
+import {addBookmarks, dragSort, getBookmarks} from "../../../request/homeRequest";
 import CommonStore from "../../../store/CommonStore";
 
-let setCurrentGroupItems;   // 放在方法内会报错 应该是会重新变成空
+let setCurrentGroupItems;   //组内传过来的设置列表的方法 放在方法内会报错 应该是会重新变成空
 
 export default function Bookmarks() {
     const [bookmarkGroupItems, setBookmarkGroupItems] = useState([])    // 初始不是书签组的书签列表
@@ -53,7 +53,7 @@ export default function Bookmarks() {
     const getSortBookmarks = (bookmarks) => {
         if (!bookmarks.sort) return []
         const Bookmarks = bookmarkGroupItems.filter(item => item.type === 2 && parseInt(item.sort)===bookmarks.id)
-        const order = bookmarks.sort.split('/').map(id => parseInt(id))
+        const order = bookmarks.sort.toString().split('/').map(id => parseInt(id))
         return  Bookmarks.sort((a, b) => {
             // 获取两个元素的id在排序顺序数组中的索引
             const indexA = order.indexOf(a.id)
@@ -69,7 +69,7 @@ export default function Bookmarks() {
     const setModal = (isOpen, type, obj) => {
         if (JWTUtils.isExpired()){
             UserStore.setOpenModal(true)
-            return msg.info('登录后可添加书签')
+            return msg.info('登录后方可添加书签')
         }else {
             setOpenModal(isOpen)
             setEditObj(obj)
@@ -77,7 +77,7 @@ export default function Bookmarks() {
         }
     }
 
-
+    /**给书签组设置书签分组：给新增表单用知道现在的表单是哪个分组*/
     const setGroup = (id,setItem) => {
         setSort(id)
         setCurrentGroupItems=setItem;
@@ -110,14 +110,32 @@ export default function Bookmarks() {
             <PlusOutlined/> {/*加号➕*/}
         </Button>
 
+    /**
+     * 拖动后请求排序
+     */
+    const dragSortReq = async (dragEndList) => {
+        const oldList = [...bookmarkGroupList]
+       const sort = dragEndList.map(item => item.id).join('/')
+       const result = await dragSort({id:bookmarkGroupOrder.id, type: 0,sort})
+        if(result) msg.success('排序成功')
+        else setBookmarkGroupList(oldList)
+    }
+
+    // 右键时的动作
+    const onContextMenu = (e) => {
+        e.preventDefault();  // 阻止浏览器的右键菜单
+        msg.info('hhh')
+
+    }
+
     return <>
         <FormModal open={openModal} setOpen={setOpenModal} obj={editObj} type={ModalType} addBookmark={addBookmark}/>
         {!JWTUtils.isExpired() && bookmarkGroupList.length > 0 &&
-            <MyDnd dndIds={bookmarkGroupList} setItems={setBookmarkGroupList}>
+            <MyDnd dndIds={bookmarkGroupList} setItems={setBookmarkGroupList} dragEndFunc={dragSortReq}>
                 {bookmarkGroupList.map(group =>
                     <MyDnd.Item key={group.id} id={group.id} styles={{padding: '1px 0'}}
                                 drag={<span style={{color: '#00000030'}}>☰</span>}>
-                        <Dropdown
+                        <Dropdown // 下拉菜单
                             dropdownRender={() =>
                                 <div className={'ant-dropdown-menu'}>
                                     <BookmarksItem bookmarkItems={getSortBookmarks(group)}
@@ -128,15 +146,26 @@ export default function Bookmarks() {
                                 </div>
                             }
                         >
-                            <Button ghost           // 使按钮背景透明
-                                    type="dashed"
-                                    size='small'
-                                    href={group.url}
-                                    style={{textShadow: ' 0px 0px 5px #abc9ec', borderColor: 'rgb(0 0 0)'}}
-                                    target="_blank"
-                            >
-                                {group.name}
-                            </Button>
+                            <span style={{marginLeft: -5}}> {/*不加一层span 2个下拉菜单直接嵌套控制台会有警告*/}
+                                <Dropdown  // 右键菜单
+                                    trigger={['contextMenu']}
+                                    menu={{
+                                        items: [{label: '编辑', key: 'EDIT'}, {label: '删除', key: 'DELETE'}],
+                                        onClick: event => msg.info('草稿') && console.log('█████████', event)
+                                    }}
+                                    onContextMenu={onContextMenu}
+                                >
+                                    <Button ghost           // 使按钮背景透明
+                                            type="dashed"
+                                            size='small'
+                                            href={group.url}
+                                            style={{textShadow: ' 0px 0px 5px #abc9ec', borderColor: 'rgb(0 0 0)'}}
+                                            target="_blank"
+                                    >
+                                        {group.name}
+                                    </Button>
+                                </Dropdown>
+                            </span>
                         </Dropdown>
                     </MyDnd.Item>
                 )}
