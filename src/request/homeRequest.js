@@ -216,12 +216,19 @@ export async function addBookmarks(bookmark) {
 }
 
 /**
- * 拖动排序
+ * 拖动排序书签
  * @param bookmark 书签dto
  */
 export async function dragSort(bookmark) {
     CommonStore.setLoading(true);
     const {data: {data}={}} = await myAxios({url: '/bookmarks/dragSort', method: 'put', data: bookmark}) || {}
     CommonStore.setLoading(false);
+    return data
+}
+
+/**删除书签*/
+export async function delBookmark(bookmark) {
+    const {data: {data}={}} = await myAxios({url: '/bookmarks', method: 'delete', data: bookmark}) || {}
+    data && CommonStore.msg.success('删除成功')
     return data
 }
