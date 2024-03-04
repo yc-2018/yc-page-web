@@ -1,14 +1,15 @@
 import React, {useEffect, useState} from "react";
-import {Button, Dropdown} from "antd";
-import {PlusOutlined} from "@ant-design/icons";
+import {App, Button, Dropdown} from "antd";
+import {ExclamationCircleFilled, PlusOutlined} from "@ant-design/icons";
 
 import BookmarksItem from "./BookmarksItem";
 import MyDnd from "../../../compontets/MyDnd";
 import FormModal from "./FormModal";
 import UserStore from "../../../store/UserStore";
 import JWTUtils from "../../../utils/JWTUtils";
-import {addBookmarks, dragSort, getBookmarks} from "../../../request/homeRequest";
+import {addBookmarks, delBookmark, dragSort, getBookmarks} from "../../../request/homeRequest";
 import CommonStore from "../../../store/CommonStore";
+import ContextMenu from "../../../compontets/ContextMenu";
 
 let setCurrentGroupItems;   //组内传过来的设置列表的方法 放在方法内会报错 应该是会重新变成空
 
@@ -22,6 +23,7 @@ export default function Bookmarks() {
     const [editObj, setEditObj] = useState()                    // 表单模态框编辑对象
     const [sort, setSort] = useState()                          // 那个书签组的新增点击了 它就是哪个书签组的id
 
+    const {  modal } = App.useApp();
     const {msg} = CommonStore
 
     useEffect(() => {
@@ -121,12 +123,29 @@ export default function Bookmarks() {
         else setBookmarkGroupList(oldList)
     }
 
-    // 右键时的动作
-    const onContextMenu = (e) => {
-        e.preventDefault();  // 阻止浏览器的右键菜单
-        msg.info('hhh')
-
+    /**右键菜单点击后的功能*/
+    const lambdaObj = {
+        'EDIT':object =>msg.success('修改成功'+object.name),
+        'DELETE':object =>modal.confirm({
+            title: '确定删除吗?',
+            icon: <ExclamationCircleFilled />,
+            content: '删除了就真的消失了',
+            confirmLoading: true,
+            async onOk() {
+                try {
+                    await new Promise(async (resolve, reject) => {
+                        const delResp = await delBookmark(object);
+                        if (delResp) {
+                            setBookmarkGroupList(groupList => groupList.filter(item => item.id !== object.id));
+                            return resolve(); // 成功,关闭按钮加载 关闭窗口
+                        }
+                        return reject(); // 失败，关闭按钮加载,关闭窗口
+                    });
+                } catch (error) {msg.error('删除异常')}
+            }
+        })
     }
+
 
     return <>
         <FormModal open={openModal} setOpen={setOpenModal} obj={editObj} type={ModalType} addBookmark={addBookmark}/>
@@ -147,14 +166,7 @@ export default function Bookmarks() {
                             }
                         >
                             <span style={{marginLeft: -5}}> {/*不加一层span 2个下拉菜单直接嵌套控制台会有警告*/}
-                                <Dropdown  // 右键菜单
-                                    trigger={['contextMenu']}
-                                    menu={{
-                                        items: [{label: '编辑', key: 'EDIT'}, {label: '删除', key: 'DELETE'}],
-                                        onClick: event => msg.info('草稿') && console.log('█████████', event)
-                                    }}
-                                    onContextMenu={onContextMenu}
-                                >
+                                <ContextMenu tag={group} lambdaObj={lambdaObj}>
                                     <Button ghost           // 使按钮背景透明
                                             type="dashed"
                                             size='small'
@@ -164,7 +176,7 @@ export default function Bookmarks() {
                                     >
                                         {group.name}
                                     </Button>
-                                </Dropdown>
+                                </ContextMenu>
                             </span>
                         </Dropdown>
                     </MyDnd.Item>
