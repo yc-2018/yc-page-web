@@ -10,7 +10,7 @@ class CommonStore {
     }
 
 
-    //设置jwt
+    //设置网络加载状态（转圈圈） 和 消息提示  全屏用
     setLoading(statuses, msg=null, type="info") {
         this.loading = statuses
         if (msg) return type === "success" ? this.msg.success(msg) : type === "error" ? this.msg.error(msg) : this.msg.info(msg)

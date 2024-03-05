@@ -39,7 +39,7 @@ function Home() {
     let {jwt} = UserStore;
 
     useEffect(() => {
-        if(!JWTUtils.isExpired())(async()=> {
+        if(!JWTUtils.isExpired() && !backgroundImage)(async()=> {
             // 获取云端保存的页面信息
             const info = await getPageInfo()
             if (info?.backgroundUrl) setBgImage(info.backgroundUrl);
@@ -53,7 +53,7 @@ function Home() {
     const reImages = async(bzType) => {
         const imgUrl = await reImagesUrl(bzType);
         if (imgUrl) setBgImage(imgUrl, '获取背景成功，喜欢的话请手动点击上传到云端☁');
-        else msg.info('获取背景出错');
+        else msg.error('获取背景出错');
     }
 
     /**  获取本地记录背景URL */
@@ -84,7 +84,7 @@ function Home() {
             {/* 《为了打开英语抽屉漂浮在底层透明背景》用做 点击右键显示 抽屉 只能放在这上面，放到下面去写会挡住按钮 不知道为啥。*/}
             <div
                 style={{position: 'absolute',bottom: '10%',right: '20%',width: '60%', height: '80%', zIndex: 0}}
-                onContextMenu={(event) => {
+                onContextMenu={event => {
                     event.preventDefault();                 // 阻止默认的右键菜单弹出
                     showOrNot.setEnglishDrawerShow(true);  // 打开英语抽屉
                 }}
@@ -98,9 +98,9 @@ function Home() {
                 {/* antd居中输入框 */}
                 <div className="ant-input-group">
                     <div className="ant-input-group-addon">
-                        <i className="anticon anticon-user"></i>
+                        <i className="anticon anticon-user" />
                     </div>
-
+                    <br/>
                     {/*搜索框*/}
                     <Search />
 
@@ -177,12 +177,12 @@ function Home() {
                         />
                         {/*换背景*/}
                         <FloatButton
-                            onClick={reImages}
+                            onClick={()=>reImages("bing")}
                             icon={<SyncOutlined />}
                             tooltip={<div style={{textAlign: 'center'}} onClick={event=>event.stopPropagation()}>
-                                <div>点击换缓慢的科技|风景背景:默认</div>
-                                <Button onClick={()=>reImages("动画")}>加载快速的动画背景</Button>
-                                <Button onClick={()=>reImages("随机")}>高清缓慢的随机背景</Button>
+                                <div>默认bing随机壁纸当背景</div>
+                                <Button onClick={()=>reImages("风景")}>(慢)风景背景</Button>
+                                <Button onClick={()=>reImages("漫画")}>漫画背景</Button>
                                 <Input placeholder="自定义背景链接，回车加载" onPressEnter={event => {
                                     if (/^(http|https):\/\/.+/.test(event.target.value))
                                         setBgImage(event.target.value,'正在设置中...') // 设置背景

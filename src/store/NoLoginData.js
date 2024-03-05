@@ -169,3 +169,63 @@ export const tagNameMapper = {
     6: "工作",
     7: "其他"
 }
+
+
+export const simulateBookmarks = [
+    {
+        "id": 1,
+        "name": "",
+        "url": "",
+        "sort": "2/3/7",
+        "type": 0,
+        "icon": ""
+    },
+    {
+        "id": 2,
+        "name": "本地3000",
+        "url": "http://localhost:3000/",
+        "sort": "4",
+        "type": 1,
+        "icon": "https://placeimg.com/812/168/any"
+    },
+    {
+        "id": 3,
+        "name": "linux DO",
+        "url": "https://linux.do/",
+        "sort": "5/6",
+        "type": 1,
+        "icon": "https://www.lorempixel.com/1011/970"
+    },
+    {
+        "id": 4,
+        "name": "油叉",
+        "url": "https://greasyfork.org/zh-CN/scripts",
+        "sort": "2",
+        "type": 2,
+        "icon": "https://dummyimage.com/1003x350"
+    },
+    {
+        "id": 5,
+        "name": "国内gpt",
+        "url": "https://x.chatmindai.net/",
+        "sort": "3",
+        "type": 2,
+        "icon": "https://www.lorempixel.com/834/235"
+    },
+    {
+        "id": 6,
+        "name": "更新部署",
+        "url": "https://gitee.com/yc556/yc556/pages",
+        "sort": "3",
+        "type": 2,
+        "icon": "https://www.lorempixel.com/834/235"
+    },
+    {
+        "id": 7,
+        "name": "百度ai",
+        "url": "https://chat.baidu.com/",
+        "sort": null,
+        "type": 1,
+        "icon": "https://www.lorempixel.com/834/235"
+    },
+]

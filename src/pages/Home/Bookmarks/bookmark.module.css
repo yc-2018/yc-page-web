@@ -1,0 +1,23 @@
+/*每一个书签的整体样式*/
+.dndItem {
+     display: flex;
+     width: 100%; /* 确保容器占满整行 */
+ }
+.dndItem:hover{
+    border-radius: 5px;                                      /*圆角*/
+    box-shadow: inset 0 0 10px rgba(85, 155, 255, 0.5);     /*内发光*/
+}
+
+/*书签的文字链接样式*/
+.dndItem span:nth-child(2) {
+    flex-grow: 1; /* 使第二个span占据所有剩余空间 */
+    display: block; /* 将span从内联元素转换为块级元素，允许它填充空间 */
+}
+
+/*每一个书签的文字样式*/
+.dndContent{
+    text-align: left;
+    padding:0 2px;
+    color: black;
+    width: 100%;
+}
