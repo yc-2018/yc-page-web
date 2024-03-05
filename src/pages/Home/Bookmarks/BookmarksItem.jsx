@@ -5,6 +5,8 @@ import styles from "./bookmark.module.css"
 import MyDnd from "../../../compontets/MyDnd";
 import {dragSort} from "../../../request/homeRequest";
 import CommonStore from "../../../store/CommonStore";
+import action from "./action";
+import ContextMenu from "../../../compontets/ContextMenu";
 
 /**
  *   书签组件
@@ -36,13 +38,18 @@ export default ({bookmarkItems,setModal,groupId,setGroup}) => {
         else setItems(oldList)
     }
 
+    /**右键菜单点击后的功能*/
+    const lambdaObj = action(setItems)
+
     return (items.length > 0 ?
         <MyDnd dndIds={items} setItems={setItems} style={{}} dragEndFunc={dragSortReq}>
             {items.map(item =>
                 <MyDnd.Item key={item.id} id={item.id} drag={"🔖"} className={styles.dndItem}>
-                    <Button type="link" href={item.url} className={styles.dndContent} target="_blank">
-                        {item.name}
-                    </Button>
+                    <ContextMenu tag={item} lambdaObj={lambdaObj}>
+                        <Button type="link" href={item.url} className={styles.dndContent} target="_blank">
+                            {item.name}
+                        </Button>
+                    </ContextMenu>
                 </MyDnd.Item>
             )}
             {bookmarkItems.length < 16 && addItemButton()}
