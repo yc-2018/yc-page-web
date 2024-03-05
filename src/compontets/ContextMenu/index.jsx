@@ -1,7 +1,7 @@
 import {Dropdown} from "antd";
 
 /**
- * @param children {ReactNode} 子元素
+ * @param children 子元素
  * @param items {Array} 菜单项
  * @param tag {Object} 给回调函数的数据对象
  * @param lambdaObj {Object} 回调函数:键对应items的key属性 值对应回调函数 {string:function(tag)}

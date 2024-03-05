@@ -216,6 +216,19 @@ export async function addBookmarks(bookmark) {
 }
 
 /**
+ * 新增书签|组
+ *
+ * @param bookmark 要修改的书签
+ * @return 成功与否
+ * @author ChenGuangLong
+ * @since 2024/03/5
+ */
+export async function updateBookmark(bookmark) {
+    const {data:{data}={}} = await myAxios({url:'/bookmarks',method: 'put', data : bookmark})||{}
+    return data
+}
+
+/**
  * 拖动排序书签
  * @param bookmark 书签dto
  */

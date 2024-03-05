@@ -5,16 +5,21 @@ import CommonStore from "../../../store/CommonStore";
 import {App} from "antd";
 
 /**
- * @param setList 要修改的状态列表
+ * @param setList  要修改的状态列表
+ * @param setModal 设置表单数据和开关
+ * @param setItems 修改书签子项列表【子项需要，因为方法在index】
  * @return {{string:Function}} 一个对象 key为事件名 value为事件回调
  * */
-export default (setList) => {
+export default (setList,setModal,setItems=null) => {
     const {msg} = CommonStore
     const {  modal } = App.useApp();
 
     return{
-        'EDIT':object =>msg.success('修改成功'+object.name),
-        'DELETE':object =>modal.confirm({
+        'EDIT':object => {
+            setModal(true, object.type, object)
+            setItems && setItems()
+        },
+        'DELETE':object => modal.confirm({
             title: '确定删除吗?',
             icon: <ExclamationCircleFilled />,
             content: '删除了就真的消失了',

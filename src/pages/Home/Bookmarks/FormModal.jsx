@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {Form, Input, Modal} from 'antd';
 import CommonStore from "../../../store/CommonStore";
 
@@ -9,20 +9,25 @@ import CommonStore from "../../../store/CommonStore";
  * @param {object} obj       编辑时需要数据
  * @param {number} type     【必须】类型 1:书签组 2:书签
  * @param {function} addBookmark 【必须】添加书签方法
+ * @param {function} updateBookmark 【必须】修改书签方法
  */
-export default ({open, setOpen,obj,type, addBookmark}) => {
+export default ({open, setOpen,obj,type, addBookmark, updateBookmark}) => {
     const [bookmarksForm] = Form.useForm()                       // 创建表单域
     const [confirmLoading, setConfirmLoading] = useState(false) // 是否加载中
     const {msg} = CommonStore
 
+    // 每次修改表达的值都要重置表单 才能获取最新的初始值  因为异步的原因还要手动延迟一下
+    useEffect(()=> {
+        if (open) setTimeout(() => bookmarksForm.resetFields(), 100)
+    },[open])
 
     /**点击确定按钮事件*/
     const handleOk = async () => {
         bookmarksForm.validateFields().then(async (values) => {
             setConfirmLoading(true)
-            const result = await addBookmark(values)
+            const funcResult = obj ? await updateBookmark({...obj, ...values}) : await addBookmark(values)
             setConfirmLoading(false)
-            if (!result){
+            if (!funcResult){   // 成功不返回 失败返回字符串
                 msg.success('操作成功')
                 setOpen(false)
                 bookmarksForm.resetFields()
@@ -30,8 +35,6 @@ export default ({open, setOpen,obj,type, addBookmark}) => {
         }).catch((e) => console.log('表单有误=>',e) || msg.error('请填写必填项'))
     }
 
-    /**关闭弹窗事件*/
-    const handleCancel = () => setOpen(false)
 
 
     /**类型*/
@@ -43,7 +46,7 @@ export default ({open, setOpen,obj,type, addBookmark}) => {
             open={open}
             onOk={handleOk}
             confirmLoading={confirmLoading}
-            onCancel={handleCancel}
+            onCancel={() => setOpen(false)}
         >
             <Form
                 form={bookmarksForm}
@@ -62,9 +65,9 @@ export default ({open, setOpen,obj,type, addBookmark}) => {
                     <Input placeholder="请输入网址" />
                 </Form.Item>
 
-                <Form.Item name="icon" label={'图标'}>
-                    <Input placeholder="网址图标" />
-                </Form.Item>
+                {/*<Form.Item name="icon" label={'图标'}>*/}
+                {/*    <Input placeholder="网址图标" />*/}
+                {/*</Form.Item>*/}
             </Form>
         </Modal>
     )

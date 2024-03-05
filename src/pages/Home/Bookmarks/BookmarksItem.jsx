@@ -22,8 +22,8 @@ export default ({bookmarkItems,setModal,groupId,setGroup}) => {
     const addItemButton = () =>
         <Button type="dashed" block size={'small'} onClick={() => {
             setModal(true, 2)
-            setGroup(groupId,setItems)
-        }}>
+            setGroup(groupId,setItems)}}
+        >
             ➕
         </Button>
 
@@ -39,7 +39,7 @@ export default ({bookmarkItems,setModal,groupId,setGroup}) => {
     }
 
     /**右键菜单点击后的功能*/
-    const lambdaObj = action(setItems)
+    const lambdaObj = action(setItems,setModal,() => setGroup(groupId,setItems))
 
     return (items.length > 0 ?
         <MyDnd dndIds={items} setItems={setItems} style={{}} dragEndFunc={dragSortReq}>

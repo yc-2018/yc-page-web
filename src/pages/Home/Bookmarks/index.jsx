@@ -7,7 +7,7 @@ import MyDnd from "../../../compontets/MyDnd";
 import FormModal from "./FormModal";
 import UserStore from "../../../store/UserStore";
 import JWTUtils from "../../../utils/JWTUtils";
-import {addBookmarks, dragSort, getBookmarks} from "../../../request/homeRequest";
+import {addBookmarks, dragSort, getBookmarks, updateBookmark} from "../../../request/homeRequest";
 import CommonStore from "../../../store/CommonStore";
 import ContextMenu from "../../../compontets/ContextMenu";
 import action from "./action";
@@ -68,7 +68,7 @@ export default function Bookmarks() {
     /**
      * 打开表单模态框设置数据 没登录就弹出登录框
      */
-    const setModal = (isOpen, type, obj) => {
+    const setModal = (isOpen, type, obj=undefined) => {
         if (JWTUtils.isExpired()){
             UserStore.setOpenModal(true)
             return msg.info('登录后方可添加书签')
@@ -94,6 +94,19 @@ export default function Bookmarks() {
         if (id && ModalType===1) setBookmarkGroupList(bookmarkGroups => [...bookmarkGroups, {...bookmark,id}])
         else if (id && ModalType===2) setCurrentGroupItems(Items => [...Items, {...bookmark,id}])
         else return '操作失败'
+    }
+
+    /**
+     * 修改书签|组请求
+     */
+    const updateBookmarks = async (formData) => {
+        const resp = await updateBookmark(formData)
+        msg.info(editObj?.type)
+        if (resp){
+            console.log('███████resp>>>>', resp,'<<<<██████')
+        }
+
+        return '操作失败'
     }
 
     /**
@@ -124,11 +137,17 @@ export default function Bookmarks() {
     }
 
     /**右键菜单点击后的功能*/
-    const lambdaObj = action(setBookmarkGroupList)
+    const lambdaObj = action(setBookmarkGroupList,setModal)
 
 
     return <>
-        <FormModal open={openModal} setOpen={setOpenModal} obj={editObj} type={ModalType} addBookmark={addBookmark}/>
+        <FormModal open={openModal}
+                   setOpen={setOpenModal}
+                   obj={editObj}
+                   type={ModalType}
+                   addBookmark={addBookmark}
+                   updateBookmark={updateBookmarks}
+        />
         {!JWTUtils.isExpired() && bookmarkGroupList.length > 0 &&
             <MyDnd dndIds={bookmarkGroupList} setItems={setBookmarkGroupList} dragEndFunc={dragSortReq}>
                 {bookmarkGroupList.map(group =>
