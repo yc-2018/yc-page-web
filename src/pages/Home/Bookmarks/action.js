@@ -7,7 +7,7 @@ import {App} from "antd";
 /**
  * @param setList  要修改的状态列表
  * @param setModal 设置表单数据和开关
- * @param setItems 修改书签子项列表【子项需要，因为方法在index】
+ * @param setItems 修改书签列表
  * @return {{string:Function}} 一个对象 key为事件名 value为事件回调
  * */
 export default (setList,setModal,setItems=null) => {

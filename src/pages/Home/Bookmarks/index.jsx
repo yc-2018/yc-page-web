@@ -100,12 +100,10 @@ export default function Bookmarks() {
      * 修改书签|组请求
      */
     const updateBookmarks = async (formData) => {
-        const resp = await updateBookmark(formData)
-        msg.info(editObj?.type)
-        if (resp){
-            console.log('███████resp>>>>', resp,'<<<<██████')
-        }
-
+        if (await updateBookmark(formData))
+            return setCurrentGroupItems(Items =>
+                Items.map(item => item.id === formData.id ? {...item, ...formData} : item)
+            )
         return '操作失败'
     }
 
@@ -137,7 +135,7 @@ export default function Bookmarks() {
     }
 
     /**右键菜单点击后的功能*/
-    const lambdaObj = action(setBookmarkGroupList,setModal)
+    const lambdaObj = action(setBookmarkGroupList,setModal,() => setGroup(null,setBookmarkGroupList))
 
 
     return <>
