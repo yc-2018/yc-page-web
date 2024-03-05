@@ -1,15 +1,16 @@
 import React, {useEffect, useState} from "react";
-import {App, Button, Dropdown} from "antd";
-import {ExclamationCircleFilled, PlusOutlined} from "@ant-design/icons";
+import {Button, Dropdown} from "antd";
+import {PlusOutlined} from "@ant-design/icons";
 
 import BookmarksItem from "./BookmarksItem";
 import MyDnd from "../../../compontets/MyDnd";
 import FormModal from "./FormModal";
 import UserStore from "../../../store/UserStore";
 import JWTUtils from "../../../utils/JWTUtils";
-import {addBookmarks, delBookmark, dragSort, getBookmarks} from "../../../request/homeRequest";
+import {addBookmarks, dragSort, getBookmarks, updateBookmark} from "../../../request/homeRequest";
 import CommonStore from "../../../store/CommonStore";
 import ContextMenu from "../../../compontets/ContextMenu";
+import action from "./action";
 
 let setCurrentGroupItems;   //组内传过来的设置列表的方法 放在方法内会报错 应该是会重新变成空
 
@@ -23,7 +24,6 @@ export default function Bookmarks() {
     const [editObj, setEditObj] = useState()                    // 表单模态框编辑对象
     const [sort, setSort] = useState()                          // 那个书签组的新增点击了 它就是哪个书签组的id
 
-    const {  modal } = App.useApp();
     const {msg} = CommonStore
 
     useEffect(() => {
@@ -68,7 +68,7 @@ export default function Bookmarks() {
     /**
      * 打开表单模态框设置数据 没登录就弹出登录框
      */
-    const setModal = (isOpen, type, obj) => {
+    const setModal = (isOpen, type, obj=undefined) => {
         if (JWTUtils.isExpired()){
             UserStore.setOpenModal(true)
             return msg.info('登录后方可添加书签')
@@ -94,6 +94,17 @@ export default function Bookmarks() {
         if (id && ModalType===1) setBookmarkGroupList(bookmarkGroups => [...bookmarkGroups, {...bookmark,id}])
         else if (id && ModalType===2) setCurrentGroupItems(Items => [...Items, {...bookmark,id}])
         else return '操作失败'
+    }
+
+    /**
+     * 修改书签|组请求
+     */
+    const updateBookmarks = async (formData) => {
+        if (await updateBookmark(formData))
+            return setCurrentGroupItems(Items =>
+                Items.map(item => item.id === formData.id ? {...item, ...formData} : item)
+            )
+        return '操作失败'
     }
 
     /**
@@ -124,31 +135,17 @@ export default function Bookmarks() {
     }
 
     /**右键菜单点击后的功能*/
-    const lambdaObj = {
-        'EDIT':object =>msg.success('修改成功'+object.name),
-        'DELETE':object =>modal.confirm({
-            title: '确定删除吗?',
-            icon: <ExclamationCircleFilled />,
-            content: '删除了就真的消失了',
-            confirmLoading: true,
-            async onOk() {
-                try {
-                    await new Promise(async (resolve, reject) => {
-                        const delResp = await delBookmark(object);
-                        if (delResp) {
-                            setBookmarkGroupList(groupList => groupList.filter(item => item.id !== object.id));
-                            return resolve(); // 成功,关闭按钮加载 关闭窗口
-                        }
-                        return reject(); // 失败，关闭按钮加载,关闭窗口
-                    });
-                } catch (error) {msg.error('删除异常')}
-            }
-        })
-    }
+    const lambdaObj = action(setBookmarkGroupList,setModal,() => setGroup(null,setBookmarkGroupList))
 
 
     return <>
-        <FormModal open={openModal} setOpen={setOpenModal} obj={editObj} type={ModalType} addBookmark={addBookmark}/>
+        <FormModal open={openModal}
+                   setOpen={setOpenModal}
+                   obj={editObj}
+                   type={ModalType}
+                   addBookmark={addBookmark}
+                   updateBookmark={updateBookmarks}
+        />
         {!JWTUtils.isExpired() && bookmarkGroupList.length > 0 &&
             <MyDnd dndIds={bookmarkGroupList} setItems={setBookmarkGroupList} dragEndFunc={dragSortReq}>
                 {bookmarkGroupList.map(group =>
