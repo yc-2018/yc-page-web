@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {Button} from "antd";
+import {Button,Image} from "antd";
 
 import styles from "./bookmark.module.css"
 import MyDnd from "../../../compontets/MyDnd";
@@ -38,13 +38,28 @@ export default ({bookmarkItems,setModal,groupId,setGroup}) => {
         else setItems(oldList)
     }
 
+    /**
+     * 获取书签图标
+     * @param URL 正则匹配后的URL是个列表  [0]:带http..  [1]:不带http..
+     * 其他接口地址 https://blog.qqsuu.cn/4423.html   https://api.iowen.cn/doc/favicon.html   https://toolb.cn/favicon
+     */
+    const getLogo = URL =>
+        <Image
+            width={18}
+            height={18}
+            preview={false}
+            src={URL[0]+'/favicon.ico'}
+            fallback={`https://api.iowen.cn/favicon/${URL[1]}.png`}
+        />
+
+
     /**右键菜单点击后的功能*/
     const lambdaObj = action(setItems,setModal,() => setGroup(groupId,setItems))
 
     return (items.length > 0 ?
         <MyDnd dndIds={items} setItems={setItems} style={{}} dragEndFunc={dragSortReq}>
             {items.map(item =>
-                <MyDnd.Item key={item.id} id={item.id} drag={"🔖"} className={styles.dndItem}>
+                <MyDnd.Item key={item.id} id={item.id} drag={getLogo(item.url.match(/^(?:https?:\/\/)?([^\/]+)/))} className={styles.dndItem}>
                     <ContextMenu tag={item} lambdaObj={lambdaObj}>
                         <Button type="link" href={item.url} className={styles.dndContent} target="_blank">
                             {item.name}

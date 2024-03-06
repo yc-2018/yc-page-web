@@ -61,7 +61,12 @@ export default ({open, setOpen,obj,type, addBookmark, updateBookmark}) => {
                     <Input placeholder={`请输入${typeName}名称`} />
                 </Form.Item>
 
-                <Form.Item name="url" label="网址" rules={[{required: type===2, message: `网址是要写滴`}]}>
+                <Form.Item name="url" label="网址" rules={[
+                    {required: type===2, message: `网址是要写滴`},
+                    {
+                        pattern: /^https?:\/\/.*\..+$/,
+                        message: '请输入有效的网址',
+                    }]}>
                     <Input placeholder="请输入网址" />
                 </Form.Item>
 
