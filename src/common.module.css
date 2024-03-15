@@ -99,3 +99,9 @@ code {
   border-radius: 10px;
   background-color: #000000ea;
 }
+
+/*左右居中 网格版 想要flex就直接改成把grid改成flex即可*/
+.lrCenter{
+  display: grid;
+  justify-content: center;
+}
