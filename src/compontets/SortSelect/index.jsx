@@ -16,7 +16,7 @@ const SortSelect = ({onChange, options,value , width,loading}) =>
         <Space.Compact className={'sParent'}>
             <SwapOutlined rotate={90} className={'select-icon'}/>
             <Select
-                bordered={false}
+                variant={'borderless'}  // 无边框的
                 icon={<SwapOutlined rotate={90}/>}
                 size={'small'}
                 value={value}
