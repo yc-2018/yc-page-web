@@ -118,7 +118,7 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
                     <Radio.Button value={7}>其他</Radio.Button>
                 </Radio.Group>
             </div>
-            <TextArea rows={16}
+            <TextArea rows={14}
                       showCount
                       ref={textRef}
                       maxLength={2000}
