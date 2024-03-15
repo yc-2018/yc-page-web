@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
-import {Modal, Input, Radio, Space, Divider, App} from 'antd';
+import {Modal, Input, Radio, Space, Divider, App, Button, DatePicker} from 'antd';
 import {saveOrUpdateToDoItem} from "../../request/homeRequest";
 const { TextArea } = Input;
 /**
@@ -14,6 +14,7 @@ const { TextArea } = Input;
 const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
     const [formData, setFormData] = useState(null);    // 用来复制编辑的数据（改变的）
     const [confirmLoading, setConfirmLoading] = useState(false);
+    const [openDate, setOpenDate] = useState(false)
 
     const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
 
@@ -55,8 +56,29 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
         setConfirmLoading(false);
     };
 
+    /** 插入日期 */
+    const insertDate = (_date, dateStr) => {
+        const content = dateStr + '\n' + (formData.content ?? '');
+        setFormData({...formData,content})
+        setOpenDate(false)
+        textRef.current?.focus() // 将光标移动到最后
+    }
+
+
     return (
-        <Modal title={data?"编辑备忘":"新增备忘"} open={isOpen} onOk={handleOk} onCancel={()=>setOpen(false)} confirmLoading={confirmLoading}>
+        <Modal
+            title={data?"编辑备忘":"新增备忘"}
+            open={isOpen}
+            onOk={handleOk}
+            onCancel={()=>setOpen(false)}
+            confirmLoading={confirmLoading}
+            footer={[
+                <Button key="dateButt" onClick={()=>setOpenDate(v=>!v)}>插入日期</Button>,
+                <DatePicker key="date" open={openDate} onChange={insertDate}  placement={'topRight'} style={{visibility:'hidden',width:0}}/>,
+                <Button key="back" onClick={()=>setOpen(false)}>返回</Button>,
+                <Button key="submit" type="primary" onClick={handleOk}>提交</Button>,
+            ]}
+        >
             <Divider plain>
                 <Space direction={'vertical'} style={{marginBottom:20}}>
                     <Radio.Group onChange={(e)=>{setFormData({...formData,itemType:e.target.value})}} defaultValue={formData?.itemType} value={formData?.itemType} buttonStyle="solid">

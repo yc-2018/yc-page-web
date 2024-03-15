@@ -24,7 +24,7 @@ export default observer(() => {
     return (
             <App message={{maxCount: 5}}>
                 {contextMsg}
-                {window.location.pathname === '/' ? null : <Head/>}
+                {window.location.pathname !== '/' && <Head/>}
                 {element}
                 <LoginModal/>
                 <Spin spinning={CommonStore.loading} fullscreen />{/* 加载动画 */}
