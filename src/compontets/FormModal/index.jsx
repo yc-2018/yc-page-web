@@ -75,6 +75,7 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
 
     /** 插入日期范围 */
     const insertDateRange = (_dates, date2Str) => {
+        if (!date2Str[0]) return;
         const content = date2Str.join('~') + '\n' + (formData.content ?? '');
         setFormData({...formData,content})
         setOpenDateRange(false)
@@ -83,20 +84,12 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
 
     /** 自定义底部按钮 */
     const footerButtons = [
-        <Button key="dateButt" onClick={() => setOpenDate(v => !v) || setOpenDateRange(false)}>
-            插入日期
-        </Button>,
         <Button key="RangeButt" onClick={() => setOpenDateRange(v => !v) || setOpenDate(false)}>
             插入日期段
         </Button>,
-        <DatePicker key="date" open={openDate} onChange={insertDate} placement={'topRight'} style={{visibility: 'hidden', width: 0}}/>,
-        <DatePicker.RangePicker
-            key="dateRange"
-            open={openDateRange}
-            onChange={insertDateRange}
-            placement={'topRight'}
-            style={{visibility: 'hidden'}}
-        />,
+        <Button key="dateButt" onClick={() => setOpenDate(v => !v) || setOpenDateRange(false)}>
+            插入日期
+        </Button>,
         <Button key="back" onClick={closeModal}>返回</Button>,
         <Button key="submit" type="primary" onClick={handleOk} loading={confirmLoading}>提交</Button>,
     ]
@@ -133,6 +126,21 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
                       placeholder="请输入备忘内容"
                       onChange={e => setFormData({...formData, content: e.target.value})}
             />
+            {/*日期选择面板*/}
+            <DatePicker open={openDate}
+                        onChange={insertDate}
+                        placement={'topRight'}
+                        style={{left:480,top:30, height:20, visibility: 'hidden'}}
+            />
+            {/*日期范围选择面板*/}
+            <DatePicker.RangePicker
+                key="dateRange"
+                open={openDateRange}
+                onChange={insertDateRange}
+                placement={'topRight'}
+                style={{left:100, height:20, display:openDateRange?'':'none'}}
+            />
+
         </Modal>
     )
 }
