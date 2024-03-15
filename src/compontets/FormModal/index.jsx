@@ -81,37 +81,33 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
         textRef.current?.focus() // 将光标移动到最后
     }
 
+    /** 自定义底部按钮 */
+    const footerButtons = [
+        <Button key="dateButt" onClick={() => setOpenDate(v => !v) || setOpenDateRange(false)}>
+            插入日期
+        </Button>,
+        <Button key="RangeButt" onClick={() => setOpenDateRange(v => !v) || setOpenDate(false)}>
+            插入日期段
+        </Button>,
+        <DatePicker key="date" open={openDate} onChange={insertDate} placement={'topRight'} style={{visibility: 'hidden', width: 0}}/>,
+        <DatePicker.RangePicker
+            key="dateRange"
+            open={openDateRange}
+            onChange={insertDateRange}
+            placement={'topRight'}
+            style={{visibility: 'hidden'}}
+        />,
+        <Button key="back" onClick={closeModal}>返回</Button>,
+        <Button key="submit" type="primary" onClick={handleOk} loading={confirmLoading}>提交</Button>,
+    ]
+
     return (
         <Modal
             width={888}
             title={data ? "编辑备忘" : "新增备忘"}
             open={isOpen}
-            // onCancel={closeModal}
-            confirmLoading={confirmLoading}
-            footer={[
-                <Button
-                    key="dateButt"
-                    onClick={() => setOpenDate(v => !v) || setOpenDateRange(false)}
-                >
-                    插入日期
-                </Button>,
-                <Button
-                    key="RangeButt"
-                    onClick={() => setOpenDateRange(v => !v)||setOpenDate(false) }
-                >
-                    插入日期段
-                </Button>,
-                <DatePicker key="date" open={openDate} onChange={insertDate} placement={'topRight'} style={{visibility: 'hidden', width: 0}}/>,
-                <DatePicker.RangePicker
-                    key="dateRange"
-                    open={openDateRange}
-                    onChange={insertDateRange}
-                    placement={'topRight'}
-                    style={{visibility: 'hidden'}}
-                />,
-                <Button key="back" onClick={closeModal}>返回</Button>,
-                <Button key="submit" type="primary" onClick={handleOk}>提交</Button>,
-            ]}
+            onCancel={closeModal}
+            footer={footerButtons}
         >
             <div className={styles.lrCenter}>
                 <Radio.Group
