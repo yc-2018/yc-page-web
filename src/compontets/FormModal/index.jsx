@@ -113,7 +113,7 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
 
     /** 自定义底部按钮 */
     const footerButtons = [
-        <Popover content={help} title="帮助"><Button icon={<QuestionCircleTwoTone/>} shape="circle"/></Popover>,
+        <Popover key="help" content={help} title="帮助"><Button icon={<QuestionCircleTwoTone/>} shape="circle"/></Popover>,
         <Button key="RangeButt" onClick={() => setOpenDateRange(v => !v) || setOpenDate(false)}>
             插入日期段
         </Button>,
