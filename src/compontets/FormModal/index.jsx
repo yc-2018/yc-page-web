@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState} from "react";
-import {Modal, Input, Radio, App, Button, DatePicker} from 'antd';
+import {Modal, Input, Radio, App, Button, DatePicker, Popover} from 'antd';
 import {saveOrUpdateToDoItem} from "../../request/homeRequest";
 import styles from '../../common.module.css'
+import {QuestionCircleTwoTone} from "@ant-design/icons";
 const { TextArea } = Input;
 /**
  * 新增/编辑备忘录弹窗
@@ -34,9 +35,8 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
 
     // 打开后自动获得焦点
     useEffect(()=> {
-        if(isOpen)
             // 点击编辑或新增按钮后自动获得焦点,但是弹窗没这么快出现在页面上，所以获取焦点也要延迟一点点
-            window.setTimeout(() => textRef.current?.focus(), 100)
+        if(isOpen) window.setTimeout(() => textRef.current?.focus(), 100)
     },[isOpen])
 
     /** 关闭弹窗 */
@@ -67,23 +67,53 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
 
     /** 插入日期 */
     const insertDate = (_date, dateStr) => {
-        const content = dateStr + '\n' + (formData.content ?? '');
-        setFormData({...formData,content})
+        insertAtCursor(`${dateStr}${formData.content ? '' : '\n'}`) // 插入日期 如果本来内容为空 那多加一个换行
         setOpenDate(false)
-        textRef.current?.focus() // 将光标移动到最后
     }
 
     /** 插入日期范围 */
     const insertDateRange = (_dates, date2Str) => {
         if (!date2Str[0]) return;
-        const content = date2Str.join('~') + '\n' + (formData.content ?? '');
-        setFormData({...formData,content})
+        insertAtCursor(`${date2Str.join('~')}${formData.content ? '' : '\n'}`) // 如果本来内容为空 那多加一个换行
         setOpenDateRange(false)
-        textRef.current?.focus() // 将光标移动到最后
     }
+
+    /** 在光标位置后面插入文本的函数 */
+    const insertAtCursor = (textToInsert) => {
+        // 获取原生的textarea元素
+        const textareaElement = textRef.current?.resizableTextArea.textArea ?? {selectionStart:-1,selectionEnd:-1}
+        const selectionStart = textareaElement.selectionStart;   // 光标位置
+        const selectionEnd = textareaElement.selectionEnd        // 选择情况下的选中最后位置 没选中就是和光标位置一样
+
+        const currentValue = formData.content ?? ''
+        const beforeText = currentValue.slice(0, selectionStart);
+        const afterText = currentValue.slice(selectionEnd);
+
+        setFormData(formData => ({
+            ...formData,
+            content: `${beforeText}${textToInsert}${afterText}`
+        }));
+
+        window.setTimeout(() => { // setFormData是异步的哇 所以一定要比它还要晚一点 因为它是属于全覆盖 光标自然在最后
+            // 重新定位光标到插入点之后
+            if (textRef.current) {
+                textRef.current?.resizableTextArea.textArea.setSelectionRange(selectionStart + textToInsert.length, selectionStart + textToInsert.length)
+                textRef.current.focus();
+            }
+        }, 100)
+    }
+
+    const help = (
+        <div>
+            <p>● 点击插入时间/段,可插入时间/段在输入框光标所在位置</p>
+            <p>● 如果输入框本来是空的 插入后会多加一个换行</p>
+            <p>● 如果选中了文字 插入会覆盖哦</p>
+        </div>
+    );
 
     /** 自定义底部按钮 */
     const footerButtons = [
+        <Popover key="help" content={help} title="帮助"><Button icon={<QuestionCircleTwoTone/>} shape="circle"/></Popover>,
         <Button key="RangeButt" onClick={() => setOpenDateRange(v => !v) || setOpenDate(false)}>
             插入日期段
         </Button>,
@@ -118,7 +148,7 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
                     <Radio.Button value={7}>其他</Radio.Button>
                 </Radio.Group>
             </div>
-            <TextArea rows={16}
+            <TextArea rows={14}
                       showCount
                       ref={textRef}
                       maxLength={2000}

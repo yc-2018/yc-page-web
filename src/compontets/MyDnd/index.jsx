@@ -31,7 +31,6 @@ const MyDnd = ({dndIds,setItems ,storageName,style,children,dragEndFunc }) => {
                 // 找到目标位置项目（over.id）的索引
                 const newIndex = items.findIndex(item => item.id === over.id)
                 const data = arrayMove(items, oldIndex, newIndex);
-                console.log('███████newIndex>>>>', data,'<<<<██████')
                 // 要的话 把新数组的id 放到localStorage中
                 storageName && localStorage.setItem(storageName+'_idList', JSON.stringify(data.map(item=>item.id)))
                 dragEndFunc && dragEndFunc(data)    // 如果有传 就回调
