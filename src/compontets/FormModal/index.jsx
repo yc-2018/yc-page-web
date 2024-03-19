@@ -1,8 +1,10 @@
 import React, {useEffect, useRef, useState} from "react";
-import {Modal, Input, Radio, App, Button, DatePicker, Popover} from 'antd';
+import {QuestionCircleTwoTone, SmileTwoTone} from "@ant-design/icons";
+import {Modal, Input, Radio, App, Button, DatePicker, Popover, Row, Col} from 'antd';
 import {saveOrUpdateToDoItem} from "../../request/homeRequest";
 import styles from '../../common.module.css'
-import {QuestionCircleTwoTone} from "@ant-design/icons";
+import modalStyle from './formModal.module.css'
+
 const { TextArea } = Input;
 /**
  * 新增/编辑备忘录弹窗
@@ -103,16 +105,36 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
         }, 100)
     }
 
-    const help = (
+    const help =
         <div>
             <p>● 点击插入时间/段,可插入时间/段在输入框光标所在位置</p>
             <p>● 如果输入框本来是空的 插入后会多加一个换行</p>
             <p>● 如果选中了文字 插入会覆盖哦</p>
+            <p>● 插入的符号更多
+                <Button type="link"
+                        href={'https://blog.csdn.net/weixin_46665865/article/details/126132912'}
+                        style={{padding:0}}
+                        target="_blank"
+                >
+                    参考这里
+                </Button>
+            </p>
+
         </div>
-    );
+
+    const signs =
+        <Row>
+            {symbols.map(sign =>
+                <Col span={3} onClick={() => insertAtCursor(sign)} className={modalStyle.sign}>
+                    {sign}
+                </Col>
+            )}
+        </Row>
+
 
     /** 自定义底部按钮 */
     const footerButtons = [
+        <Popover key="help" content={signs} title="插入符号"><Button icon={<SmileTwoTone />} shape="circle"/></Popover>,
         <Popover key="help" content={help} title="帮助"><Button icon={<QuestionCircleTwoTone/>} shape="circle"/></Popover>,
         <Button key="RangeButt" onClick={() => setOpenDateRange(v => !v) || setOpenDate(false)}>
             插入日期段
@@ -175,3 +197,16 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
     )
 }
 export default FormModal;
+
+
+
+
+/** 符号列表 */
+const symbols =
+    [
+        '▣', '●', '〓', '▬', '▼', '▲', '▷', '⚫',
+        '↔', '⌂', '→', '←', '↖', '↗',
+        '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹', '⁰',
+        '⁺', '⁻', '⁼', '×', '√', '◆', '℃', '𖤐', '♻',
+        '֎', '✩', '𖦹', '𓃒', '𐃶', '𐙼', '😶‍🌫️',
+    ]
