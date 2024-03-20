@@ -5,10 +5,12 @@ import {BookOutlined} from '@ant-design/icons'
 
 import styles from './blog.module.css'
 import {blogMenu} from "../../store/NoLoginData"
+import {getBlogList, getBlogMd} from "../../request/blogRequest";
+import LoaderWhite from "../../compontets/common/LoaderWhite";
 
 
 // 模拟菜单
-const items = blogMenu.map(item => ({
+const items = blogMenu => blogMenu.map(item => ({
     key      : item[0],
     label    : item[0],
     icon     : <BookOutlined/>,
@@ -23,20 +25,26 @@ const {Content, Sider} = Layout
  * */
 const Blog = () => {
     const [content, setContent] = useState(<h2>欢迎来到仰晨博客</h2>);
-    const [menu, setMenu] = useState(items);
+    const [loading, setLoading] = useState(false)   // 加载状态
+    const [menu, setMenu] = useState(items(blogMenu));
     const navigate = useNavigate()   // 路由跳转
 
     /** 页面加载菜单 (和读取URL的菜单) */
     useEffect(() => {
         // 请求获取最新菜单
-
+        getBlogList().then(data => setMenu(items(data)))
     }, [])
 
     /** 菜单点击事件 */
     const handleMenuClick = (item) => {
+        setLoading(true)
         navigate(`?item=${encodeURIComponent(item.keyPath)}`);
-        const [sub, parent] = item.keyPath;
-        setContent(`正在请求${parent}/${sub}，请稍后...`)
+        getBlogMd(item.keyPath).then(data => {
+            setContent(data)
+        }).catch(() => {
+            setContent(`请求失败，请检查网络连接`)
+        }).finally(()=>setLoading(false))
+
     }
 
 
@@ -60,7 +68,7 @@ const Blog = () => {
             <Layout style={{padding: '0 24px 24px'}}>
                 <br/>
                 <Content className={`${styles.scrollbar} ${styles.content}`}>
-                    {content}
+                    {loading ? <LoaderWhite/> : content}
                 </Content>
             </Layout>
         </Layout>
