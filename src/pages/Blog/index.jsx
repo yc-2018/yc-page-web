@@ -68,7 +68,7 @@ const Blog = () => {
             <Layout style={{padding: '0 24px 24px'}}>
                 <br/>
                 <Content className={`${styles.scrollbar} ${styles.content}`}>
-                    {loading ? <LoaderWhite/> : content}
+                    <pre> {loading ? <LoaderWhite/> : content} </pre>
                 </Content>
             </Layout>
         </Layout>
