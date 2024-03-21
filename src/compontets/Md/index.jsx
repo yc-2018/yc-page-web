@@ -1,15 +1,13 @@
 import React from 'react';
 import Markdown from 'markdown-to-jsx';
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/hljs';    // 浅蓝底docco
 
 import styles from './md.module.css'
 import {mdCodeLanguageList} from "../../store/NoLoginData";
 
 
-/**
- *  内联代码片 和 代码块
- * */
+/** 内联代码片 和 代码块 */
 const CodeBlock = ({children, className}) => {
     // 是 内联代码片 (单行代码)直接返回。  感觉还是有点问题的 但问题不大！
     if (!/\n/.test(children) && !className) return <span className={styles.inlineCode}>{children}</span>;
@@ -18,13 +16,16 @@ const CodeBlock = ({children, className}) => {
     const lines = children.split('\n');
     const isIn = mdCodeLanguageList.includes(lines[0])
     if (isIn) {
-        className = `lang-${lines[0]}`
+        className = lines[0]
         children = lines.slice(1).join('\n')
     }
 
     return (
         <SyntaxHighlighter
-            language={className?.replace(/language-/, '')}
+            className={styles.scrollbar}
+            customStyle={{/*圆角*/ borderRadius: '10px'}} // pre标签上的顶级样式组合的属性，这里的样式将覆盖以前的样式。
+            showLineNumbers={lines.length > 2}           // 大于2行才显示行号（本来想1的 但是可能受上面说的bug影响 有的1行也会显示)
+            language={className?.replace(/lang-/, '')}
             style={a11yDark}
         >
             {children}
@@ -32,6 +33,15 @@ const CodeBlock = ({children, className}) => {
     );
 };
 
+/** markdown解析组件，及自定义样式<br/>
+ * <a href="https://react-syntax-highlighter.github.io/react-syntax-highlighter/demo/">高亮库官方demo</a>
+ * <a href="https://github.com/react-syntax-highlighter/react-syntax-highlighter/blob/master/AVAILABLE_LANGUAGES_HLJS.MD">可用语言列表</a>
+ * <a href="https://github.com/react-syntax-highlighter/react-syntax-highlighter">高亮库 GitHub</a><br/>
+ * <a href="https://github.com/quantizor/markdown-to-jsx/">markdown-to-jsx GitHub</a>
+ * <a href="https://markdown-to-jsx.quantizor.dev/">markdown-to-jsx官方demo</a><br/>
+ * <a href="https://remarkjs.github.io/react-markdown/">react-markdown官方demo</a>
+ * <a href="https://github.com/remarkjs/react-markdown">react-markdown GitHub</a><br/>
+ * */
 export default ({children}) => {
     const options = {
         overrides: {
