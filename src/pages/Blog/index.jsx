@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Layout, Menu} from 'antd'
+import {Layout, Menu, Popover} from 'antd'
 import {useNavigate} from "react-router-dom"
 import {BookOutlined} from '@ant-design/icons'
 
@@ -15,7 +15,15 @@ const items = blogMenu => blogMenu.map(item => ({
     key      : item[0],
     label    : item[0],
     icon     : <BookOutlined/>,
-    children : item.length > 1 ? item.slice(1).map(child => ({key: child, label: child})) : []
+    children: item.length > 1 ? item.slice(1).map(child => (
+        {
+            key: child,
+            label:
+                <Popover placement="right" content={child.replace('.md', ' ')}>
+                    <div style={{maxWidth: 230}}>{child.replace('.md', ' ')}</div>
+                </Popover>
+        }
+    )) : []
 }))
 // antd布局组件
 const {Content, Sider} = Layout
@@ -52,7 +60,7 @@ const Blog = () => {
     return (
         <Layout style={{maxHeight: 'calc(100vh - 64px)'}}>
             {/*------- 页面左侧 -------*/}
-            <Sider width={200}
+            <Sider width={250}
                    theme={'light'}
                    className={styles.scrollbar}
                    style={{overflow: 'auto'}}
