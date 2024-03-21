@@ -35,19 +35,37 @@ const {Content, Sider} = Layout
 const Blog = () => {
     const [content, setContent] = useState('# 欢迎来到仰晨博客');
     const [loading, setLoading] = useState(false)   // 加载状态
-    const [menu, setMenu] = useState(items(blogMenu));
-    const navigate = useNavigate()   // 路由跳转
+    const [menu, setMenu] = useState(items(blogMenu))                  // 菜单项
+    const [selectKey, setSelectKey] = useState([])     // 菜单选中项【子，父】
+
+
+    const navigate = useNavigate()                     // 路由跳转
+
 
     /** 页面加载菜单 (和读取URL的菜单) */
     useEffect(() => {
         // 请求获取最新菜单
         getBlogList().then(data => setMenu(items(data)))
+        const params = window.location.href.split('?')?.[1];
+        if (params) {
+            // 获取查询参数
+            const searchParams = new URLSearchParams(params);
+            const itemValue = searchParams.get('item');
+            try {
+                const currentKeys = JSON.parse(decodeURIComponent(itemValue ?? ''));
+                currentKeys?.length === 2 && setSelectKey(currentKeys) || handleMenuClick({keyPath: currentKeys})
+            } catch (e) {console.log('URL参数异常',e)}
+
+        }
+
+
     }, [])
 
     /** 菜单点击事件 */
-    const handleMenuClick = (item) => {
+    const handleMenuClick = item => {
         setLoading(true)
-        navigate(`?item=${encodeURIComponent(item.keyPath)}`);
+        setSelectKey(item.keyPath)  // 设置选中项【子，父】
+        navigate(`?item=${encodeURIComponent(JSON.stringify(item.keyPath))}`);
         getBlogMd(item.keyPath).then(data => {
             setContent(data)
         }).catch(() => {
@@ -67,9 +85,12 @@ const Blog = () => {
                    collapsible
             >
                 <Menu
+                    selectedKeys={[selectKey[0]]}   // 当前选中的菜单项 key 数组
+                    openKeys={[selectKey[1]]}       // 当前展开的 SubMenu 菜单项 key 数组
                     mode="inline"
                     items={menu}
-                    onClick={handleMenuClick}
+                    onClick={handleMenuClick}       // 点击菜单子项
+                    onOpenChange={v => setSelectKey(l => v.length > 0 ? [l[0], v[1]] : [l[0], null])}  // 点击展开菜单
                 />
             </Sider>
 
@@ -85,6 +106,6 @@ const Blog = () => {
                 </Content>
             </Layout>
         </Layout>
-    )
+    );
 }
 export default Blog
