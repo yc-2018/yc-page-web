@@ -4,28 +4,30 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 import styles from './md.module.css'
+import {mdCodeLanguageList} from "../../store/NoLoginData";
 
-// 创建自定义主题，继承原有主题并添加单行代码样式
-const customTheme = {
-    hljs: {
-        color: '#c7254e',
-        backgroundColor: '#f9f2f4',
-        borderRadius: 2,
-        display: 'inline',
-    },
-    // 可能还需要进一步自定义其他部分，具体取决于你希望修改哪些样式
-};
 
+/**
+ *  内联代码片 和 代码块
+ * */
 const CodeBlock = ({children, className}) => {
-    const isSingleLine = !/\n/.test(children) && !className    // 判断是否为单行代码 还是有点问题的
+    // 是 内联代码片 (单行代码)直接返回。  感觉还是有点问题的 但问题不大！
+    if (!/\n/.test(children) && !className) return <span className={styles.inlineCode}>{children}</span>;
 
-    // 使用不同的样式来区分单行和多行代码
+    // 这个md可能是有bug 三反单引号后面的语言名 有时会被当成第一行 然后代码语言类就消失了
+    const lines = children.split('\n');
+    const isIn = mdCodeLanguageList.includes(lines[0])
+    if (isIn) {
+        className = `lang-${lines[0]}`
+        children = lines.slice(1).join('\n')
+    }
+
     return (
         <SyntaxHighlighter
             language={className?.replace(/language-/, '')}
-            style={isSingleLine ? customTheme : a11yDark}
+            style={a11yDark}
         >
-            {isSingleLine ? children.trim() : children}
+            {children}
         </SyntaxHighlighter>
     );
 };
@@ -70,8 +72,7 @@ export default ({children}) => {
             hr: {component: () => <hr className={styles.hr}/>},
         },
 
-    };
+    }
 
     return <Markdown options={options}>{children}</Markdown>
-
-};
+}

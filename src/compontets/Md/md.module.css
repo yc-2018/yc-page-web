@@ -37,3 +37,10 @@ table .tr {
 table .tr:nth-child(2n), thead {
     background-color: #f8f8f8;
 }
+
+/*内联代码片*/
+.inlineCode{
+    color: #c7254e;
+    background-color: #f9f2f4;
+    border-radius: 2px;
+}

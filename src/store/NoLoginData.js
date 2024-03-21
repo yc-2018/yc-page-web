@@ -177,3 +177,26 @@ export const blogMenu = [
     ['菜单3', '子带单31'],
     ['菜单4'],
 ]
+
+/** md代码语言列表 */
+export const mdCodeLanguageList = [
+    'java',
+    'javascript',
+    'html',
+    'css',
+    'bash',
+    'less',
+    'scss',
+    'typescript',
+    'json',
+    'xml',
+    'markdown',
+    'yaml',
+    'sql',
+    'shell',
+    'powershell',
+    'bat',
+    'sh',
+    'c',
+    'c++',
+]
