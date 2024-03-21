@@ -1,140 +1,111 @@
-import React, {useState} from 'react';
-import {LaptopOutlined, NotificationOutlined, UserOutlined} from '@ant-design/icons';
-import {Layout, Menu, theme} from 'antd';
-import styles from './blog.module.css'
-import MyDnd from "../../compontets/MyDnd";
+import React, {useState, useEffect} from 'react';
+import {Layout, Menu, Popover} from 'antd'
+import {useNavigate} from "react-router-dom"
+import {BookOutlined} from '@ant-design/icons'
 
-const {Content, Sider} = Layout;
-['1', '2', '3', '4'].map((key) => ({
-    key,
-    label: `nav ${key}`,
-}));
-const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined, NotificationOutlined].map((icon, index) => {
-    const key = String(index + 1);
-    return {
-        key: `sub${key}`,
-        icon: React.createElement(icon),
-        label: `subNav ${key}`,
-        children: new Array(4).fill(null).map((_, j) => {
-            const subKey = index * 4 + j + 1;
-            return {
-                key: subKey,
-                label: `option${subKey}`,
-            };
-        }),
-    };
-});
+import styles from './blog.module.css'
+import {blogMenu} from "../../store/NoLoginData"
+import {getBlogList, getBlogMd} from "../../request/blogRequest";
+import LoaderWhite from "../../compontets/common/LoaderWhite";
+import Md from "../../compontets/Md";
+
+
+// 模拟菜单
+const items = blogMenu => blogMenu.map(item => ({
+    key      : item[0],
+    label    : item[0],
+    icon     : <BookOutlined/>,
+    children: item.length > 1 ? item.slice(1).map(child => (
+        {
+            key: child,
+            label:
+                <Popover placement="right" content={child.replace('.md', ' ')}>
+                    <div style={{maxWidth: 230}}>{child.replace('.md', ' ')}</div>
+                </Popover>
+        }
+    )) : []
+}))
+// antd布局组件
+const {Content, Sider} = Layout
+
+
+/**
+ * 博客页
+ * */
 const Blog = () => {
-    const {token: {colorBgContainer}} = theme.useToken();
-    const [items, setItems] = useState([
-        {id: "11hhh", name: 'Item 12111'},
-        {id: "22hhh", name: 'Item 232'},
-        {id: "33hhh", name: 'Item 334'},
-        {id: "43hhh", name: 'Item 44'},
-        {id: "5hhh", name: 'Item 556'},
-        {id: "6hhh", name: 'Item 667'},
-        {id: "37h", name: 'Item 77'},
-        {id: "338h", name: 'Item 889'},
-        {id: "33h9hh", name: 'Item 99'},
-        {id: "331hhh", name: 'Item aa'},
-        {id: "33h11hh", name: 'Item ss'},
-        {id: "33h12hh", name: 'Item dd'},
-        {id: "3314hhh", name: 'Item ff'},
-        {id: "33hh13h", name: 'Item gg'},
-        {id: "33h15hh", name: 'Item hh'},
-        {id: "dd", name: 'Item dd'},
-        {id: "cc", name: 'Item cc'},
-        {id: "zz", name: 'Item zz'},
-        {id: "vv", name: 'Item vv'},
-        {id: "tt", name: 'tt hh'},
-    ])
+    const [content, setContent] = useState('# 欢迎来到仰晨博客');
+    const [loading, setLoading] = useState(false)   // 加载状态
+    const [menu, setMenu] = useState(items(blogMenu))                  // 菜单项
+    const [selectKey, setSelectKey] = useState([])     // 菜单选中项【子，父】
+
+
+    const navigate = useNavigate()                     // 路由跳转
+
+
+    /** 页面加载菜单 (和读取URL的菜单) */
+    useEffect(() => {
+        // 请求获取最新菜单
+        getBlogList().then(data => setMenu(items(data)))
+        const params = window.location.href.split('?')?.[1];
+        if (params) {
+            // 获取查询参数
+            const searchParams = new URLSearchParams(params);
+            const itemValue = searchParams.get('item');
+            try {
+                const currentKeys = JSON.parse(decodeURIComponent(itemValue ?? ''));
+                currentKeys?.length === 2 && setSelectKey(currentKeys) || handleMenuClick({keyPath: currentKeys})
+            } catch (e) {console.log('URL参数异常',e)}
+
+        }
+
+
+    }, [])
+
+    /** 菜单点击事件 */
+    const handleMenuClick = item => {
+        setLoading(true)
+        setSelectKey(item.keyPath)  // 设置选中项【子，父】
+        navigate(`?item=${encodeURIComponent(JSON.stringify(item.keyPath))}`);
+        getBlogMd(item.keyPath).then(data => {
+            setContent(data)
+        }).catch(() => {
+            setContent(`请求失败，请检查网络连接`)
+        }).finally(()=>setLoading(false))
+
+    }
+
+
     return (
         <Layout style={{maxHeight: 'calc(100vh - 64px)'}}>
             {/*------- 页面左侧 -------*/}
-            <Sider width={200}
+            <Sider width={250}
                    theme={'light'}
                    className={styles.scrollbar}
-                   style={{background: colorBgContainer,overflow: 'auto'}}
+                   style={{overflow: 'auto'}}
                    collapsible
             >
                 <Menu
+                    selectedKeys={[selectKey[0]]}   // 当前选中的菜单项 key 数组
+                    openKeys={[selectKey[1]]}       // 当前展开的 SubMenu 菜单项 key 数组
                     mode="inline"
-                    defaultSelectedKeys={['1']}
-                    defaultOpenKeys={['sub1']}
-                    style={{height: '100%', borderRight: 0}}
-                    items={items2}
-                    inlineCollapsed={true}
+                    items={menu}
+                    onClick={handleMenuClick}       // 点击菜单子项
+                    onOpenChange={v => setSelectKey(l => v.length > 0 ? [l[0], v[1]] : [l[0], null])}  // 点击展开菜单
                 />
             </Sider>
 
             {/*------ 页面右侧 -------*/}
             <Layout style={{padding: '0 24px 24px'}}>
                 <br/>
-                <Content className={[styles.scrollbar, styles.content].join(' ')}>
-                    Content
-                    <p className={styles.testContent}>Content</p>
-                    <p>电脑用这个组件</p>
-                    <p>手机再创建一个</p>
-
-                    <MyDnd dndIds={items} setItems={setItems} storageName={'ikun'}>
-                        {items.map(item =>
-                            <MyDnd.Item key={item.id} id={item.id} drag={<>█</>}>
-                                {item.name}
-                            </MyDnd.Item>
-                        )}
-                        █████████zz
-                    </MyDnd>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
-                    <p>Content</p>
+                <Content className={`${styles.scrollbar} ${styles.content}`}>
+                    {loading ?
+                        <LoaderWhite/>
+                        :
+                        <Md>{content}</Md>
+                    }
                 </Content>
             </Layout>
-
         </Layout>
     );
-};
-export default Blog;
+}
+export default Blog

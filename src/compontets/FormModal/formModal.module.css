@@ -1,0 +1,10 @@
+/*符号样式*/
+.sign{
+    border: 1px solid rgba(0, 0, 0, 0.25);  /*边框*/
+    text-align: center;                     /*文字居中*/
+    cursor: pointer;                        /*鼠标变小手*/
+}
+.sign:hover{
+    background-color: #f5f5f5;              /*鼠标放上去背景变浅色*/
+}
+
