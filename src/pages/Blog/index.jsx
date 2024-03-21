@@ -7,6 +7,7 @@ import styles from './blog.module.css'
 import {blogMenu} from "../../store/NoLoginData"
 import {getBlogList, getBlogMd} from "../../request/blogRequest";
 import LoaderWhite from "../../compontets/common/LoaderWhite";
+import Md from "../../compontets/Md";
 
 
 // 模拟菜单
@@ -24,7 +25,7 @@ const {Content, Sider} = Layout
  * 博客页
  * */
 const Blog = () => {
-    const [content, setContent] = useState(<h2>欢迎来到仰晨博客</h2>);
+    const [content, setContent] = useState('# 欢迎来到仰晨博客');
     const [loading, setLoading] = useState(false)   // 加载状态
     const [menu, setMenu] = useState(items(blogMenu));
     const navigate = useNavigate()   // 路由跳转
@@ -68,7 +69,11 @@ const Blog = () => {
             <Layout style={{padding: '0 24px 24px'}}>
                 <br/>
                 <Content className={`${styles.scrollbar} ${styles.content}`}>
-                    <pre> {loading ? <LoaderWhite/> : content} </pre>
+                    {loading ?
+                        <LoaderWhite/>
+                        :
+                        <Md>{content}</Md>
+                    }
                 </Content>
             </Layout>
         </Layout>
