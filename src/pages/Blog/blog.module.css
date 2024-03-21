@@ -9,6 +9,7 @@
 }
 .scrollbar::-webkit-scrollbar{		/*定义滚动条宽度*/
     width: 9px;
+    height: 9px;
 }
 .scrollbar::-webkit-scrollbar-track  /*定义滚动条轨道 内阴影+圆角*/
 {
@@ -21,7 +22,7 @@
 .content{
     padding: 24px;
     margin: 0;
-    min-height: 280px;
+    min-height: 89vh;
     background: rgb(255, 255, 255);
     border-radius: 8px;
     overflow: auto;
