@@ -32,44 +32,20 @@ export const items = [
         key: 'blog',
     },
     {
-        label: '帮助',
-        key: 'help',
-    },
-    {
-        label: '导航二',
-        key: '222',
-        disabled: true,
-    },
-    {
-        label: '导航三-子菜单',
-        key: '333',
+        label: '站内工具',
+        key: 'tool',
         children: [
             {
-                type: 'group',
-                label: '项目1',
-                children: [
-                    {
-                        label: '选项1',
-                        key: '3331',
-                    },
-                    {
-                        label: '选项2',
-                        key: '3332',
-                    },
-                ],
+                label: '转特殊字母|数字',
+                key: 'specialChar',
+                disabled: true,
             },
             {
-                label: '项目2',
+                label: '2FA验证码获取',
+                key: 'get2fa',
+                disabled: true,
             },
         ],
-    },
-    {
-        label: (
-            <a href="http://localhost:3000/" target="_blank" rel="noopener noreferrer">
-                导航四-链接
-            </a>
-        ),
-        key: '444',
     },
     {
         label: '工具',
@@ -92,6 +68,10 @@ export const items = [
                 key: 'cssGridLayoutGenerator',
             },
         ],
+    },
+    {
+        label: '帮助',
+        key: 'help',
     },
 ];
 
