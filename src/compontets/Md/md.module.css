@@ -60,3 +60,38 @@ table .tr:nth-child(2n), thead {
     border-radius: 9px;
     background-color: #656565;
 }
+
+
+/* --------------复制代码样式--------------- */
+/* 包括代码块 做相对定位 */
+.codeBlockWrapper {
+    position: relative;
+}
+.copyButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: transparent;
+    color: #4caf50;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    padding: 0 5px;
+
+}
+.copySuccess {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #4caf50;
+    color: white;
+    padding: 0 5px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    border-radius: 0 5px 0 5px;
+}
+.copyButton:hover + .copySuccess,
+.copySuccess {
+    opacity: 1;
+}
