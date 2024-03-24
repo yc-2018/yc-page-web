@@ -21,8 +21,6 @@ import {useNavigate} from 'react-router-dom'
 
 import Search from './Search';
 import showOrNot from '../../store/ShowOrNot';
-import EnglishDrawer from "./EnglishDrawer";
-import MemoDrawer from "./MemoDrawer";
 import {reImagesUrl, uploadInfo, getPageInfo} from "../../request/homeRequest";
 import UserStore from "../../store/UserStore";
 import CommonStore from "../../store/CommonStore";
@@ -271,10 +269,6 @@ function Home() {
                         }}
                     />
 
-                    {/*备忘录抽屉*/}
-                    <MemoDrawer/>
-                    {/*备忘英语抽屉*/}
-                    <EnglishDrawer />
                 </div>
             </div>
             <Button type="link"
