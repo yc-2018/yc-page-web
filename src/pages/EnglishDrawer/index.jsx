@@ -143,7 +143,7 @@ function EnglishDrawer() {
                 title: '确定删除吗?',
                 icon: <ExclamationCircleFilled />,
                 content: '删除了就会消失了',
-                confirmLoading: true,
+                maskClosable: true,  // 点遮罩可以关闭
                 onOk () {
                     return new Promise(async (resolve, reject)=>{
                         const delResp = await delToDoItem(id)
