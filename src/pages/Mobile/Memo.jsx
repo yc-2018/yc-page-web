@@ -5,7 +5,7 @@ import {
     PullToRefresh, SearchBar, Badge
 } from 'antd-mobile'
 
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/homeRequest";
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest.js";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data";
 import styles from './mobile.module.css'
 

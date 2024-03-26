@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {QuestionCircleTwoTone, SmileTwoTone} from "@ant-design/icons";
 import {Modal, Input, Radio, App, Button, DatePicker, Popover, Row, Col} from 'antd';
-import {saveOrUpdateToDoItem} from "../../request/homeRequest";
+import {saveOrUpdateToDoItem} from "../../request/memoRequest.js";
 import styles from '../../common.module.css'
 import modalStyle from './formModal.module.css'
 
@@ -80,6 +80,16 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
         setOpenDateRange(false)
     }
 
+    /** 插入符号 */
+    const signs =
+        <Row>
+            {symbols.map(sign =>
+                <Col key={sign} span={3} onClick={() => insertAtCursor(sign)} className={modalStyle.sign}>
+                    {sign}
+                </Col>
+            )}
+        </Row>
+
     /** 在光标位置后面插入文本的函数 */
     const insertAtCursor = (textToInsert) => {
         // 获取原生的textarea元素
@@ -119,23 +129,13 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
                     参考这里
                 </Button>
             </p>
-
         </div>
-
-    const signs =
-        <Row>
-            {symbols.map(sign =>
-                <Col span={3} onClick={() => insertAtCursor(sign)} className={modalStyle.sign}>
-                    {sign}
-                </Col>
-            )}
-        </Row>
 
 
     /** 自定义底部按钮 */
     const footerButtons = [
-        <Popover key="help" content={signs} title="插入符号"><Button icon={<SmileTwoTone />} shape="circle"/></Popover>,
         <Popover key="help" content={help} title="帮助"><Button icon={<QuestionCircleTwoTone/>} shape="circle"/></Popover>,
+        <Popover key="insertSymbol" content={signs} title="插入符号"><Button icon={<SmileTwoTone />} shape="circle"/></Popover>,
         <Button key="RangeButt" onClick={() => setOpenDateRange(v => !v) || setOpenDate(false)}>
             插入日期段
         </Button>,
