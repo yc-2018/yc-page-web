@@ -4,7 +4,7 @@ import {App, message, Spin} from "antd";
 
 import './App.css';
 import routes from "./routes";
-import Head from "./compontets/Head";
+import Head from "./pages/Head";
 import CommonStore from "./store/CommonStore";
 import LoginModal from "./compontets/LoginModal";
 import {observer} from "mobx-react-lite";
