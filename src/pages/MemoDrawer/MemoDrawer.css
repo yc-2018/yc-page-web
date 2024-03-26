@@ -65,12 +65,12 @@
 }
 
 /*点完成按钮后的样式*/
-.confirm-finish:hover{
-    background-color: #0080004d !important;
-    color:green!important;
-    border: 1px solid green!important;
-    font-weight: bold; /* 加粗字体 */
-}
+/*.confirm-finish:hover{*/
+/*    background-color: #0080004d !important;*/
+/*    color:green!important;*/
+/*    border: 1px solid green!important;*/
+/*    font-weight: bold; !* 加粗字体 *!*/
+/*}*/
 
 /*点删除按钮后的样式*/
 .confirm-delete:hover{
