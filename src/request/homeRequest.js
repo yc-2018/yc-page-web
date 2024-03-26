@@ -42,7 +42,7 @@ const getBgFns = {
         return response.data.data;
     },
     '风景': async () => {
-        const {data: [image]} = await axios.get('/jfApi/home/bg/ajaxbg');
+        const {data: [image]} = await axios.get('https://yc556.cn/jfApi/home/bg/ajaxbg');
         return 'https://i0.wp.com/www.jianfast.com' + image.replace('/400', '');
     },
 }
