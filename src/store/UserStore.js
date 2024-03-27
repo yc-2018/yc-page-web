@@ -5,6 +5,8 @@ class UserStore {
     _jwt = localStorage.getItem('jwt')
     /** 用户登录弹窗 */
     openModal = false
+    /** 个人信息弹窗 */
+    infoModal = false
 
     /** 构造函数 自动化数据管理就靠它*/
     constructor() {makeAutoObservable(this)}
@@ -20,6 +22,8 @@ class UserStore {
 
     /** 设置登录弹窗 */
     setOpenModal(openModal) {this.openModal = openModal}
+    /** 设置个人信息弹窗 */
+    setInfoModal(infoModal) {this.infoModal = infoModal}
 
     /** 清除登录信息 */
     clearJwt() {

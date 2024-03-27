@@ -1,5 +1,4 @@
 import axios from 'axios';
-import UserStore from '../store/UserStore';
 import CommonStore from "../store/CommonStore";
 import myAxios  from "./myAxios";
 import bingWallpaperList from "../store/bingWallpaper";
@@ -46,27 +45,6 @@ const getBgFns = {
         return 'https://i0.wp.com/www.jianfast.com' + image.replace('/400', '');
     },
 }
-
-
-/** 登录 */
-export async function login(loginCode,expireTime='bt', loading) {
-    try {
-        loading && loading(true)
-        const response = await axios.post(`/api/users/login?key=${loginCode}&expireTime=${expireTime}`);
-        loading && loading(false)
-        const {code,msg,data} = response.data;
-
-        if (code === 1) {
-            // 存储 JWT
-            UserStore.jwt = data;
-            CommonStore.msg.success("登录成功");
-            return true;
-        } else if (code === 0) CommonStore.msg.error(msg);  // 显示消息
-    } catch (error) {
-        CommonStore.msg.error('请求失败');
-    }
-}
-
 
 
 /** 上传页面配置信息到云端 */
