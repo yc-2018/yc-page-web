@@ -8,13 +8,14 @@ import {blogMenu} from "../../store/NoLoginData"
 import {getBlogList, getBlogMd} from "../../request/blogRequest";
 import LoaderWhite from "../../compontets/common/LoaderWhite";
 import Md from "../../compontets/Md";
+import iconMapping from './iconMapping'
 
 
 // 模拟菜单
 const items = blogMenu => blogMenu.map(item => ({
     key      : item[0],
     label    : item[0],
-    icon     : <BookOutlined/>,
+    icon     : iconMapping[item[0]] ??<BookOutlined/>,
     children: item.length > 1 ? item.slice(1).map(child => (
         {
             key: child,

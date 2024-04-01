@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite'
 import React, {useEffect, useRef, useState} from "react";
 
 import UserStore from "../../store/UserStore";
-import {login} from "../../request/homeRequest";
+import {login} from "../../request/commonRequest";
 
 const LoginModal = () => {
     const [expireTime, setExpireTime] = useState(undefined);           // 登录有效时间

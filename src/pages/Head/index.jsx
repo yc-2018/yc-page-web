@@ -62,7 +62,11 @@ export default observer(() => {
                                     <Dropdown
                                         placement="bottom"
                                         menu={{
-                                            items:[
+                                            items:[{
+                                                key: 'info',
+                                                label:'我的信息',
+                                                onClick: () => UserStore.setInfoModal(true),
+                                            },
                                                 {
                                                     key: 'openMemo',
                                                     label:'备忘录',
