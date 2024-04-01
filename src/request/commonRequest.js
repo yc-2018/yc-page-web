@@ -8,7 +8,7 @@ import myAxios from "./myAxios";
 export async function login(loginCode,expireTime='bt', loading) {
     try {
         loading && loading(true)
-        const response = await axios.post(`/api/users/login?key=${loginCode}&expireTime=${expireTime}`);
+        const response = await axios.post(`https://yc556.cn/api/users/login?key=${loginCode}&expireTime=${expireTime}`);
         loading && loading(false)
         const {code,msg,data} = response.data;
 
