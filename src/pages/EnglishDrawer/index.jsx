@@ -6,18 +6,18 @@ import {
     ExclamationCircleFilled, PlusCircleOutlined, SyncOutlined
 } from "@ant-design/icons";
 
-import showOrNot from "../../../store/ShowOrNot";
-import UserStore from "../../../store/UserStore";
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../../request/homeRequest";
-import EmptyList from "../../../compontets/common/EmptyList";
-import {englishSortingOptions, tagList} from "../../../store/NoLoginData";
-import MyButton from "../../../compontets/MyButton";
-import CommonStore from "../../../store/CommonStore";
-import SortSelect from "../../../compontets/SortSelect";
-import LoaderWhite from "../../../compontets/common/LoaderWhite";
-import JWTUtils from "../../../utils/JWTUtils";
+import showOrNot from "../../store/ShowOrNot";
+import UserStore from "../../store/UserStore";
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/memoRequest.js";
+import EmptyList from "../../compontets/common/EmptyList";
+import {englishSortingOptions, tagList} from "../../store/NoLoginData";
+import MyButton from "../../compontets/MyButton";
+import CommonStore from "../../store/CommonStore";
+import SortSelect from "../../compontets/SortSelect";
+import LoaderWhite from "../../compontets/common/LoaderWhite";
+import JWTUtils from "../../utils/JWTUtils";
 
-import styles from "../../../common.module.css"
+import styles from "../../common.module.css"
 
 
 let total = 0;    // 初始化待办总数
@@ -143,7 +143,7 @@ function EnglishDrawer() {
                 title: '确定删除吗?',
                 icon: <ExclamationCircleFilled />,
                 content: '删除了就会消失了',
-                confirmLoading: true,
+                maskClosable: true,  // 点遮罩可以关闭
                 onOk () {
                     return new Promise(async (resolve, reject)=>{
                         const delResp = await delToDoItem(id)

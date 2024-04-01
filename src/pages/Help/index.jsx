@@ -1,35 +1,40 @@
 import React from 'react';
-import { Card, List } from 'antd';
-const data = [
+import {Col, Row} from 'antd';
+
+const data = [      // 超过一个就会报错：Uncaught SyntaxError: Identifier 'u' has already been declared
     {
-        title: 'Title 1',
-        content: 'Content 1'
+        title: 'Open备忘第一页 备忘介绍',
+        content: 'aid=1550258784&bvid=BV15y421Y7KW&cid=1431193521'
     },
     {
-        title: 'Title 2',
-        content: 'Content 2'
+        title: 'Open备忘第一页 页面配置介绍',
+        content: 'aid=1200458240&bvid=BV1MF4m1M7qJ&cid=1431142000'
     },
     {
-        title: 'Title 3',
-        content: 'Content 3'
-    },
-    {
-        title: 'Title 4',
-        content: 'Content 4'
+        title: 'Open备忘第一页 搜索功能介绍',
+        content: 'aid=1300073102&bvid=BV1GT4m1S7Kx&cid=1429151385'
     },
 ];
-const Help = () => (
-    <div>
+export default () => (
+    <>
         <h2>帮助页面</h2>
-    <List
-        grid={{gutter: 0, column: 4}/*间隙 ，列数*/}
-        dataSource={data}
-        renderItem={(item) => (
-            <List.Item>
-                <Card title={item.title}>{item.content}</Card>
-            </List.Item>
-        )}
-    />
-    </div>
-);
-export default Help;
+        <Row>
+            {data.map(({title, content}) =>
+                <Col span={8} key={title}>
+                    <div style={{
+                        boxShadow: 'rgb(153 153 153 / 50%) 0px 0px 10px inset',
+                        borderRadius: 4,
+                        padding: 5,
+                        margin: '0 5px'
+                    }}>
+                        <div style={{textAlign: 'center', fontSize: 16, fontWeight: 'bold'}}>{title}</div>
+                        <iframe height={300} width={'100%'}
+                                src={`//player.bilibili.com/player.html?${content}&p=1&autoplay=0`} // bilibili内嵌默认自动播放 手动加入 &autoplay=0 默认不播放
+                                allowFullScreen={true}
+                        />
+                    </div>
+                </Col>
+            )}
+        </Row>
+    </>
+)
