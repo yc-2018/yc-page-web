@@ -10,6 +10,7 @@ import JWTUtils from "../../utils/JWTUtils";
 import UserStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
 import CommonStore from "../../store/CommonStore";
+import css from './head.module.css'
 
 
 export default observer(() => {
@@ -59,6 +60,7 @@ export default observer(() => {
                                     未登录
                                 </Avatar>
                                 :
+                                <div className={css.userImg}>
                                     <Dropdown
                                         placement="bottom"
                                         menu={{
@@ -91,6 +93,8 @@ export default observer(() => {
                                                 icon={<UserOutlined />}
                                         />
                                     </Dropdown>
+                                    <span className={css.helloUserName}>你好! {JWTUtils.getName()}</span>
+                                </div>
 
                         }
                     </Col>

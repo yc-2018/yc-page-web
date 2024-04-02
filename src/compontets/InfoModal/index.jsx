@@ -27,6 +27,7 @@ export default observer(() => {
 
     return (
         <Modal onOk={handleOk}
+               title={'查看|修改 个人信息'}
                open={UserStore.infoModal}
                confirmLoading={confirmLoading}
                onCancel={()=>UserStore.setInfoModal(false)}
@@ -34,9 +35,9 @@ export default observer(() => {
             <Form
                 form={infoForm}
                 layout="vertical"
-                initialValues={{name: JWTUtils.getName(), avatar: JWTUtils.getAvatar()}}
+                initialValues={{username: JWTUtils.getName(), avatar: JWTUtils.getAvatar()}}
             >
-                <Form.Item name="username" label={'用户昵称'}>
+                <Form.Item name="username" label={'用户昵称'} rules={[{required: true, max: 10}]}>
                     <Input placeholder={'请输入用户昵称'} />
                 </Form.Item>
             </Form>
