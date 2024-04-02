@@ -1,18 +1,20 @@
 import {observer} from "mobx-react-lite";
-import {Form, Input, Modal} from "antd";
+import {Avatar, Col, Form, Input, Modal, Row} from "antd";
 import UserStore from "../../store/UserStore";
 import React, {useState} from "react";
 import JWTUtils from "../../utils/JWTUtils";
 import {updateNameOrAvatar} from "../../request/commonRequest";
+import {UserOutlined} from "@ant-design/icons";
 
 export default observer(() => {
     const [confirmLoading, setConfirmLoading] = useState(false) // 是否加载中
+    const [avatar, setAvatar] = useState(JWTUtils.getAvatar())
     const [infoForm] = Form.useForm()
 
     /**点击确定按钮事件*/
     const handleOk = async () => {
         infoForm.validateFields().then(async values => {
-            const {username, avatar} = values;
+            const {username} = values;
             setConfirmLoading(true)
             const funcResult = await updateNameOrAvatar({username, avatar})
             setConfirmLoading(false)
@@ -37,11 +39,28 @@ export default observer(() => {
                 <Form.Item name="username" label={'用户昵称'}>
                     <Input placeholder={'请输入用户昵称'} />
                 </Form.Item>
-
-                <Form.Item name="avatar" label="头像">
-                    <Input placeholder="请输入网址" />
-                </Form.Item>
             </Form>
+            <Row>
+                <Col span={20}>
+                    头像
+                    <Input value={avatar} onChange={(e)=>setAvatar(e.target.value)} />
+                </Col>
+                <Col span={4} style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                    <Avatar size={40}
+                            style={{backgroundColor: 'rgba(180,171,171,0.45)'}}
+                            icon={<UserOutlined />}
+                            src={avatar}
+                    />
+                </Col>
+                {[...Array(99).keys()].map(i =>
+                        <Avatar key={i}
+                                size={40}
+                                src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${i + 1}`}
+                                onClick={()=>setAvatar(`https://api.dicebear.com/7.x/miniavs/svg?seed=${i + 1}`)}
+                        />
+                )}
+            </Row>
+
         </Modal>
     )
 })

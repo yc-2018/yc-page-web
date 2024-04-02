@@ -87,7 +87,7 @@ export default observer(() => {
                                     >
                                         <Avatar size={40}
                                                 style={{backgroundColor: 'rgba(255,255,255,0.45)'}}
-                                                src="https://api.dicebear.com/7.x/miniavs/svg?seed=1"
+                                                src={JWTUtils.getAvatar()}
                                                 icon={<UserOutlined />}
                                         />
                                     </Dropdown>
