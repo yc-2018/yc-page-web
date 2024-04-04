@@ -33,7 +33,7 @@ export default [
     {
         path:'/utils/specialChar',
         element:<SpecialChar/>,
-        title:'仰晨-博客',
+        title:'仰晨工具-字母数字转特殊字符',
     },
     {
         path:'/*',
