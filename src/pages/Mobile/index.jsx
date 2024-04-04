@@ -9,7 +9,7 @@ import {tabs} from "./data";
 
 import styles from "./mobile.module.css";
 import './mobileCommom.css';
-import Blog from "../Blog";
+import Blog from "./Blog";
 import Me from "./Me";
 
 
