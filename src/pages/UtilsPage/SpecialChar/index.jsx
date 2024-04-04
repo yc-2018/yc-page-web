@@ -7,9 +7,9 @@ import CommonStore from "../../../store/CommonStore";
 
 
 // 普通字母
-const normalLetters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' //Array.from(Array(26)).map((_, i) => String.fromCharCode(65 + i))
+const ptLetters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' //Array.from(Array(26)).map((_, i) => String.fromCharCode(65 + i))
 // 普通数字
-const ordinaryNumbers = '0123456789'
+const ptNumbers = '0123456789'
 
 // 特殊字母
 const tsLetter = [
@@ -60,11 +60,11 @@ export default () => {
         let tsText = ''
         // 循环输入文本，判断每个字符是否在普通字母或普通数字中，如果在，则替换为特殊的字母或数字
         for (const char of inputText) {
-            let indexTsAbc = normalLetters.indexOf(char);
+            let indexTsAbc = ptLetters.indexOf(char);
             if (indexTsAbc !== -1) {
                 tsText += Array.from(tsAbc)[indexTsAbc]             // 获取特殊字母  套上Array.from是因为文本是一段Unicode字符序列，其中包括一些特殊的数学字母（双层字符）。
             } else {
-                indexTsAbc = ordinaryNumbers.indexOf(char);
+                indexTsAbc = ptNumbers.indexOf(char);
                 if (indexTsAbc !== -1) {
                     tsText += Array.from(tsNumbers)[indexTsAbc]     // 获取特殊数字
                 } else {
@@ -101,12 +101,14 @@ export default () => {
             <span>特殊字母：</span>
             <Radio.Group value={tsAbc} onChange={e => setTsAbc(e.target.value)}>
                 {tsLetter.map(ts =>  <Radio.Button value={ts} key={ts}>{Array.from(ts).slice(0, 3).join('')}...</Radio.Button>)}
+                <Radio.Button value={ptLetters}>不换!</Radio.Button>
             </Radio.Group>
             <hr style={{border: '#eaeaf5 solid 1px'}} />
 
             <span>特殊数字：</span>
             <Radio.Group value={tsNumbers} onChange={e => setTsNumbers(e.target.value)}>
                 {tsNumber.map(ts =>  <Radio.Button value={ts} key={ts}>{Array.from(ts).slice(0, 3).join('')}...</Radio.Button>)}
+                <Radio.Button value={ptNumbers}>不换!</Radio.Button>
             </Radio.Group>
             <hr style={{border: '#eaeaf5 solid 1px'}} />
 
@@ -126,15 +128,15 @@ export default () => {
                     <a href={'https://blog.csdn.net/weixin_46665865/article/details/126132912'} target={'_blank'}>
                         可以看看我的CSDN这篇笔记</a>，都已经分类整理好了
                 </div>
-                <Button 
-                  onClick={(event)=>{
-                      event.target.parentElement.style.display='none'
-                    let fhAdd = '' // 符号追加
-                    for (let i = 32; i < 140000; i++) {
-                        fhAdd+=String.fromCharCode(i)
-                    }
-                    setTsAll(fhAdd)
-                }}>
+                <Button
+                  onClick={event => {
+                      event.target.parentElement.style.display = 'none' // 点完就消失
+                      let fhAdd = '' // 符号追加
+                      for (let i = 32; i < 140000; i++) {
+                          fhAdd += String.fromCharCode(i)
+                      }
+                      setTsAll(fhAdd)
+                  }}>
                     直接看10万符号(电脑卡别点)
                 </Button>
                 <div style={{wordWrap: 'break-word'}}>
