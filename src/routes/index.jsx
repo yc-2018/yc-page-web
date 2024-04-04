@@ -31,7 +31,7 @@ export default [
         title:'仰晨-博客',
     },
     {
-        path:'/utils/specialChar',
+        path:'/utils-specialChar',
         element:<SpecialChar/>,
         title:'仰晨工具-字母数字转特殊字符',
     },
