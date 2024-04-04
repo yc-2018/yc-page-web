@@ -137,7 +137,7 @@ export default () => {
                       }
                       setTsAll(fhAdd)
                   }}>
-                    直接看10万符号(电脑卡别点)
+                    点击直接看10万符号(电脑卡别点)【有很多方块这些都是电脑当前字体不支持显示的符号】
                 </Button>
                 <div style={{wordWrap: 'break-word'}}>
                     {tsAll}
