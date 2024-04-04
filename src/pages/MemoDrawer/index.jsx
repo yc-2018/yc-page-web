@@ -265,6 +265,7 @@ const MemoDrawer = observer(() => {
                 case 'finish':  // 完成?
                     window.ikunSelectDate = undefined
                     return modal.confirm({
+                        maskClosable: true,         // 点遮罩可以关闭
                         title: `确定${itemObj.completed ? '取消' : ''}完成?`,
                         icon: <QuestionCircleFilled/>,
                         content: itemObj.completed ? '' : selectDate('完成'),
@@ -309,6 +310,7 @@ const MemoDrawer = observer(() => {
                         title: `确定加一吗?`,
                         icon: <QuestionCircleFilled/>,
                         content: selectDate('加一'),
+                        maskClosable: true,         // 点遮罩可以关闭
                         onOk() {
                             return new Promise(async (resolve, reject) => {
                                 const body = {

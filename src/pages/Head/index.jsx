@@ -10,6 +10,7 @@ import JWTUtils from "../../utils/JWTUtils";
 import UserStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
 import CommonStore from "../../store/CommonStore";
+import css from './head.module.css'
 
 
 export default observer(() => {
@@ -59,10 +60,15 @@ export default observer(() => {
                                     未登录
                                 </Avatar>
                                 :
+                                <div className={css.userImg}>
                                     <Dropdown
                                         placement="bottom"
                                         menu={{
-                                            items:[
+                                            items:[{
+                                                key: 'info',
+                                                label:'我的信息',
+                                                onClick: () => UserStore.setInfoModal(true),
+                                            },
                                                 {
                                                     key: 'openMemo',
                                                     label:'备忘录',
@@ -83,10 +89,12 @@ export default observer(() => {
                                     >
                                         <Avatar size={40}
                                                 style={{backgroundColor: 'rgba(255,255,255,0.45)'}}
-                                                src="https://api.dicebear.com/7.x/miniavs/svg?seed=1"
+                                                src={JWTUtils.getAvatar()}
                                                 icon={<UserOutlined />}
                                         />
                                     </Dropdown>
+                                    <span className={css.helloUserName}>你好! {JWTUtils.getName()}</span>
+                                </div>
 
                         }
                     </Col>
