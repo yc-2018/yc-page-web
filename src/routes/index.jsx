@@ -5,6 +5,7 @@ import Help from "../pages/Help";
 import NoPage from "../compontets/404/NoPage";
 import Blog from "../pages/Blog";
 import Mobile from "../pages/Mobile";
+import SpecialChar from "../pages/UtilsPage/SpecialChar";
 
 // 判断是否是移动端
 const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -27,6 +28,11 @@ export default [
     {
         path:'/blog',
         element:<Blog/>,
+        title:'仰晨-博客',
+    },
+    {
+        path:'/utils/specialChar',
+        element:<SpecialChar/>,
         title:'仰晨-博客',
     },
     {

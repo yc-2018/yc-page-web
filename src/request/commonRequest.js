@@ -4,13 +4,14 @@ import CommonStore from "../store/CommonStore";
 import UserStore from "../store/UserStore";
 import myAxios from "./myAxios";
 
+
 /** 用户登录 */
-export async function login(loginCode,expireTime='bt', loading) {
+export async function login(loginCode, expireTime = 'bt', loading) {
     try {
         loading && loading(true)
         const response = await axios.post(`https://yc556.cn/api/users/login?key=${loginCode}&expireTime=${expireTime}`);
         loading && loading(false)
-        const {code,msg,data} = response.data;
+        const {code, msg, data} = response.data;
 
         if (code === 1) {
             // 存储 JWT
@@ -25,14 +26,13 @@ export async function login(loginCode,expireTime='bt', loading) {
 
 export async function updateNameOrAvatar(body) {
     try {
-        const response = await myAxios.put(`/api/users`,body);
-        const {code,msg,data} = response.data;
+        const response = await myAxios.put(`/users`, body);
+        const {code, msg, data} = response.data;
         if (code === 1) {
             // 保存新的
             UserStore.jwt = data;
             CommonStore.msg.success("更新成功");
-            return true;
+            return 1;
         } else CommonStore.msg.error(msg);  // 显示消息
-    } catch (error) {
-    }
+    } catch (_err) {CommonStore.msg.error('操作失败')}
 }

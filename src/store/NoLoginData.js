@@ -37,8 +37,7 @@ export const items = [
         children: [
             {
                 label: '转特殊字母|数字',
-                key: 'specialChar',
-                disabled: true,
+                key: '/utils/specialChar',
             },
             {
                 label: '2FA验证码获取',
