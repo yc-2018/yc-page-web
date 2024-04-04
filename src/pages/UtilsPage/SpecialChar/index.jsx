@@ -1,6 +1,10 @@
 import TextArea from "antd/es/input/TextArea";
-import {useEffect, useState} from "react";
-import {Col, Row} from "antd";
+import React, {useEffect, useState} from "react";
+import {Button, Col, Row, Radio, Card} from "antd";
+import {CopyToClipboard} from "react-copy-to-clipboard/src";
+
+import CommonStore from "../../../store/CommonStore";
+
 
 // 普通字母
 const normalLetters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' //Array.from(Array(26)).map((_, i) => String.fromCharCode(65 + i))
@@ -35,17 +39,23 @@ const tsNumber = [
     "𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫",
     "𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡",
     "𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿",
-    "𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵"
+    "𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵",
+    "₀₁₂₃₄₅₆₇₈₉",
+    "⁰¹²³⁴⁵⁶⁷⁸⁹",
 ]
+
 
 export default () => {
     const [inputText, setInputText] = useState('')             // 输入文本
     const [outputText, setOutputText] = useState('')           // 输出文本
-    const [tsAbc, setTsAbc] = useState(tsLetter[2])             // 特殊字母
-    const [tsNumbers, setTsNumbers] = useState(tsNumber[2])     // 特殊数字
+    const [lgText,setLgText] = useState('')                    // 乱搞文本
+    const [tsAbc, setTsAbc] = useState(tsLetter[2])                      // 当前特殊字母
+    const [tsNumbers, setTsNumbers] = useState(tsNumber[2])              // 当前特殊数字
+    const [tsAll,setTsAll] = useState('')                      // 扩展:10万符号
 
-    useEffect(() => toTs(), [inputText]);
+    useEffect(() => toTs(), [inputText, tsAbc, tsNumbers]);
 
+    /** 输入框输入时触发，转换为指定的特殊字符 */
     const toTs = () => {
         let tsText = ''
         // 循环输入文本，判断每个字符是否在普通字母或普通数字中，如果在，则替换为特殊的字母或数字
@@ -72,13 +82,73 @@ export default () => {
             {element}
         </Col>
 
-    return (
+    return <>
         <Row>
-            {bd('输入文本',<TextArea rows={9} value={inputText} onChange={e => setInputText(e.target.value)}/>)}
-            {bd('输出文本',<TextArea rows={9} value={outputText}/>)}
-            {bd('乱搞文本',<TextArea rows={9}/>)}
+            {bd('输入文本', <TextArea rows={15} value={inputText} onChange={e => setInputText(e.target.value)}/>)}
+            {bd(<>输出文本<CopyText text={outputText} /></>, <TextArea rows={15} value={outputText}/>)}
+            {bd(
+              <>
+                  <Button size={'small'} onClick={() => setLgText(outputText)}>
+                      ➪输出过来
+                  </Button>
+                  乱搞文本
+                  <CopyText text={lgText} />
+              </>, <TextArea rows={15} value={lgText} onChange={v => setLgText(v.target.value)}/>)}
         </Row>
-    )
+        <div style={{margin: 10}}>
+            <hr style={{border: '#eaeaf5 solid 1px'}} />
 
+            <span>特殊字母：</span>
+            <Radio.Group value={tsAbc} onChange={e => setTsAbc(e.target.value)}>
+                {tsLetter.map(ts =>  <Radio.Button value={ts} key={ts}>{Array.from(ts).slice(0, 3).join('')}...</Radio.Button>)}
+            </Radio.Group>
+            <hr style={{border: '#eaeaf5 solid 1px'}} />
 
+            <span>特殊数字：</span>
+            <Radio.Group value={tsNumbers} onChange={e => setTsNumbers(e.target.value)}>
+                {tsNumber.map(ts =>  <Radio.Button value={ts} key={ts}>{Array.from(ts).slice(0, 3).join('')}...</Radio.Button>)}
+            </Radio.Group>
+            <hr style={{border: '#eaeaf5 solid 1px'}} />
+
+            <Card title={<div style={{textAlign:'center'}}>注意事项和说明</div>}>
+                <div>
+                    <b>特殊字母选项：</b>如果选项显示小写就说明大小写正常转换，
+                    <b style={{color: 'red'}}>如果显示大写的就说明本来的大小写都会转化为大写</b>；
+                    另外 <b style={{color: 'blue'}}>🇦🇧🇨...</b>比较特殊,在手机上显示<b style={{color: 'blue'}}>蓝色大字</b>,
+                    但是两个以上拼接在一起就会显示变成一些国旗符号,所以可以到乱搞文本上加上空格<b style={{color: 'blue'}}>🇦 🇧 🇨...</b>,这样手机上也能正常显示了。
+                </div>
+                <div>
+                    <b>乱搞文本：</b>顾名思义就是给你编辑的,因为输出文本输入框是跟着输入变的,所以输出框是不能编辑的,所以你可以点击【输出过来】按钮
+                    把输出文本 覆盖到乱搞文本。 <b>值得注意的是</b>：如果你已经在乱搞文本里面编辑了,就不要再点【输出过来】按钮了,因为是会覆盖你本来编辑的文字的。
+                </div>
+                <div><b>换特殊符号时：</b> 输出文本会实时改变。</div>
+                <div><b>更多特殊符号：</b>
+                    <a href={'https://blog.csdn.net/weixin_46665865/article/details/126132912'} target={'_blank'}>
+                        可以看看我的CSDN这篇笔记</a>，都已经分类整理好了
+                </div>
+                <Button 
+                  onClick={(event)=>{
+                      event.target.parentElement.style.display='none'
+                    let fhAdd = '' // 符号追加
+                    for (let i = 32; i < 140000; i++) {
+                        fhAdd+=String.fromCharCode(i)
+                    }
+                    setTsAll(fhAdd)
+                }}>
+                    直接看10万符号(电脑卡别点)
+                </Button>
+                <div style={{wordWrap: 'break-word'}}>
+                    {tsAll}
+                </div>
+            </Card>
+        </div>
+    </>
 }
+
+
+
+/** 复制组件 */
+const CopyText = ({text}) =>
+  <CopyToClipboard text={text} onCopy={()=>CommonStore.msg.success('复制成功')}>
+      <Button size={'small'}>复制文本</Button>
+  </CopyToClipboard>
