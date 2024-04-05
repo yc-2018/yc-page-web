@@ -1,16 +1,19 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {
     InfiniteScroll, List, Popup, SwipeAction, Toast,
-    Button, Tag, Radio, TextArea, Dialog, Picker,
-    PullToRefresh, SearchBar, Badge, Ellipsis, CalendarPicker
+    Button, Tag, Radio, TextArea, Dialog, PullToRefresh,
+    SearchBar, Badge, Ellipsis, CalendarPicker, Dropdown,
+    Space
 } from 'antd-mobile'
+
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest.js";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data";
-import styles from './mobile.module.css'
 import {ExclamationCircleFilled} from "@ant-design/icons";
+import {sortingOptions} from "../../store/NoLoginData";
+import styles from './mobile.module.css'
 
 
-let updateTime;
+let updateTime;     // 待办更新时间
 
 /**
  * @param type 要渲染的待办类型
@@ -22,30 +25,30 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     let total;  // 总条数 给父组件显示
 
     const [data, setData] = useState([])
-    const [hasMore, setHasMore] = useState(true)         // 是否自动翻页
-    const [page, setPage] = useState(1);                 // 待办翻页
-    const [completed, setCompleted] = useState(0);       // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
-    const [orderBy,setOrderBy] = useState(1)             // 排序
-    const [keyword, setKeyword] = useState(null)                 // 搜索关键字
-    const [visible, setVisible] = useState(undefined);           // 查看弹窗的显示和隐藏
-    const [editVisible, setEditVisible] = useState(undefined);   // 编辑弹窗的显示和隐藏
-    const [dateVisible, setDateVisible] = useState(false);   // 日期弹窗的显示和隐藏
-    const [loopTime, setLoopTime] = useState(undefined)          // 循环时间弹窗的显示和隐藏(用数据来控制)
-    const [loopTimeHasMore, setLoopTimeHasMore] = useState(null) // 循环时间是否自动翻页(布尔值bug有时无法启动副作用的启动)
-    const [loopTimePage, setLoopTimePage] = useState(1);          // 循环时间页数
-    const [pickerVisible, setPickerVisible] = useState(false)    // 待办状态选择器的显示和隐藏
+    const [hasMore, setHasMore] = useState(true)                // 是否自动翻页
+    const [page, setPage] = useState(1);                        // 待办翻页
+    const [completed, setCompleted] = useState(0);              // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+    const [orderBy,setOrderBy] = useState(1)                    // 排序
+    const [keyword, setKeyword] = useState(null)                        // 搜索关键字
+    const [visible, setVisible] = useState(undefined);                  // 查看弹窗的显示和隐藏
+    const [editVisible, setEditVisible] = useState(undefined);          // 编辑弹窗的显示和隐藏
+    const [dateVisible, setDateVisible] = useState(false);     // 日期弹窗的显示和隐藏
+    const [loopTime, setLoopTime] = useState(undefined)                 // 循环时间弹窗的显示和隐藏(用数据来控制)
+    const [loopTimeHasMore, setLoopTimeHasMore] = useState(null)        // 循环时间是否自动翻页(布尔值bug有时无法启动副作用的启动)
+    const [loopTimePage, setLoopTimePage] = useState(1);       // 循环时间页数
 
-    const [content, setContent] = useState('')   // 表单内容
-    const [itemType, setItemType] = useState(0) // 表单类型
+    const [content, setContent] = useState('')                   // 表单内容
+    const [itemType, setItemType] = useState(0)                 // 表单类型
 
-    useEffect(()=>{type === changeType && resetList()},[changeType])
-    useEffect(()=>{resetList()},[completed,orderBy])
-    useEffect(()=>{loopTimeHasMore && showLoopTime(visible.id)},[loopTimeHasMore])
+    useEffect(()=>{type === changeType && resetList()},[changeType])                // 新增或修改类型是当前类型 说明要在当前列表有变化
+    useEffect(()=>{resetList()},[completed,orderBy])                                // 筛选状态 或排序状态改变 就重置列表
+    useEffect(()=>{loopTimeHasMore && showLoopTime(visible.id)},[loopTimeHasMore])  // 循环时间自动翻页
 
 
     const textRef = useRef()          // 搜索框的ref 让它能自动获得焦点
     const loading = useRef()          // 显示加载中
     const dateRef = useRef()          // 绑定日期
+    const dropdownRef = useRef()      // 绑定排序和状态下拉菜单
 
     /** 重置列表 */
     const resetList = () => {
@@ -251,9 +254,43 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
     return(
         <>
-            <Button onClick={openAdd}>添加一条</Button>
-            <Button onClick={() => setPickerVisible(true)}>{/*状态:*/}{finishName(completed)} & {/*排序:*/}{orderByName(orderBy)}</Button>
-            {/*todo：状态和排序可以改成下来菜单*/}
+            <Dropdown ref={dropdownRef} >
+                <Button onClick={openAdd} size={'small'}>添加一条</Button>
+                {/*排序类型*/}
+                <Dropdown.Item key='sorter' title={<div style={{fontSize: 15}}>排序:{orderByName(orderBy)}</div>}>
+                    <div style={{ padding: 12 }}>
+                        <Radio.Group
+                            value={orderBy}
+                            onChange={e => setOrderBy(e) || dropdownRef.current.close()}
+                        >
+                            <Space direction='vertical'>
+                                {sortingOptions.map(item =>
+                                    <Radio key={item.value} value={item.value} style={{width: '90vw'}}>
+                                        {item.label}
+                                    </Radio>
+                                )}
+                            </Space>
+                        </Radio.Group>
+                    </div>
+                </Dropdown.Item>
+                {/*完成状态*/}
+                <Dropdown.Item key='toDoStatus' title={<div style={{fontSize: 15}}>状态:{finishName(completed)}</div>}>
+                    <div style={{ padding: 12 }}>
+                        <Radio.Group
+                            value={completed}
+                            onChange={e => setCompleted(e) || dropdownRef.current.close()}
+                        >
+                            <Space direction='vertical'>
+                                {columns.map(item =>
+                                    <Radio key={item.value} value={item.value} style={{width: '90vw'}}>
+                                        {item.label}
+                                    </Radio>
+                                )}
+                            </Space>
+                        </Radio.Group>
+                    </div>
+                </Dropdown.Item>
+            </Dropdown>
 
 
             {/*有数据时显示搜索框*/ (data?.length > 0 || keyword) &&
@@ -433,17 +470,6 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 }
             </Popup>
 
-
-            <Picker  /*待办条件 选择器(筛选)*/
-                columns={columns}
-                visible={pickerVisible}
-                onClose={() => setPickerVisible(false)}
-                value={[completed,orderBy]}
-                onConfirm={v => {
-                    setCompleted(v[0])  // 完成状态
-                    setOrderBy(v[1])    // 排序
-                }}
-            />
 
             {/*日期选择器（antd实验性组件）*/}
             <CalendarPicker
