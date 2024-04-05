@@ -57,6 +57,7 @@ export default ({setBarItem}) => {
               </>,
               closeOnMaskClick: true,
               onConfirm: async () => {
+                if (!username) return Toast.show({icon: 'fail', content: '请输入昵称'})
                 const funcResult = await updateNameOrAvatar({username, avatar})
                 Toast.show({
                   icon: funcResult === 1 ? 'success' : 'fail',
