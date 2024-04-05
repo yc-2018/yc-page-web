@@ -89,12 +89,8 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                         <div>
                             完成时间为现在或
                             <a ref={dateRef}            // 改日期显示
-                               onClick={() => {
-                                   setDateVisible(true)
-                               }}
-                            >
-                                选择日期
-                            </a>
+                               onClick={() => setDateVisible(true)}
+                            >选择日期</a>
                         </div>
                         :
                         '确定取消完成吗？',
@@ -125,13 +121,29 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
             // +1 ///////////////////////////////////////////////////////////////////////
             case 'addOne':
-                showLoading('loading', '加载中…')
-                const addOneResp = await saveOrUpdateToDoItem({id, numberOfRecurrences:777}, 'put')
-                if(addOneResp){
-                    Toast.show({icon: 'success', content: '成功'})
-                    setData(val => val.map(item => item.id === id ? {...item, numberOfRecurrences:item.numberOfRecurrences +1, updateTime: new Date().toLocaleString() } : item))
-                    setVisible(undefined)
-                }else Toast.show({icon: 'fail', content: '失败'})
+                updateTime = undefined  // 重置更新时间
+                await Dialog.confirm({
+                    content:
+                        <div>
+                            循环时间为现在或
+                            <a ref={dateRef}            // 改日期显示
+                               onClick={() => setDateVisible(true)}
+                            >选择日期</a>
+                        </div>
+                    ,
+                    onConfirm: async () => {
+                        showLoading('loading', '加载中…')
+                        const addOneResp = await saveOrUpdateToDoItem({id, updateTime, numberOfRecurrences: 777}, 'put')
+                        if(addOneResp){
+                            Toast.show({icon: 'success', content: '成功'})
+                            setData(val => val.map(item => item.id === id ? {
+                                ...item,
+                                numberOfRecurrences: item.numberOfRecurrences + 1,
+                                updateTime: updateTime || new Date().toLocaleString()
+                            } : item))
+                            setVisible(undefined)
+                        }else Toast.show({icon: 'fail', content: '失败'})
+                    }})
                 break;
 
             // 编辑 //////////////////////////////////////////////////////////////////////
