@@ -40,12 +40,12 @@ export const rightActions = item => [
     },
 ].filter(i => i);
 
-export const columns =[[
-    { label: '未完成', value: 0 },
-    { label: '完成', value: 1 },
-    { label: '全部', value: -1 }],sortingOptions]
-export const finishName =(column)=> columns[0].find(i => i.value === column).label
-export const orderByName =(column)=> columns[1].find(i => i.value === column).label
+export const columns = [
+    {label: '未完成', value: 0},
+    {label: '完成', value: 1},
+    {label: '全部', value: -1}]
+export const finishName =(column)=> columns.find(i => i.value === column).label
+export const orderByName =(column)=> sortingOptions.find(i => i.value === column).label
 
 /*列表随机返回一张欢迎图*/
 export const getWelcomePic = () => {

@@ -4,6 +4,7 @@ import {Collapse, DotLoading} from 'antd-mobile'
 import Md from "../../compontets/Md";
 import {blogMenu} from "../../store/NoLoginData";
 import {getBlogList, getBlogMd} from "../../request/blogRequest";
+import iconMapping from "../Blog/iconMapping";
 
 export default () => {
   const [menu, setMenu] = useState(blogMenu)                  // 菜单项
@@ -16,7 +17,7 @@ export default () => {
     <Collapse accordion>
       {
         blogMenu.map(itemList =>
-          <Collapse.Panel key={itemList[0]} title={itemList[0]}>
+          <Collapse.Panel key={itemList[0]} title={<> {iconMapping[itemList[0]]} {itemList[0]}</>}>
             <Collapse accordion>
               {itemList.slice(1).map(item =>
                 <Collapse.Panel key={item} title={item}>

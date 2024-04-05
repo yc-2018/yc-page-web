@@ -35,6 +35,22 @@
 /*}*/
 
 
+/* 长待办展开和收缩按钮 */
+.expand-button{
+    cursor: pointer;
+    user-select: none;
+    /*隐形边框*/
+    border: 1px solid rgba(0, 0, 0, 0);
+    transition: all 0.5s;
+    opacity: 0.8;
+    color: #1677ff;
+    font-weight: bold;
+    border-radius:0 0 6px 0;
+}
+.expand-button:hover{
+    border-bottom: .05cm solid rgb(227, 46, 46);
+}
+
 
 /*《添加待办》的按钮*/
 .addItemButton{
