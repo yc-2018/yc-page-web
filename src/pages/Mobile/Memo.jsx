@@ -316,7 +316,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
                 {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
                     <Tag color='success' fill='outline' style={{ '--background-color': '#c8f7c5', margin: '3px 10px' }}>
-                        {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace('T', ' ')}
+                        {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace('T00:00:00', '').replace('T', ' ')}
                     </Tag>
                 }
                 {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
@@ -426,7 +426,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 {loopTime?.length > 0 && <>
                     <List>
                         {loopTime?.map((item, index) =>
-                            <List.Item key={item.id}>{index + 1}：{item.memoDate.replace('T', ' ')} </List.Item>)
+                            <List.Item key={item.id}>{index + 1}：{item.memoDate.replace('T00:00:00', '').replace('T', ' ')} </List.Item>)
                         }
                     </List>
                     <InfiniteScroll loadMore={showLoopTime} hasMore={loopTime?.length % 10 === 0 && !!loopTimeHasMore}/></>
@@ -445,7 +445,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 }}
             />
 
-            {/*日期选择器*/}
+            {/*日期选择器（antd实验性组件）*/}
             <CalendarPicker
                 popupStyle={{zIndex: 99999}}
                 min={new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)}    // 前7天
