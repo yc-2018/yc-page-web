@@ -48,7 +48,7 @@ export default isMobile() ?
     ]
 
 // 把字符串组件 => 组件标签
-export function load(name) {
+function load(name) {
     const Page = lazy(() => import(`../pages/${name}`))
     return <Page/>
 }
