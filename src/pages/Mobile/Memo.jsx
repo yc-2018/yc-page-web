@@ -2,12 +2,12 @@ import React, {useEffect, useRef, useState} from 'react'
 import {
     InfiniteScroll, List, Popup, SwipeAction, Toast,
     Button, Tag, Radio, TextArea, Dialog, Picker,
-    PullToRefresh, SearchBar, Badge
+    PullToRefresh, SearchBar, Badge, Ellipsis
 } from 'antd-mobile'
-
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest.js";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data";
 import styles from './mobile.module.css'
+import {ExclamationCircleFilled} from "@ant-design/icons";
 
 
 /**
@@ -63,15 +63,14 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
         setIncompleteCounts(v=>({...v,...append?.map.groupToDoItemsCounts, [type]: total}))
     }
 
-    /**
-     * 改变总数 给父组件传值：未完成总数s*/
+    /** 改变总数 给父组件传值：未完成总数s */
     const changeTotal = (add='++') => {
         if(add==='++') ++total
         else --total
         setIncompleteCounts(v => ({...v, [type]: total}))
     }
 
-
+    /** 显示加载动画 */
     const showLoading = (icon, content) => {Toast.show({icon, content})}
 
     /** 执行动作 */
@@ -121,7 +120,10 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             // 删除
             case 'delete':
                 await Dialog.confirm({
-                    content: '确定删除该条备忘吗',
+                    content:
+                        <div style={{textAlign: 'center'}}>
+                            <ExclamationCircleFilled style={{color: 'red'}}/> 确定删除该条备忘吗
+                        </div>,
                     onConfirm: async () => {
                         const deleteResponse = await delToDoItem(id)
                         if(deleteResponse){
@@ -240,7 +242,16 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                                        onClick={() => setVisible(item)}
                                        clickable={false}>
                                 <Badge content={type === 1 && item.numberOfRecurrences} color={'#6ad59d'}> {/*循环待办显示次数*/}
-                                    <span style={{width: '100%'}}>{item.content}</span>
+                                    <span style={{width: '100%'}}>
+                                        <Ellipsis                       // 省略文本
+                                            direction='end'
+                                            content={item.content}      // 内容
+                                            expandText='展开'
+                                            collapseText='收起'
+                                            rows={3}
+                                            stopPropagationForActionButtons={['click']}
+                                        />
+                                    </span>
                                 </Badge>
                             </List.Item>
                         </SwipeAction>
