@@ -255,7 +255,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     return(
         <>
             <Dropdown ref={dropdownRef} >   {/*下拉菜单：antd的实验性组件*/}
-                <Button onClick={openAdd} size={'small'}>添加一条</Button>
+                <Button onClick={openAdd} size={'small'} style={{margin:5}}>添加一条</Button>
                 {/*排序类型*/}
                 <Dropdown.Item key='sorter' title={<div style={{fontSize: 15}}>排序:{orderByName(orderBy)}</div>}>
                     <div style={{ padding: 12 }}>
