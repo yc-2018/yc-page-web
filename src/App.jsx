@@ -1,5 +1,5 @@
 import {useRoutes} from 'react-router-dom'
-import React, { useEffect } from 'react';
+import React, {Suspense, useEffect} from 'react';
 import {App, message, Spin} from "antd";
 
 import './App.css';
@@ -28,6 +28,7 @@ export default observer(() => {
     return (
             <App message={{maxCount: 5}}>
                 {contextMsg}
+              <Suspense fallback={<h1>加载中...</h1>}>
                 {isMobile() ? null : window.location.pathname !== '/' && <Head/>}
                 {element}
                 {
@@ -38,6 +39,7 @@ export default observer(() => {
                         {/*备忘英语抽屉*/      <EnglishDrawer/>}
                     </>
                 }
+              </Suspense>
                 <Spin spinning={CommonStore.loading} fullscreen />{/* 加载动画 */}
             </App>
     )

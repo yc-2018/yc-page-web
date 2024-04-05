@@ -1,19 +1,15 @@
 // import {Navigate} from 'react-router-dom'
 
-import Home from '../pages/Home'
-import Help from "../pages/Help";
 import NoPage from "../compontets/404/NoPage";
-import Blog from "../pages/Blog";
-import Mobile from "../pages/Mobile";
-import SpecialChar from "../pages/UtilsPage/SpecialChar";
 import isMobile from "../utils/winUtils";
+import {lazy} from "react";
 
 
 export default isMobile() ?
     [
         {
             path: '/*',
-            element: <Mobile/>,
+            element: load('Mobile'),
             title: '仰晨备忘',
         },
     ]
@@ -21,22 +17,22 @@ export default isMobile() ?
     [
         {
             path: '/',
-            element: <Home/>,
+            element: load('Home'),
             title: 'Open备忘第一页',
         },
         {
             path: '/help',
-            element: <Help/>,
+            element: load('Help'),
             title: '仰晨-帮助页',
         },
         {
             path: '/blog',
-            element: <Blog/>,
+            element: load('Blog'),
             title: '仰晨-博客',
         },
         {
             path: '/utils-specialChar',
-            element: <SpecialChar/>,
+            element: load('UtilsPage/SpecialChar'),
             title: '仰晨工具-字母数字转特殊字符',
         },
         {
@@ -50,3 +46,9 @@ export default isMobile() ?
         //     element:<Navigate to="/home"/>
         // }
     ]
+
+// 把字符串组件 => 组件标签
+export function load(name) {
+    const Page = lazy(() => import(`../pages/${name}`))
+    return <Page/>
+}
