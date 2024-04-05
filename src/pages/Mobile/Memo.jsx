@@ -43,7 +43,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     useEffect(()=>{loopTimeHasMore && showLoopTime(visible.id)},[loopTimeHasMore])
 
 
-    const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
+    const textRef = useRef()          // 搜索框的ref 让它能自动获得焦点
     const loading = useRef()          // 显示加载中
     const dateRef = useRef()          // 绑定日期
 
