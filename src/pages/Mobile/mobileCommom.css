@@ -26,3 +26,7 @@
     content: "*";
     color: red;
 }
+
+.█tabsContainer .adm-tabs-content{
+    padding-top: 0;
+}

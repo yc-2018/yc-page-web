@@ -191,9 +191,9 @@ const MemoDrawer = observer(() => {
                     </div>
                 }
             >
-       <span className={styles.pointer}>
-           &nbsp;&nbsp;&nbsp;<CaretDownOutlined/>循环:{updateTime}<CaretDownOutlined/>
-       </span>
+                <span className={styles.pointer}>
+                    &nbsp;&nbsp;&nbsp;<CaretDownOutlined/>循环:{updateTime}<CaretDownOutlined/>
+                </span>
             </Dropdown>
 
         // 获取循环备忘录时间列表
@@ -212,14 +212,14 @@ const MemoDrawer = observer(() => {
         const selectDate = text =>
             <>
                 直接点击确定,【{text}时间】就是现在(带时分秒)
-                 <div>当然也允许您往前几天去选择日期(不带时分秒)</div>
+                <div>当然也允许您往前几天去选择日期(不带时分秒)</div>
                 <DatePicker
                     allowClear
                     size={"small"}
                     style={{width: '90%'}}
-                    placeholder={'选择日期,或默认当前时间:'+ new Date().toLocaleString()}
-                    disabledDate={current=>current && (current < moment().subtract(7, 'days') || current > moment())}
-                    onChange={(_, dateStr) => window.ikunSelectDate = dateStr? dateStr+'T00:00:00' : undefined}
+                    placeholder={'选择日期,或默认当前时间:' + new Date().toLocaleString()}
+                    disabledDate={current => current && (current < moment().subtract(7, 'days') || current > moment())}
+                    onChange={(_, dateStr) => window.ikunSelectDate = dateStr ? dateStr + 'T00:00:00' : undefined}
                 />
             </>
 
@@ -424,13 +424,32 @@ const MemoDrawer = observer(() => {
                                         <List.Item.Meta
                                             description={
                                                 <div data-id={id}>
-                                           <span data-action="see"
-                                                 style={{userSelect: 'auto'}}
-                                                 className={(itemType === 3 && !completed && styles.gradientText) || null}
-                                           >
-                                               {/*待办内容*/ content}
-                                           </span>
-                                                    <br/>
+                                                    <div data-action="see"
+                                                          style={{userSelect: 'auto'}}
+                                                          className={(itemType === 3 && !completed && styles.gradientText) || null}
+                                                    >
+                                                        {content?.slice(0, 100)}
+                                                        {/*待办内容*/ content?.length > 100 &&
+                                                            <span>
+                                                                <span/> {/*用来展开或收起的文字变化*/}
+                                                                <span
+                                                                    className='expand-button'
+                                                                    onClick={event => {
+                                                                        if (event.target.innerText === '...展开') {
+                                                                            event.target.parentElement.childNodes[0].innerText = content.slice(100)
+                                                                            event.target.innerText = '收起'
+                                                                        } else {
+                                                                            event.target.parentElement.childNodes[0].innerText = ''
+                                                                            event.target.innerText = '...展开'
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    ...展开
+                                                                </span>
+                                                            </span>
+
+                                                        }
+                                                    </div>
 
                                                     {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
                                                         <Badge count={numberOfRecurrences}

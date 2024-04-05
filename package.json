@@ -16,7 +16,7 @@
     "@types/node": "^16.18.61",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
-    "antd": "^5.11.1",
+    "antd": "^5.16.0",
     "antd-mobile": "^5.34.0",
     "axios": "^1.6.2",
     "markdown-to-jsx": "^7.4.4",

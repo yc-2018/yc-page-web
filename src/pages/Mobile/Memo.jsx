@@ -1,14 +1,19 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {
     InfiniteScroll, List, Popup, SwipeAction, Toast,
-    Button, Tag, Radio, TextArea, Dialog, Picker,
-    PullToRefresh, SearchBar, Badge
+    Button, Tag, Radio, TextArea, Dialog, PullToRefresh,
+    SearchBar, Badge, Ellipsis, CalendarPicker, Dropdown,
+    Space
 } from 'antd-mobile'
 
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest.js";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data";
+import {ExclamationCircleFilled} from "@ant-design/icons";
+import {sortingOptions} from "../../store/NoLoginData";
 import styles from './mobile.module.css'
 
+
+let updateTime;     // 待办更新时间
 
 /**
  * @param type 要渲染的待办类型
@@ -20,28 +25,30 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     let total;  // 总条数 给父组件显示
 
     const [data, setData] = useState([])
-    const [hasMore, setHasMore] = useState(true)         // 是否自动翻页
-    const [page, setPage] = useState(1);                 // 待办翻页
-    const [completed, setCompleted] = useState(0);       // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
-    const [orderBy,setOrderBy] = useState(1)             // 排序
-    const [keyword, setKeyword] = useState(null)                 // 搜索关键字
-    const [visible, setVisible] = useState(undefined);           // 查看弹窗的显示和隐藏
-    const [editVisible, setEditVisible] = useState(undefined);   // 编辑弹窗的显示和隐藏
-    const [loopTime, setLoopTime] = useState(undefined)          // 循环时间弹窗的显示和隐藏(用数据来控制)
-    const [loopTimeHasMore, setLoopTimeHasMore] = useState(null) // 循环时间是否自动翻页(布尔值bug有时无法启动副作用的启动)
-    const [loopTimePage, setLoopTimePage] = useState(1);          // 循环时间页数
-    const [pickerVisible, setPickerVisible] = useState(false)    // 待办状态选择器的显示和隐藏
+    const [hasMore, setHasMore] = useState(true)                // 是否自动翻页
+    const [page, setPage] = useState(1);                        // 待办翻页
+    const [completed, setCompleted] = useState(0);              // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+    const [orderBy,setOrderBy] = useState(1)                    // 排序
+    const [keyword, setKeyword] = useState(null)                        // 搜索关键字
+    const [visible, setVisible] = useState(undefined);                  // 查看弹窗的显示和隐藏
+    const [editVisible, setEditVisible] = useState(undefined);          // 编辑弹窗的显示和隐藏
+    const [dateVisible, setDateVisible] = useState(false);     // 日期弹窗的显示和隐藏
+    const [loopTime, setLoopTime] = useState(undefined)                 // 循环时间弹窗的显示和隐藏(用数据来控制)
+    const [loopTimeHasMore, setLoopTimeHasMore] = useState(null)        // 循环时间是否自动翻页(布尔值bug有时无法启动副作用的启动)
+    const [loopTimePage, setLoopTimePage] = useState(1);       // 循环时间页数
 
-    const [content, setContent] = useState('')   // 表单内容
-    const [itemType, setItemType] = useState(0) // 表单类型
+    const [content, setContent] = useState('')                   // 表单内容
+    const [itemType, setItemType] = useState(0)                 // 表单类型
 
-    useEffect(()=>{type === changeType && resetList()},[changeType])
-    useEffect(()=>{resetList()},[completed,orderBy])
-    useEffect(()=>{loopTimeHasMore && showLoopTime(visible.id)},[loopTimeHasMore])
+    useEffect(()=>{type === changeType && resetList()},[changeType])                // 新增或修改类型是当前类型 说明要在当前列表有变化
+    useEffect(()=>{resetList()},[completed,orderBy])                                // 筛选状态 或排序状态改变 就重置列表
+    useEffect(()=>{loopTimeHasMore && showLoopTime(visible.id)},[loopTimeHasMore])  // 循环时间自动翻页
 
 
-    const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
+    const textRef = useRef()          // 搜索框的ref 让它能自动获得焦点
     const loading = useRef()          // 显示加载中
+    const dateRef = useRef()          // 绑定日期
+    const dropdownRef = useRef()      // 绑定排序和状态下拉菜单
 
     /** 重置列表 */
     const resetList = () => {
@@ -63,48 +70,86 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
         setIncompleteCounts(v=>({...v,...append?.map.groupToDoItemsCounts, [type]: total}))
     }
 
-    /**
-     * 改变总数 给父组件传值：未完成总数s*/
+    /** 改变总数 给父组件传值：未完成总数s */
     const changeTotal = (add='++') => {
         if(add==='++') ++total
         else --total
         setIncompleteCounts(v => ({...v, [type]: total}))
     }
 
-
+    /** 显示加载动画 */
     const showLoading = (icon, content) => {Toast.show({icon, content})}
 
     /** 执行动作 */
     const onAction =async action => {
         const {id, text} = action;
         switch (action.key) {
-            // 取消|完成
+            // 取消|完成 //////////////////////////////////////////////////////////////
             case 'success':
-                showLoading('loading', '加载中…')
-                const finishResp = await saveOrUpdateToDoItem({id, completed: text === '完成' ? 1 : 0}, 'put')
-                if(finishResp){
-                    Toast.show({icon: 'success', content: '成功'})
-                    /*全部的还是要显示在列表上*/completed === -1 && setData(val => val.map(item => item.id === id ? {...item, completed: text === '完成' ? 1 : 0, updateTime: new Date().toLocaleString()} : item))
-                    /*类型变了不属于显示范畴了*/completed !== -1 && setData(val => val.filter(item => item.id !== id))
+                updateTime = undefined  // 重置更新时间
+                await Dialog.confirm({
+                    content: text === '完成' ?
+                        <div>
+                            完成时间为现在或
+                            <a ref={dateRef}            // 改日期显示
+                               onClick={() => setDateVisible(true)}
+                            >选择日期</a>
+                        </div>
+                        :
+                        '确定取消完成吗？',
+                    onConfirm: async () => {
+                        showLoading('loading', '加载中…')
+                        const finishResp = await saveOrUpdateToDoItem({
+                            id,
+                            updateTime,
+                            completed: text === '完成' ? 1 : 0
+                        }, 'put')
+                        if(finishResp){
+                            Toast.show({icon: 'success', content: '成功'})
+                            /*全部的还是要显示在列表上*/
+                            completed === -1 && setData(val => val.map(item => item.id === id ? {
+                                ...item,
+                                completed: text === '完成' ? 1 : 0,
+                                updateTime: updateTime || new Date().toLocaleString()
+                            } : item))
+                            /*类型变了不属于显示范畴了*/completed !== -1 && setData(val => val.filter(item => item.id !== id))
 
-                    setVisible(undefined)
+                            setVisible(undefined)
 
-                    changeTotal(text === '完成' ? '--' : '++')// █给父组件传值：未完成总数s
-                }else Toast.show({icon: 'fail', content: '失败'})
+                            changeTotal(text === '完成' ? '--' : '++')// █给父组件传值：未完成总数s
+                        }else Toast.show({icon: 'fail', content: '失败'})
+                    }
+                })
                 break;
 
-            // +1
+            // +1 ///////////////////////////////////////////////////////////////////////
             case 'addOne':
-                showLoading('loading', '加载中…')
-                const addOneResp = await saveOrUpdateToDoItem({id, numberOfRecurrences:777}, 'put')
-                if(addOneResp){
-                    Toast.show({icon: 'success', content: '成功'})
-                    setData(val => val.map(item => item.id === id ? {...item, numberOfRecurrences:item.numberOfRecurrences +1, updateTime: new Date().toLocaleString() } : item))
-                    setVisible(undefined)
-                }else Toast.show({icon: 'fail', content: '失败'})
+                updateTime = undefined  // 重置更新时间
+                await Dialog.confirm({
+                    content:
+                        <div>
+                            循环时间为现在或
+                            <a ref={dateRef}            // 改日期显示
+                               onClick={() => setDateVisible(true)}
+                            >选择日期</a>
+                        </div>
+                    ,
+                    onConfirm: async () => {
+                        showLoading('loading', '加载中…')
+                        const addOneResp = await saveOrUpdateToDoItem({id, updateTime, numberOfRecurrences: 777}, 'put')
+                        if(addOneResp){
+                            Toast.show({icon: 'success', content: '成功'})
+                            setData(val => val.map(item => item.id === id ? {
+                                ...item,
+                                numberOfRecurrences: item.numberOfRecurrences + 1,
+                                updateTime: updateTime || new Date().toLocaleString()
+                            } : item))
+                            setVisible(undefined)
+                        }else Toast.show({icon: 'fail', content: '失败'})
+                    }})
                 break;
 
-            // 编辑
+            // 编辑 //////////////////////////////////////////////////////////////////////
             case 'edit':
                 setVisible(undefined)
                 const obj = data.find(item => item.id === id);
@@ -118,10 +163,13 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 }, 100)                                                       // 没在页面那么快，所以要延迟一点点
                 break;
 
-            // 删除
+            // 删除 ///////////////////////////////////////////////////////////////////////
             case 'delete':
                 await Dialog.confirm({
-                    content: '确定删除该条备忘吗',
+                    content:
+                        <div style={{textAlign: 'center'}}>
+                            <ExclamationCircleFilled style={{color: 'red'}}/> 确定删除该条备忘吗
+                        </div>,
                     onConfirm: async () => {
                         const deleteResponse = await delToDoItem(id)
                         if(deleteResponse){
@@ -131,7 +179,6 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                             setVisible(undefined)
                             action.completed === 0 && changeTotal('--')// █给父组件传值：未完成总数s
                         }else Toast.show({icon: 'fail', content: '删除失败'})
-
                     },
                 })
         }
@@ -191,9 +238,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
     }
 
 
-    /**
-     * 获取循环时间显示
-     * */
+    /** 获取循环时间显示 */
     const showLoopTime = async id => {
         if (!id) id = loopTime?.[0]?.toDoItemId
         const resp = await selectLoopMemoTimeList(id, loopTimePage);
@@ -209,9 +254,43 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
     return(
         <>
-            <Button onClick={openAdd}>添加一条</Button>
-            <Button onClick={() => setPickerVisible(true)}>{/*状态:*/}{finishName(completed)} & {/*排序:*/}{orderByName(orderBy)}</Button>
-            {/*todo：状态和排序可以改成下来菜单*/}
+            <Dropdown ref={dropdownRef} >   {/*下拉菜单：antd的实验性组件*/}
+                <Button onClick={openAdd} size={'small'} style={{margin:5}}>添加一条</Button>
+                {/*排序类型*/}
+                <Dropdown.Item key='sorter' title={<div style={{fontSize: 15}}>排序:{orderByName(orderBy)}</div>}>
+                    <div style={{ padding: 12 }}>
+                        <Radio.Group
+                            value={orderBy}
+                            onChange={e => setOrderBy(e) || dropdownRef.current.close()}
+                        >
+                            <Space direction='vertical'>
+                                {sortingOptions.map(item =>
+                                    <Radio key={item.value} value={item.value} style={{width: '90vw'}}>
+                                        {item.label}
+                                    </Radio>
+                                )}
+                            </Space>
+                        </Radio.Group>
+                    </div>
+                </Dropdown.Item>
+                {/*完成状态*/}
+                <Dropdown.Item key='toDoStatus' title={<div style={{fontSize: 15}}>状态:{finishName(completed)}</div>}>
+                    <div style={{ padding: 12 }}>
+                        <Radio.Group
+                            value={completed}
+                            onChange={e => setCompleted(e) || dropdownRef.current.close()}
+                        >
+                            <Space direction='vertical'>
+                                {columns.map(item =>
+                                    <Radio key={item.value} value={item.value} style={{width: '90vw'}}>
+                                        {item.label}
+                                    </Radio>
+                                )}
+                            </Space>
+                        </Radio.Group>
+                    </div>
+                </Dropdown.Item>
+            </Dropdown>
 
 
             {/*有数据时显示搜索框*/ (data?.length > 0 || keyword) &&
@@ -240,7 +319,16 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                                        onClick={() => setVisible(item)}
                                        clickable={false}>
                                 <Badge content={type === 1 && item.numberOfRecurrences} color={'#6ad59d'}> {/*循环待办显示次数*/}
-                                    <span style={{width: '100%'}}>{item.content}</span>
+                                    <span style={{width: '100%'}}>
+                                        <Ellipsis                       // 省略文本
+                                            direction='end'             // 省略尾部
+                                            content={item.content}      // 内容
+                                            expandText='展开'
+                                            collapseText='收起'
+                                            rows={3}                                    // 超过3行才省略
+                                            stopPropagationForActionButtons={['click']} // 阻止冒泡事件
+                                        />
+                                    </span>
                                 </Badge>
                             </List.Item>
                         </SwipeAction>
@@ -265,7 +353,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
 
                 {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
                     <Tag color='success' fill='outline' style={{ '--background-color': '#c8f7c5', margin: '3px 10px' }}>
-                        {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace('T', ' ')}
+                        {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace('T00:00:00', '').replace('T', ' ')}
                     </Tag>
                 }
                 {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
@@ -375,7 +463,7 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
                 {loopTime?.length > 0 && <>
                     <List>
                         {loopTime?.map((item, index) =>
-                            <List.Item key={item.id}>{index + 1}：{item.memoDate.replace('T', ' ')} </List.Item>)
+                            <List.Item key={item.id}>{index + 1}：{item.memoDate.replace('T00:00:00', '').replace('T', ' ')} </List.Item>)
                         }
                     </List>
                     <InfiniteScroll loadMore={showLoopTime} hasMore={loopTime?.length % 10 === 0 && !!loopTimeHasMore}/></>
@@ -383,14 +471,22 @@ export default ({type, setIncompleteCounts,changeType, setChangeType}) => {
             </Popup>
 
 
-            <Picker  /*待办条件 选择器(筛选)*/
-                columns={columns}
-                visible={pickerVisible}
-                onClose={() => setPickerVisible(false)}
-                value={[completed,orderBy]}
-                onConfirm={v => {
-                    setCompleted(v[0])  // 完成状态
-                    setOrderBy(v[1])    // 排序
+            {/*日期选择器（antd实验性组件）*/}
+            <CalendarPicker
+                popupStyle={{zIndex: 99999}}
+                min={new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)}    // 前7天
+                max={new Date()}                                              // 今天
+                visible={dateVisible}
+                selectionMode='single'
+                onClose={() => setDateVisible(false)}
+                onMaskClick={() => setDateVisible(false)}
+                onConfirm={date=> {
+                    if (!date) return;
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份是从0开始的，所以需要加1
+                    const day = String(date.getDate()).padStart(2, '0');
+                    updateTime = `${year}-${month}-${day}T00:00:00`
+                    dateRef.current.innerHTML = updateTime.replace('T00:00:00', '')
                 }}
             />
         </>

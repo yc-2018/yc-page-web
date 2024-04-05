@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import Markdown from 'markdown-to-jsx';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/hljs';    // 浅蓝底docco
@@ -6,22 +6,13 @@ import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/hljs';    // �
 import styles from './md.module.css'
 import {mdCodeLanguageList} from "../../store/NoLoginData";
 import {CopyToClipboard} from "react-copy-to-clipboard/src";
+import CommonStore from "../../store/CommonStore";
 
 
 /** 内联代码片 和 代码块 */
 const CodeBlock = ({children, className}) => {
-    const [copied, setCopied] = useState(false);    // 复制成功后1.5s提示
-
     // 是 内联代码片 (单行代码)直接返回。  感觉还是有点问题的 但问题不大！
     if (!/\n/.test(children) && !className) return <span className={styles.inlineCode}>{children}</span>;
-
-    /** 复制代码提示 */
-    const onCopy = () => {
-        setCopied(true);
-        setTimeout(() => {
-            setCopied(false);
-        }, 1500); // 1.5秒后恢复复制提示
-    };
 
     // 这个md可能是有bug 三反单引号后面的语言名 有时会被当成第一行 然后代码语言类就消失了
     const lines = children.split('\n');
@@ -33,20 +24,21 @@ const CodeBlock = ({children, className}) => {
 
     return (
         <div className={styles.codeBlockWrapper}>
+            <div className={styles.codeLangHead}>
+                {className?.replace(/lang-/, '')}
+                <CopyToClipboard text={children} onCopy={() => CommonStore.msg.success('复制成功')}>
+                    <button className={styles.copyButton}>复制代码</button>
+                </CopyToClipboard>
+            </div>
             <SyntaxHighlighter
                 className={styles.scrollbar}
-                customStyle={{ borderRadius: 10}}            // pre标签上的顶级样式组合的属性，这里的样式将覆盖以前的样式。
+                customStyle={{ borderRadius: '0 0 8px 8px', marginTop: 0}}            // pre标签上的顶级样式组合的属性，这里的样式将覆盖以前的样式。
                 showLineNumbers={lines.length > 2}           // 大于2行才显示行号（本来想1的 但是可能受上面说的bug影响 有的1行也会显示)
                 language={className?.replace(/lang-/, '')}
                 style={a11yDark}
             >
                 {children}
             </SyntaxHighlighter>
-            {copied ? <span className={styles.copySuccess}>已复制</span> : (
-                <CopyToClipboard text={children} onCopy={onCopy}>
-                    <button className={styles.copyButton}>复制代码</button>
-                </CopyToClipboard>
-            )}
         </div>
     );
 };

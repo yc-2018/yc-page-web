@@ -1,3 +1,4 @@
+/*这个标签的样式 抄Typora的*/
 .kbd {
     margin: 0 0.1em;
     padding: 0.1em 0.6em;
@@ -62,30 +63,29 @@ table .tr:nth-child(2n), thead {
 }
 
 
-/* --------------复制代码样式--------------- */
-/* 包括代码块 做相对定位 */
+/* --------------代码块样式--------------- */
+/* 代码块最外层（头和块） */
 .codeBlockWrapper {
     position: relative;
+    background-color: #323641;
+    border-radius: 10px;
+}
+/**代码头部*/
+.codeLangHead{
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 3px 3px 13px;
+    color: #f7fff8;
 }
 .copyButton {
-    position: absolute;
-    top: 0;
-    right: 0;
     background-color: transparent;
-    color: #4caf50;
-    border: none;
     padding: 0 5px;
-
+    color: #f7fff8;
+    border: 2px solid transparent; /* 初始化一个透明边框 */
+    border-radius: 5px;
+    transition: border-color 0.5s linear; /* 指定过渡效果应用于边框颜色，持续0.5秒，时间函数为线性 */
+    overflow: hidden;
 }
-.copySuccess {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-color: #4caf50;
-    color: white;
-    padding: 0 5px;
-    font-size: 12px;
-    transition: opacity 0.3s ease-in-out;
-    border-radius: 0 5px 0 5px;
-
+.copyButton:hover {
+    border-color: #768d79;
 }
