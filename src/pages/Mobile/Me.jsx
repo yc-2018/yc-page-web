@@ -14,7 +14,8 @@ let avatar = JWTUtils.getAvatar()   // 获取头像
  * @param setBarItem {function} 设置当前页面:用来退出后登录设置会到待办页面，不然重新登录进来会有bug
  * */
 export default ({setBarItem}) => {
-  const avatarRef = useRef()
+  const avatarRef = useRef()        // 头像ref 因为弹窗是静态的 用不了state 所以用ref
+
   return (
     <div style={{padding: '10px'}}>
       <List>
