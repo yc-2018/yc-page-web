@@ -11,6 +11,7 @@ import {observer} from "mobx-react-lite";
 import MemoDrawer from "./pages/MemoDrawer";
 import EnglishDrawer from "./pages/EnglishDrawer";
 import InfoModal from "./compontets/InfoModal";
+import isMobile from "./utils/winUtils";
 
 export default observer(() => {
     const element = useRoutes(routes);   //根据路由表生成对应的路由规则
@@ -27,13 +28,16 @@ export default observer(() => {
     return (
             <App message={{maxCount: 5}}>
                 {contextMsg}
-                {window.location.pathname !== '/' && <Head/>}
+                {isMobile() ? null : window.location.pathname !== '/' && <Head/>}
                 {element}
-                {/*登录弹窗*/        <LoginModal/>}
-                {/*用户信息修改弹窗*/  <InfoModal />}
-                {/*备忘录抽屉*/       <MemoDrawer/>}
-                {/*备忘英语抽屉*/      <EnglishDrawer />}
-
+                {
+                    isMobile() ? null : <>
+                        {/*登录弹窗*/        <LoginModal/>}
+                        {/*用户信息修改弹窗*/  <InfoModal/>}
+                        {/*备忘录抽屉*/       <MemoDrawer/>}
+                        {/*备忘英语抽屉*/      <EnglishDrawer/>}
+                    </>
+                }
                 <Spin spinning={CommonStore.loading} fullscreen />{/* 加载动画 */}
             </App>
     )

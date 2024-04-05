@@ -6,43 +6,47 @@ import NoPage from "../compontets/404/NoPage";
 import Blog from "../pages/Blog";
 import Mobile from "../pages/Mobile";
 import SpecialChar from "../pages/UtilsPage/SpecialChar";
+import isMobile from "../utils/winUtils";
 
-// 判断是否是移动端
-const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-// 判断是否是移动窗口
-const isMobileViewport = isMobileDevice || (window?.matchMedia('(max-width: 767px)')?.matches);
 
-const isMobile = isMobileDevice || isMobileViewport;
+export default isMobile() ?
+    [
+        {
+            path: '/*',
+            element: <Mobile/>,
+            title: '仰晨备忘',
+        },
+    ]
+    :
+    [
+        {
+            path: '/',
+            element: <Home/>,
+            title: 'Open备忘第一页',
+        },
+        {
+            path: '/help',
+            element: <Help/>,
+            title: '仰晨-帮助页',
+        },
+        {
+            path: '/blog',
+            element: <Blog/>,
+            title: '仰晨-博客',
+        },
+        {
+            path: '/utils-specialChar',
+            element: <SpecialChar/>,
+            title: '仰晨工具-字母数字转特殊字符',
+        },
+        {
+            path: '/*',
+            element: <NoPage/>,
+            title: '未知页面',
 
-export default [
-    {
-        path:'/',
-        element: isMobile ? <Mobile/> : <Home/>,
-        title:'Open备忘第一页',
-    },
-    {
-        path:'/help',
-        element:<Help/>,
-        title:'仰晨-帮助页',
-    },
-    {
-        path:'/blog',
-        element:<Blog/>,
-        title:'仰晨-博客',
-    },
-    {
-        path:'/utils-specialChar',
-        element:<SpecialChar/>,
-        title:'仰晨工具-字母数字转特殊字符',
-    },
-    {
-        path:'/*',
-        element:<NoPage/>,
-        title:'未知页面',
-
-    },
-    // {
-    //     path:'/',
-    //     element:<Navigate to="/home"/>
-    // }
-]
+        },
+        // {
+        //     path:'/',
+        //     element:<Navigate to="/home"/>
+        // }
+    ]
