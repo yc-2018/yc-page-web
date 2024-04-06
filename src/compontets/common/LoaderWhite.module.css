@@ -8,6 +8,16 @@
     border-radius: 50%;
 }
 
+.text {
+    --size: 111px;
+    position: absolute;
+    left: calc(50% - (var(--size) / 2));
+    top: calc(50% + (var(--size) / 2));
+    font-size: 1rem;
+    font-weight: bold;
+    color: #3d3a4e;
+}
+
 .loader .item1 {
     --size: 90px;
     animation: size1_1 2.5s infinite alternate;
