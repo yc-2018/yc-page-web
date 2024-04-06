@@ -90,7 +90,7 @@ export default observer(() => {
                                         <Avatar size={40}
                                                 style={{backgroundColor: 'rgba(255,255,255,0.45)'}}
                                                 src={JWTUtils.getAvatar()}
-                                                icon={<UserOutlined />}
+                                                icon={<UserOutlined style={{color: 'blue'}}/>}
                                         />
                                     </Dropdown>
                                     <span className={css.helloUserName}>你好! {JWTUtils.getName()}</span>
