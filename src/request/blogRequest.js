@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const blogAxios = axios.create({
-    baseURL: '/md', // 设置基础 URL
+    baseURL: 'https://yc556.cn/md', // 设置基础 URL
     timeout: 10000 // 设置超时时间为 10000 毫秒（10秒）
 });
 
