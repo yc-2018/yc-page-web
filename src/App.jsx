@@ -31,7 +31,7 @@ export default observer(() => {
   return (
     <App message={{maxCount: 5}}>
       {contextMsg}
-      <Suspense fallback={<LoaderWhite/>}>
+        <Suspense fallback={/* 懒加载等待时显示的组件 */<LoaderWhite/>}>
         {isMobile() ? null : window.location.pathname !== '/' && <Head/>}
         {element}
         {

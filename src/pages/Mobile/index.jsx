@@ -1,17 +1,18 @@
-import React, {useState} from 'react'
+import React, {lazy, useState} from 'react'
 import {observer} from "mobx-react-lite";
 
-import Memos from "./Memos";
-import Login from "./Login";
 import JWTUtils from "../../utils/JWTUtils";
 import {TabBar} from "antd-mobile";
 import {tabs} from "./data";
 
 import styles from "./mobile.module.css";
 import './mobileCommom.css';
-import Blog from "./Blog";
-import Me from "./Me";
 
+// 动态导入组件
+const Me = lazy(() => import('./Me'));
+const Blog = lazy(() => import('./Blog'));
+const Login = lazy(() => import('./Login'));
+const Memos = lazy(() => import('./Memos'));
 
 export default observer(() => {
     const [barItem,setBarItem] = useState('Memos');
