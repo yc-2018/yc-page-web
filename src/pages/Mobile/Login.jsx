@@ -4,7 +4,7 @@ import {login} from "../../request/commonRequest";
 import styles from './mobile.module.css'
 import {getWelcomePic, loginTime} from "./data";
 
-export default function () {
+export default () => {
     const formRef = useRef()
     const [loginLoading, setLoginLoading] = React.useState(false)
 

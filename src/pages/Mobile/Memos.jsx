@@ -12,7 +12,7 @@ const tabList = [
     {title: '工作', type: 6},
     {title: '其他', type: 7},
 ]
-export default () =>{
+export default () => {
 
     // 显示计数
     const [incompleteCounts,setIncompleteCounts] = useState({0:null,1:null,2:null,3:null,5:null,6:null,7:null})
@@ -21,7 +21,7 @@ export default () =>{
     const [ refresh, setRefresh] = useState(true)
 
     return (
-        <Tabs defaultActiveKey='普通' className={'█tabsContainer'} onChange={(key) => setRefresh(!refresh)}>
+        <Tabs defaultActiveKey='普通' className={'█tabsContainer'} onChange={(_key) => setRefresh(!refresh)}>
 
             {tabList.map(tab=>
                 <Tabs.Tab title={<Badge content={incompleteCounts[tab.type]}>{tab.title}</Badge>} key={tab.title}>
