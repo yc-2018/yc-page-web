@@ -10,19 +10,23 @@
 .                                                                                                                                                                                                                
 ├── public : 静态文件  
 ├── src : 项目源码
-│   ├── components : 组件
+│   ├── components : 各种自定义小组件
 │   ├── pages : 页面
-│   │   ├── Home : 导航页组件
+│   │   ├── Home : 导航页组件(包括书签组件和搜索组件)
 │   │   ├── Help : 帮助页组件
 │   │   ├── Blog : 博客页组件
-│   │   └── Mobile : 移动端组件
+│   │   ├── Head : 头部栏组件
+│   │   ├── UtilsPage : 各种小工具组件
+│   │   ├── Mobile : 移动端组件
+│   │   ├── MemoDrawer : 备忘录组件
+│   │   └── EnglishDrawer : 备忘英语组件
 │   ├── routes : 路由
 │   ├── store : 状态管理 和 一些静态数据
 │   ├── utils : 工具类   
 │   ├── request : 请求整合在此
 │   ├── App.js :  程序入口--路由跳转、公共页面
 │   ├── index.js : 项目入口--路由配置、国际化
-│   └── setupProxy.js : 调试模式下的代理
+│   └── setupProxy.js : 调试模式下的代理 实际部署这个没用得用Nginx
 ├── package.json : 包管理文件
 └── yarn.lock : 项目使用yarn管理依赖  
 ```
