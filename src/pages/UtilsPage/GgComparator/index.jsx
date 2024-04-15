@@ -13,33 +13,34 @@ export default () => {
   const [price1Ke2, price1Jin2] = getPrice(product2Price, product2Weight)
   
   
-  return <div style={{padding: 20, textAlign: 'center'}}>
-    <Row gutter={20} justify="center">
-      <Col span={6} style={{textAlign: 'center'}}>
-        <div>商品1</div>
-        <InputNumber addonAfter="克" value={product1Weight} onChange={value => setProduct1Weight(value)}
-                     style={{margin: 5}}/>
-        <InputNumber addonAfter="元" value={product1Price} onChange={value => setProduct1Price(value)}
-                     style={{margin: 5}}/>
-        <div>每克:{price1Ke1}块</div>
-        <div>一斤:{price1Jin1}块</div>
-        {getPriceCompare(price1Ke1, price1Ke2)}
-      </Col>
-      
-      <Col span={6} style={{textAlign: 'center'}}>
-        <div>商品2</div>
-        <InputNumber addonAfter="克" value={product2Weight} onChange={value => setProduct2Weight(value)}
-                     style={{margin: 5}}/>
-        <InputNumber addonAfter="元" value={product2Price} onChange={value => setProduct2Price(value)}
-                     style={{margin: 5}}/>
-        <div>每克:{price1Ke2}块</div>
-        <div>一斤:{price1Jin2}块</div>
-        {getPriceCompare(price1Ke2, price1Ke1)}
-      </Col>
-    </Row>
-    <div>
+  return (
+    <div style={{padding: 20, textAlign: 'center'}}>
+      <Row gutter={20} justify="center">
+        <Col span={6} style={{textAlign: 'center'}}>
+          <div>商品1</div>
+          <InputNumber addonAfter="克" value={product1Weight} onChange={value => setProduct1Weight(value)}
+                       style={{margin: 5}}/>
+          <InputNumber addonAfter="元" value={product1Price} onChange={value => setProduct1Price(value)}
+                       style={{margin: 5}}/>
+          <div>每克:{price1Ke1}块</div>
+          <div>一斤:{price1Jin1}块</div>
+          {getPriceCompare(price1Ke1, price1Ke2)}
+        </Col>
+        
+        <Col span={6} style={{textAlign: 'center'}}>
+          <div>商品2</div>
+          <InputNumber addonAfter="克" value={product2Weight} onChange={value => setProduct2Weight(value)}
+                       style={{margin: 5}}/>
+          <InputNumber addonAfter="元" value={product2Price} onChange={value => setProduct2Price(value)}
+                       style={{margin: 5}}/>
+          <div>每克:{price1Ke2}块</div>
+          <div>一斤:{price1Jin2}块</div>
+          {getPriceCompare(price1Ke2, price1Ke1)}
+        </Col>
+      </Row>
+      <div>{getPriceDifference(price1Ke1, price1Jin1, price1Ke2, price1Jin2)}</div>
     </div>
-  </div>
+  )
 }
 
 /**
@@ -74,12 +75,12 @@ const getPriceCompare = (price1, price2) => {
  * 输入商品1和商品2的克数和价格 输出 每斤差了多少克 和每近差了多少元
  * @author ChenGuangLong
  * @since 2024/4/15 11:59
-*/
+ */
 const getPriceDifference = (price1Ke1, price1Jin1, price1Ke2, price1Jin2) => {
-  if (!price1Ke1 || !price1Jin1 || !price1Ke2 || !price1Jin2) return null
+  if (!price1Ke1 || !price1Ke2) return null
+  const weightDifference = Math.abs(price1Jin1 - price1Jin2)
   
-  
-
+  return <div style={{fontSize:40,color:'#4d4d4d'}}>一斤差了{weightDifference}块钱</div>
   
   
 }
