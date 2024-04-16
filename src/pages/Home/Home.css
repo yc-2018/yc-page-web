@@ -33,16 +33,24 @@
     background-color: #000000ea;
 }
 
-
-.aButton {
-    font-size: 8px;
+/*备案样式*/
+.filing {
+    font-size: 12px;
     position: fixed;
-    right: 44%;
+    right: 0;
+    left: 0;
+    margin-right: auto;
+    margin-left: auto;
+    width: fit-content; /* 居中 */
     bottom: 5px;
     color: white;
-    opacity: 0.5;
 }
-.aButton:hover{
-    color: white!important;
+.filing a{
+    color: #fff;
+    text-shadow: 0 0 5px #000;
+    opacity: .6;
+    transition: all 0.5s;
+}
+.filing a:hover{
     opacity: 1;
 }

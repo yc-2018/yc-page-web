@@ -36,6 +36,11 @@ export default isMobile() ?
             title: '仰晨工具-字母数字转特殊字符',
         },
         {
+            path: '/utils-ggComparator',
+            element: load('UtilsPage/GgComparator'),
+            title: '仰晨工具-gg比价器',
+        },
+        {
             path: '/*',
             element: <NoPage/>,
             title: '未知页面',

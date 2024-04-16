@@ -25,6 +25,7 @@ import UserStore from "../../store/UserStore";
 import CommonStore from "../../store/CommonStore";
 import JWTUtils from "../../utils/JWTUtils"
 import "./Home.css"
+import Filing from "../../compontets/Filing";
 
 
 function Home() {
@@ -281,13 +282,9 @@ function Home() {
 
         </div>
       </div>
-      <Button type="link"
-              href="https://beian.miit.gov.cn"
-              target="_blank"
-              className={'aButton'}
-      >
-        粤ICP备2024164470号
-      </Button>
+      {/*备案号显示*/}
+      <Filing/>
+      
     </div>
 
   );

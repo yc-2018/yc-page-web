@@ -40,6 +40,10 @@ export const items = [
                 key: 'utils-specialChar',
             },
             {
+                label: 'gg比价器',
+                key: 'utils-ggComparator',
+            },
+            {
                 label: '2FA验证码获取',
                 key: 'get2fa',
                 disabled: true,
