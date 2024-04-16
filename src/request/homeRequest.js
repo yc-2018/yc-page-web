@@ -42,7 +42,8 @@ const getBgFns = {
     },
     '风景': async () => {
         const {data: [image]} = await axios.get('/jfApi/home/bg/ajaxbg');
-        return 'https://i0.wp.com/www.jianfast.com' + image.replace('/400', '');
+        // return 'https://i0.wp.com/www.jianfast.com' + image.replace('/400', '');
+        return 'https://image.baidu.com/search/down?url=https://www.jianfast.com' + image.replace('/400', '');
     },
 }
 
