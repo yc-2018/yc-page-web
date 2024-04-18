@@ -26,6 +26,7 @@ import CommonStore from "../../store/CommonStore";
 import JWTUtils from "../../utils/JWTUtils"
 import "./Home.css"
 import Filing from "../../compontets/Filing";
+import SearchStore from "../../store/SearchStore";
 
 
 function Home() {
@@ -217,7 +218,23 @@ function Home() {
                 />
                 <FloatButton
                   icon={<SettingOutlined/>}
-                  tooltip="页面样式配置"
+                  tooltip={
+                  <div onClick={event => event.stopPropagation()}>
+                    <div style={{textAlign: 'center'}}>页面样式配置</div>
+                    
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={SearchStore.quickSearchIcon}
+                        onChange={event => {
+                          SearchStore.setQuickSearchIcon(event.target.checked)
+                        }}
+                      />
+                      快速搜索是否显示图标
+                    </label>
+                    
+                  </div>
+                  }
                   style={{right: 135}}
                   className='buttonOpacity'
                   onClick={() => {

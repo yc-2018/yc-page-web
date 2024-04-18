@@ -1,7 +1,9 @@
 import { makeAutoObservable } from 'mobx'
 
-class SearchEnginesStore {
+class SearchStore {
   searchEngines: string = localStorage.getItem('searchEngines') || 'Bing'
+  quickSearchIcon: any = localStorage.getItem('quickSearchIcon') ?? true
+
   
     //构造函数
     constructor() {
@@ -13,7 +15,11 @@ class SearchEnginesStore {
       localStorage.setItem('searchEngines',searchEngines)
       this.searchEngines = searchEngines;
     }
-      
+
+    setQuickSearchIcon(quickSearchIcon:boolean) {
+      localStorage.setItem('quickSearchIcon', quickSearchIcon ? 'ikun' : '')
+      this.quickSearchIcon = quickSearchIcon;
+    }
     // get print() {
     //   //可以把本来的值美化在输出
     //   return null
@@ -22,4 +28,4 @@ class SearchEnginesStore {
 
   }
   
-  export default new SearchEnginesStore()
+  export default new SearchStore()

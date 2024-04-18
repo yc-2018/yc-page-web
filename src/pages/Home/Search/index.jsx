@@ -10,7 +10,7 @@ import {
     updateSearchEngine
 } from "../../../request/homeRequest";
 import MySearch from '../../../compontets/MySearch';
-import searchStore from '../../../store/SearchEnginesStore';
+import searchStore from '../../../store/SearchStore';
 import {searchData} from '../../../store/NoLoginData';
 import UserStore from "../../../store/UserStore";
 import CommonStore from "../../../store/CommonStore";
@@ -171,7 +171,7 @@ function Search() {
                             className={"searchButton"}
                             icon={<ThunderboltOutlined />}
                             onClick={() => onSearch(item.engineUrl)}
-                            style={{ backgroundImage: `url(https://api.iowen.cn/favicon/${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]}.png)`}}
+                            style={{backgroundImage: searchStore.quickSearchIcon ? `url(https://api.iowen.cn/favicon/${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]}.png)` : undefined}}
                         >
                             {item.name}
                         </Button>
