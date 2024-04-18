@@ -169,8 +169,9 @@ function Search() {
                     <Dropdown menu={{items,onClick}} trigger={['contextMenu']} onContextMenu={onContextMenu} key={item.id}>
                         <Button
                             className={"searchButton"}
-                            onClick={() => onSearch(item.engineUrl)}
                             icon={<ThunderboltOutlined />}
+                            onClick={() => onSearch(item.engineUrl)}
+                            style={{ backgroundImage: `url(https://api.iowen.cn/favicon/${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]}.png)`}}
                         >
                             {item.name}
                         </Button>
