@@ -1,9 +1,10 @@
 import React, {useEffect, useRef, useState} from "react";
 import {QuestionCircleTwoTone, SmileTwoTone} from "@ant-design/icons";
-import {Modal, Input, Radio, App, Button, DatePicker, Popover, Row, Col} from 'antd';
+import {Modal, Input, Radio, Button, DatePicker, Popover, Row, Col} from 'antd';
 import {saveOrUpdateToDoItem} from "../../request/memoRequest.js";
 import styles from '../../common.module.css'
 import modalStyle from './formModal.module.css'
+import CommonStore from "../../store/CommonStore";
 
 const { TextArea } = Input;
 /**
@@ -23,8 +24,6 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
     const [openDateRange, setOpenDateRange] = useState(false)       // 日期范围选择
 
     const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
-
-    const { message } = App.useApp();
 
     // 初始化数据
     useEffect(()=> {
@@ -50,8 +49,8 @@ const FormModal = ({isOpen,setOpen,data,reList,currentMemoType}) => {
 
     /** 确定按钮（编辑完成给后端发请求） */
     const handleOk = async() => {
-        if(!formData.itemType?.toString())return message.error('备忘类型不能为空')
-        if(!formData.content)return message.error('备忘内容不能为空')
+        if(!formData.itemType?.toString())return CommonStore.msg.error('备忘类型不能为空')
+        if(!formData.content)return CommonStore.msg.error('备忘内容不能为空')
 
         setConfirmLoading(true);
         // 构造请求体

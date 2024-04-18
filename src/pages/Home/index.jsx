@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from 'react';
 import axios from "axios";
-import Bookmarks from './Bookmarks';
 import {observer} from 'mobx-react-lite'
 import {Avatar, Button, FloatButton, Input} from "antd";
 import {
@@ -18,15 +17,16 @@ import {
 } from "@ant-design/icons";
 import {useNavigate} from 'react-router-dom'
 
-import Search from './Search';
-import showOrNot from '../../store/ShowOrNot';
-import {reImagesUrl, uploadInfo, getPageInfo} from "../../request/homeRequest";
-import UserStore from "../../store/UserStore";
-import CommonStore from "../../store/CommonStore";
-import JWTUtils from "../../utils/JWTUtils"
 import "./Home.css"
+import Search from './Search';
+import Bookmarks from './Bookmarks';
+import JWTUtils from "../../utils/JWTUtils"
 import Filing from "../../compontets/Filing";
+import showOrNot from '../../store/ShowOrNot';
+import UserStore from "../../store/UserStore";
 import SearchStore from "../../store/SearchStore";
+import CommonStore from "../../store/CommonStore";
+import {reImagesUrl, uploadInfo, getPageInfo} from "../../request/homeRequest";
 
 
 function Home() {
