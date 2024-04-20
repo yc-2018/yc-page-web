@@ -1,8 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import axios from "axios";
-import Bookmarks from './Bookmarks';
 import {observer} from 'mobx-react-lite'
-import {Avatar, Button, FloatButton, Input} from "antd";
+import {Avatar, Button, FloatButton, Input, Slider} from "antd";
 import {
   PictureTwoTone,
   SnippetsTwoTone,
@@ -14,18 +13,20 @@ import {
   CloudUploadOutlined,
   CloudDownloadOutlined,
   QuestionCircleTwoTone,
-  SmileTwoTone, EditOutlined
+  SmileTwoTone, EditOutlined, LayoutTwoTone
 } from "@ant-design/icons";
 import {useNavigate} from 'react-router-dom'
 
-import Search from './Search';
-import showOrNot from '../../store/ShowOrNot';
-import {reImagesUrl, uploadInfo, getPageInfo} from "../../request/homeRequest";
-import UserStore from "../../store/UserStore";
-import CommonStore from "../../store/CommonStore";
-import JWTUtils from "../../utils/JWTUtils"
 import "./Home.css"
+import Search from './Search';
+import Bookmarks from './Bookmarks';
+import JWTUtils from "../../utils/JWTUtils"
 import Filing from "../../compontets/Filing";
+import showOrNot from '../../store/ShowOrNot';
+import UserStore from "../../store/UserStore";
+import SearchStore from "../../store/SearchStore";
+import CommonStore from "../../store/CommonStore";
+import {reImagesUrl, uploadInfo, getPageInfo} from "../../request/homeRequest";
 
 
 function Home() {
@@ -100,7 +101,7 @@ function Home() {
           {/*搜索框*/}
           <Search/>
 
-          {/*显示备忘录*/}
+          {/*显示备忘录***********************************************************/}
           <FloatButton
             onClick={() => showOrNot.setMemoDrawerShow(true)}
             icon={<SnippetsTwoTone/>}
@@ -108,7 +109,7 @@ function Home() {
             className='buttonOpacity'
           />
 
-          {/*背景*/}
+          {/*背景***********************************************************/}
           <FloatButton.Group
             style={{right: 80}}
             trigger="hover"
@@ -191,7 +192,7 @@ function Home() {
 
           {jwt ?
             (
-              /*用户登录后选项*/
+              /*用户登录后选项***********************************************************/
               <FloatButton.Group
                 trigger="hover"
                 icon={  // 头像
@@ -208,7 +209,6 @@ function Home() {
                 <FloatButton
                   icon={<PoweroffOutlined/>}
                   tooltip="退出登录"
-                  style={{right: 135}}
                   className='buttonOpacity'
                   onClick={() => {
                     UserStore.clearJwt()
@@ -216,18 +216,8 @@ function Home() {
                   }}
                 />
                 <FloatButton
-                  icon={<SettingOutlined/>}
-                  tooltip="页面样式配置"
-                  style={{right: 135}}
-                  className='buttonOpacity'
-                  onClick={() => {
-                    msg.info('还没写呢...');
-                  }}
-                />
-                <FloatButton
                   icon={<EditOutlined />}
                   tooltip="修改信息"
-                  style={{right: 135}}
                   className='buttonOpacity'
                   onClick={() => UserStore.setInfoModal(true)}
                 />
@@ -235,7 +225,7 @@ function Home() {
             )
             :
             (
-              /*用户登录按钮*/
+              /*用户登录按钮***********************************************************/
               <FloatButton
                 icon={<UserOutlined/>}
                 tooltip="用户登录"
@@ -247,25 +237,79 @@ function Home() {
               />
             )
           }
+          
+          {/*页面设置***********************************************************/}
+          <FloatButton.Group
+            trigger="hover"
+            icon={<LayoutTwoTone />}
+            tooltip="页面设置"
+            style={{right: 190, opacity: .5}}
+            className='buttonOpacity'
+          >
+            <FloatButton
+              icon={<SettingOutlined/>}
+              tooltip={
+                <div onClick={event => event.stopPropagation()}>
+                  <div style={{textAlign: 'center'}}>页面样式配置</div>
+                  
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={SearchStore.quickSearchIcon}
+                      onChange={e => SearchStore.setQuickSearchIcon(e.target.checked)}
+                    />
+                    快速搜索是否显示图标
+                  </label>
+                  <div style={{textAlign: 'center',margin:'5px 20px'}}>
+                    快速搜索图标的透明度
+                  <Slider
+                    min={10}
+                    max={90}
+                    value={SearchStore.searchIconTransparency}
+                    disabled={!SearchStore.quickSearchIcon}
+                    onChange={value => SearchStore.setSearchIconTransparency(value)}
+                    styles={{
+                    track: {
+                      background: '#FFF',
+                    },
+                    tracks: {
+                      background: "#a46e6e",
+                    },
+                    rail:{
+                      background: "#7b7b7b",
+                    },
+                  }}/>
+                  </div>
+                  
+                </div>
+              }
+              className='buttonOpacity'
+              onClick={() => {
+                msg.info('未完待续...');
+              }}
+            />
+          </FloatButton.Group>
 
-          {/*跳转到帮助*/}
+          {/*跳转到帮助***********************************************************/}
           <FloatButton
             onClick={() => navigate('/help')}
             icon={<QuestionCircleTwoTone/>}
             tooltip="帮助"
-            style={{right: 190}}
-            className='buttonOpacity'
-          />
-
-          {/*跳转到博客*/}
-          <FloatButton
-            onClick={() => navigate('/blog')}
-            icon={<SmileTwoTone/>}
-            tooltip="博客"
             style={{right: 245}}
             className='buttonOpacity'
           />
 
+          {/*跳转到博客***********************************************************/}
+          <FloatButton
+            onClick={() => navigate('/blog')}
+            icon={<SmileTwoTone/>}
+            tooltip="博客"
+            style={{right: 300}}
+            className='buttonOpacity'
+          />
+
+          
+          
           {/* 侧边半透明的边 移动到上面显示抽屉 */}
           <div
             onMouseEnter={() => showOrNot.setMemoDrawerShow(true)}

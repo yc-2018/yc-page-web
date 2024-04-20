@@ -7,8 +7,11 @@
 }
 
 .searchButton{
-    opacity: 0.6;
+    opacity: .7;
     transition: all 0.5s;
+    background-size: cover;                     /* 背景图像覆盖整个元素 */
+    background-position: center;                /* 背景图像居中 */
+    background-blend-mode: lighten;             /* 使用混合模式来提亮背景颜色 */
 }
 .searchButton:hover{
     opacity: 1;

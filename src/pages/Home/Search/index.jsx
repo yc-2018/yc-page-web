@@ -10,7 +10,7 @@ import {
     updateSearchEngine
 } from "../../../request/homeRequest";
 import MySearch from '../../../compontets/MySearch';
-import searchStore from '../../../store/SearchEnginesStore';
+import searchStore from '../../../store/SearchStore';
 import {searchData} from '../../../store/NoLoginData';
 import UserStore from "../../../store/UserStore";
 import CommonStore from "../../../store/CommonStore";
@@ -169,8 +169,12 @@ function Search() {
                     <Dropdown menu={{items,onClick}} trigger={['contextMenu']} onContextMenu={onContextMenu} key={item.id}>
                         <Button
                             className={"searchButton"}
-                            onClick={() => onSearch(item.engineUrl)}
                             icon={<ThunderboltOutlined />}
+                            onClick={() => onSearch(item.engineUrl)}
+                            style={{
+                                backgroundImage: searchStore.quickSearchIcon ? `url(https://api.iowen.cn/favicon/${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]}.png)` : undefined,
+                                backgroundColor: `rgba(255, 255, 255, ${(searchStore.searchIconTransparency * 0.01)})`,
+                        }}
                         >
                             {item.name}
                         </Button>

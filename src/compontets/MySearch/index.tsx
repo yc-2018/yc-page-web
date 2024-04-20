@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AutoComplete, Input } from 'antd';
-import searchStore from '../../store/SearchEnginesStore';
+import searchStore from '../../store/SearchStore';
 import {SendOutlined } from '@ant-design/icons';
 
 import {getThinkList} from "../../request/homeRequest";
