@@ -23,7 +23,7 @@ class SearchStore {
     }
 
     setSearchIconTransparency(searchIconTransparency:number) {
-      // localStorage.setItem('searchIconTransparency', searchIconTransparency.toString())
+      localStorage.setItem('searchIconTransparency', searchIconTransparency.toString())
       this._searchIconTransparency = searchIconTransparency;
     }
 
