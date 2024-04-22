@@ -16,10 +16,10 @@ import styles from './mobile.module.css'
 let updateTime;     // 待办更新时间
 
 /**
- * @param type 要渲染的待办类型
+ * @param type                要渲染的待办类型
  * @param setIncompleteCounts 给父组件传值：未完成总数s
- * @param changeType 监控值，如果和类型相同 就 重置该待办列表
- * @param setChangeType 如果新增或修改的类型不是目前待办的列表类型，就改变这个值为那个待办类型的值
+ * @param changeType          监控值，如果和类型相同 就 重置该待办列表
+ * @param setChangeType       如果新增或修改的类型不是目前待办的列表类型，就改变这个值为那个待办类型的值
  * */
 export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
   let total;  // 总条数 给父组件显示
@@ -296,14 +296,15 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
       
       
       {/*有数据时显示搜索框*/ (data?.length > 0 || keyword) &&
-        <SearchBar cancelText={'清空'}
-                   placeholder='要搜索内容吗😶‍🌫️'
-                   onSearch={e => setKeyword(e) || resetList()}
+        <SearchBar
+          cancelText={'清空'}
+          placeholder='要搜索内容吗😶‍🌫️'
+          onSearch={e => setKeyword(e) || resetList()}
           // onBlur={onSearch}  // 输入框失去焦点时触发（搜索也会触发 如果想就可以改成e.target.value
-                   onCancel={() => keyword && (setKeyword(null) || resetList())}
-                   onClear={() => keyword && (setKeyword(null) || resetList())}
-                   showCancelButton
-                   maxLength={100}
+          onCancel={() => keyword && (setKeyword(null) || resetList())}
+          onClear={() => keyword && (setKeyword(null) || resetList())}
+          showCancelButton
+          maxLength={100}
         />
       }
       
@@ -315,22 +316,30 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
       >
         <List>
           {data.map(item => (
-            <SwipeAction key={item.id} leftActions={leftActions(item)} rightActions={rightActions(item)} onAction={onAction}>
-              <List.Item key={item.id}
-                         style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
-                         onClick={() => setVisible(item)}
-                         clickable={false}>
-                <Badge content={type === 1 && item.numberOfRecurrences} color={'#6ad59d'}> {/*循环待办显示次数*/}
+            <SwipeAction    // 滑动操作
+              key={item.id}
+              leftActions={leftActions(item)}
+              rightActions={rightActions(item)}
+              onAction={onAction}
+            >
+              <List.Item
+                key={item.id}
+                style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
+                onClick={() => setVisible(item)}
+                clickable={false}
+              >
+                {/*循环待办显示次数*/}
+                <Badge content={type === 1 && item.numberOfRecurrences} color={'#6ad59d'}>
                   <span style={{width: '100%'}}>
-                                        <Ellipsis                       // 省略文本
-                                          direction='end'             // 省略尾部
-                                          content={item.content}      // 内容
-                                          expandText='展开'
-                                          collapseText='收起'
-                                          rows={3}                                    // 超过3行才省略
-                                          stopPropagationForActionButtons={['click']} // 阻止冒泡事件
-                                        />
-                                    </span>
+                    <Ellipsis                       // 省略文本
+                      direction='end'             // 省略尾部
+                      content={item.content}      // 内容
+                      expandText='展开'
+                      collapseText='收起'
+                      rows={3}                                    // 超过3行才省略
+                      stopPropagationForActionButtons={['click']} // 阻止冒泡事件
+                    />
+                  </span>
                 </Badge>
               </List.Item>
             </SwipeAction>
@@ -359,58 +368,76 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
           </Tag>
         }
         {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
-          <Tag color='warning'
-               fill='outline'
-               onClick={() => {
-                 setLoopTime([])
-                 setLoopTimeHasMore(visible.id)
-                 setLoopTimePage(1)
-                 loading.current = Toast.show({
-                   icon: 'loading',
-                   content: '加载中…',
-                   duration: 0,
-                 })
-               }}
-               style={{'--background-color': '#fcecd8', '--border-radius': '6px'}}>
+          <Tag
+            color='warning'
+            fill='outline'
+            onClick={() => {
+              setLoopTime([])
+              setLoopTimeHasMore(visible.id)
+              setLoopTimePage(1)
+              loading.current = Toast.show({
+                icon: 'loading',
+                content: '加载中…',
+                duration: 0,
+              })
+            }}
+            style={{'--background-color': '#fcecd8', '--border-radius': '6px'}}
+          >
             {`循环次数: ${visible?.numberOfRecurrences}▼`}
           </Tag>
         }
         <div style={{height: '38vh', overflowY: 'scroll'}}>
-                    <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px'}}>
-                        {visible?.content}
-                    </pre>
+          <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px'}}>
+            {visible?.content}
+          </pre>
         </div>
         
         
         {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
-          <Button color='primary' className={styles.popupButton} onClick={() => onAction({key: 'edit', id: visible?.id})}>
+          <Button
+            color='primary'
+            className={styles.popupButton}
+            onClick={() => onAction({key: 'edit', id: visible?.id})}
+          >
             修改
           </Button>
         }
         {/*未完成的显示完成按钮 */ visible?.completed === 0 &&
-          <Button color='success' className={styles.popupButton} onClick={() => onAction({key: 'success', text: '完成', id: visible?.id})}>
+          <Button
+            color='success'
+            className={styles.popupButton}
+            onClick={() => onAction({key: 'success', text: '完成', id: visible?.id})}
+          >
             完成
           </Button>
         }
         
         {/*完成的显示取消完成按钮 */ visible?.completed === 1 &&
-          <Button className={styles.popupButton}
-                  style={{background: '#f6b234', border: 'none', color: '#fff'}}
-                  onClick={() => onAction({key: 'success', text: '取消完成', id: visible?.id})}>
+          <Button
+            className={styles.popupButton}
+            style={{background: '#f6b234', border: 'none', color: '#fff'}}
+            onClick={() => onAction({key: 'success', text: '取消完成', id: visible?.id})}
+          >
             取消完成
           </Button>
         }
         
         {/*显示删除按钮*/
-          <Button color='danger' className={styles.popupButton} onClick={() => onAction({key: 'delete', id: visible?.id})}>
+          <Button
+            color='danger'
+            className={styles.popupButton}
+            onClick={() => onAction({key: 'delete', id: visible?.id})}
+          >
             删除
           </Button>
         }
         
         {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
-          <Button className={styles.popupButton}
-                  style={{background: '#a934f6', border: 'none', color: '#fff'}}
-                  onClick={() => onAction({key: 'addOne', id: visible?.id})}>
+          <Button
+            className={styles.popupButton}
+            style={{background: '#a934f6', border: 'none', color: '#fff'}}
+            onClick={() => onAction({key: 'addOne', id: visible?.id})}
+          >
             +1
           </Button>
         }
@@ -436,12 +463,14 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
           <div className={'█required'}>
             内容
           </div>
-          <TextArea rows={13}
-                    ref={textRef}
-                    style={{height: '250px'}}
-                    maxLength={2000} showCount
-                    placeholder="请输入备忘内容"
-                    value={content} onChange={value => setContent(value)}/>
+          <TextArea
+            rows={13}
+            ref={textRef}
+            style={{height: '250px'}}
+            maxLength={2000} showCount
+            placeholder="请输入备忘内容"
+            value={content} onChange={value => setContent(value)}
+          />
           <br/>
           <div className={'█required'}>
             请选择类型
@@ -469,13 +498,17 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
         onMaskClick={() => setLoopTime(undefined)}
         bodyStyle={{height: '55vh', overflow: 'scroll'}}
       >
-        {loopTime?.length > 0 && <>
-          <List>
-            {loopTime?.map((item, index) =>
-              <List.Item key={item.id}>{index + 1}：{item.memoDate.replace('T00:00:00', '').replace('T', ' ')} </List.Item>)
-            }
-          </List>
-          <InfiniteScroll loadMore={showLoopTime} hasMore={loopTime?.length % 10 === 0 && !!loopTimeHasMore}/></>
+        {loopTime?.length > 0 &&
+          <>
+            <List>
+              {loopTime?.map((item, index) =>
+                <List.Item key={item.id}>
+                  {index + 1}：{item.memoDate.replace('T00:00:00', '').replace('T', ' ')}
+                </List.Item>
+              )}
+            </List>
+            <InfiniteScroll loadMore={showLoopTime} hasMore={loopTime?.length % 10 === 0 && !!loopTimeHasMore}/>
+          </>
         }
       </Popup>
       
