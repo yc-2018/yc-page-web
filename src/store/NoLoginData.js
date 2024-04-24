@@ -43,11 +43,11 @@ export const items = [
                 label: 'gg比价器',
                 key: 'utils-ggComparator',
             },
-            {
-                label: '2FA验证码获取',
-                key: 'get2fa',
-                disabled: true,
-            },
+            // {
+            //     label: '2FA验证码获取',
+            //     key: 'utils-2af',
+            //     // disabled: true,
+            // },
         ],
     },
     {
