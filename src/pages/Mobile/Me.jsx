@@ -1,10 +1,11 @@
-import React, {useRef} from "react";
+import React, {useRef, useState} from "react";
 import {Button, Avatar, List, Dialog, Toast,Grid} from 'antd-mobile'
 
 import UserStore from "../../store/UserStore";
 import JWTUtils from "../../utils/JWTUtils";
 import {Input} from "antd";
 import {updateNameOrAvatar} from "../../request/commonRequest";
+import GgComparator from "./Tools/GgComparator";
 
 
 let username = JWTUtils.getName()   // 获取用户名
@@ -15,6 +16,7 @@ let avatar = JWTUtils.getAvatar()   // 获取头像
  * */
 export default ({setBarItem}) => {
   const avatarRef = useRef()        // 头像ref 因为弹窗是静态的 用不了state 所以用ref
+  const ggVisible = useState(false) // gg工具弹窗
 
   return (
     <div style={{padding: '10px'}}>
@@ -39,7 +41,7 @@ export default ({setBarItem}) => {
                   src={avatar}
                   style={{display: 'inline-block'}}
                   ref={avatarRef}
-                  alt
+                  alt={'头像'}
                 />
 
                 <Grid columns={5} gap={2}>
@@ -86,7 +88,7 @@ export default ({setBarItem}) => {
         <List.Item
           onClick={() => {
             Dialog.alert({
-              image: 'https://s21.ax1x.com/2024/04/04/pFbrav9.jpg',   // 微信+支付宝收款码图片
+              image: 'https://z.wiki/autoupload/20240420/4aC5.3735X1280-jz_%281%29.jpg',   // 微信+支付宝收款码图片
               title: '感谢你的支持!',
               confirmText: '关闭',
             })
@@ -94,6 +96,8 @@ export default ({setBarItem}) => {
         >
             打赏
         </List.Item>
+        <List.Item style={{textAlign: 'center', color: 'gray'}}>————工具————</List.Item>
+        <List.Item onClick={() => ggVisible[1](true)}>gg比价器</List.Item>
       </List>
 
       {/*退出登录*/}
@@ -105,6 +109,7 @@ export default ({setBarItem}) => {
       >
         退出登录
       </Button>
+      <GgComparator v={ggVisible}/>
     </div>)
 }
 

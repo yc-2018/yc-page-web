@@ -96,8 +96,7 @@ const Blog = () => {
             </Sider>
 
             {/*------ 页面右侧 -------*/}
-            <Layout style={{padding: '0 24px 24px'}}>
-                <br/>
+            <Layout style={{padding: '10px'}}>
                 <Content className={`${styles.scrollbar} ${styles.content}`}>
                     {loading ?
                         <LoaderWhite/>

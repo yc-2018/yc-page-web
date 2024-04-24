@@ -171,7 +171,10 @@ function Search() {
                             className={"searchButton"}
                             icon={<ThunderboltOutlined />}
                             onClick={() => onSearch(item.engineUrl)}
-                            style={{backgroundImage: searchStore.quickSearchIcon ? `url(https://api.iowen.cn/favicon/${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]}.png)` : undefined}}
+                            style={{
+                                backgroundImage: searchStore.quickSearchIcon ? `url(https://api.iowen.cn/favicon/${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]}.png)` : undefined,
+                                backgroundColor: `rgba(255, 255, 255, ${(searchStore.searchIconTransparency * 0.01)})`,
+                        }}
                         >
                             {item.name}
                         </Button>
