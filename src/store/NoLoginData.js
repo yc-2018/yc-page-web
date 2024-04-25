@@ -70,6 +70,14 @@ export const items = [
                 ),
                 key: 'cssGridLayoutGenerator',
             },
+            {
+                label: (
+                  <a href="https://yc556.gitee.io/2fa/" target="_blank" rel="noopener noreferrer">
+                      2FA验证码获取
+                  </a>
+                ),
+                key: '2fa',
+            },
         ],
     },
     {
