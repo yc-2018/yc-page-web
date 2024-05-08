@@ -83,13 +83,14 @@ export default ({children}) => {
                         {props.children}
                     </td>
             },
+            a: ({href, children}) => <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>,
             kbd: {
                 component: props =>
                     <kbd className={styles.kbd}>
                         {props.children}
                     </kbd>
             },
-            hr: {component: () => <hr className={styles.hr}/>},
+            hr: () => <hr className={styles.hr}/>,
         },
 
     }
