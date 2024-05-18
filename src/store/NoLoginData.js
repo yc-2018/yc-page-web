@@ -43,11 +43,11 @@ export const items = [
                 label: 'gg比价器',
                 key: 'utils-ggComparator',
             },
-            {
-                label: '2FA验证码获取',
-                key: 'get2fa',
-                disabled: true,
-            },
+            // {
+            //     label: '2FA验证码获取',
+            //     key: 'utils-2af',
+            //     // disabled: true,
+            // },
         ],
     },
     {
@@ -69,6 +69,14 @@ export const items = [
                     </a>
                 ),
                 key: 'cssGridLayoutGenerator',
+            },
+            {
+                label: (
+                  <a href="https://yc556.gitee.io/2fa/" target="_blank" rel="noopener noreferrer">
+                      2FA验证码获取
+                  </a>
+                ),
+                key: '2fa',
             },
         ],
     },
