@@ -8,6 +8,7 @@ import { ReactComponent as Py } from './svg/py.svg'
 import { ReactComponent as SpringBoot } from './svg/springboot.svg'
 import { ReactComponent as Win } from './svg/win.svg'
 import { ReactComponent as OtherIssues } from './svg/otherIssues.svg'
+import { ReactComponent as Sql } from './svg/sql.svg'
 
 
 export default {
@@ -19,6 +20,7 @@ export default {
     'Linux':<Linux/>,
     'Python':<Py/>,
     'SpringBoot':<SpringBoot/>,
+    'SQL':<Sql/>,
     'Windows':<Win/>,
     '其他问题':<OtherIssues/>,
 
