@@ -399,7 +399,7 @@ const MemoDrawer = () => {
               {getTag(3, "紧急")}
               {getTag(6, "工作")}
               {getTag(1, "循环", "magenta")}
-              {getTag(2, "长期", "warning")}
+              {getTag(2, "长期", "gold")}
               {getTag(5, "日记", "cyan")}
               {getTag(7, "其他","purple")}
             </Space>
