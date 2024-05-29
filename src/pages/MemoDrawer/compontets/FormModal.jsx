@@ -17,9 +17,8 @@ const {TextArea} = Input;
  * @param {number}      currentMemoType 当前备忘类型,编辑的不用，新增的才要
  * */
 const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
-  const [formData, setFormData] = useState(null);    // 用来复制编辑的数据（改变的）
-  const [confirmLoading, setConfirmLoading] = useState(false)
-  
+  const [formData, setFormData] = useState(null);                          // 用来复制编辑的数据（改变的）
+  const [confirmLoading, setConfirmLoading] = useState(false)     // 提交按钮loading
   const [openDate, setOpenDate] = useState(false)                 // 日期选择
   const [openDateRange, setOpenDateRange] = useState(false)       // 日期范围选择
   
@@ -42,8 +41,9 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
   }, [isOpen])
   
   /** 关闭弹窗 */
-  const closeModal = () => {
-    if (formData.content && formData.content !== data?.content) {
+  const closeModal = (notSubmit=true) => {
+    // 编辑框有内容 && 内容发送改变 && 不是提交 ==>> 提示弹窗
+    if (formData.content && formData.content !== data?.content && notSubmit) {
       modal.confirm({
         title: '检查到内容发送改变',
         content: '是否确定不保存内容直接关闭编辑框？',
@@ -72,7 +72,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
     body.id = data?.id;
     let result = await saveOrUpdateToDoItem(body, data && "put");
     if (result) {
-      closeModal();
+      closeModal(false);
       reList(Math.random()) // 刷新列表
     }
     setConfirmLoading(false);
