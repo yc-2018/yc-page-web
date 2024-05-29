@@ -253,7 +253,7 @@ const MemoDrawer = () => {
       case 'see':
         // 双击查看
         if (event.type === 'dblclick') {
-          modal.info({
+          modal.confirm({
             title: '查看备忘',
             maskClosable: true,
             okText: '关闭',
