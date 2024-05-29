@@ -16,7 +16,7 @@ import moment from 'moment';
 
 import showOrNot from "../../store/ShowOrNot";
 import UserStore from "../../store/UserStore";
-import FormModal from "../../compontets/FormModal";
+import FormModal from "./compontets/FormModal";
 import ShowOrNot from "../../store/ShowOrNot";
 import JWTUtils from "../../utils/JWTUtils";
 import {sortingOptions, tagNameMapper} from "../../store/NoLoginData";
@@ -224,6 +224,13 @@ const MemoDrawer = () => {
       />
     </>
   
+  /**
+   * 格式化时间（去0去T）
+   * @param strTime 时间字符串
+   * @author ChenGuangLong
+   * @since 2024/5/29 16:43
+  */
+  const formatTime = strTime => strTime?.replace('T00:00:00', ' ').replace('T', ' ')
   
   /** 处理待办列表的操作 */
   const listHandleAction = async event => {
@@ -345,8 +352,14 @@ const MemoDrawer = () => {
           <Spin spinning={webLoading} indicator={<></>}>
             <div style={{marginBottom: 8}}>
               {/*新增和编辑表单*/}
-              <FormModal isOpen={formModal} setOpen={setFormModal} data={fModalData}
-                         reList={setRefreshTrigger} currentMemoType={type}/>
+              <FormModal
+                isOpen={formModal}
+                setOpen={setFormModal}
+                data={fModalData}
+                reList={setRefreshTrigger}
+                currentMemoType={type}
+              />
+              
               <Tooltip title={'刷新当前待办'} mouseEnterDelay={0.6}>
                 <SyncOutlined className='refresh' spin={webLoading}
                               onClick={() => setRefreshTrigger(!refreshTrigger)}/>
@@ -467,9 +480,9 @@ const MemoDrawer = () => {
                         <div style={{fontSize: 10}}>
                           创建于:{createTime?.replace('T', ' ')}
                           {createTime !== updateTime && itemType === 1 ?
-                            getLoopMemoTimeList(id, updateTime?.replace('T00:00:00', ' ').replace('T', ' '))
+                            getLoopMemoTimeList(id, formatTime(updateTime))
                             :
-                            ` ${completed ? '完成' : '修改'}于:` + updateTime?.replace('T00:00:00', ' ').replace('T', ' ')
+                            ` ${completed ? '完成' : '修改'}于:` + formatTime(updateTime)
                           }
                         </div>
                       </div>
