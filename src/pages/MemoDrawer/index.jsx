@@ -37,20 +37,20 @@ const MemoDrawer = () => {
   const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
   const [webLoading, setWebLoading] = useState(false);        // 网络加载
   const [refreshTrigger, setRefreshTrigger] = useState(true); // 刷新触发(值无意义，改变即刷新
-  const [data, setData] = useState([]);     // 待办列表数据
-  const [list, setList] = useState([]);     // 待办展示列表
-  const [page, setPage] = useState(1);    // 待办翻页
-  const [type, setType] = useState(0);    // 待办类型
-  const [loopTimeList, setLoopTimeList] = useState([])                     // 循环时间列表
-  const [loopTimePage, setLoopTimePage] = useState(1);                  // 循环时间页数
-  const [loopTimeTotal, setLoopTimeTotal] = useState(0);               //循环时间总数
+  const [data, setData] = useState([]);                         // 待办列表数据
+  const [list, setList] = useState([]);                         // 待办展示列表
+  const [page, setPage] = useState(1);                        // 待办翻页
+  const [type, setType] = useState(0);                        // 待办类型
+  const [loopTimeList, setLoopTimeList] = useState([])          // 循环时间列表
+  const [loopTimePage, setLoopTimePage] = useState(1);        // 循环时间页数
+  const [loopTimeTotal, setLoopTimeTotal] = useState(0);      //循环时间总数
   const [loopTimeWebLoading, setLoopTimeWebLoading] = useState(true); // 循环时间网络加载
-  const [unFinishCounts, setUnFinishCounts] = useState();        // 待办未完成计数
-  const [completed, setCompleted] = useState(0);         // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
-  const [formModal, setFormModal] = useState(false);    // 是否显示新增或编辑的模态框。
-  const [fModalData, setFModalData] = useState();              // 设置模态框数据
-  const [keyword, setKeyword] = useState('');             // 搜索关键字
-  const [searchEmpty, setSearchEmpty] = useState(true); // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
+  const [unFinishCounts, setUnFinishCounts] = useState();             // 待办未完成计数
+  const [completed, setCompleted] = useState(0);              // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+  const [formModal, setFormModal] = useState(false);          // 是否显示新增或编辑的模态框。
+  const [fModalData, setFModalData] = useState();                     // 设置模态框数据
+  const [keyword, setKeyword] = useState('');                   // 搜索关键字
+  const [searchEmpty, setSearchEmpty] = useState(true);       // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
   
   const {notification, modal} = App.useApp();
   
@@ -398,10 +398,10 @@ const MemoDrawer = () => {
               {getTag(0, "普通")}
               {getTag(3, "紧急")}
               {getTag(6, "工作")}
-              {getTag(7, "其他")}
-              {getTag(1, "循环", "warning")}
+              {getTag(1, "循环", "magenta")}
               {getTag(2, "长期", "warning")}
-              {getTag(5, "日记", "default")}
+              {getTag(5, "日记", "cyan")}
+              {getTag(7, "其他","purple")}
             </Space>
           </Spin>
         </>
