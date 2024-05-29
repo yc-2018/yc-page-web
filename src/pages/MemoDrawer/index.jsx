@@ -406,8 +406,8 @@ const MemoDrawer = () => {
             </div>
             <Space>
               {getTag(0, "普通")}
-              {getTag(3, "紧急")}
               {getTag(6, "工作")}
+              {getTag(3, "紧急","red")}
               {getTag(1, "循环", "magenta")}
               {getTag(2, "长期", "gold")}
               {getTag(5, "日记", "cyan")}
