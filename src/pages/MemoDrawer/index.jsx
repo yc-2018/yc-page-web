@@ -37,23 +37,23 @@ const MemoDrawer = () => {
   const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
   const [webLoading, setWebLoading] = useState(false);        // 网络加载
   const [refreshTrigger, setRefreshTrigger] = useState(true); // 刷新触发(值无意义，改变即刷新
-  const [data, setData] = useState([]);     // 待办列表数据
-  const [list, setList] = useState([]);     // 待办展示列表
-  const [page, setPage] = useState(1);    // 待办翻页
-  const [type, setType] = useState(0);    // 待办类型
-  const [loopTimeList, setLoopTimeList] = useState([])                     // 循环时间列表
-  const [loopTimePage, setLoopTimePage] = useState(1);                  // 循环时间页数
-  const [loopTimeTotal, setLoopTimeTotal] = useState(0);               //循环时间总数
+  const [data, setData] = useState([]);                         // 待办列表数据
+  const [list, setList] = useState([]);                         // 待办展示列表
+  const [page, setPage] = useState(1);                        // 待办翻页
+  const [type, setType] = useState(0);                        // 待办类型
+  const [loopTimeList, setLoopTimeList] = useState([])          // 循环时间列表
+  const [loopTimePage, setLoopTimePage] = useState(1);        // 循环时间页数
+  const [loopTimeTotal, setLoopTimeTotal] = useState(0);      //循环时间总数
   const [loopTimeWebLoading, setLoopTimeWebLoading] = useState(true); // 循环时间网络加载
-  const [unFinishCounts, setUnFinishCounts] = useState();        // 待办未完成计数
-  const [completed, setCompleted] = useState(0);         // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
-  const [formModal, setFormModal] = useState(false);    // 是否显示新增或编辑的模态框。
-  const [fModalData, setFModalData] = useState();              // 设置模态框数据
-  const [keyword, setKeyword] = useState('');             // 搜索关键字
-  const [searchEmpty, setSearchEmpty] = useState(true); // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
-  
+  const [unFinishCounts, setUnFinishCounts] = useState();             // 待办未完成计数
+  const [completed, setCompleted] = useState(0);              // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+  const [formModal, setFormModal] = useState(false);          // 是否显示新增或编辑的模态框。
+  const [fModalData, setFModalData] = useState();                     // 设置模态框数据
+  const [keyword, setKeyword] = useState('');                   // 搜索关键字
+  const [searchEmpty, setSearchEmpty] = useState(true);       // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
+
   const {notification, modal} = App.useApp();
-  
+
   useEffect(() => {
     if (!JWTUtils.isExpired()) (async () => {
       setFModalData(null)     // 模态框数据重置 null和 undefined 来回切换
@@ -72,7 +72,7 @@ const MemoDrawer = () => {
       const {data, map} = resp;
       setData(data.records);
       setList(data.records);
-      
+
       if (completed === 0) setUnFinishCounts(map.groupToDoItemsCounts)
       // 如果刚打开时有未完成的紧急备忘 而且抽屉没打开 就弹出提醒
       if (initLoading && !showOrNot.memoDrawerShow && map.groupToDoItemsCounts['3'] > 0 && total === -1) {
@@ -96,16 +96,16 @@ const MemoDrawer = () => {
             </Space>
           )
         })
-        
+
       }
       total = data.total;
       setInitLoading(false);
       setWebLoading(false);
     })();
-    
+
   }, [UserStore.jwt, type, completed, refreshTrigger]);
-  
-  
+
+
   /** 点击加载更多数据触发 */
   const onLoadMore = async () => {
     setItemItemLoading(true);
@@ -118,7 +118,7 @@ const MemoDrawer = () => {
         })),
       ),
     );
-    
+
     // 使用 axios 发起请求
     const {data: respData} = await getToDoItems({type, page: page + 1, completed, orderBy, keyword});
     if (!respData) return;      // 保持代码的健壮性
@@ -130,10 +130,10 @@ const MemoDrawer = () => {
     setPage(page + 1);      // 异步放前面也没用
     // 触发 resize 事件
     // window.dispatchEvent(new Event('resize'));
-    
+
   };
-  
-  
+
+
   /** 判断 显示《加载更多》《到底了》还是什么都不显示 */
   const loadMore =
     !initLoading && !itemLoading && list.length < total ? (
@@ -141,8 +141,8 @@ const MemoDrawer = () => {
         <Button block onClick={onLoadMore}>加载更多</Button>
       </div>
     ) : !itemLoading && list.length && <Divider className='loadMore' plain>🥺到底啦🐾</Divider>;
-  
-  
+
+
   /** 分类标签生成 */
   const getTag = (TypeNum, typeName, color) =>
     <Badge size="small" offset={[-5, 2]}
@@ -160,8 +160,8 @@ const MemoDrawer = () => {
         {typeName}
       </Tag>
     </Badge>
-  
-  
+
+
   /** 获取循环备忘录时间列表 */
   const getLoopMemoTimeList = (id, updateTime) =>
     <Dropdown
@@ -196,7 +196,7 @@ const MemoDrawer = () => {
           &nbsp;&nbsp;&nbsp;<CaretDownOutlined/>循环:{updateTime}<CaretDownOutlined/>
         </span>
     </Dropdown>
-  
+
   // 获取循环备忘录时间列表
   const getLoopMemoTimeData = async id => {
     setLoopTimeWebLoading(true)
@@ -208,7 +208,7 @@ const MemoDrawer = () => {
       setLoopTimeTotal(resp.total)
     }
   }
-  
+
   /** 完成或加1时 可以选择日期 */
   const selectDate = text =>
     <>
@@ -223,24 +223,24 @@ const MemoDrawer = () => {
         onChange={(_, dateStr) => window.ikunSelectDate = dateStr ? dateStr + 'T00:00:00' : undefined}
       />
     </>
-  
+
   /**
    * 格式化时间（去0去T）
    * @param strTime 时间字符串
    * @author ChenGuangLong
    * @since 2024/5/29 16:43
-  */
+   */
   const formatTime = strTime => strTime?.replace('T00:00:00', ' ').replace('T', ' ')
-  
+
   /** 处理待办列表的操作 */
   const listHandleAction = async event => {
-    
+
     const target = event.target;
     const action = target.getAttribute('data-action');
     const id = target.parentElement.getAttribute('data-id');
     const itemObj = list.find(item => item.id === parseInt(id));
     const confirmAction = Array.from(target.classList).some(className => className.startsWith('confirm-'))  // 防止快速重复点
-    
+
     if (!action) return;
     // 防止点太快了
     if (isQueryOnClick && confirmAction) return // message.warning('哇，你点的好快呀👍');
@@ -248,28 +248,37 @@ const MemoDrawer = () => {
       isQueryOnClick = true
       window.setTimeout(() => isQueryOnClick = false, 1000)
     }
-    
+
     switch (action) {
       case 'see':
         // 双击查看
         if (event.type === 'dblclick') {
-          modal.info({
+          modal.confirm({
             title: '查看备忘',
             maskClosable: true,
             okText: '关闭',
+            cancelText: '编辑',
             width: 800,
             closable: true,
             icon: <BookOutlined/>,
-            content: <TextArea rows={14} value={itemObj.content} style={{margin: '0 0 0 -14px'}}/>
+            content: <TextArea rows={14} value={itemObj.content} style={{margin: '0 0 0 -14px'}}/>,
+            onCancel: (close) => {
+              // 点击自动传入的这个关闭方法，如果是点背景关闭的，就是空方法，转字符串比较短，点击编辑按钮就是比较长的关闭方法
+              if(close.toString().length > 20){ // 点击编辑按钮  关闭当前弹窗并打开编辑弹窗
+                setFModalData(itemObj)
+                setFormModal(true)
+                close()
+              }
+            },
           })
         }
         break;
-      
+
       case 'edit':
         setFModalData(itemObj)
         setFormModal(true)
         break;
-      
+
       case 'finish':  // 完成?
         window.ikunSelectDate = undefined
         return modal.confirm({
@@ -292,7 +301,7 @@ const MemoDrawer = () => {
             })
           }
         })
-      
+
       case 'delete':
         // 如果按钮已经在删除确认状态
         if (target.classList.contains('confirm-delete')) {
@@ -311,7 +320,7 @@ const MemoDrawer = () => {
           }, 3000);
         }
         break;
-      
+
       case 'addOne':
         window.ikunSelectDate = undefined
         return modal.confirm({
@@ -334,11 +343,12 @@ const MemoDrawer = () => {
             })
           }
         })
-      default: break
+      default:
+        break
     }
   }
-  
-  
+
+
   return (
     <Drawer
       placement="right"
@@ -359,20 +369,20 @@ const MemoDrawer = () => {
                 reList={setRefreshTrigger}
                 currentMemoType={type}
               />
-              
+
               <Tooltip title={'刷新当前待办'} mouseEnterDelay={0.6}>
                 <SyncOutlined className='refresh' spin={webLoading}
                               onClick={() => setRefreshTrigger(!refreshTrigger)}/>
               </Tooltip>
               备忘录
-              
+
               <SortSelect             /*自己搞的《排序下拉框》*/
                 value={orderBy}
                 onChange={value => setRefreshTrigger(orderBy = value)/*这不是传参，就是赋值*/}
                 options={sortingOptions}
                 loading={webLoading}
               />
-              
+
               <Select                 /*下拉框看《待办状态》*/
                 size='small'
                 value={completed}
@@ -396,12 +406,12 @@ const MemoDrawer = () => {
             </div>
             <Space>
               {getTag(0, "普通")}
-              {getTag(3, "紧急")}
               {getTag(6, "工作")}
-              {getTag(7, "其他")}
-              {getTag(1, "循环", "warning")}
-              {getTag(2, "长期", "warning")}
-              {getTag(5, "日记", "default")}
+              {getTag(3, "紧急","red")}
+              {getTag(1, "循环", "magenta")}
+              {getTag(2, "长期", "gold")}
+              {getTag(5, "日记", "cyan")}
+              {getTag(7, "其他", "purple")}
             </Space>
           </Spin>
         </>
@@ -462,10 +472,10 @@ const MemoDrawer = () => {
                                    ...展开
                                 </span>
                               </span>
-                            
+
                           }
                         </div>
-                        
+
                         {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
                           <Badge count={numberOfRecurrences}
                                  style={{backgroundColor: '#52c41a'}} offset={[-13, -1]}
@@ -474,9 +484,9 @@ const MemoDrawer = () => {
                           </Badge>
                         }
                         <ActionBtn actionName={'finish'}>{!!completed && '取消'}完成</ActionBtn>
-                        <ActionBtn actionName={'edit'} show={!completed}>编辑</ActionBtn>    {/*完成了就不要显示编辑了*/}
+                        <ActionBtn actionName={'edit'} show={!completed}>编辑</ActionBtn> {/*完成了就不要显示编辑了*/}
                         <ActionBtn actionName={'delete'}>删除</ActionBtn>
-                        
+
                         <div style={{fontSize: 10}}>
                           创建于:{createTime?.replace('T', ' ')}
                           {createTime !== updateTime && itemType === 1 ?
@@ -495,7 +505,7 @@ const MemoDrawer = () => {
           :
           <div className='loadMore' onClick={() => UserStore.setOpenModal(true)}>
             <Divider plain>🥺<Button type="link">请先登录</Button>🐾</Divider>
-            
+
             <Skeleton/>
             <Skeleton/>
             <Skeleton/>
@@ -503,7 +513,7 @@ const MemoDrawer = () => {
         }
       </Spin>
     </Drawer>
-  
+
   )
 }
 
