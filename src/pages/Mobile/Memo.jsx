@@ -447,7 +447,7 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
       <Popup      /* 编辑弹出层 **********************************************************/
         visible={!!editVisible}
         onMaskClick={async () => {
-          if (content === editVisible?.content) return setEditVisible(false)
+          if (!content || content === editVisible?.content) return setEditVisible(false)
           const result = await Dialog.confirm({
             content: '检测到内容已修改，直接返回已编辑的内容会丢失哦,确定退出吗？',
             closeOnMaskClick: true,     // 点击遮罩层关闭提示
