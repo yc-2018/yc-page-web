@@ -28,6 +28,12 @@ export default () => {
                     <Memo type={tab.type} setIncompleteCounts={setIncompleteCounts} changeType={changeType} setChangeType={setChangeType}/>
                 </Tabs.Tab>)
             }
+
+            <Tabs.Tab title={'英语'} key={'英语'}>
+                <div>
+                    <h1>未完待续...</h1>
+                </div>
+            </Tabs.Tab>
         </Tabs>
     )
 }
