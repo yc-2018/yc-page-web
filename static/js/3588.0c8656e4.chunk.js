@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkantd_demo=self.webpackChunkantd_demo||[]).push([[3588],{3588:(d,n,e)=>{e.r(n),e.d(n,{default:()=>t});const t={dndItem:"bookmark_dndItem__MwsZ3",dndContent:"bookmark_dndContent__LB8hc"}}}]);
+//# sourceMappingURL=3588.0c8656e4.chunk.js.map
