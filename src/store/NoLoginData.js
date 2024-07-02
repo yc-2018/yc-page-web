@@ -31,7 +31,7 @@ const buildSearchData = () => {
   const searchData = []
   for (let i = 0; i < searchDatas.length; i += 3) {
     searchData.push({
-      id: searchDatas[i],
+      id: i,
       isQuickSearch: searchDatas[i],
       name: searchDatas[i + 1],
       engineUrl: 'https://' + searchDatas[i + 2],
