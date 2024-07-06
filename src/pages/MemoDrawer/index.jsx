@@ -375,24 +375,8 @@ const MemoDrawer = () => {
                               onClick={() => setRefreshTrigger(!refreshTrigger)}/>
               </Tooltip>
               备忘录
-
-              <SortSelect             /*自己搞的《排序下拉框》*/
-                value={orderBy}
-                onChange={value => setRefreshTrigger(orderBy = value)/*这不是传参，就是赋值*/}
-                options={sortingOptions}
-                loading={webLoading}
-              />
-
-              <Select                 /*下拉框看《待办状态》*/
-                size='small'
-                value={completed}
-                style={{width: '6em'}}
-                onChange={value => setCompleted(value)}
-                options={[{label: '未完成', value: 0}, {label: '已完成', value: 1}, {
-                  label: '全部',
-                  value: -1
-                }]}
-              />
+              
+              {/* 添加按钮 */}
               <Tooltip title={'添加一个待办'} mouseEnterDelay={1}>
                 <Button
                   icon={<PlusOutlined/>}
@@ -403,6 +387,25 @@ const MemoDrawer = () => {
                   size={"small"} className={"addItemButton"}
                 />
               </Tooltip>
+              
+              <Select                 /*下拉框看《待办状态》*/
+                size='small'
+                value={completed}
+                style={{width: '6em',marginLeft:5}}
+                onChange={value => setCompleted(value)}
+                options={[{label: '未完成', value: 0}, {label: '已完成', value: 1}, {
+                  label: '全部',
+                  value: -1
+                }]}
+              />
+              
+              <SortSelect             /*自己搞的《排序下拉框》*/
+                value={orderBy}
+                onChange={value => setRefreshTrigger(orderBy = value)/*这不是传参，就是赋值*/}
+                options={sortingOptions}
+                loading={webLoading}
+              />
+              
             </div>
             <Space>
               {getTag(0, "普通")}
