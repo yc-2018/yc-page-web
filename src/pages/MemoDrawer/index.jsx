@@ -3,9 +3,9 @@ import {observer} from 'mobx-react-lite'
 import TextArea from "antd/es/input/TextArea";
 import {
   BookOutlined,
-  CaretDownOutlined,
+  CaretDownOutlined, ColumnHeightOutlined,
   PlusOutlined, QuestionCircleFilled,
-  SyncOutlined
+  SyncOutlined, VerticalAlignMiddleOutlined
 } from "@ant-design/icons";
 import {
   Drawer, List, Skeleton, Button, Tag,
@@ -31,12 +31,14 @@ import ActionBtn from "./compontets/ActionBtn";
 let total = -1;    // 初始化待办总数
 let orderBy = 1;   // 《表单》默认排序方式
 let isQueryOnClick = false; // 防止点太快了
+let openMemoText = 0;       //  控制全部展开备忘录内容 1展开 非1收缩
 
 const MemoDrawer = () => {
   const [initLoading, setInitLoading] = useState(true);       // 初始化加载
   const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
   const [webLoading, setWebLoading] = useState(false);        // 网络加载
-  const [refreshTrigger, setRefreshTrigger] = useState(true); // 刷新触发(值无意义，改变即刷新
+  const [refreshTrigger, setRefreshTrigger] = useState(true); // 刷新触发列表(值无意义，改变即刷新
+  const [refresh, setRefresh] = useState(true);               // 刷新触发：单纯驱动非状态变量改变页面
   const [data, setData] = useState([]);                         // 待办列表数据
   const [list, setList] = useState([]);                         // 待办展示列表
   const [page, setPage] = useState(1);                        // 待办翻页
@@ -347,7 +349,16 @@ const MemoDrawer = () => {
         break
     }
   }
-
+  
+  /**
+   * 设置是否展开备忘录内容
+   * @author ChenGuangLong
+   * @since 2024/7/6 16:52
+  */
+  const setOpenMemoText = v => {
+    openMemoText = v
+    setRefresh(!refresh)
+  };
 
   return (
     <Drawer
@@ -406,6 +417,27 @@ const MemoDrawer = () => {
                 loading={webLoading}
               />
               
+              {/*展开文本*/}
+              <Tooltip title="展开文本，对全部长备忘录的展开">
+                <Button
+                  size="small"
+                  shape="circle"
+                  icon={<ColumnHeightOutlined/>}
+                  onClick={() => setOpenMemoText(1)}
+                />
+                {' '}
+              </Tooltip>
+              
+              {/*收起文本*/}
+              <Tooltip title="收起文本，对全部长备忘录的收起">
+                <Button
+                  size="small"
+                  shape="circle"
+                  icon={<VerticalAlignMiddleOutlined/>}
+                  onClick={() => setOpenMemoText(-1)}
+                />
+              </Tooltip>
+              
             </div>
             <Space>
               {getTag(0, "普通")}
@@ -421,11 +453,14 @@ const MemoDrawer = () => {
       }
       /* 底部搜索框*/
       footer={!JWTUtils.isExpired() &&
-        <SearchBox keyword={keyword}
-                   setKeyword={setKeyword}
-                   setRefreshTrigger={setRefreshTrigger}
-                   searchEmpty={searchEmpty}
-                   setSearchEmpty={setSearchEmpty}/>
+        <SearchBox
+          keyword={keyword}
+          setKeyword={setKeyword}
+          setRefreshTrigger={setRefreshTrigger}
+          searchEmpty={searchEmpty}
+          setSearchEmpty={setSearchEmpty}
+          setOpenMemoText={setOpenMemoText}
+        />
       }
     >
       <Spin spinning={webLoading} tip={'正在加载' + tagNameMapper[type] + '待办'}>
@@ -459,7 +494,7 @@ const MemoDrawer = () => {
                           {content?.slice(0, 100)}
                           {/*待办内容*/ content?.length > 100 &&
                             <span>
-                                <span/> {/*用来展开或收起的文字变化*/}
+                              <span>{openMemoText === 1 && content.slice(100)}</span> {/*用来展开或收起的文字变化*/}
                               <span
                                 className='expand-button'
                                 onClick={event => {
@@ -472,10 +507,9 @@ const MemoDrawer = () => {
                                   }
                                 }}
                               >
-                                   ...展开
-                                </span>
+                                {openMemoText === 1 ? '收起' : '...展开'}
                               </span>
-
+                            </span>
                           }
                         </div>
 
