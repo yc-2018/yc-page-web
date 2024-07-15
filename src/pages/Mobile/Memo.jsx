@@ -11,6 +11,7 @@ import {finishName, columns, leftActions, rightActions, orderByName} from "./dat
 import {ExclamationCircleFilled} from "@ant-design/icons";
 import {sortingOptions} from "../../store/NoLoginData";
 import styles from './mobile.module.css'
+import HighlightKeyword from "../../utils/HighlightKeyword";
 
 
 let updateTime;     // 待办更新时间
@@ -307,7 +308,6 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
           maxLength={100}
         />
       }
-      
       <PullToRefresh
         pullingText={'用点力拉🤤'}
         canReleaseText={'忍住，别放开🥺'}
@@ -331,14 +331,18 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
                 {/*循环待办显示次数*/}
                 <Badge content={type === 1 && item.numberOfRecurrences} color={'#6ad59d'}>
                   <span style={{width: '100%'}}>
-                    <Ellipsis                       // 省略文本
-                      direction='end'             // 省略尾部
-                      content={item.content}      // 内容
-                      expandText='展开'
-                      collapseText='收起'
-                      rows={3}                                    // 超过3行才省略
-                      stopPropagationForActionButtons={['click']} // 阻止冒泡事件
-                    />
+                    {keyword ?
+                      <HighlightKeyword content={item.content} keyword={keyword}/>
+                      :
+                      <Ellipsis                       // 省略文本
+                        direction='end'             // 省略尾部
+                        content={item.content}      // 内容
+                        expandText='展开'
+                        collapseText='收起'
+                        rows={3}                                    // 超过3行才省略
+                        stopPropagationForActionButtons={['click']} // 阻止冒泡事件
+                      />
+                    }
                   </span>
                 </Badge>
               </List.Item>
