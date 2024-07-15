@@ -12,7 +12,7 @@ import CommonStore from "../../store/CommonStore";
 /** 内联代码片 和 代码块 */
 const CodeBlock = ({children, className}) => {
     // 是 内联代码片 (单行代码)直接返回。  感觉还是有点问题的 但问题不大！
-    if (!/\n/.test(children) && !className) return <span className={styles.inlineCode}>{children}</span>;
+    if (!/\n/.test(children) && !className) return <code className={styles.inlineCode}>{children}</code>;
 
     // 这个md可能是有bug 三反单引号后面的语言名 有时会被当成第一行 然后代码语言类就消失了
     const lines = children.split('\n');
@@ -83,13 +83,14 @@ export default ({children}) => {
                         {props.children}
                     </td>
             },
+            a: ({href, children}) => <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>,
             kbd: {
                 component: props =>
                     <kbd className={styles.kbd}>
                         {props.children}
                     </kbd>
             },
-            hr: {component: () => <hr className={styles.hr}/>},
+            hr: () => <hr className={styles.hr}/>,
         },
 
     }

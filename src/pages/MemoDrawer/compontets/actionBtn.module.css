@@ -1,0 +1,15 @@
+/* 列表下的全部按钮 */
+.btn {
+    padding: 0 1rem;
+    margin: 0 2px;
+    border-radius: 1.5rem;
+    border: 1px solid #3d3a4e;
+    color: #3f3d3d;
+    transition: all 0.8s;
+    opacity: 0.6;
+}
+
+.btn:hover {
+    background: rgba(61, 58, 78, 0.23);
+    opacity: .9;
+}

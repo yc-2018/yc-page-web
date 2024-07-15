@@ -3,21 +3,26 @@ import {Collapse, DotLoading} from 'antd-mobile'
 
 import Md from "../../compontets/Md";
 import {blogMenu} from "../../store/NoLoginData";
-import {getBlogList, getBlogMd} from "../../request/blogRequest";
-import iconMapping from "../Blog/iconMapping";
+import {blogBaseURL, getBlogItemIconObj, getBlogList, getBlogMd} from "../../request/blogRequest";
 
 export default () => {
   const [menu, setMenu] = useState(blogMenu)                  // 菜单项
+  const [icon, setIcon] = useState({})                  // 图标
 
-  /** 初始化获取最新菜单 */
-  useEffect(() => {getBlogList().then(data => setMenu(data))}, [])
+  /** 初始化获取最新菜单和图标 */
+  useEffect(() => {
+    getBlogItemIconObj().then(obj => {
+      setIcon(obj)
+      getBlogList().then(data => setMenu(data))
+    })
+  }, [])
 
   /** 构建菜单 */
   const buildMenu = blogMenu =>
     <Collapse accordion>
       {
         blogMenu.map(itemList =>
-          <Collapse.Panel key={itemList[0]} title={<> {iconMapping[itemList[0]]} {itemList[0]}</>}>
+          <Collapse.Panel key={itemList[0]} title={<> <img src={`${blogBaseURL}/icon/${icon[itemList[0]]}`} alt="图标"/> {itemList[0]}</>}>
             <Collapse accordion>
               {itemList.slice(1).map(item =>
                 <Collapse.Panel key={item} title={item}>

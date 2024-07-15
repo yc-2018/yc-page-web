@@ -50,22 +50,35 @@ export const orderByName =(column)=> sortingOptions.find(i => i.value === column
 /*列表随机返回一张欢迎图*/
 export const getWelcomePic = () => {
     const welcomePicList = [
-        'https://i.niupic.com/images/2024/01/18/fq2S.png',
-        'https://i.niupic.com/images/2024/01/18/fq1O.png',
-        'https://i.niupic.com/images/2024/01/18/fqnk.png',
-        'https://i.niupic.com/images/2024/01/18/fqnu.png',
-        'https://i.niupic.com/images/2024/01/18/fqnB.png',
-        'https://i.niupic.com/images/2024/01/18/fqnK.png',
-        'https://i.niupic.com/images/2024/01/18/fqnP.png',
-        'https://i.niupic.com/images/2024/01/18/fqnV.png',
-        'https://i.niupic.com/images/2024/01/18/fqo3.png',
-        'https://i.niupic.com/images/2024/01/18/fqo9.png',
-        'https://i.niupic.com/images/2024/01/18/fqog.png',
-        'https://i.niupic.com/images/2024/01/18/fqoo.png',
-        'https://i.niupic.com/images/2024/01/18/fqoP.png',
-        'https://i.niupic.com/images/2024/01/18/fqoW.png',
+        // 'https://i.niupic.com/images/2024/01/18/fqoW.png',
+        '21/4ov5.512X512-1',
+        '21/dIpc.1536X1024-2',
+        '21/lgpi.512X512-3',
+        '21/vaXU.512X512-4',
+        '21/yGvo.1024X1024-5',
+        '21/lWy2.1024X1024-6',
+        '21/drWX.1024X1024-7',
+        '21/rKFv.1024X1024-8',
+        '21/E3n4.1024X1024-9',
+        '21/hkNt.1024X1024-10',
+        '21/EoIz.1024X1024-11',
+        '21/gp87.1024X1024-12',
+        '22/I4FN.1024X1024-13',
+        '22/1FKs.1024X1024-14',
+        '22/oMA8.512X512-15',
+        '22/gPqD.1024X1024-16',
+        '22/J7XD.1024X1024-17',
+        '22/JCoe.1024X1024-18',
+        '22/xwD3.1024X1024-19',
+        '22/yhzY.1024X1024-20',
+        '22/NPza.1024X1024-21',
+        '22/5CSq.1024X1024-22',
+        '22/5L9J.1024X1024-23',
+        '22/yiqk.1024X1024-24',
+        '22/zgkB.1024X1024-25',
+        '22/Rt7b.1024X1024-26',
     ]
-    return welcomePicList[Math.floor(Math.random() * welcomePicList.length)]
+    return `https://z.wiki/autoupload/202404${welcomePicList[Math.floor(Math.random() * welcomePicList.length)]}.jpg`
 }
 
 /*底部导航*/

@@ -10,16 +10,30 @@ import React from "react";
  * @param searchEmpty      {boolean}    搜索框是否为空(是否为空,清空图标变红)
  * @param setSearchEmpty   {function}  设置搜索框是否为空
  * */
-export default ({keyword, setKeyword, setRefreshTrigger, searchEmpty, setSearchEmpty}) =>
-    <Space style={{display: 'grid', justifyContent: 'center'}}>    {/*居中*/}
-        <Space.Compact>
-            <Button icon={searchEmpty ? <DeleteOutlined/> : <DeleteTwoTone twoToneColor={'red'}/>}
-                    onClick={() => keyword && (setKeyword(null) || (!searchEmpty && (setRefreshTrigger(v => !v) || setSearchEmpty(true))))}/>
-            <Input.Search placeholder="要搜索内容吗😶‍🌫️"
-                          value={keyword}
-                          style={{width: 300}}
-                          onChange={v => setKeyword(v.target.value)}
-                          onSearch={() => keyword && (setRefreshTrigger(v => !v) || setSearchEmpty(false))}/>
-        </Space.Compact>
-    </Space>
+const SearchBox = ({keyword, setKeyword, setRefreshTrigger, searchEmpty, setSearchEmpty}) =>
+  <Space style={{display: 'grid', justifyContent: 'center'}}>    {/*居中*/}
+    <Space.Compact>
+      <Button   // ————————————————————清除搜索——————————————————
+        icon={searchEmpty ? <DeleteOutlined/> : <DeleteTwoTone twoToneColor={'red'}/>}
+        onClick={() => {
+          keyword && setKeyword(null)
+          !searchEmpty && (setRefreshTrigger(v => !v) || setSearchEmpty(true))
+        }}
+      />
+      
+      <Input.Search // ————————————————搜索内容——————————————————
+        placeholder="要搜索内容吗😶‍🌫️"
+        value={keyword}
+        style={{width: 300}}
+        onChange={v => setKeyword(v.target.value)}
+        onSearch={() => {
+          // 已搜索 但搜索框的的值被清空
+          if (!searchEmpty && !keyword) setRefreshTrigger(v => !v) || setSearchEmpty(true)
+            // 搜索框有值，直接搜索
+          else if (keyword) setRefreshTrigger(v => !v) || setSearchEmpty(false)
+        }}
+      />
+    </Space.Compact>
+  </Space>
 
+export default SearchBox

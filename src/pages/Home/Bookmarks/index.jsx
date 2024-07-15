@@ -168,7 +168,7 @@ export default function Bookmarks() {
                                             type="dashed"
                                             size='small'
                                             href={group.url}
-                                            style={{textShadow: ' 0px 0px 5px #abc9ec', borderColor: 'rgb(0 0 0)'}}
+                                            style={{textShadow: ' 1px 1px 4px #4A4A4AFF', borderColor: '#4a4a4a'}}
                                             target="_blank"
                                     >
                                         {group.name}

@@ -1,15 +1,15 @@
-import {App, Button, Input, Modal, Radio, Space} from "antd";
+import {Button, Input, Modal, Radio, Space} from "antd";
 import { observer } from 'mobx-react-lite'
 import React, {useEffect, useRef, useState} from "react";
 
 import UserStore from "../../store/UserStore";
 import {login} from "../../request/commonRequest";
+import CommonStore from "../../store/CommonStore";
 
 const LoginModal = () => {
     const [expireTime, setExpireTime] = useState(undefined);           // 登录有效时间
     const [loginCaptcha, setLoginCaptcha] = useState(undefined);       // 登录验证码
     const [loginLoading, setLoginLoading] = useState(false);  // 点击登录按钮加载
-    const {message} = App.useApp();
     const textRef = useRef(null)  // 输入框的ref 让它能自动获得焦点
 
     useEffect(()=> {
@@ -21,7 +21,7 @@ const LoginModal = () => {
      */
     const goLogin = async() => {
         // 校验 loginCaptcha 是否为6位数字
-        if (loginCaptcha?.length!== 6) return message.error('验证码格式有误');
+        if (loginCaptcha?.length!== 6) return CommonStore.msg.error('验证码格式有误');
 
         const isLogin =await login(loginCaptcha, expireTime, setLoginLoading);
 

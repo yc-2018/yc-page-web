@@ -7,30 +7,30 @@ export default () => {
   const [product2Weight, setProduct2Weight] = useState()              // 商品2 重量
   const [product1Price, setProduct1Price] = useState()                // 商品1 价格
   const [product2Price, setProduct2Price] = useState()                // 商品2 价格
-  
-  
+
+
   const [price1Ke1, price1Jin1] = getPrice(product1Price, product1Weight)
   const [price1Ke2, price1Jin2] = getPrice(product2Price, product2Weight)
-  
-  
+
+
   return (
-    <div style={{padding: 20, textAlign: 'center'}}>
-      <Row gutter={20} justify="center">
-        <Col span={6} style={{textAlign: 'center'}}>
+    <div style={{margin: 20, textAlign: 'center'}}>
+      <Row justify="center">
+        <Col span={12} style={{textAlign: 'center'}}>
           <div>商品1</div>
           <InputNumber addonAfter="克" value={product1Weight} onChange={value => setProduct1Weight(value)}
-                       style={{margin: 5}}/>
+                       style={{margin: 5}}/> <br/>
           <InputNumber addonAfter="元" value={product1Price} onChange={value => setProduct1Price(value)}
                        style={{margin: 5}}/>
           <div>每克:{price1Ke1}块</div>
           <div>一斤:{price1Jin1}块</div>
           {getPriceCompare(price1Ke1, price1Ke2)}
         </Col>
-        
-        <Col span={6} style={{textAlign: 'center'}}>
+
+        <Col span={12} style={{textAlign: 'center'}}>
           <div>商品2</div>
           <InputNumber addonAfter="克" value={product2Weight} onChange={value => setProduct2Weight(value)}
-                       style={{margin: 5}}/>
+                       style={{margin: 5}}/> <br/>
           <InputNumber addonAfter="元" value={product2Price} onChange={value => setProduct2Price(value)}
                        style={{margin: 5}}/>
           <div>每克:{price1Ke2}块</div>
@@ -54,9 +54,9 @@ export default () => {
  */
 const getPrice = (price, weight) => {
   if (!price || !weight) return [null, null]
-  
-  let pricePerGram = price / weight;       // 每克价格
-  let oneCattyPrice = pricePerGram * 500;  // 一斤价格
+
+  let pricePerGram = (price / weight).toFixed(2);       // 每克价格(保留2位小数)
+  let oneCattyPrice = (pricePerGram * 500).toFixed(2);  // 一斤价格
   return [pricePerGram, oneCattyPrice];
 }
 
@@ -79,8 +79,11 @@ const getPriceCompare = (price1, price2) => {
 const getPriceDifference = (price1Ke1, price1Jin1, price1Ke2, price1Jin2) => {
   if (!price1Ke1 || !price1Ke2) return null
   const weightDifference = Math.abs(price1Jin1 - price1Jin2)
-  
-  return <div style={{fontSize:40,color:'#4d4d4d'}}>一斤差了{weightDifference}块钱</div>
-  
-  
+
+  return (
+    <div style={{fontSize: 36, color: '#4d4d4d'}}>
+      每斤差{weightDifference.toFixed(2)}块
+      <div style={{fontSize: 12, color: '#6b6b6b'}}>数据只保留2位小数,使用'四舍六入五成双'规则</div>
+    </div>
+  )
 }
