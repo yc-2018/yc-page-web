@@ -27,6 +27,7 @@ import SearchBox from "../../compontets/common/SearchBox";
 import './MemoDrawer.css'
 import styles from '../../common.module.css'
 import ActionBtn from "./compontets/ActionBtn";
+import HighlightKeyword from "../../utils/HighlightKeyword";
 
 let total = -1;    // 初始化待办总数
 let orderBy = 1;   // 《表单》默认排序方式
@@ -238,8 +239,8 @@ const MemoDrawer = () => {
   const listHandleAction = async event => {
 
     const target = event.target;
-    const action = target.getAttribute('data-action');
-    const id = target.parentElement.getAttribute('data-id');
+    const action = target.closest('[data-action]')?.getAttribute('data-action');
+    const id = target.closest('[data-id]')?.getAttribute('data-id');
     const itemObj = list.find(item => item.id === parseInt(id));
     const confirmAction = Array.from(target.classList).some(className => className.startsWith('confirm-'))  // 防止快速重复点
 
@@ -260,7 +261,7 @@ const MemoDrawer = () => {
             maskClosable: true,
             okText: '关闭',
             cancelText: '编辑',
-            width: 800,
+            width: 888,
             closable: true,
             icon: <BookOutlined/>,
             content: <TextArea rows={14} value={itemObj.content} style={{margin: '0 0 0 -14px'}}/>,
@@ -459,7 +460,6 @@ const MemoDrawer = () => {
           setRefreshTrigger={setRefreshTrigger}
           searchEmpty={searchEmpty}
           setSearchEmpty={setSearchEmpty}
-          setOpenMemoText={setOpenMemoText}
         />
       }
     >
@@ -487,12 +487,14 @@ const MemoDrawer = () => {
                   <List.Item.Meta
                     description={
                       <div data-id={id}>
-                        <div data-action="see"
-                             style={{userSelect: 'auto'}}
-                             className={(itemType === 3 && !completed && styles.gradientText) || null}
+                        <div
+                          data-action="see"
+                          style={{userSelect: 'auto'}}
+                          className={(itemType === 3 && !completed && styles.gradientText) || null}
                         >
-                          {content?.slice(0, 100)}
-                          {/*待办内容*/ content?.length > 100 &&
+                          {!searchEmpty && <HighlightKeyword content={content} keyword={keyword}/>}
+                          {searchEmpty && content?.slice(0, 100)}
+                          {searchEmpty && content?.length > 100 &&
                             <span>
                               <span>{openMemoText === 1 && content.slice(100)}</span> {/*用来展开或收起的文字变化*/}
                               <span
