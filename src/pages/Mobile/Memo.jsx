@@ -15,6 +15,8 @@ import HighlightKeyword from "../../utils/HighlightKeyword";
 
 
 let updateTime;     // 待办更新时间
+let 循环时间页数 = 1;
+let 循环备忘主键 = null;
 
 /**
  * @param type                要渲染的待办类型
@@ -22,9 +24,9 @@ let updateTime;     // 待办更新时间
  * @param changeType          监控值，如果和类型相同 就 重置该待办列表
  * @param setChangeType       如果新增或修改的类型不是目前待办的列表类型，就改变这个值为那个待办类型的值
  * */
-export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
+const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   let total;  // 总条数 给父组件显示
-  
+
   const [data, setData] = useState([])
   const [hasMore, setHasMore] = useState(true)                // 是否自动翻页
   const [page, setPage] = useState(1);                        // 待办翻页
@@ -36,27 +38,25 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [dateVisible, setDateVisible] = useState(false);     // 日期弹窗的显示和隐藏
   const [loopTime, setLoopTime] = useState(undefined)                 // 循环时间弹窗的显示和隐藏(用数据来控制)
   const [loopTimeHasMore, setLoopTimeHasMore] = useState(null)        // 循环时间是否自动翻页(布尔值bug有时无法启动副作用的启动)
-  const [loopTimePage, setLoopTimePage] = useState(1);       // 循环时间页数
-  
+
   const [content, setContent] = useState('')                   // 表单内容
   const [itemType, setItemType] = useState(0)                 // 表单类型
-  
+
   useEffect(() => {type === changeType && resetList()}, [changeType])                // 新增或修改类型是当前类型 说明要在当前列表有变化
   useEffect(() => {resetList()}, [completed, orderBy])                               // 筛选状态 或排序状态改变 就重置列表
-  useEffect(() => {loopTimeHasMore && showLoopTime(visible.id)}, [loopTimeHasMore])  // 循环时间自动翻页
-  
+
   const textRef = useRef()          // 搜索框的ref 让它能自动获得焦点
   const loading = useRef()          // 显示加载中
   const dateRef = useRef()          // 绑定日期
   const dropdownRef = useRef()      // 绑定排序和状态下拉菜单
-  
+
   /** 重置列表 */
   const resetList = () => {
     setPage(1)
     setData([])
     setHasMore(true)
   }
-  
+
   /** 加载更多 */
   const loadMore = async () => {
     const append = await getToDoItems({type, page, completed, orderBy, keyword});
@@ -64,22 +64,22 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
     setData(val => [...val, ...append.data.records])
     setHasMore(data.length < append.data.total)
     setPage(val => val + 1)
-    
+
     total = append.data.total
     // 给父组件传值：未完成总数s
     setIncompleteCounts(v => ({...v, ...append?.map.groupToDoItemsCounts, [type]: total}))
   }
-  
+
   /** 改变总数 给父组件传值：未完成总数s */
   const changeTotal = (add = '++') => {
     if (add === '++') ++total
     else --total
     setIncompleteCounts(v => ({...v, [type]: total}))
   }
-  
+
   /** 显示加载动画 */
   const showLoading = (icon, content) => {Toast.show({icon, content})}
-  
+
   /** 执行动作 */
   const onAction = async action => {
     const {id, text} = action;
@@ -114,15 +114,15 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
               } : item))
               /* 类型变了不属于显示范畴了 */
               completed !== -1 && setData(val => val.filter(item => item.id !== id))
-              
+
               setVisible(undefined)
-              
+
               changeTotal(text === '完成' ? '--' : '++')// █给父组件传值：未完成总数s
             } else Toast.show({icon: 'fail', content: '失败'})
           }
         })
         break;
-      
+
       // +1 ///////////////////////////////////////////////////////////////////////
       case 'addOne':
         updateTime = undefined  // 重置更新时间
@@ -150,7 +150,7 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
           }
         })
         break;
-      
+
       // 编辑 //////////////////////////////////////////////////////////////////////
       case 'edit':
         setVisible(undefined)
@@ -164,7 +164,7 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
           textRef.current.nativeElement.setSelectionRange(length, length)   // 设置光标位置在最后
         }, 100)                                                       // 没在页面那么快，所以要延迟一点点
         break;
-      
+
       // 删除 ///////////////////////////////////////////////////////////////////////
       case 'delete':
         await Dialog.confirm({
@@ -185,21 +185,21 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
         })
     }
   }
-  
+
   /*打开添加弹窗*/
   const openAdd = () => {
     setEditVisible('新增');
     setContent('');
     setItemType(type);
     window.setTimeout(() => textRef.current?.focus(), 100) // 点击添加按钮后自动获得焦点,但是没在页面上所以要延迟一点点
-    
+
   }
-  
+
   /** 编辑或新增的提交表单 */
   const submit = async () => {
     if (content?.length === 0) return Toast.show({icon: 'fail', content: '内容不能为空'})
     // if (!itemType) return Toast.show({icon: 'fail', content: '类型不能为空'})
-    
+
     // 构造请求体
     let body = {};
     body.content = content === editVisible?.content ? null : content;       // 内容不一致时才更新
@@ -211,7 +211,7 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
     if (result) {
       showLoading('success', '成功')
       setEditVisible(false);
-      
+
       if (editVisible === '新增') {
         if (type !== body.itemType) return setChangeType(body.itemType);  /* 新增的待办不是当前类型，那个重置的数据 */
         // 新增的待办是当前类型，那么更新本地数据
@@ -238,23 +238,22 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
       }
     } else showLoading('fail', '失败')
   }
-  
-  
+
+
   /** 获取循环时间显示 */
-  const showLoopTime = async id => {
-    if (!id) id = loopTime?.[0]?.toDoItemId
-    const resp = await selectLoopMemoTimeList(id, loopTimePage);
+  const showLoopTime = async () => {
+    const resp = await selectLoopMemoTimeList(循环备忘主键, 循环时间页数);
     loading.current?.close()    // 关闭加载蒙版
-    
+
     if (resp?.records?.length > 0) {
-      setLoopTimePage(i => i + 1)
+      循环时间页数++
       setLoopTime(list => [...list ?? [], ...resp.records])
     } else Toast.show({icon: 'fail', content: '获取失败'})
-    
+
     if (resp?.records?.length % 10 !== 0 && (loopTime?.length ?? 0 + resp?.records?.length > resp?.total ?? 0))
       setLoopTimeHasMore(false)
   }
-  
+
   return (
     <>
       <Dropdown ref={dropdownRef}>   {/*下拉菜单：antd的实验性组件*/}
@@ -294,8 +293,8 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
           </div>
         </Dropdown.Item>
       </Dropdown>
-      
-      
+
+
       {/*有数据时显示搜索框*/ (data?.length > 0 || keyword) &&
         <SearchBar
           cancelText={'清空'}
@@ -352,8 +351,8 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
         <InfiniteScroll loadMore={loadMore} hasMore={hasMore}/>
         <br/>
       </PullToRefresh>
-      
-      
+
+
       <Popup    /* 查看详细弹出层***************************************************/
         visible={!!visible}
         closeOnSwipe /* 组件内向下滑动关闭 */
@@ -365,7 +364,7 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
         <Tag color='primary' fill='outline' style={{'--border-radius': '6px', '--background-color': '#c5f1f7'}}>
           创建时间:{visible?.createTime?.replace('T', ' ')}
         </Tag>
-        
+
         {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
           <Tag color='success' fill='outline' style={{'--background-color': '#c8f7c5', margin: '3px 10px'}}>
             {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace('T00:00:00', '').replace('T', ' ')}
@@ -378,7 +377,9 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
             onClick={() => {
               setLoopTime([])
               setLoopTimeHasMore(visible.id)
-              setLoopTimePage(1)
+              循环时间页数=1
+              循环备忘主键 = visible.id
+              showLoopTime()
               loading.current = Toast.show({
                 icon: 'loading',
                 content: '加载中…',
@@ -395,8 +396,8 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
             {visible?.content}
           </pre>
         </div>
-        
-        
+
+
         {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
           <Button
             color='primary'
@@ -415,7 +416,7 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
             完成
           </Button>
         }
-        
+
         {/*完成的显示取消完成按钮 */ visible?.completed === 1 &&
           <Button
             className={styles.popupButton}
@@ -425,7 +426,7 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
             取消完成
           </Button>
         }
-        
+
         {/*显示删除按钮*/
           <Button
             color='danger'
@@ -435,7 +436,7 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
             删除
           </Button>
         }
-        
+
         {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
           <Button
             className={styles.popupButton}
@@ -446,8 +447,8 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
           </Button>
         }
       </Popup>
-      
-      
+
+
       <Popup      /* 编辑弹出层 **********************************************************/
         visible={!!editVisible}
         onMaskClick={async () => {
@@ -462,7 +463,7 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
         position='top'
         bodyStyle={{height: '450px'}}
       >
-        
+
         <div style={{padding: '10px'}}>
           <div className={'█required'}>
             内容
@@ -479,7 +480,7 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
           <div className={'█required'}>
             请选择类型
           </div>
-          
+
           <Radio.Group value={itemType} onChange={value => setItemType(() => value)}>
             <Radio value={0} className={'█Radio'}>普通</Radio>
             <Radio value={1} className={'█Radio'}>循环</Radio>
@@ -495,8 +496,8 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
           <Button block onClick={submit}> 提交 </Button>
         </div>
       </Popup>
-      
-      
+
+
       <Popup      /* 循环时间的弹出层 *******************************************************************/
         visible={!!loopTime}
         onMaskClick={() => setLoopTime(undefined)}
@@ -515,8 +516,8 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
           </>
         }
       </Popup>
-      
-      
+
+
       {/*日期选择器（antd实验性组件）*/}
       <CalendarPicker
         popupStyle={{zIndex: 99999}}
@@ -538,3 +539,4 @@ export default ({type, setIncompleteCounts, changeType, setChangeType}) => {
     </>
   )
 }
+export default Memo;

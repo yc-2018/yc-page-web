@@ -11,7 +11,8 @@ import myAxios from "./myAxios";
  * @param keyword  搜索关键词
  */
 export async function getToDoItems({type = 0, page = 1, completed = 0, orderBy, firstLetter, keyword}) {
-    const pageSize = type === 1?'&pageSize=30':'';   // 如果是循环待办就默认30条
+    let pageSize = type === 1?'&pageSize=30':'';   // 如果是循环待办就默认30条
+    type === 4 && (pageSize = '&pageSize=20');
     page = `?page=${page}`;
     completed= `&completed=${completed}`;                   // 完成?
     orderBy = orderBy?`&orderBy=${orderBy}`:'';             // 排序
