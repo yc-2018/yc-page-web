@@ -1,20 +1,24 @@
-import React, {useEffect, useState} from "react";
-import {Collapse, DotLoading} from 'antd-mobile'
+import React, {useEffect, useRef, useState} from "react";
+import {Collapse, DotLoading, Toast} from 'antd-mobile'
 
 import Md from "../../compontets/Md";
 import {blogMenu} from "../../store/NoLoginData";
 import {blogBaseURL, getBlogItemIconObj, getBlogList, getBlogMd} from "../../request/blogRequest";
 
 export default () => {
-  const [menu, setMenu] = useState(blogMenu)                  // 菜单项
-  const [icon, setIcon] = useState({})                  // 图标
+  const [menu, setMenu] = useState(blogMenu)  // 菜单项
+  const [icon, setIcon] = useState({})                 // 图标
+
+  const loading = useRef()          // 显示加载中
 
   /** 初始化获取最新菜单和图标 */
   useEffect(() => {
+    loading.current = Toast.show({icon: 'loading', content: '数据加载中...', duration: 0})
     getBlogItemIconObj().then(obj => {
       setIcon(obj)
+      loading.current?.close()    // 关闭加载蒙版
       getBlogList().then(data => setMenu(data))
-    })
+    }).catch(() => Toast.show({icon: 'fail', content: '数据加载失败'}))
   }, [])
 
   /** 构建菜单 */
