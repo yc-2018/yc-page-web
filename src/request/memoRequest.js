@@ -17,7 +17,7 @@ export async function getToDoItems({type = 0, page = 1, completed = 0, orderBy, 
     completed= `&completed=${completed}`;                   // 完成?
     orderBy = orderBy?`&orderBy=${orderBy}`:'';             // 排序
     firstLetter = firstLetter?`&firstLetter=${firstLetter}`:'';
-    keyword = keyword ?`&keyword=${keyword}`:'';
+    keyword = keyword ? `&keyword=${encodeURIComponent(keyword)}` : ''; // 关键词不加参数前 搜索包涵‘[’或‘]’就会报 400 错误
     try {
         const response = await myAxios
             .get(`/toDoItems/${type + page + completed + pageSize + orderBy + firstLetter + keyword}`);
