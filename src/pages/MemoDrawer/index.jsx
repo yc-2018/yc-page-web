@@ -252,37 +252,33 @@ const MemoDrawer = () => {
       window.setTimeout(() => isQueryOnClick = false, 1000)
     }
 
-    switch (action) {
-      case 'see':
+    const actionObj = {
+      see: () => {
         // 双击查看
         if (event.type === 'dblclick') {
-          modal.confirm({
+          const seeModel = modal.confirm({
             title: '查看备忘',
             maskClosable: true,
-            okText: '关闭',
-            cancelText: '编辑',
-            width: 888,
             closable: true,
+            width: 888,
             icon: <BookOutlined/>,
             content: <TextArea rows={14} value={itemObj.content} style={{margin: '0 0 0 -14px'}}/>,
-            onCancel: (close) => {
-              // 点击自动传入的这个关闭方法，如果是点背景关闭的，就是空方法，转字符串比较短，点击编辑按钮就是比较长的关闭方法
-              if(close.toString().length > 20){ // 点击编辑按钮  关闭当前弹窗并打开编辑弹窗
-                setFModalData(itemObj)
-                setFormModal(true)
-                close()
-              }
-            },
+          })
+          seeModel.update({ // 添加按钮分开写是因为 seeModel直接写会没初始化完成 导致没发关闭
+            footer:
+              <div style={{display: 'flex', justifyContent: 'flex-end', gap: 5, position: 'relative', top: 9}}>
+                <Button onClick={() => actionObj.finish(seeModel.destroy)}>{`${itemObj.completed ? '取消' : ''}完成`}</Button>
+                <Button onClick={() => seeModel.destroy() || setFormModal(true)}>编辑</Button>
+                <Button type="primary" onClick={seeModel.destroy}>关闭</Button>
+              </div>
           })
         }
-        break;
-
-      case 'edit':
+      },
+      edit: () => {
         setFModalData(itemObj)
         setFormModal(true)
-        break;
-
-      case 'finish':  // 完成?
+      },
+      finish: (func) => {
         window.ikunSelectDate = undefined
         return modal.confirm({
           maskClosable: true,         // 点遮罩可以关闭
@@ -297,6 +293,7 @@ const MemoDrawer = () => {
                 updateTime: window.ikunSelectDate
               }, 'put')
               if (finishResponse) {
+                if (func) func()    // 执行传入方法（关闭查看窗口)
                 setRefreshTrigger(!refreshTrigger)  // 刷新触发
                 return resolve()    // 成功,关闭按钮加载 关闭窗口
               }
@@ -304,8 +301,8 @@ const MemoDrawer = () => {
             })
           }
         })
-
-      case 'delete':
+      },
+      delete: async () => {
         // 如果按钮已经在删除确认状态
         if (target.classList.contains('confirm-delete')) {
           setWebLoading(true)
@@ -322,9 +319,8 @@ const MemoDrawer = () => {
             }
           }, 3000);
         }
-        break;
-
-      case 'addOne':
+      },
+      addOne: () => {
         window.ikunSelectDate = undefined
         return modal.confirm({
           title: `确定加一吗?`,
@@ -346,9 +342,9 @@ const MemoDrawer = () => {
             })
           }
         })
-      default:
-        break
+      },
     }
+    if (actionObj[action]) actionObj[action]()
   }
   
   /**
