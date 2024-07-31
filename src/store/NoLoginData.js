@@ -103,6 +103,13 @@ export const items = [
           </a>
       },
       {
+        key: '七天年化收益率计算器',
+        label:
+          <a href={linkToolsUrl + '七天年化收益率计算器/'} target="_blank" rel="noopener noreferrer">
+            七天年化收益率计算器
+          </a>
+      },
+      {
         key: '拳皇二稿版',
         label:
           <a href={linkToolsUrl + '拳皇二稿版/'} target="_blank" rel="noopener noreferrer">
