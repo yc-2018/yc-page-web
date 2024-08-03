@@ -268,7 +268,7 @@ const MemoDrawer = () => {
             footer:
               <div style={{display: 'flex', justifyContent: 'flex-end', gap: 5, position: 'relative', top: 9}}>
                 <Button onClick={() => actionObj.finish(seeModel.destroy)}>{`${itemObj.completed ? '取消' : ''}完成`}</Button>
-                <Button onClick={() => seeModel.destroy() || setFormModal(true)}>编辑</Button>
+                <Button onClick={() => seeModel.destroy() || setFModalData(itemObj) || setFormModal(true)}>编辑</Button>
                 <Button type="primary" onClick={seeModel.destroy}>关闭</Button>
               </div>
           })
