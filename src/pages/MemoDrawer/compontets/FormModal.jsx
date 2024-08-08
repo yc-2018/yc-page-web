@@ -73,7 +73,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
     let result = await saveOrUpdateToDoItem(body, data && "put");
     if (result) {
       closeModal(false);
-      reList(Math.random()) // 刷新列表
+      reList() // 刷新列表
     }
     setConfirmLoading(false);
   };

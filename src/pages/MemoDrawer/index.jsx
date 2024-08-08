@@ -30,8 +30,11 @@ import styles from '../../common.module.css'
 import ActionBtn from "./compontets/ActionBtn";
 import HighlightKeyword from "../../utils/HighlightKeyword";
 
-let total = -1;    // 初始化待办总数
-let orderBy = 1;   // 《表单》默认排序方式
+window.ikunSelectDate = undefined    // 用于完成或+1时是否主动选择日期
+
+let i = 0;                   // 页面刷新次数
+let total = -1;              // 初始化待办总数
+let orderBy = 1;             // 《表单》默认排序方式
 let isQueryOnClick = false; // 防止点太快了
 let openMemoText = 0;       //  控制全部展开备忘录内容 1展开 非1收缩
 let dates = [] ;              // 未处理的筛选日期
@@ -43,8 +46,8 @@ const MemoDrawer = () => {
   const [initLoading, setInitLoading] = useState(true);       // 初始化加载
   const [itemLoading, setItemItemLoading] = useState(false);  // 底部加载
   const [webLoading, setWebLoading] = useState(false);        // 网络加载
-  const [refreshTrigger, setRefreshTrigger] = useState(true); // 刷新触发列表(值无意义，改变即刷新
-  const [refresh, setRefresh] = useState(true);               // 刷新触发：单纯驱动非状态变量改变页面
+  const [refreshTrigger, setRefreshTrigger] = useState(0);    // 刷新触发列表(值无意义，改变即刷新列表数据
+  const [, setRefresh] = useState(0);                                 // 刷新触发：单纯驱动非状态变量改变页面
   const [data, setData] = useState([]);                         // 待办列表数据
   const [list, setList] = useState([]);                         // 待办展示列表
   const [page, setPage] = useState(1);                        // 待办翻页
@@ -60,8 +63,10 @@ const MemoDrawer = () => {
   const [keyword, setKeyword] = useState('');                   // 搜索关键字
   const [searchEmpty, setSearchEmpty] = useState(true);       // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
 
-  const dateRangeRef = React.useRef();
   const {notification, modal} = App.useApp();
+  
+  const sxYm = () => setRefresh(++i)        // 刷新页面
+  const sxSj = () => setRefreshTrigger(++i) // 刷新数据列表
 
   useEffect(() => {
     if (!JWTUtils.isExpired()) (async () => {
@@ -137,8 +142,6 @@ const MemoDrawer = () => {
     setList(newData);
     setItemItemLoading(false);
     setPage(page + 1);      // 异步放前面也没用
-    // 触发 resize 事件
-    // window.dispatchEvent(new Event('resize'));
 
   };
 
@@ -156,6 +159,7 @@ const MemoDrawer = () => {
   const getTag = (TypeNum, typeName, color) =>
     <Badge size="small" offset={[-5, 2]}
            title={"未完成的条数"}
+           overflowCount={9999}    // 展示封顶的数字值
            count={type === TypeNum && total > 0 ? total : unFinishCounts?.[TypeNum]}
     >
       <Tag className={`${styles.pointer} ${type === TypeNum ? styles.currentTag : ''}`}
@@ -300,7 +304,7 @@ const MemoDrawer = () => {
               }, 'put')
               if (finishResponse) {
                 if (func) func()    // 执行传入方法（关闭查看窗口)
-                setRefreshTrigger(!refreshTrigger)  // 刷新触发
+                sxSj()
                 return resolve()    // 成功,关闭按钮加载 关闭窗口
               }
               return reject() // 失败，关闭按钮加载,关闭窗口
@@ -313,7 +317,7 @@ const MemoDrawer = () => {
         if (target.classList.contains('confirm-delete')) {
           setWebLoading(true)
           const deleteResponse = await delToDoItem(id)
-          if (deleteResponse) setRefreshTrigger(!refreshTrigger)  // 刷新触发
+          if (deleteResponse) sxSj()
           setWebLoading(false)
         } else {
           target.classList.add('confirm-delete');
@@ -336,12 +340,12 @@ const MemoDrawer = () => {
           onOk() {
             return new Promise(async (resolve, reject) => {
               const body = {
-                id: target.parentElement.parentElement.getAttribute('data-id'),
+                id,
                 numberOfRecurrences: 666,
                 updateTime: window.ikunSelectDate
               }
               if (await saveOrUpdateToDoItem(body, 'put')) {
-                setRefreshTrigger(!refreshTrigger)  // 刷新触发
+                sxSj()
                 return resolve()    // 成功,关闭按钮加载 关闭窗口
               }
               return reject() // 失败，关闭按钮加载,关闭窗口
@@ -358,10 +362,7 @@ const MemoDrawer = () => {
    * @author ChenGuangLong
    * @since 2024/7/6 16:52
   */
-  const setOpenMemoText = v => {
-    openMemoText = v
-    setRefresh(!refresh)
-  };
+  const setOpenMemoText = v => sxYm(openMemoText = v);
   
   /**
    * 筛选日期
@@ -371,12 +372,12 @@ const MemoDrawer = () => {
   const handleFilterDate = () => {
     if (!dates) {
       filterDate = ''
-      setRefreshTrigger(!refreshTrigger)
+      sxSj()
     } else if (dates.length === 2) {
       const newFilterDate = `${dates[0].valueOf()}/${dates[1].endOf('day').valueOf()}/${filterDateType}`
       if (newFilterDate !== filterDate) {
         filterDate = newFilterDate
-        setRefreshTrigger(!refreshTrigger)
+        sxSj()
       }
     }
   }
@@ -398,13 +399,12 @@ const MemoDrawer = () => {
                 isOpen={formModal}
                 setOpen={setFormModal}
                 data={fModalData}
-                reList={setRefreshTrigger}
+                reList={sxSj}
                 currentMemoType={type}
               />
 
               <Tooltip title={'刷新当前待办'} mouseEnterDelay={0.6}>
-                <SyncOutlined className='refresh' spin={webLoading}
-                              onClick={() => setRefreshTrigger(!refreshTrigger)}/>
+                <SyncOutlined className='refresh' spin={webLoading} onClick={sxSj}/>
               </Tooltip>
               备忘录
               
@@ -423,17 +423,18 @@ const MemoDrawer = () => {
               <Select                 /*下拉框看《待办状态》*/
                 size='small'
                 value={completed}
-                style={{width: '6em',marginLeft:5}}
+                style={{width: '6em', marginLeft: 5}}
                 onChange={value => setCompleted(value)}
-                options={[{label: '未完成', value: 0}, {label: '已完成', value: 1}, {
-                  label: '全部',
-                  value: -1
-                }]}
+                options={[
+                  {label: '未完成', value: 0},
+                  {label: '已完成', value: 1},
+                  {label: '全部', value: -1}
+                ]}
               />
               
               <SortSelect             /*自己搞的《排序下拉框》*/
                 value={orderBy}
-                onChange={value => setRefreshTrigger(orderBy = value)/*这不是传参，就是赋值*/}
+                onChange={value => sxSj(orderBy = value)/*这不是传参，就是赋值*/}
                 options={sortingOptions}
                 loading={webLoading}
               />
@@ -441,9 +442,8 @@ const MemoDrawer = () => {
               {/*————日期筛选————*/}
               <DatePicker.RangePicker
                 size={'small'}
-                ref={dateRangeRef}
                 onOpenChange={open => !open && handleFilterDate()}  // 关闭日期选择器时触发
-                onChange={dateArr => dates = dateArr}
+                onChange={dateArr => dates = dateArr}               // 改变日期触发记录它
                 renderExtraFooter={() =>
                   <div className="flex-center m5 memo-dateRangeSwitch">
                     <Switch
@@ -452,7 +452,7 @@ const MemoDrawer = () => {
                       checked={!!filterDateType}
                       onClick={checked => {
                         filterDateType = checked ? 1 : 0
-                        setRefresh(!refresh)
+                        sxYm()
                       }}
                     />
                   </div>}
@@ -480,7 +480,7 @@ const MemoDrawer = () => {
               </Tooltip>
               
             </div>
-            <Space>
+            <Space size={'large'}>
               {getTag(0, "普通")}
               {getTag(6, "工作")}
               {getTag(3, "紧急","red")}
@@ -497,7 +497,7 @@ const MemoDrawer = () => {
         <SearchBox
           keyword={keyword}
           setKeyword={setKeyword}
-          setRefreshTrigger={setRefreshTrigger}
+          sxSj={sxSj}
           searchEmpty={searchEmpty}
           setSearchEmpty={setSearchEmpty}
         />
