@@ -41,6 +41,7 @@
 
 /*《添加待办》的按钮*/
 .addItemButton{
+    width: 40px;
     margin-left: 6px;
     color: #52c41a;
     border-color: #52c41a;
@@ -93,10 +94,10 @@
     user-select: none;  /* 文字不可选中 */
 }
 
-.memo-dateRangeSwitch [aria-checked="false"]{
+/*日期选择里面的按创建时间还是按修改时间来筛选的按创建时间来筛选改变一下样式*/
+.memo-dateRangeSwitch [aria-checked="false"] {
     background-color: #439861;
 }
-
-.memo-dateRangeSwitch [aria-checked="false"]:hover{
+.memo-dateRangeSwitch [aria-checked="false"]:hover {
     background-color: #69ca8b;
 }
