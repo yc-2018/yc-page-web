@@ -11,6 +11,6 @@ import styles from './actionBtn.module.css'
  * @since 2024/5/29 18:42
 */
 const ActionBtn = ({actionName, children, show = true}) => show &&
-  <span data-action={actionName} className={styles.btn}>{children}</span>
+  <div data-action={actionName} className={styles.btn}>{children}</div>
 
 export default ActionBtn;

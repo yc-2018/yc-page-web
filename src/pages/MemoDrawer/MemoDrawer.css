@@ -93,4 +93,10 @@
     user-select: none;  /* 文字不可选中 */
 }
 
+.memo-dateRangeSwitch [aria-checked="false"]{
+    background-color: #439861;
+}
 
+.memo-dateRangeSwitch [aria-checked="false"]:hover{
+    background-color: #69ca8b;
+}
