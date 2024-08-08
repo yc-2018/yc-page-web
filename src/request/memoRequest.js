@@ -9,18 +9,19 @@ import myAxios from "./myAxios";
  * @param orderBy  排序方式 1：更新时间↓ 2：更新时间↑ 3：创建时间↓ 4：创建时间↑ 5：A↓ 6：Z↓
  * @param firstLetter 从哪个字母开始查询
  * @param keyword  搜索关键词
+ * @param dateRange   日期范围: 开始时间戳/结束时间戳/0：修改时间 1：创建时间
  */
-export async function getToDoItems({type = 0, page = 1, completed = 0, orderBy, firstLetter, keyword}) {
-    let pageSize = type === 1?'&pageSize=30':'';   // 如果是循环待办就默认30条
+export async function getToDoItems({type = 0, page = 1, completed = 0, orderBy, firstLetter, keyword, dateRange}) {
+    let pageSize = type === 1 ? '&pageSize=30' : '';   // 如果是循环待办就默认30条
     type === 4 && (pageSize = '&pageSize=20');
     page = `?page=${page}`;
-    completed= `&completed=${completed}`;                   // 完成?
-    orderBy = orderBy?`&orderBy=${orderBy}`:'';             // 排序
-    firstLetter = firstLetter?`&firstLetter=${firstLetter}`:'';
+    completed = `&completed=${completed}`;                   // 完成?
+    orderBy = orderBy ? `&orderBy=${orderBy}` : '';             // 排序
+    firstLetter = firstLetter ? `&firstLetter=${firstLetter}` : '';
     keyword = keyword ? `&keyword=${encodeURIComponent(keyword)}` : ''; // 关键词不加参数前 搜索包涵‘[’或‘]’就会报 400 错误
+    dateRange = dateRange ? `&dateRange=${dateRange}` : '';
     try {
-        const response = await myAxios
-            .get(`/toDoItems/${type + page + completed + pageSize + orderBy + firstLetter + keyword}`);
+        const response = await myAxios.get(`/toDoItems/${type + page + completed + pageSize + orderBy + firstLetter + keyword + dateRange}`);
         return response.data;
     } catch (error) {console.error('待办请求失败:', error)}
 }

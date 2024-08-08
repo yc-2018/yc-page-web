@@ -10,7 +10,8 @@ import {
 import {
   Drawer, List, Skeleton, Button, Tag,
   Spin, Tooltip, Select, Divider,
-  Badge, Space, Dropdown, App, DatePicker
+  Badge, Space, Dropdown, App, DatePicker,
+  Switch
 } from "antd";
 import moment from 'moment';
 
@@ -33,6 +34,10 @@ let total = -1;    // 初始化待办总数
 let orderBy = 1;   // 《表单》默认排序方式
 let isQueryOnClick = false; // 防止点太快了
 let openMemoText = 0;       //  控制全部展开备忘录内容 1展开 非1收缩
+let dates = [] ;              // 未处理的筛选日期
+let filterDate = '';         // 筛选日期 格式： 开始时间戳/结束时间戳/0：修改时间 1：创建时间
+let filterDateType = 0;     // 筛选日期类型 0：修改时间 1：创建时间
+
 
 const MemoDrawer = () => {
   const [initLoading, setInitLoading] = useState(true);       // 初始化加载
@@ -55,6 +60,7 @@ const MemoDrawer = () => {
   const [keyword, setKeyword] = useState('');                   // 搜索关键字
   const [searchEmpty, setSearchEmpty] = useState(true);       // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
 
+  const dateRangeRef = React.useRef();
   const {notification, modal} = App.useApp();
 
   useEffect(() => {
@@ -66,7 +72,7 @@ const MemoDrawer = () => {
       setPage(1)              // 待办翻页重置
       total = -1;                   // 待办总数重置
       // 使用 axios 发起请求 获取又一次初始化待办列表
-      const resp = await getToDoItems({type, page: 1, completed, orderBy, keyword});
+      const resp = await getToDoItems({type, page: 1, completed, orderBy, keyword, dateRange: filterDate});
       if (!(resp?.code === 1)) {
         setInitLoading(false);
         setWebLoading(false);
@@ -123,7 +129,7 @@ const MemoDrawer = () => {
     );
 
     // 使用 axios 发起请求
-    const {data: respData} = await getToDoItems({type, page: page + 1, completed, orderBy, keyword});
+    const {data: respData} = await getToDoItems({type, page: page + 1, completed, orderBy, keyword, dateRange: filterDate});
     if (!respData) return;      // 保持代码的健壮性
     // 结合旧数据和新数据
     const newData = data.concat(respData.records);
@@ -160,7 +166,7 @@ const MemoDrawer = () => {
              setType(TypeNum)
            }}
       >
-        {typeName}
+        &nbsp;&nbsp;{typeName}&nbsp;&nbsp;
       </Tag>
     </Badge>
 
@@ -356,6 +362,24 @@ const MemoDrawer = () => {
     openMemoText = v
     setRefresh(!refresh)
   };
+  
+  /**
+   * 筛选日期
+   * @author ChenGuangLong
+   * @since 2024/8/8 11:49
+   */
+  const handleFilterDate = () => {
+    if (!dates) {
+      filterDate = ''
+      setRefreshTrigger(!refreshTrigger)
+    } else if (dates.length === 2) {
+      const newFilterDate = `${dates[0].valueOf()}/${dates[1].endOf('day').valueOf()}/${filterDateType}`
+      if (newFilterDate !== filterDate) {
+        filterDate = newFilterDate
+        setRefreshTrigger(!refreshTrigger)
+      }
+    }
+  }
 
   return (
     <Drawer
@@ -363,7 +387,7 @@ const MemoDrawer = () => {
       onClose={() => showOrNot.setMemoDrawerShow(false)}
       open={showOrNot.memoDrawerShow}
       style={{opacity: 0.8}}
-      width={450}
+      width={700}
       closeIcon={false}
       title={JWTUtils.isExpired() ? '备忘录' :
         <>
@@ -414,6 +438,26 @@ const MemoDrawer = () => {
                 loading={webLoading}
               />
               
+              {/*————日期筛选————*/}
+              <DatePicker.RangePicker
+                size={'small'}
+                ref={dateRangeRef}
+                onOpenChange={open => !open && handleFilterDate()}  // 关闭日期选择器时触发
+                onChange={dateArr => dates = dateArr}
+                renderExtraFooter={() =>
+                  <div className="flex-center m5 memo-dateRangeSwitch">
+                    <Switch
+                      checkedChildren="创建时间"
+                      unCheckedChildren="修改时间"
+                      checked={!!filterDateType}
+                      onClick={checked => {
+                        filterDateType = checked ? 1 : 0
+                        setRefresh(!refresh)
+                      }}
+                    />
+                  </div>}
+              />
+              {' '}
               {/*展开文本*/}
               <Tooltip title="展开文本，对全部长备忘录的展开">
                 <Button
@@ -511,25 +555,29 @@ const MemoDrawer = () => {
                           }
                         </div>
 
-                        {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
-                          <Badge count={numberOfRecurrences}
-                                 style={{backgroundColor: '#52c41a'}} offset={[-13, -1]}
-                                 size={'small'}>
-                            <ActionBtn actionName={'addOne'}>循环+1</ActionBtn>
-                          </Badge>
-                        }
-                        <ActionBtn actionName={'finish'}>{!!completed && '取消'}完成</ActionBtn>
-                        <ActionBtn actionName={'edit'} show={!completed}>编辑</ActionBtn> {/*完成了就不要显示编辑了*/}
-                        <ActionBtn actionName={'delete'}>删除</ActionBtn>
-
-                        <div style={{fontSize: 10}}>
-                          创建于:{createTime?.replace('T', ' ')}
-                          {createTime !== updateTime && itemType === 1 ?
-                            getLoopMemoTimeList(id, formatTime(updateTime))
-                            :
-                            ` ${completed ? '完成' : '修改'}于:` + formatTime(updateTime)
+                        {/*————————————————备忘项 的功能按钮和 创建修改时间显示————————————————*/}
+                        <div style={{display: 'flex',marginTop: 10}}>
+                          {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
+                            <Badge count={numberOfRecurrences}
+                                   style={{backgroundColor: '#52c41a'}} offset={[-13, -1]}
+                                   size={'small'}>
+                              <ActionBtn actionName={'addOne'}>循环+1</ActionBtn>
+                            </Badge>
                           }
+                          <ActionBtn actionName={'finish'}>{!!completed && '取消'}完成</ActionBtn>
+                          <ActionBtn actionName={'edit'} show={!completed}>编辑</ActionBtn> {/*完成了就不要显示编辑了*/}
+                          <ActionBtn actionName={'delete'}>删除</ActionBtn>
+                          
+                          <div style={{fontSize: 10, height: 22, lineHeight: '25px', marginLeft: 10}}>
+                            创建于:{createTime?.replace('T', ' ')}
+                            {createTime !== updateTime && itemType === 1 ?
+                              getLoopMemoTimeList(id, formatTime(updateTime))
+                              :
+                              ` ${completed ? '完成' : '修改'}于:` + formatTime(updateTime)
+                            }
+                          </div>
                         </div>
+                        
                       </div>
                     }
                   />
