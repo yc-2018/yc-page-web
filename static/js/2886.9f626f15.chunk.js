@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkantd_demo=self.webpackChunkantd_demo||[]).push([[2886],{2886:(e,o,_)=>{_.r(o),_.d(o,{default:()=>t});const t={mobile:"mobile_mobile__x-RW4",qrCode:"mobile_qrCode__y2Fbz",popupButton:"mobile_popupButton__cuB2f",tabBar:"mobile_tabBar__ef+oa"}}}]);
+//# sourceMappingURL=2886.9f626f15.chunk.js.map
