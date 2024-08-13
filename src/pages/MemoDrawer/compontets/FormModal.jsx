@@ -7,6 +7,11 @@ import modalStyle from './formModal.module.css'
 import CommonStore from "../../../store/CommonStore";
 
 const {TextArea} = Input;
+/** 外部图片链接列表 */
+const externalImgBedList = [
+  {src: 'https://playground.z.wiki/img-cloud/index.html', title: '外部图床1(可能失效,注意信息安全)'},
+  {src: 'https://ycimg.pages.dev/', title: '外部图床2(加载缓慢,最大支持5M)'},
+]
 /**
  * 新增/编辑备忘录弹窗
  *
@@ -73,7 +78,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
     let result = await saveOrUpdateToDoItem(body, data && "put");
     if (result) {
       closeModal(false);
-      reList(Math.random()) // 刷新列表
+      reList() // 刷新列表
     }
     setConfirmLoading(false);
   };
@@ -125,7 +130,26 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
       }
     }, 100)
   }
-  
+
+  /** 打开外部图床弹窗 */
+  const openExternalImgModel = (title, src) =>
+    modal.info({
+      title,
+      style: {top: 20},
+      wrapClassName:modalStyle.externalImgModel,
+      width: '100vh',
+      okText: '关闭',
+      maskClosable: true,
+      content:
+        <iframe
+          src={src}
+          title={title}
+          allow="clipboard-read; clipboard-write"
+          style={{width: '100%', height: '100%'}}
+        />
+    })
+
+  /** 帮助按钮气泡 */
   const help =
     <div>
       <p>● 点击插入时间/段,可插入时间/段在输入框光标所在位置</p>
@@ -145,6 +169,12 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
   
   /** 自定义底部按钮 */
   const footerButtons = [
+    ...externalImgBedList.map(({title, src}, index) =>
+      <Button
+        key={index}
+        onClick={() => openExternalImgModel(title, src)}>
+        外部图床{index + 1}
+      </Button>),
     <Popover key="help" content={help} title="帮助"><Button icon={<QuestionCircleTwoTone/>} shape="circle"/></Popover>,
     <Popover key="insertSymbol" content={signs} title="插入符号"><Button icon={<SmileTwoTone/>}
                                                                          shape="circle"/></Popover>,
