@@ -39,7 +39,7 @@ let isQueryOnClick = false; // 防止点太快了
 let openMemoText = 0;       //  控制全部展开备忘录内容 1展开 非1收缩
 let dates = [] ;              // 未处理的筛选日期
 let filterDate = '';         // 筛选日期 格式： 开始时间戳/结束时间戳/0：修改时间 1：创建时间
-let filterDateType = 0;     // 筛选日期类型 0：修改时间 1：创建时间
+let filterDateType = 1;     // 筛选日期类型 0：修改时间 1：创建时间
 
 
 const MemoDrawer = () => {
@@ -370,7 +370,8 @@ const MemoDrawer = () => {
    * @since 2024/8/8 11:49
    */
   const handleFilterDate = () => {
-    if (!dates) {
+    if (dates.length === 0 && !filterDate) return;  // 如果本来就没有日期筛选条件，现在给的日期数组又是空的，那就不用管
+    if (dates.length === 0) {
       filterDate = ''
       sxSj()
     } else if (dates.length === 2) {
@@ -438,26 +439,27 @@ const MemoDrawer = () => {
                 options={sortingOptions}
                 loading={webLoading}
               />
-              
+
               {/*————日期筛选————*/}
               <DatePicker.RangePicker
                 size={'small'}
                 onOpenChange={open => !open && handleFilterDate()}  // 关闭日期选择器时触发
-                onChange={dateArr => dates = dateArr}               // 改变日期触发记录它
+                onChange={dateArr => {                              // 改变日期触发记录它
+                  dates = (dateArr ?? [])
+                  !dateArr && filterDate && handleFilterDate()      // 清除了日期，但还有筛选条件，就触发筛选列表
+                }}
                 renderExtraFooter={() =>
                   <div className="flex-center m5 memo-dateRangeSwitch">
                     <Switch
                       checkedChildren="创建时间"
                       unCheckedChildren="修改时间"
-                      checked={!!filterDateType}
-                      onClick={checked => {
-                        filterDateType = checked ? 1 : 0
-                        sxYm()
-                      }}
+                      checked={Boolean(filterDateType)}
+                      onClick={checked => sxYm(filterDateType = checked ? 1 : 0)}
                     />
                   </div>}
               />
-              {' '}
+              &nbsp;&nbsp;
+
               {/*展开文本*/}
               <Tooltip title="展开文本，对全部长备忘录的展开">
                 <Button
