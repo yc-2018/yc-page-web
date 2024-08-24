@@ -34,7 +34,8 @@ const {Content, Sider} = Layout
  * */
 const Blog = () => {
   const [content, setContent] = useState('# 欢迎来到仰晨博客');
-  const [loading, setLoading] = useState(false)   // 加载状态
+  const [loading, setLoading] = useState(false)     // 加载状态
+  const [initLoad, setInitLoad] = useState(true)    // 初始加载菜单状态
   const [menu, setMenu] = useState(items(blogMenu))                  // 菜单项
   const [selectKey, setSelectKey] = useState([])     // 菜单选中项【子，父】
 
@@ -44,7 +45,7 @@ const Blog = () => {
 
   /** 页面加载菜单 (和读取URL的菜单) */
   useEffect(() => {
-    (()=> init())()
+    init()
   }, [])
 
   /** 初始化页面加载菜单 (和读取URL的菜单) */
@@ -52,6 +53,7 @@ const Blog = () => {
     const blogIconObj = await getBlogItemIconObj(); // 请求获取图标
     const blogList = await getBlogList();           // 请求获取最新菜单
     setMenu(items(blogList, blogIconObj))           // 生成菜单并设置到state
+    setInitLoad(false)
 
     // ——————————————————————🟡处理带URL进来的情况🟡————————————————————————
     const params = window.location.href.split('?')?.[1];
@@ -81,8 +83,8 @@ const Blog = () => {
     }).finally(() => setLoading(false))
 
   }
-
-
+  
+  
   return (
     <Layout style={{maxHeight: 'calc(100vh - 64px)'}}>
       {/*------- 页面左侧 -------*/}
@@ -92,14 +94,17 @@ const Blog = () => {
              style={{overflow: 'auto'}}
              collapsible
       >
-        <Menu
-          selectedKeys={[selectKey[0]]}   // 当前选中的菜单项 key 数组
-          openKeys={[selectKey[1]]}       // 当前展开的 SubMenu 菜单项 key 数组
-          mode="inline"
-          items={menu}
-          onClick={handleMenuClick}       // 点击菜单子项
-          onOpenChange={v => setSelectKey(l => v.length > 0 ? [l[0], v[1]] : [l[0], null])}  // 点击展开菜单
-        />
+        {initLoad ?
+          <LoaderWhite loadName="获取菜单中..."/>
+          :
+          <Menu
+            selectedKeys={[selectKey[0]]}   // 当前选中的菜单项 key 数组
+            openKeys={[selectKey[1]]}       // 当前展开的 SubMenu 菜单项 key 数组
+            mode="inline"
+            items={menu}
+            onClick={handleMenuClick}       // 点击菜单子项
+            onOpenChange={v => setSelectKey(l => v.length > 0 ? [l[0], v[1]] : [l[0], null])}  // 点击展开菜单
+          />}
       </Sider>
 
       {/*------ 页面右侧 -------*/}
