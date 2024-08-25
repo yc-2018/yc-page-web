@@ -41,6 +41,11 @@ export default isMobile() ?
             title: '仰晨工具-gg比价器',
         },
         {
+            path: '/seeTime',
+            element: load('SeeTime'),
+            title: '看时间',
+        },
+        {
             path: '/*',
             element: <NoPage/>,
             title: '未知页面',
