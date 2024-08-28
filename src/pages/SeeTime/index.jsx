@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation} from "react-router-dom";
-import {Col, Empty, Result, Row} from "antd";
+import {Card, Col, Empty, Result, Row} from "antd";
 import {saveSeeTime} from "../../request/otherRequest";
 import JWTUtils from "../../utils/JWTUtils";
 import DateUtils from "../../utils/DateUtils";
@@ -93,27 +93,30 @@ function SeeTime() {
       <Col span={10} style={{display: 'flex', flexDirection: 'column', height: 'calc(100vh - 88px)'}}>
         <div style={{height: '22vh'}}>
           {duration ? <>
-              <h2>{remark}</h2>
-              本次开始时间:{DateUtils.format(startTime)}
-              本次结束时间:{DateUtils.format(endTime)}
-              本次时长:{endTime.getTime() - startTime.getTime()}
-              当天总时长:{duration}
+              <h3>{remark}</h3>
+              <div><b>本次开始时间：</b>{DateUtils.format(startTime)}</div>
+              <div><b>本次结束时间：</b>{DateUtils.format(endTime)}</div>
+              <div><b>本次时长：</b>{DateUtils.millisecondFormat(endTime.getTime() - startTime.getTime())}</div>
+              <div><b>当天总时长：</b>{DateUtils.secondFormat(duration)}</div>
             </>
             :
             <Empty description="数据不足以支持渲染此处。" style={{marginTop:12}}/>}
         </div>
 
-        <div style={{textAlign: 'center', background: 'rgba(240,240,240,0.29)', borderRadius: 6, flex: 1}}>
-          <h3>本地记录</h3>
+        <div style={{background: 'rgba(240,240,240,0.29)', borderRadius: 6, flex: 1}}>
+          <h3 style={{textAlign: 'center'}}>本地记录</h3>
           {localDataList.length > 0 ?
-            <div>
-              {localDataList.map(item =>
-                <div key={item.startTime?.valueOf()}>
-                  {item.remark}
-                  {item.save ? '已保存' : '未保存'}
-                </div>
+            <Row gutter={6} style={{padding: 6}}>
+              {localDataList.sort((a, b) => b.startTime - a.startTime).map(item =>
+                <Col span={12} key={item.startTime?.valueOf()} style={{marginBottom: 6}}>
+                  <Card
+                    title={`${item.remark} >>> ${DateUtils.millisecondFormat(item.endTime.getTime() - item.startTime.getTime())}`}>
+                    <b>{DateUtils.format(item.startTime)}</b> ~ <b>{DateUtils.format(item.endTime)}</b>
+                    <div><b>当天总时长：</b>{DateUtils.secondFormat(item.duration)}</div>
+                  </Card>
+                </Col>
               )}
-            </div>
+            </Row>
             :
             <Result
               style={{padding: 0}}
