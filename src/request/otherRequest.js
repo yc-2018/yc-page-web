@@ -16,3 +16,10 @@ export async function saveSeeTime(body) {
     return data;
   } catch (error) {CommonStore.setLoading(false,"记录失败",'error')}
 }
+
+export async function getSeeTime(body) {
+  try {
+    const {data:{data}} = await myAxios({url:'/other/getSeeTime',method: 'post', data : body});
+    return data ?? [];
+  } catch (error) {return []}
+}

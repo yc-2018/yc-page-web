@@ -4,6 +4,9 @@ import {Card, Col, Empty, Result, Row} from "antd";
 import {saveSeeTime} from "../../request/otherRequest";
 import JWTUtils from "../../utils/JWTUtils";
 import DateUtils from "../../utils/DateUtils";
+import {observer} from "mobx-react-lite";
+import MyEmpty from "../../compontets/common/MyEmpty";
+import SeeTimeChart from "./SeeTimeChart";
 
 let sxIndex = 0;
 let requestData = {}         // 读取URL参数组合
@@ -77,7 +80,7 @@ function SeeTime() {
         itemObj.startTime = new Date(itemObj.startTime)
         itemObj.endTime = new Date(itemObj.endTime)
         // 如果url有值 和URL比较，系统就覆盖
-        if (itemObj.startTime.toString() === requestData?.startTime.toString()) {
+        if (itemObj.startTime?.toString() === requestData?.startTime?.toString()) {
           noExists = false;
           window.localStorage.setItem(`seeTime${index}`, JSON.stringify(requestData))
         }
@@ -130,7 +133,10 @@ function SeeTime() {
       </Col>
 
       <Col span={14}>
-        登录后网络数据
+        {JWTUtils.isExpired()?
+          <MyEmpty describe={'登录后方可查看观看时间数据~'}/>:
+          <SeeTimeChart/>
+        }
       </Col>
 
 
@@ -139,4 +145,4 @@ function SeeTime() {
   );
 }
 
-export default SeeTime;
+export default observer(SeeTime);
