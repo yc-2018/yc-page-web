@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Col, DatePicker, Row, Space} from "antd";
+import {Button, DatePicker, Row, Space} from "antd";
 import dayjs from "dayjs";
 import {getSeeTime} from "../../request/otherRequest";
 import {typeMapper, typeMapperEn} from "./mapper";
@@ -13,7 +13,8 @@ let seeData = {
 };
 
 let seeDataList = [];
-
+// 一天的总毫秒数
+const millisecondsInADay = 26 * 60 * 60 * 1000;
 /**
  * 看时间图表
  *
@@ -82,23 +83,48 @@ const SeeTimeChart = () => {
           {builderBtn(3)} {/* 月 */}
           {builderBtn(4)} {/* 年 */}
         </div>
+
+
         <div
           style={{
             width: 'calc(100% - 70px)',
             background: '#fffff5',
-            display: 'flex',
-            flexDirection: 'column-reverse',
             position: 'relative',
           }}
         >
-          <div style={{position: 'absolute', top: 0, left: 0}}>
+
+          <div style={{position: 'absolute', top: 4, left: 8}}>
             {dayjs(seeData.startDate).format('YYYY-MM-DD')}
             {seeData.seeRange > 1 && ' ~ ' + dayjs(seeData.endDate).format('YYYY-MM-DD')}
           </div>
 
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column-reverse',
+              height: 'calc(100vh - 160px)',
+              overflow: 'auto'}}
+          >
+
+            {seeDataList.map((item, index) =>
+              <Row>
+                <div
+                  style={{
+                    marginLeft:getFrontPercentage(item.startTime),
+                    width: `${dayjs(item.endTime).diff(dayjs(item.startTime)) / millisecondsInADay * 100}%`,
+                    background: '#ff8686',
+                }}
+                />
+                {item.thisTime}
+              </Row>)
+            }
+          </div>
+
           <Row>
-            {Array.from({length: 24}).map((_, i) => <Col span={1} key={i} style={{textAlign: 'center'}}>{i}</Col>)}
+            {Array.from({length: 26}).map((_, i) =>
+              <div key={i} style={{width: `${100/26}%`, textAlign: 'center'}}>{i%24}</div>)}
           </Row>
+
 
 
 
@@ -132,3 +158,17 @@ const SeeTimeChart = () => {
 };
 
 export default SeeTimeChart;
+
+function getFrontPercentage(dayjsTime) {
+  // 获取当天开始时间 (00:00:00)
+  const startOfDay = dayjs(dayjsTime).startOf('day');
+
+  // 计算时间差，单位为毫秒
+  const timeDifference = dayjs(dayjsTime).diff(startOfDay);
+
+
+  // 计算时间差占一天的百分比
+  const percentageOfDay = (timeDifference / millisecondsInADay) * 100;
+
+  return `${percentageOfDay}%`;
+}

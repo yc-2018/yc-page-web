@@ -33,7 +33,7 @@ export default observer(() => {
             }}>
                 <Row style={{width: '100%'}}>
                     {/*logo 回到首页*/}
-                    <Col span={1}>
+                    <Col span={1} onContextMenu={e => e.preventDefault() || navigate('/seeTime')}>
                         <Avatar src="/favicon.ico"
                                 onClick={() => navigate('/')}
                                 style={{cursor: 'pointer'}}

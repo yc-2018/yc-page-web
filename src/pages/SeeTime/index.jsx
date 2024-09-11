@@ -7,6 +7,7 @@ import DateUtils from "../../utils/DateUtils";
 import {observer} from "mobx-react-lite";
 import MyEmpty from "../../compontets/common/MyEmpty";
 import SeeTimeChart from "./SeeTimeChart";
+import dayjs from "dayjs";
 
 let sxIndex = 0;
 let requestData = {}         // 读取URL参数组合
@@ -93,7 +94,7 @@ function SeeTime() {
 
   return (
     <Row style={{margin: 12}}>
-      <Col span={10} style={{display: 'flex', flexDirection: 'column', height: 'calc(100vh - 88px)'}}>
+      <Col span={4} style={{display: 'flex', flexDirection: 'column', height: 'calc(100vh - 88px)'}}>
         <div style={{height: '22vh'}}>
           {duration ? <>
               <h3>{remark}</h3>
@@ -111,10 +112,11 @@ function SeeTime() {
           {localDataList.length > 0 ?
             <Row gutter={6} style={{padding: 6}}>
               {localDataList.sort((a, b) => b.startTime - a.startTime).map(item =>
-                <Col span={12} key={item.startTime?.valueOf()} style={{marginBottom: 6}}>
+                <Col span={24} key={item.startTime?.valueOf()} style={{marginBottom: 6}}>
                   <Card
+                    styles={{body: {paddingTop: 12}}}
                     title={`${item.remark} >>> ${DateUtils.millisecondFormat(item.endTime.getTime() - item.startTime.getTime())}`}>
-                    <b>{DateUtils.format(item.startTime)}</b> ~ <b>{DateUtils.format(item.endTime)}</b>
+                    <span>{DateUtils.format(item.startTime)}</span> {'>>>'} <sapn>{dayjs(item.endTime).format('HH:mm:ss')}</sapn>
                     <div><b>当天总时长：</b>{DateUtils.secondFormat(item.duration)}</div>
                   </Card>
                 </Col>
@@ -132,7 +134,7 @@ function SeeTime() {
         </div>
       </Col>
 
-      <Col span={14}>
+      <Col span={20}>
         {JWTUtils.isExpired()?
           <MyEmpty describe={'登录后方可查看观看时间数据~'}/>:
           <SeeTimeChart/>
