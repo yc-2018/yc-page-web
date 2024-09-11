@@ -9,7 +9,7 @@ import {
 import showOrNot from "../../store/ShowOrNot";
 import UserStore from "../../store/UserStore";
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/memoRequest.js";
-import EmptyList from "../../compontets/common/EmptyList";
+import MyEmpty from "../../compontets/common/MyEmpty";
 import {englishSortingOptions, tagList} from "../../store/NoLoginData";
 import MyButton from "../../compontets/MyButton";
 import CommonStore from "../../store/CommonStore";
@@ -170,7 +170,7 @@ function EnglishDrawer() {
                 </div>
                 :
                 total ? <Divider className='loadMore' plain>🥺到底啦🐾</Divider>
-                    : <EmptyList/>   // 没有数据
+                    : <MyEmpty/>   // 没有数据
 
     /** 标签生成器 */
     const buildTag=(value, color="processing",icon, onClick, bordered=false)=>
