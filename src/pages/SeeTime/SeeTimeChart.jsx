@@ -6,7 +6,7 @@ import {typeMapper, typeMapperEn} from "./mapper";
 import DateUtils from "../../utils/DateUtils";
 let sxIndex = 0;
 
-let seeData = {
+let seeDataConfig = {
   seeRange: 1, // 1日、2周、3月、4年
   startDate: dayjs().startOf('day').valueOf(),
   endDate: dayjs().endOf('day').valueOf(),
@@ -31,7 +31,7 @@ const SeeTimeChart = () => {
   }, [])
 
   const getSeeData = async () => {
-    seeDataList = await getSeeTime(seeData);
+    seeDataList = await getSeeTime(seeDataConfig);
     setSeeTimeRange();
     sxYm();
   }
@@ -83,7 +83,7 @@ const SeeTimeChart = () => {
 
   const builderBtn = type => {
     const changeSeeRange = type => {
-      seeData.seeRange = type
+      seeDataConfig.seeRange = type
       dateChange(dayjs())
       getSeeData()
     }
@@ -93,7 +93,7 @@ const SeeTimeChart = () => {
         type="primary"
         size="large"
         style={{margin:'20px 0'}}
-        disabled={seeData.seeRange === type}
+        disabled={seeDataConfig.seeRange === type}
         onClick={() => changeSeeRange(type)}
       >
         {typeMapper[type]}
@@ -108,14 +108,14 @@ const SeeTimeChart = () => {
    * @since 2024/9/11 1:59
    */
   const dateChange = (date) => {
-    let start = date.startOf(typeMapperEn[seeData.seeRange])
-    let end = date.endOf(typeMapperEn[seeData.seeRange])
-    if (seeData.seeRange === 2) {
+    let start = date.startOf(typeMapperEn[seeDataConfig.seeRange])
+    let end = date.endOf(typeMapperEn[seeDataConfig.seeRange])
+    if (seeDataConfig.seeRange === 2) {
       start = start.add(1, 'day')
       end = end.add(1, 'day')
     }
-    seeData.startDate = start.valueOf();
-    seeData.endDate = end.valueOf();
+    seeDataConfig.startDate = start.valueOf();
+    seeDataConfig.endDate = end.valueOf();
     sxYm()
     getSeeData()
   };
@@ -141,8 +141,8 @@ const SeeTimeChart = () => {
         >
 
           <div style={{position: 'absolute', top: 4, left: 8}}>
-            {dayjs(seeData.startDate).format('YYYY-MM-DD')}
-            {seeData.seeRange > 1 && ' ~ ' + dayjs(seeData.endDate).format('YYYY-MM-DD')}
+            {dayjs(seeDataConfig.startDate).format('YYYY-MM-DD')}
+            {seeDataConfig.seeRange > 1 && ' ~ ' + dayjs(seeDataConfig.endDate).format('YYYY-MM-DD')}
           </div>
 
           <div
@@ -194,7 +194,7 @@ const SeeTimeChart = () => {
 
       <Space size="large">
         <Button onClick={getSeeData}>刷新</Button>
-        <DatePicker onChange={dateChange} picker={typeMapperEn[seeData.seeRange]}/>
+        <DatePicker onChange={dateChange} picker={typeMapperEn[seeDataConfig.seeRange]}/>
         {seeDataList.length > 0 &&
           <b>
             总时长：
