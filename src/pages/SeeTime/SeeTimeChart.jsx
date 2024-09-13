@@ -13,8 +13,9 @@ let seeData = {
 };
 
 let seeDataList = [];
-// 一天的总毫秒数
-const millisecondsInADay = 26 * 60 * 60 * 1000;
+let seeTimeRange = [];  // 显示的时间范围
+// 显示的小时的总毫秒数
+const millisecondsInHour = () => seeTimeRange.length * 60 * 60 * 1000;
 /**
  * 看时间图表
  *
@@ -31,8 +32,54 @@ const SeeTimeChart = () => {
 
   const getSeeData = async () => {
     seeDataList = await getSeeTime(seeData);
-    sxYm()
+    setSeeTimeRange();
+    sxYm();
   }
+
+  /**
+   * 把有看的时间小时范围记录，没有的一个连续两个小时的就合并为... 如果开始天和结束天不是同一天那就一直加到结束时间的小时数，如 23，0，1
+   *
+   * @author Yc
+   * @since 2024/9/13 1:54
+   */
+  const setSeeTimeRange = () => {
+    seeTimeRange = []
+    let crossDayHour = false; // 是否跨越天
+
+    // 把看过的小时放入数组
+    for (let i = 0; i < seeDataList.length; i++) {
+      const item = seeDataList[i];
+      let startHour = dayjs(item.startTime).hour();
+      let endHour = dayjs(item.endTime).hour();
+      const hourDiff = endHour - startHour;
+      if (hourDiff < 0) {
+        crossDayHour = true;
+        endHour = 23
+      }
+      for (let j = startHour; j <= endHour; j++) !seeTimeRange.includes(j) && seeTimeRange.push(j);
+    }
+    // 从小到大排序
+    seeTimeRange.sort((a, b) => a - b);
+
+    // 加上 {h} 或...
+    const newSeeTimeRange = [seeTimeRange[0]]
+    for (let i = 1; i < seeTimeRange.length; i++) {
+      const diff = seeTimeRange[i] - seeTimeRange[i - 1];
+      if (diff === 2) newSeeTimeRange.push(seeTimeRange[i - 1] + 1)
+      if (diff > 2) newSeeTimeRange.push('...')
+      newSeeTimeRange.push(seeTimeRange[i])
+    }
+
+    // 只要隔天了就加上两小时
+    if (crossDayHour) {
+      newSeeTimeRange.push(0)
+      newSeeTimeRange.push(1)
+    }
+    if (!crossDayHour) newSeeTimeRange.push(seeTimeRange[seeTimeRange.length - 1] + 1)
+
+    seeTimeRange = newSeeTimeRange;
+  };
+
 
   const builderBtn = type => {
     const changeSeeRange = type => {
@@ -106,23 +153,37 @@ const SeeTimeChart = () => {
               overflow: 'auto'}}
           >
 
-            {seeDataList.map((item, index) =>
-              <Row>
+            {seeDataList.map(item =>
+              <Row key={item.id}>
                 <div
                   style={{
                     marginLeft:getFrontPercentage(item.startTime),
-                    width: `${dayjs(item.endTime).diff(dayjs(item.startTime)) / millisecondsInADay * 100}%`,
+                    width: `${dayjs(item.endTime).diff(dayjs(item.startTime)) / millisecondsInHour() * 100}%`,
                     background: '#ff8686',
                 }}
                 />
+                {dayjs(item.startTime).format('HH:mm:ss')} ~
+                {dayjs(item.endTime).format('HH:mm:ss')} /
                 {item.thisTime}
               </Row>)
             }
           </div>
 
+          {/*——————————X轴时间轴——————————*/}
           <Row>
-            {Array.from({length: 26}).map((_, i) =>
-              <div key={i} style={{width: `${100/26}%`, textAlign: 'center'}}>{i%24}</div>)}
+            {seeTimeRange.map((hour, index) =>
+              <div
+                key={index}
+                style={{
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  width: `${100 / seeTimeRange.length}%`,
+                  background: index % 2 === 0 ? '#c4ffa9' : '#b9edff'
+              }}
+              >
+                {hour}
+              </div>
+            )}
           </Row>
 
 
@@ -160,15 +221,16 @@ const SeeTimeChart = () => {
 export default SeeTimeChart;
 
 function getFrontPercentage(dayjsTime) {
-  // 获取当天开始时间 (00:00:00)
-  const startOfDay = dayjs(dayjsTime).startOf('day');
+  const startOfHour = dayjs(seeDataList[0].startTime).startOf('day');
+
+  const hourIndex = seeTimeRange.indexOf(dayjs(dayjsTime).hour())
+  const virtualHour = dayjs(dayjsTime).hour(hourIndex)
 
   // 计算时间差，单位为毫秒
-  const timeDifference = dayjs(dayjsTime).diff(startOfDay);
-
+  const timeDifference = virtualHour.diff(startOfHour);
 
   // 计算时间差占一天的百分比
-  const percentageOfDay = (timeDifference / millisecondsInADay) * 100;
+  const percentageOfDay = (timeDifference / millisecondsInHour()) * 100;
 
   return `${percentageOfDay}%`;
 }
