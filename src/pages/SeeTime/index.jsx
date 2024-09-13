@@ -116,7 +116,7 @@ function SeeTime() {
                   <Card
                     styles={{body: {paddingTop: 12}}}
                     title={`${item.remark} >>> ${DateUtils.millisecondFormat(item.endTime.getTime() - item.startTime.getTime())}`}>
-                    <span>{DateUtils.format(item.startTime)}</span> {'>>>'} <sapn>{dayjs(item.endTime).format('HH:mm:ss')}</sapn>
+                    <span>{DateUtils.format(item.startTime)}</span> {'>>>'} <span>{dayjs(item.endTime).format('HH:mm:ss')}</span>
                     <div><b>当天总时长：</b>{DateUtils.secondFormat(item.duration)}</div>
                   </Card>
                 </Col>

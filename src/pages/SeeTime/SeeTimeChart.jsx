@@ -1,20 +1,24 @@
 import React, {useEffect, useState} from 'react';
-import {Button, DatePicker, Row, Space} from "antd";
+import {Button, DatePicker, Space} from "antd";
 import dayjs from "dayjs";
 import {getSeeTime} from "../../request/otherRequest";
 import {typeMapper, typeMapperEn} from "./mapper";
-import DateUtils from "../../utils/DateUtils";
+import OneDayChart, {OneDayTotalDuration, OneDayWatchDuration} from "./OneDayChart";
 let sxIndex = 0;
 
-let seeData = {
+let seeDataConfig = {
   seeRange: 1, // 1日、2周、3月、4年
   startDate: dayjs().startOf('day').valueOf(),
   endDate: dayjs().endOf('day').valueOf(),
 };
+const DAY = 1;
+const WEEK = 2;
+const MONTH = 3;
+const YEAR = 4;
 
 let seeDataList = [];
-// 一天的总毫秒数
-const millisecondsInADay = 26 * 60 * 60 * 1000;
+// 显示的小时的总毫秒数
+
 /**
  * 看时间图表
  *
@@ -29,14 +33,11 @@ const SeeTimeChart = () => {
     getSeeData()
   }, [])
 
-  const getSeeData = async () => {
-    seeDataList = await getSeeTime(seeData);
-    sxYm()
-  }
+  const getSeeData = async () => sxYm(seeDataList = await getSeeTime(seeDataConfig));
 
   const builderBtn = type => {
     const changeSeeRange = type => {
-      seeData.seeRange = type
+      seeDataConfig.seeRange = type
       dateChange(dayjs())
       getSeeData()
     }
@@ -46,7 +47,7 @@ const SeeTimeChart = () => {
         type="primary"
         size="large"
         style={{margin:'20px 0'}}
-        disabled={seeData.seeRange === type}
+        disabled={seeDataConfig.seeRange === type}
         onClick={() => changeSeeRange(type)}
       >
         {typeMapper[type]}
@@ -61,30 +62,32 @@ const SeeTimeChart = () => {
    * @since 2024/9/11 1:59
    */
   const dateChange = (date) => {
-    let start = date.startOf(typeMapperEn[seeData.seeRange])
-    let end = date.endOf(typeMapperEn[seeData.seeRange])
-    if (seeData.seeRange === 2) {
+    let start = date.startOf(typeMapperEn[seeDataConfig.seeRange])
+    let end = date.endOf(typeMapperEn[seeDataConfig.seeRange])
+    if (seeDataConfig.seeRange === WEEK) {  // 周 默认周日开始，我这里设置为周一开始
       start = start.add(1, 'day')
       end = end.add(1, 'day')
     }
-    seeData.startDate = start.valueOf();
-    seeData.endDate = end.valueOf();
+    seeDataConfig.startDate = start.valueOf();
+    seeDataConfig.endDate = end.valueOf();
     sxYm()
     getSeeData()
   };
 
 
   return (
-    <div style={{width:'99%',height:'100%',marginLeft:10}}>
+    <div style={{width: '99%', height: '100%', marginLeft: 10}}>
       <div style={{display: 'flex', marginBottom: 10, height: 'calc(100vh - 130px)'}}>
+
+        {/*——————————————————左边选择查看的区间按钮————————————————*/}
         <div style={{width: 70, textAlign: 'center', background: '#f1ffeb', borderRadius: '10px 0 0 10px'}}>
-          {builderBtn(1)} {/* 日 */}
-          {builderBtn(2)} {/* 周 */}
-          {builderBtn(3)} {/* 月 */}
-          {builderBtn(4)} {/* 年 */}
+          {builderBtn(DAY)}
+          {builderBtn(WEEK)}
+          {builderBtn(MONTH)}
+          {builderBtn(YEAR)}
         </div>
 
-
+        {/*————————————————————图表展示内容——————————————————————*/}
         <div
           style={{
             width: 'calc(100% - 70px)',
@@ -94,64 +97,22 @@ const SeeTimeChart = () => {
         >
 
           <div style={{position: 'absolute', top: 4, left: 8}}>
-            {dayjs(seeData.startDate).format('YYYY-MM-DD')}
-            {seeData.seeRange > 1 && ' ~ ' + dayjs(seeData.endDate).format('YYYY-MM-DD')}
+            {dayjs(seeDataConfig.startDate).format('YYYY-MM-DD')}
+            {seeDataConfig.seeRange !== DAY && ' ~ ' + dayjs(seeDataConfig.endDate).format('YYYY-MM-DD')}
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column-reverse',
-              height: 'calc(100vh - 160px)',
-              overflow: 'auto'}}
-          >
-
-            {seeDataList.map((item, index) =>
-              <Row>
-                <div
-                  style={{
-                    marginLeft:getFrontPercentage(item.startTime),
-                    width: `${dayjs(item.endTime).diff(dayjs(item.startTime)) / millisecondsInADay * 100}%`,
-                    background: '#ff8686',
-                }}
-                />
-                {item.thisTime}
-              </Row>)
-            }
-          </div>
-
-          <Row>
-            {Array.from({length: 26}).map((_, i) =>
-              <div key={i} style={{width: `${100/26}%`, textAlign: 'center'}}>{i%24}</div>)}
-          </Row>
-
-
-
+          {seeDataConfig.seeRange === DAY && <OneDayChart seeDataList={seeDataList}/>}
 
         </div>
       </div>
 
+      {/*————————————————————————————底部功能————————————————————————————*/}
       <Space size="large">
         <Button onClick={getSeeData}>刷新</Button>
-        <DatePicker onChange={dateChange} picker={typeMapperEn[seeData.seeRange]}/>
-        {seeDataList.length > 0 &&
-          <b>
-            总时长：
-            {DateUtils.millisecondFormat(seeDataList.map(item => {
-                const start = dayjs(item.startTime);
-                const end = dayjs(item.endTime);
-                return end.diff(start)
-              }
-            ).reduce((total, current) => total + current, 0))}
-          </b>
-        }
-
-        {seeDataList.length > 0 &&
-          <b>
-            观看时长：
-            {DateUtils.secondFormat(seeDataList.reduce((total, current) => total + current.thisTime, 0))}
-          </b>
-        }
+        <DatePicker onChange={dateChange} picker={typeMapperEn[seeDataConfig.seeRange]} allowClear={false}/>
+        {seeDataConfig.seeRange === DAY && < OneDayTotalDuration seeDataList={seeDataList}/>}
+        {seeDataConfig.seeRange === DAY && <OneDayWatchDuration seeDataList={seeDataList}/>}
+        <b>共看了 <span style={{color: '#ff0000'}}>{seeDataList.length}</span> 次</b>
       </Space>
     </div>
   );
@@ -159,16 +120,3 @@ const SeeTimeChart = () => {
 
 export default SeeTimeChart;
 
-function getFrontPercentage(dayjsTime) {
-  // 获取当天开始时间 (00:00:00)
-  const startOfDay = dayjs(dayjsTime).startOf('day');
-
-  // 计算时间差，单位为毫秒
-  const timeDifference = dayjs(dayjsTime).diff(startOfDay);
-
-
-  // 计算时间差占一天的百分比
-  const percentageOfDay = (timeDifference / millisecondsInADay) * 100;
-
-  return `${percentageOfDay}%`;
-}

@@ -91,7 +91,7 @@ const Blog = () => {
       <Sider width={250}
              theme={'light'}
              className={styles.scrollbar}
-             style={{overflow: 'auto'}}
+             style={{overflow: 'auto',maxHeight: 'calc(100vh - 112px)'}}
              collapsible
       >
         {initLoad ?
