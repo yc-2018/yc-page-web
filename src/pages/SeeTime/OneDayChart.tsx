@@ -141,7 +141,7 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
                 <div style={lineStyles(item, '内')}/>
               </div>
             </Popover>
-            <span style={{lineHeight: '34px', marginLeft: 3}}>
+            <span style={{lineHeight: '34px', marginLeft: 3, color: '#999'}}>
               {DateUtils.millisecondFormat(dayjs(item.endTime).diff(dayjs(item.startTime)))}
             </span>
           </Row>)

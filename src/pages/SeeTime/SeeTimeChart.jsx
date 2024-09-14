@@ -96,10 +96,10 @@ const SeeTimeChart = () => {
           }}
         >
 
-          <div style={{position: 'absolute', top: 4, left: 8}}>
+          <b style={{position: 'absolute', top: 4, left: 8, color: '#999',fontSize:18}}>
             {dayjs(seeDataConfig.startDate).format('YYYY-MM-DD')}
             {seeDataConfig.seeRange !== DAY && ' ~ ' + dayjs(seeDataConfig.endDate).format('YYYY-MM-DD')}
-          </div>
+          </b>
 
           {seeDataConfig.seeRange === DAY && <OneDayChart seeDataList={seeDataList}/>}
 
