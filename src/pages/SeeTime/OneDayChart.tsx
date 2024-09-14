@@ -1,4 +1,4 @@
-import {Row} from "antd";
+import {Popover, Row} from "antd";
 import dayjs from "dayjs";
 import React from "react";
 import DateUtils from "../../utils/DateUtils";
@@ -19,6 +19,36 @@ interface OneDayChartProps {
 const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
   /** 返回和X个小时的毫秒数 */
   const millisecondsInHour = () => seeTimeRange.length * 60 * 60 * 1000;
+  /** 计算本次的百分比 */
+  const percentageThisTime = (item: SeeData) =>
+    `${dayjs(item.endTime).diff(dayjs(item.startTime)) / millisecondsInHour() * 100}%`
+  /** 本次打开时间和观看时间差异百分百 */
+  const diffPercentage = (item: SeeData): string => {
+    const openTime = dayjs(item.endTime).diff(dayjs(item.startTime));
+    const watchTime = item.thisTime * 1000;
+    return `${watchTime / openTime * 100}%`
+  }
+
+  /** 不同类型不同颜色的线 */
+  const lineStyles = (item: SeeData, outIn: '外' | '内') => {
+    const Colors: any = {
+      '抖音刷视频外': '#c5daff',
+      '抖音刷视频内': '#92b8fa',
+      '抖音用户页外': '#fce1ce',
+      '抖音用户页内': '#fcc5a3',
+      '抖音搜索页外': '#fccedd',
+      '抖音搜索页内': '#ffabc6',
+    }
+
+    return {
+      background: Colors[`${item.remark}${outIn}`] || (outIn === '外' ? '#e1e1e1' : '#c0c0c0'),
+      width: outIn === '外' ? percentageThisTime(item) : diffPercentage(item),
+      height: 25,
+      borderRadius: 5,
+      margin: outIn === '外' ? '5px 0' : 'unset'
+    }
+
+  }
 
   /** 计算画图前 前面应该空多少 */
   const getFrontPercentage = (dayjsTime: string) => {
@@ -93,18 +123,27 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
       >
 
         {/*————————循环渲染 看时间的每一项——————*/}
-        {seeDataList.map((item: any) =>
+        {seeDataList.map((item: SeeData) =>
           <Row key={item.id}>
-            <div
-              style={{
-                marginLeft: getFrontPercentage(item.startTime),
-                width: `${dayjs(item.endTime).diff(dayjs(item.startTime)) / millisecondsInHour() * 100}%`,
-                background: '#ff8686',
-              }}
-            />
-            {dayjs(item.startTime).format('HH:mm:ss')} ~
-            {dayjs(item.endTime).format('HH:mm:ss')} /
-            {item.thisTime}
+            <div style={{marginLeft: getFrontPercentage(item.startTime)}}/>
+            <Popover
+              placement="top"
+              content={
+              <div style={{textAlign:"center"}}>
+                <b style={{color: '#646464',fontSize: 18}}>{item.remark}</b>
+                <div>打开时间：{DateUtils.millisecondFormat(dayjs(item.endTime).diff(dayjs(item.startTime)))}</div>
+                <div>观看时间：{DateUtils.secondFormat(item.thisTime)}</div>
+                <b>{dayjs(item.startTime).format('HH:mm:ss')} ~ {dayjs(item.endTime).format('HH:mm:ss')}</b>
+              </div>
+            }
+            >
+              <div style={lineStyles(item, '外')}>
+                <div style={lineStyles(item, '内')}/>
+              </div>
+            </Popover>
+            <span style={{lineHeight: '34px', marginLeft: 3, color: '#999'}}>
+              {DateUtils.millisecondFormat(dayjs(item.endTime).diff(dayjs(item.startTime)))}
+            </span>
           </Row>)
         }
       </div>
