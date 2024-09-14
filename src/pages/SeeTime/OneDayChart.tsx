@@ -45,6 +45,7 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
       width: outIn === '外' ? percentageThisTime(item) : diffPercentage(item),
       height: 25,
       borderRadius: 5,
+      margin: outIn === '外' ? '5px 0' : 'unset'
     }
 
   }
@@ -140,7 +141,9 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
                 <div style={lineStyles(item, '内')}/>
               </div>
             </Popover>
-            {DateUtils.millisecondFormat(dayjs(item.endTime).diff(dayjs(item.startTime)))}
+            <span style={{lineHeight: '34px', marginLeft: 3}}>
+              {DateUtils.millisecondFormat(dayjs(item.endTime).diff(dayjs(item.startTime)))}
+            </span>
           </Row>)
         }
       </div>
