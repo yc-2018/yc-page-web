@@ -150,7 +150,7 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
 
       {/*——————————X轴时间轴——————————*/}
       <Row>
-        {seeTimeRange.map((hour: number | string, index: number) =>
+        {seeTimeRange.map((hour: number , index: number) =>
           <div
             key={index}
             style={{
@@ -160,7 +160,7 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
               background: index % 2 === 0 ? '#c4ffa9' : '#b9edff'
             }}
           >
-            {hour === -1 ? '...' : hour}
+            {hour === -1 ? '...' : `${hour}`}
           </div>
         )}
       </Row>
