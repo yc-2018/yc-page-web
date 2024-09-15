@@ -119,17 +119,25 @@ function SeeTime() {
               }
             </div>
 
-            <div style={{background: 'rgba(240,240,240,0.29)', borderRadius: 6, flex: 1}}>
+            <div style={{background: 'rgba(240,240,240,0.29)', borderRadius: 6, flex: 1,overflow: 'auto'}}>
               <h3 style={{textAlign: 'center'}}>本地记录</h3>
               {localDataList.length > 0 ?
-                <Row gutter={6} style={{padding: 6}}>
+                <Row style={{padding: 6}}>
                   {localDataList.sort((a, b) => b.startTime - a.startTime).map(item =>
                     <Col span={24} key={item.startTime?.valueOf()} style={{marginBottom: 6}}>
                       <Card
                         styles={{body: {paddingTop: 12}}}
-                        title={`${item.remark} >>> ${DateUtils.millisecondFormat(item.endTime.getTime() - item.startTime.getTime())}`}>
-                        <span>{DateUtils.format(item.startTime)}</span> {'>>>'} <span>{dayjs(item.endTime).format('HH:mm:ss')}</span>
-                        <div><b>当天总时长：</b>{DateUtils.secondFormat(item.duration)}</div>
+                        title={item.remark}>
+                        <span>{dayjs(item.startTime).format('HH:mm:ss')}</span> {'>>>'}
+                        <span>{dayjs(item.endTime).format('HH:mm:ss')}</span>
+                        <div style={{display: "flex", flexWrap: 'wrap'}}>
+                          <div>本次时长：</div>
+                          <div>{DateUtils.millisecondFormat(item.endTime.getTime() - item.startTime.getTime())}</div>
+                        </div>
+                        <div style={{display: "flex", flexWrap: 'wrap'}}>
+                          <div>当天总时长：</div>
+                          <div>{DateUtils.secondFormat(item.duration)}</div>
+                        </div>
                       </Card>
                     </Col>
                   )}
@@ -147,7 +155,7 @@ function SeeTime() {
         }
       </div>
 
-
+      {/*——————————漂浮开关左边按钮————————*/}
       <div style={{position: 'absolute', top: '50%', left: lifeOpen ? '16%' : 0, transition: 'all 0.5s'}}>
         <Button
           shape="circle"
@@ -156,7 +164,7 @@ function SeeTime() {
         />
       </div>
 
-
+      {/*————————————右边图表————————————*/}
       <div style={{width: lifeOpen ? '84%' : '100%'}}>
         {JWTUtils.isExpired()?
           <MyEmpty describe={'登录后方可查看观看时间数据~'}/>:
