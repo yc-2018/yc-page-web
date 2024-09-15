@@ -117,7 +117,7 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
         style={{
           display: 'flex',
           flexDirection: 'column-reverse',
-          height: 'calc(100vh - 160px)',
+          height: 'calc(-153px + 100vh)',
           overflow: 'auto'
         }}
       >

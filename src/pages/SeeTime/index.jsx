@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation} from "react-router-dom";
-import {Card, Col, Empty, Result, Row} from "antd";
+import {Button, Card, Col, Empty, Result, Row} from "antd";
 import {saveSeeTime} from "../../request/otherRequest";
 import JWTUtils from "../../utils/JWTUtils";
 import DateUtils from "../../utils/DateUtils";
@@ -8,10 +8,12 @@ import {observer} from "mobx-react-lite";
 import MyEmpty from "../../compontets/common/MyEmpty";
 import SeeTimeChart from "./SeeTimeChart";
 import dayjs from "dayjs";
+import {LeftOutlined} from "@ant-design/icons";
 
 let sxIndex = 0;
 let requestData = {}         // 读取URL参数组合
 let localDataList = [];   // 本地记录列表
+let lifeOpen = false;   // 是否打开左边的本地记录
 
 function SeeTime() {
   const [, setSx] = useState(0)
@@ -26,8 +28,8 @@ function SeeTime() {
       requestData.endTime = DateUtils.timestampToDate(params.get('endTime'));      // 结束时间
       requestData.duration = parseInt(params.get('duration'));                     // 当天总时长
       requestData.remark = params.get('remark');                                   // 描述
-      const isClose = Boolean(params.get('isClose'));                     // 保存完直接就关闭页面
-      saveData(isClose)
+      lifeOpen = true
+      saveData()
     } finally {
       sxYm()
     }
@@ -40,7 +42,7 @@ function SeeTime() {
    * @author Yc
    * @since 2024/8/27 2:37
    */
-  const saveData = async (isClose) => {
+  const saveData = async () => {
     // 记录到本地
     let index = readData();
     if (index === -1) return;
@@ -60,8 +62,6 @@ function SeeTime() {
         window.localStorage.setItem(`seeTime${index}`, JSON.stringify(requestData));
       }
     }
-    if (isClose) window.close();
-
   };
 
   /**
@@ -93,56 +93,79 @@ function SeeTime() {
 
 
   return (
-    <Row style={{margin: 12}}>
-      <Col span={4} style={{display: 'flex', flexDirection: 'column', height: 'calc(100vh - 88px)'}}>
-        <div style={{height: '22vh'}}>
-          {duration ? <>
-              <h3>{remark}</h3>
-              <div><b>本次开始时间：</b>{DateUtils.format(startTime)}</div>
-              <div><b>本次结束时间：</b>{DateUtils.format(endTime)}</div>
-              <div><b>本次时长：</b>{DateUtils.millisecondFormat(endTime.getTime() - startTime.getTime())}</div>
-              <div><b>当天总时长：</b>{DateUtils.secondFormat(duration)}</div>
-            </>
-            :
-            <Empty description="数据不足以支持渲染此处。" style={{marginTop:12}}/>}
-        </div>
+    <div style={{margin: 12,display: 'flex'}}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: 'calc(100vh - 88px)',
+          width: lifeOpen ? '16%' : 0,
+          transition: 'all 0.5s',
+        }}
+      >
 
-        <div style={{background: 'rgba(240,240,240,0.29)', borderRadius: 6, flex: 1}}>
-          <h3 style={{textAlign: 'center'}}>本地记录</h3>
-          {localDataList.length > 0 ?
-            <Row gutter={6} style={{padding: 6}}>
-              {localDataList.sort((a, b) => b.startTime - a.startTime).map(item =>
-                <Col span={24} key={item.startTime?.valueOf()} style={{marginBottom: 6}}>
-                  <Card
-                    styles={{body: {paddingTop: 12}}}
-                    title={`${item.remark} >>> ${DateUtils.millisecondFormat(item.endTime.getTime() - item.startTime.getTime())}`}>
-                    <span>{DateUtils.format(item.startTime)}</span> {'>>>'} <span>{dayjs(item.endTime).format('HH:mm:ss')}</span>
-                    <div><b>当天总时长：</b>{DateUtils.secondFormat(item.duration)}</div>
-                  </Card>
-                </Col>
-              )}
-            </Row>
-            :
-            <Result
-              style={{padding: 0}}
-              status="404"
-              title="Empty"
-              subTitle="Sorry, 本地好像还没有记录哦."
-            />
-          }
+        {lifeOpen &&
+          <>
+            <div style={{height: '22vh'}}>
+              {duration ? <>
+                  <h3>{remark}</h3>
+                  <div><b>本次开始时间：</b>{DateUtils.format(startTime)}</div>
+                  <div><b>本次结束时间：</b>{DateUtils.format(endTime)}</div>
+                  <div><b>本次时长：</b>{DateUtils.millisecondFormat(endTime.getTime() - startTime.getTime())}</div>
+                  <div><b>当天总时长：</b>{DateUtils.secondFormat(duration)}</div>
+                </>
+                :
+                <Empty description="数据不足以支持渲染此处。" style={{marginTop: 12}}/>
+              }
+            </div>
 
-        </div>
-      </Col>
+            <div style={{background: 'rgba(240,240,240,0.29)', borderRadius: 6, flex: 1}}>
+              <h3 style={{textAlign: 'center'}}>本地记录</h3>
+              {localDataList.length > 0 ?
+                <Row gutter={6} style={{padding: 6}}>
+                  {localDataList.sort((a, b) => b.startTime - a.startTime).map(item =>
+                    <Col span={24} key={item.startTime?.valueOf()} style={{marginBottom: 6}}>
+                      <Card
+                        styles={{body: {paddingTop: 12}}}
+                        title={`${item.remark} >>> ${DateUtils.millisecondFormat(item.endTime.getTime() - item.startTime.getTime())}`}>
+                        <span>{DateUtils.format(item.startTime)}</span> {'>>>'} <span>{dayjs(item.endTime).format('HH:mm:ss')}</span>
+                        <div><b>当天总时长：</b>{DateUtils.secondFormat(item.duration)}</div>
+                      </Card>
+                    </Col>
+                  )}
+                </Row>
+                :
+                <Result
+                  style={{padding: 0}}
+                  status="404"
+                  title="Empty"
+                  subTitle="Sorry, 本地好像还没有记录哦."
+                />
+              }
+            </div>
+          </>
+        }
+      </div>
 
-      <Col span={20}>
+
+      <div style={{position: 'absolute', top: '50%', left: lifeOpen ? '16%' : 0, transition: 'all 0.5s'}}>
+        <Button
+          shape="circle"
+          onClick={() => sxYm(lifeOpen = !lifeOpen)}
+          icon={<LeftOutlined style={{transform: lifeOpen ? 'unset' : 'rotate(180deg)', transition: 'all 0.5s'}}/>}
+        />
+      </div>
+
+
+      <div style={{width: lifeOpen ? '84%' : '100%'}}>
         {JWTUtils.isExpired()?
           <MyEmpty describe={'登录后方可查看观看时间数据~'}/>:
           <SeeTimeChart/>
         }
-      </Col>
+      </div>
 
 
-    </Row>
+    </div>
 
   );
 }
