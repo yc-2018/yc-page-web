@@ -130,10 +130,11 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
               placement="top"
               content={
               <div style={{textAlign:"center"}}>
-                <b style={{color: '#646464',fontSize: 18}}>{item.remark}</b>
+                <b style={{color: '#646464',fontSize: 18}}>{item.remark}</b><br/>
+                <b>{dayjs(item.startTime).format('HH:mm:ss')} ~ {dayjs(item.endTime).format('HH:mm:ss')}</b>
                 <div>打开时间：{DateUtils.millisecondFormat(dayjs(item.endTime).diff(dayjs(item.startTime)))}</div>
                 <div>观看时间：{DateUtils.secondFormat(item.thisTime)}</div>
-                <b>{dayjs(item.startTime).format('HH:mm:ss')} ~ {dayjs(item.endTime).format('HH:mm:ss')}</b>
+                <div>至此已览：{DateUtils.secondFormat(item.totalDuration)}</div>
               </div>
             }
             >
