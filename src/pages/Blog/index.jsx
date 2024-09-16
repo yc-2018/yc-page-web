@@ -63,7 +63,7 @@ const Blog = () => {
       const itemValue = searchParams.get('item');
       try {
         const currentKeys = JSON.parse(decodeURIComponent(itemValue ?? ''));
-        currentKeys?.length === 2 && setSelectKey(currentKeys) || handleMenuClick({keyPath: currentKeys})
+        currentKeys?.length === 2 && (setSelectKey(currentKeys) || handleMenuClick({keyPath: currentKeys}))
       } catch (e) {
         console.log('URL参数异常', e)
       }
@@ -81,7 +81,6 @@ const Blog = () => {
     }).catch(() => {
       setContent(`请求失败，请检查网络连接`)
     }).finally(() => setLoading(false))
-
   }
   
   
