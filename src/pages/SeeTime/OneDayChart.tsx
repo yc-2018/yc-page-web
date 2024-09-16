@@ -74,7 +74,6 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
    */
   const setSeeTimeRange = () => {
     seeTimeRange = []
-    let crossDayHour = false; // 是否跨越天
 
     // 把看过的小时放入数组
     for (let i = 0; i < seeDataList.length; i++) {
@@ -82,16 +81,14 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
       let startHour = dayjs(item.startTime).hour();
       let endHour = dayjs(item.endTime).hour();
       const hourDiff = endHour - startHour;
-      if (hourDiff < 0) {
-        crossDayHour = true;
-        endHour = 23
-      }
+
+      if (hourDiff < 0) endHour = 23;  // 跨天也就执行到23点
       for (let j = startHour; j <= endHour; j++) !seeTimeRange.includes(j) && seeTimeRange.push(j);
     }
     // 从小到大排序
     seeTimeRange.sort((a: number, b: number) => a - b);
 
-    // 加上 {h} 或...
+    // 加上 {h} 或...(-1)
     const newSeeTimeRange = [seeTimeRange[0]]
     for (let i = 1; i < seeTimeRange.length; i++) {
       const diff = seeTimeRange[i] - seeTimeRange[i - 1];
@@ -100,12 +97,10 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
       newSeeTimeRange.push(seeTimeRange[i])
     }
 
-    // 只要隔天了就加上两小时
-    if (crossDayHour) {
-      newSeeTimeRange.push(0)
-      newSeeTimeRange.push(1)
-    }
-    if (!crossDayHour) newSeeTimeRange.push(seeTimeRange[seeTimeRange.length - 1] + 1)
+    // 这天看的最后一个小时
+    const oneDayLastHour = seeTimeRange[seeTimeRange.length - 1];
+    newSeeTimeRange.push((oneDayLastHour + 1) % 24)                             // 多给一个小时 防止展示超标
+    if (oneDayLastHour === 23) newSeeTimeRange.push((oneDayLastHour + 2) % 24)  // 跨天就再多给一个小时 防止展示超标
 
     seeTimeRange = newSeeTimeRange;
   };
