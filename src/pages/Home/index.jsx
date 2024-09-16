@@ -302,6 +302,7 @@ function Home() {
           {/*跳转到博客***********************************************************/}
           <FloatButton
             onClick={() => navigate('/blog')}
+            onContextMenu={e => e.preventDefault() || navigate('/seeTime')}
             icon={<SmileTwoTone/>}
             tooltip="博客"
             style={{right: 300}}
