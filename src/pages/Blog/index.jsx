@@ -34,9 +34,9 @@ const {Content, Sider} = Layout
  * */
 const Blog = () => {
   const [content, setContent] = useState('# 欢迎来到仰晨博客');
-  const [loading, setLoading] = useState(false)     // 加载状态
+  const [loading, setLoading] = useState(false)      // 加载状态
   const [initLoad, setInitLoad] = useState(true)    // 初始加载菜单状态
-  const [menu, setMenu] = useState(items(blogMenu))                  // 菜单项
+  const [menu, setMenu] = useState(items(blogMenu))                   // 菜单项
   const [selectKey, setSelectKey] = useState([])     // 菜单选中项【子，父】
 
 
@@ -63,8 +63,15 @@ const Blog = () => {
       const itemValue = searchParams.get('item');
       try {
         const currentKeys = JSON.parse(decodeURIComponent(itemValue ?? ''));
-        currentKeys?.length === 2 && (setSelectKey(currentKeys) || handleMenuClick({keyPath: currentKeys}))
+        if (currentKeys?.length === 2) {
+          const blogCatalog = blogList.find(item => item[0] === currentKeys[1]);  // 每个列表的里面的列表的第一个是目录，url的列表第二个是目录
+          if (!blogCatalog) return setContent('# 没有找到对应的博客哦!')
+          if (!blogCatalog.some(item => item === currentKeys[0])) return setContent('# 没有找到对应的文章哦!')
+          setSelectKey(currentKeys)
+          handleMenuClick({keyPath: currentKeys})
+        }
       } catch (e) {
+        setContent('# 参数异常')
         console.log('URL参数异常', e)
       }
     }
