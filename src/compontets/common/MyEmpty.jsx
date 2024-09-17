@@ -1,4 +1,4 @@
-const MyEmpty = ({describe = '暂无数据'}) => <>
+const MyEmpty = ({describe = '暂无数据', style = {}}) => <div style={style}>
   <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path opacity=".302"
           d="M188.106 236.119c55.715 0 100.881-14.792 100.881-33.04 0-18.247-45.166-33.039-100.881-33.039S87.225 184.832 87.225 203.079c0 18.248 45.166 33.04 100.881 33.04Z"
@@ -156,5 +156,5 @@ const MyEmpty = ({describe = '暂无数据'}) => <>
   >
     {describe}
   </div>
-</>
+</div>
 export default MyEmpty;

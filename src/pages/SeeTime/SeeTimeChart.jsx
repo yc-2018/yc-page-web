@@ -93,6 +93,7 @@ const SeeTimeChart = () => {
             width: 'calc(100% - 70px)',
             background: '#fffff5',
             position: 'relative',
+            borderRadius: '0 10px 10px 0',
           }}
         >
 

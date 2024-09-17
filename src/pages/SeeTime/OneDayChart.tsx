@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import React from "react";
 import DateUtils from "../../utils/DateUtils";
 import {SeeData} from "./interface";
+import MyEmpty from "../../compontets/common/MyEmpty";
 
 let seeTimeRange: number[] = [];  // 显示的时间范围
 
@@ -75,6 +76,8 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
   const setSeeTimeRange = () => {
     seeTimeRange = []
 
+    if (seeDataList.length === 0) return;
+
     // 把看过的小时放入数组
     for (let i = 0; i < seeDataList.length; i++) {
       const item = seeDataList[i];
@@ -141,6 +144,9 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
               {DateUtils.millisecondFormat(dayjs(item.endTime).diff(dayjs(item.startTime)))}
             </span>
           </Row>)
+        }
+        {seeDataList.length === 0 &&
+          <MyEmpty describe={'这天没有观看时间数据哦,真棒!'} style={{width: '40vw', margin: ' 0 auto'}}/>
         }
       </div>
 
