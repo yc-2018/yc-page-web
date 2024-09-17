@@ -94,6 +94,8 @@ function SeeTime() {
 
   return (
     <div style={{margin: 12,display: 'flex'}}>
+
+      {/*——————————左边的显示这次数据 和 本地数据————————————*/}
       <div
         style={{
           display: 'flex',
@@ -103,7 +105,6 @@ function SeeTime() {
           transition: 'all 0.5s',
         }}
       >
-
         {lifeOpen &&
           <>
             <div style={{height: '22vh'}}>
@@ -127,7 +128,13 @@ function SeeTime() {
                     <Col span={24} key={item.startTime?.valueOf()} style={{marginBottom: 6}}>
                       <Card
                         styles={{body: {paddingTop: 12}}}
-                        title={item.remark}>
+                        title={
+                          <div style={{display: "flex", flexWrap: 'wrap'}}>
+                            <div>{item.remark}</div>
+                            <div>{dayjs(item.startTime).format('YY/MM/DD')}</div>
+                          </div>
+                        }
+                      >
                         <span>{dayjs(item.startTime).format('HH:mm:ss')}</span> {'>>>'}
                         <span>{dayjs(item.endTime).format('HH:mm:ss')}</span>
                         <div style={{display: "flex", flexWrap: 'wrap'}}>
@@ -167,14 +174,12 @@ function SeeTime() {
       {/*————————————右边图表————————————*/}
       <div style={{width: lifeOpen ? '84%' : '100%'}}>
         {JWTUtils.isExpired()?
-          <MyEmpty describe={'登录后方可查看观看时间数据~'}/>:
+          <MyEmpty describe={'登录后方可查看观看时间数据~'} style={{width: '50vw', margin: ' 0 auto'}}/> :
           <SeeTimeChart/>
         }
       </div>
 
-
     </div>
-
   );
 }
 

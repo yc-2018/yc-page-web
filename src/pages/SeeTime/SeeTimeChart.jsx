@@ -6,15 +6,16 @@ import {typeMapper, typeMapperEn} from "./mapper";
 import OneDayChart, {OneDayTotalDuration, OneDayWatchDuration} from "./OneDayChart";
 let sxIndex = 0;
 
-let seeDataConfig = {
-  seeRange: 1, // 1日、2周、3月、4年
-  startDate: dayjs().startOf('day').valueOf(),
-  endDate: dayjs().endOf('day').valueOf(),
-};
 const DAY = 1;
 const WEEK = 2;
 const MONTH = 3;
 const YEAR = 4;
+
+let seeDataConfig = {
+  seeRange: DAY, // 1日、2周、3月、4年
+  startDate: dayjs().startOf('day').valueOf(),
+  endDate: dayjs().endOf('day').valueOf(),
+};
 
 let seeDataList = [];
 // 显示的小时的总毫秒数
@@ -33,8 +34,18 @@ const SeeTimeChart = () => {
     getSeeData()
   }, [])
 
-  const getSeeData = async () => sxYm(seeDataList = await getSeeTime(seeDataConfig));
+  /** 参数时间戳变成秒级 */
+  const getRequestParams = () => ({
+    seeRange: seeDataConfig.seeRange,
+    startDate: Math.floor(seeDataConfig.startDate / 1000),
+    endDate: Math.floor(seeDataConfig.endDate / 1000),
+  })
 
+  /** 获取数据赋值到seeDataList */
+  const getSeeData = async () =>
+    sxYm(seeDataList = await getSeeTime(getRequestParams()));
+
+  /** 构建看的范围按钮 */
   const builderBtn = type => {
     const changeSeeRange = type => {
       seeDataConfig.seeRange = type
@@ -93,6 +104,7 @@ const SeeTimeChart = () => {
             width: 'calc(100% - 70px)',
             background: '#fffff5',
             position: 'relative',
+            borderRadius: '0 10px 10px 0',
           }}
         >
 
