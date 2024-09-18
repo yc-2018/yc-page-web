@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import {getSeeTime} from "../../request/otherRequest";
 import {typeMapper, typeMapperEn} from "./mapper";
 import OneDayChart, {OneDayTotalDuration, OneDayWatchDuration} from "./OneDayChart";
+import MultiDay from "./MultiDayChart";
 let sxIndex = 0;
 
 const DAY = 1;
@@ -114,6 +115,7 @@ const SeeTimeChart = () => {
           </b>
 
           {seeDataConfig.seeRange === DAY && <OneDayChart seeDataList={seeDataList}/>}
+          {seeDataConfig.seeRange !== DAY && <MultiDay seeDataList={seeDataList} seeDataConfig={seeDataConfig}/>}
 
         </div>
       </div>

@@ -5,4 +5,6 @@ export interface SeeData {
   remark: string;
   thisTime: number;
   totalDuration: number;
+  date:string;            // 聚合后日期
+  count: number;          // 聚合后计次
 }
