@@ -3,14 +3,18 @@ import {Button, DatePicker, Space} from "antd";
 import dayjs from "dayjs";
 import {getSeeTime} from "../../request/otherRequest";
 import {typeMapper, typeMapperEn} from "./mapper";
-import OneDayChart, {OneDayTotalDuration, OneDayWatchDuration} from "./OneDayChart";
+import OneDayChart, {OneDayBottomInfo} from "./OneDayChart";
 import MultiDay from "./MultiDayChart";
+
 let sxIndex = 0;
 
 const DAY = 1;
 const WEEK = 2;
 const MONTH = 3;
 const YEAR = 4;
+const dateFormat = 'YYYY/MM/DD';
+const weekFormat = 'MM/DD';
+const monthFormat = 'YYYY/MM';
 
 let seeDataConfig = {
   seeRange: DAY, // 1日、2周、3月、4年
@@ -53,7 +57,6 @@ const SeeTimeChart = () => {
       dateChange(dayjs())
       getSeeData()
     }
-
     return (
       <Button
         type="primary"
@@ -85,6 +88,21 @@ const SeeTimeChart = () => {
     sxYm()
     getSeeData()
   };
+
+  const formatSeeRange = () => {
+    switch (seeDataConfig.seeRange) {
+      case DAY:
+        return dayjs(seeDataConfig.startDate).format(dateFormat)
+      case WEEK:
+        return dayjs(seeDataConfig.startDate).format(weekFormat) + ' ~ ' + dayjs(seeDataConfig.endDate).format(weekFormat)
+      case MONTH:
+        return dayjs(seeDataConfig.startDate).format(monthFormat)
+      case YEAR:
+        return dayjs(seeDataConfig.startDate).format('YYYY')
+      default :
+        return undefined
+    }
+  }
 
 
   return (
@@ -123,10 +141,18 @@ const SeeTimeChart = () => {
       {/*————————————————————————————底部功能————————————————————————————*/}
       <Space size="large">
         <Button onClick={getSeeData}>刷新</Button>
-        <DatePicker onChange={dateChange} picker={typeMapperEn[seeDataConfig.seeRange]} allowClear={false}/>
-        {seeDataConfig.seeRange === DAY && < OneDayTotalDuration seeDataList={seeDataList}/>}
-        {seeDataConfig.seeRange === DAY && <OneDayWatchDuration seeDataList={seeDataList}/>}
-        <b>共看了 <span style={{color: '#ff0000'}}>{seeDataList.length}</span> 次</b>
+        <DatePicker
+          allowClear={false}
+          onChange={dateChange}
+          format={formatSeeRange}   // 设置显示的格式
+          picker={typeMapperEn[seeDataConfig.seeRange]}
+          value={dayjs(seeDataConfig.startDate)}
+          minDate={dayjs('2024-08-30')}
+          maxDate={dayjs()}
+        />
+
+        {seeDataConfig.seeRange === DAY && < OneDayBottomInfo seeDataList={seeDataList}/>}
+
       </Space>
     </div>
   );

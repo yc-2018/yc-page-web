@@ -1,4 +1,4 @@
-import {Popover, Row} from "antd";
+import {Popover, Row, Space} from "antd";
 import dayjs from "dayjs";
 import React from "react";
 import DateUtils from "../../utils/DateUtils";
@@ -172,14 +172,14 @@ export default OneDayChart
 
 
 /**
- * 显示总时长
+ * 显示底部统计信息
  *
  * @author Yc
  * @since 2024/9/14 1:14
  */
-export const OneDayTotalDuration: React.FC<OneDayChartProps> = ({seeDataList=[]}) =>
-  <>
-    {seeDataList.length > 0 &&
+export const OneDayBottomInfo: React.FC<OneDayChartProps> = ({seeDataList = []}) =>
+  seeDataList.length > 0 ?
+    <Space size="large">
       <b>
         总时长：
         {DateUtils.millisecondFormat(seeDataList.map(item => {
@@ -189,22 +189,11 @@ export const OneDayTotalDuration: React.FC<OneDayChartProps> = ({seeDataList=[]}
           }
         ).reduce((total, current) => total + current, 0))}
       </b>
-    }
-  </>
-
-
-/**
- * 显示观看时长
- *
- * @author Yc
- * @since 2024/9/14 1:16
- */
-export const OneDayWatchDuration: React.FC<OneDayChartProps> = ({seeDataList=[]}) =>
-  <>
-    {seeDataList.length > 0 &&
       <b>
         观看时长：
         {DateUtils.secondFormat(seeDataList.reduce((total, current) => total + current.thisTime, 0))}
       </b>
-    }
-  </>
+      <b>共看了 <span style={{color: '#ff0000'}}>{seeDataList.length}</span> 次</b>
+    </Space> : <></>
+
+
