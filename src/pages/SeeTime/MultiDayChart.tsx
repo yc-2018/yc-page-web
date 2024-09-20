@@ -2,6 +2,8 @@ import {SeeData} from "./interface";
 import React from "react";
 import {aWeek, typeMapperCn} from "./mapper";
 import dayjs from "dayjs";
+import MyEmpty from "../../compontets/common/MyEmpty";
+import DateUtils from "../../utils/DateUtils";
 
 interface MultiDayChartProps {
   seeDataList: SeeData[];
@@ -75,17 +77,76 @@ const MultiDay: React.FC<MultiDayChartProps> = ({seeDataList,seeDataConfig}) => 
     return `${100 / 12}%`
   }
 
+  /** 设置Y轴最高点 */
+  const maxYAxis = (() => {
+    const maxItem = seeDataList.reduce((max, item) => item.thisTime > max.thisTime ? item : max, seeDataList[0])
+    if (maxItem) return maxItem.thisTime + maxItem.thisTime * 0.15
+    return 0
+  })()
+
+  /** 日期补全 */
+  const fillSeeDataList = () => {
+    const {seeRange,startDate} = seeDataConfig;
+    const fillList: SeeData[] = [];
+    const howMany = seeRange === typeMapperCn['周'] ? 7 : seeRange === typeMapperCn['月'] ? dayjs(startDate).daysInMonth() : 12
+
+    if(seeRange === typeMapperCn['年']){
+      for (let i = 0; i < howMany; i++) {
+        const dateStr = dayjs(startDate).add(i, 'month').format('YYYY-MM');
+        const findSeeData = seeDataList.find(item => item.date === dateStr);
+        if (findSeeData) fillList.push(findSeeData)
+        else fillList.push({startTime: "", totalDuration: 0, date: dateStr, thisTime: 0, count: 0})
+      }
+      return fillList;
+    }
+
+    for (let i = 0; i < howMany; i++) {
+      const dateStr = dayjs(startDate).add(i, 'day').format('YYYY-MM-DD');
+      const findSeeData = seeDataList.find(item => item.date === dateStr);
+      if (findSeeData) fillList.push(findSeeData)
+      else fillList.push({startTime: "", totalDuration: 0, date: dateStr, thisTime: 0, count: 0})
+    }
+    return fillList;
+  }
+
+
   return (
     <div>
       <div style={{height: 'calc(-153px + 100vh)', display: 'flex'}}>
-        {
-          seeDataList.map(item =>
-            <div key={item.date} style={{width: getWidthPercentage()}}>
-              {item.date}
-            </div>
-          )
-        }
+
+        {seeDataList.length > 0 && fillSeeDataList().map(item =>
+          <div key={item.date} style={{width: getWidthPercentage(), display: 'flex', alignItems: 'flex-end'}}>
+            {item.thisTime !== 0 &&
+              <div
+                style={{  // 柱子
+                  width: '50%',
+                  background: 'linear-gradient(180deg, #f1aaa6 0%, #c3b5f1 50%, #a0f1ef 100%)',
+                  margin: '0 auto',
+                  height: `${item.thisTime / maxYAxis * 100}%`,
+                  borderRadius: '50% 0',
+                  position: 'relative',
+                }}
+              >
+                <div  // 柱子上面 显示时长
+                  style={{
+                    position: 'absolute',
+                    bottom: '101%',
+                    left: '-50%',
+                    width: '200%',
+                    textAlign: 'center',
+                    color: '#999',
+                  }}
+                >
+                  {DateUtils.secondFormat(item.thisTime)}
+                </div>
+              </div>
+            }
+          </div>
+        )}
       </div>
+      {(seeDataList.length === 0 || maxYAxis === 0) &&
+        <MyEmpty describe={'您选择的时间段没有观看时间数据哦,真棒!'} style={{width: '40vw', margin: ' 0 auto'}}/>
+      }
       {XAxis()}
     </div>
   )
