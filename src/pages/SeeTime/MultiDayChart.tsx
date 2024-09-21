@@ -1,7 +1,8 @@
 import {SeeData} from "./interface";
 import React from "react";
-import {aWeek, typeMapperCn} from "./mapper";
+import {Popover, Space} from "antd";
 import dayjs from "dayjs";
+import {aWeek, typeMapperCn} from "./mapper";
 import MyEmpty from "../../compontets/common/MyEmpty";
 import DateUtils from "../../utils/DateUtils";
 
@@ -117,29 +118,41 @@ const MultiDay: React.FC<MultiDayChartProps> = ({seeDataList,seeDataConfig}) => 
         {seeDataList.length > 0 && fillSeeDataList().map(item =>
           <div key={item.date} style={{width: getWidthPercentage(), display: 'flex', alignItems: 'flex-end'}}>
             {item.thisTime !== 0 &&
-              <div
-                style={{  // 柱子
-                  width: '50%',
-                  background: 'linear-gradient(180deg, #f1aaa6 0%, #c3b5f1 50%, #a0f1ef 100%)',
-                  margin: '0 auto',
-                  height: `${item.thisTime / maxYAxis * 100}%`,
-                  borderRadius: '50% 0',
-                  position: 'relative',
-                }}
+              <Popover
+                placement="right"
+                content={
+                  <div style={{fontSize: '14px', color: '#999'}}>
+                    日期：{item.date}<br/>
+                    时长：{DateUtils.secondFormat(item.thisTime)}<br/>
+                    观看次数：{item.count}
+                  </div>
+                }
               >
-                <div  // 柱子上面 显示时长
-                  style={{
-                    position: 'absolute',
-                    bottom: '101%',
-                    left: '-50%',
-                    width: '200%',
-                    textAlign: 'center',
-                    color: '#999',
+                <div
+                  style={{  // 柱子
+                    width: '50%',
+                    background: 'linear-gradient(180deg, #f1aaa6 0%, #c3b5f1 50%, #a0f1ef 100%)',
+                    margin: '0 auto',
+                    height: `${item.thisTime / maxYAxis * 100}%`,
+                    borderRadius: '50% 0',
+                    position: 'relative',
+                    cursor: 'pointer',
                   }}
                 >
-                  {DateUtils.secondFormat(item.thisTime)}
+                  <div  // 柱子上面 显示时长
+                    style={{
+                      position: 'absolute',
+                      bottom: '101%',
+                      left: '-50%',
+                      width: '200%',
+                      textAlign: 'center',
+                      color: '#999',
+                    }}
+                  >
+                    {DateUtils.secondFormat(item.thisTime)}
+                  </div>
                 </div>
-              </div>
+              </Popover>
             }
           </div>
         )}
@@ -150,7 +163,25 @@ const MultiDay: React.FC<MultiDayChartProps> = ({seeDataList,seeDataConfig}) => 
       {XAxis()}
     </div>
   )
-
 }
 
 export default MultiDay;
+
+/**
+ * 显示底部统计信息
+ *
+ * @author Yc
+ * @since 2024/9/22 2:38
+ */
+export const MultiDayBottomInfo: React.FC<{ seeDataList: SeeData[] }> = ({seeDataList = []}) =>
+  seeDataList.length > 0 ?
+    <Space size="large">
+      <b>
+        总观看时长：
+        {DateUtils.secondFormat(seeDataList.map(item => item.thisTime).reduce((total, current) => total + current, 0))}
+      </b>
+      <b>
+        总观看次数：
+        {seeDataList.reduce((total, current) => total + (current.count ?? 0), 0)}
+      </b>
+    </Space> : <></>

@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import {getSeeTime} from "../../request/otherRequest";
 import {typeMapper, typeMapperEn} from "./mapper";
 import OneDayChart, {OneDayBottomInfo} from "./OneDayChart";
-import MultiDay from "./MultiDayChart";
+import MultiDay, {MultiDayBottomInfo} from "./MultiDayChart";
 
 let sxIndex = 0;
 
@@ -55,7 +55,6 @@ const SeeTimeChart = () => {
     const changeSeeRange = type => {
       seeDataConfig.seeRange = type
       dateChange(dayjs())
-      getSeeData()
     }
     return (
       <Button
@@ -73,10 +72,12 @@ const SeeTimeChart = () => {
   /**
    * 日期改变事件
    *
+   * @param date dayjs类型
    * @author Yc
    * @since 2024/9/11 1:59
    */
   const dateChange = (date) => {
+    if (seeDataConfig.seeRange === WEEK && date.day() === 0) date = date.subtract(1, 'day') // 如果是周日会被认为是另外一个星期的开始导致星期拿错，所以减一天就对了
     let start = date.startOf(typeMapperEn[seeDataConfig.seeRange])
     let end = date.endOf(typeMapperEn[seeDataConfig.seeRange])
     if (seeDataConfig.seeRange === WEEK) {  // 周 默认周日开始，我这里设置为周一开始
@@ -141,17 +142,33 @@ const SeeTimeChart = () => {
       {/*————————————————————————————底部功能————————————————————————————*/}
       <Space size="large">
         <Button onClick={getSeeData}>刷新</Button>
-        <DatePicker
-          allowClear={false}
-          onChange={dateChange}
-          format={formatSeeRange}   // 设置显示的格式
-          picker={typeMapperEn[seeDataConfig.seeRange]}
-          value={dayjs(seeDataConfig.startDate)}
-          minDate={dayjs('2024-08-30')}
-          maxDate={dayjs()}
-        />
+        <Button onClick={() => (seeDataConfig.seeRange = DAY) && dateChange(dayjs())}>今天</Button>
+        <div>
+          <Button
+            onClick={() => dateChange(dayjs(seeDataConfig.startDate).subtract(1, typeMapperEn[seeDataConfig.seeRange]))}
+            disabled={dayjs(seeDataConfig.startDate).isBefore(dayjs('2024-08-30'))}
+          >
+            上一{typeMapper[seeDataConfig.seeRange]}
+          </Button>
+          <DatePicker
+            allowClear={false}
+            onChange={dateChange}
+            format={formatSeeRange}   // 设置显示的格式
+            picker={typeMapperEn[seeDataConfig.seeRange]}
+            value={dayjs(seeDataConfig.startDate)}
+            minDate={dayjs('2024-08-30')}
+            maxDate={dayjs()}
+          />
+          <Button
+            onClick={() => dateChange(dayjs(seeDataConfig.endDate).add(1, typeMapperEn[seeDataConfig.seeRange]))}
+            disabled={dayjs(seeDataConfig.endDate).isAfter(dayjs())}
+          >
+            下一{typeMapper[seeDataConfig.seeRange]}
+          </Button>
+        </div>
 
         {seeDataConfig.seeRange === DAY && < OneDayBottomInfo seeDataList={seeDataList}/>}
+        {seeDataConfig.seeRange !== DAY && < MultiDayBottomInfo seeDataList={seeDataList}/>}
 
       </Space>
     </div>
