@@ -121,7 +121,7 @@ const OneDayChart: React.FC<OneDayChartProps> = ({seeDataList}) => {
       >
 
         {/*————————循环渲染 看时间的每一项——————*/}
-        {seeDataList.map((item: SeeData) =>
+        {seeDataList.filter(item => item.startTime).map((item: SeeData) =>
           <Row key={item.startTime}>
             <div style={{marginLeft: getFrontPercentage(item.startTime)}}/>
             <Popover
