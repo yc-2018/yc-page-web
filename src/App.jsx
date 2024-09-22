@@ -43,7 +43,7 @@ export default observer(() => {
           </>
         }
       </Suspense>
-      <Spin spinning={CommonStore.loading} fullscreen/>{/* 加载动画 */}
+      <Spin spinning={CommonStore.loading} fullscreen delay={500}/>{/* 加载动画 延迟500毫秒 */}
     </App>
   )
 })

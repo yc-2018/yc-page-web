@@ -9,6 +9,7 @@ import DateUtils from "../../utils/DateUtils";
 interface MultiDayChartProps {
   seeDataList: SeeData[];
   seeDataConfig: { seeRange: number, startDate: number, endDate: number };
+  onClick?: (dateStr: string) => void;
 }
 
 /**
@@ -17,7 +18,7 @@ interface MultiDayChartProps {
  * @author Yc
  * @since 2024/9/18 23:41
  */
-const MultiDay: React.FC<MultiDayChartProps> = ({seeDataList,seeDataConfig}) => {
+const MultiDay: React.FC<MultiDayChartProps> = ({seeDataList, seeDataConfig, onClick}) => {
 
   /** 不同的X轴生成 */
   const XAxis = () => {
@@ -138,6 +139,7 @@ const MultiDay: React.FC<MultiDayChartProps> = ({seeDataList,seeDataConfig}) => 
                     position: 'relative',
                     cursor: 'pointer',
                   }}
+                  onClick={() => onClick && onClick(item.date as string)}
                 >
                   <div  // 柱子上面 显示时长
                     style={{

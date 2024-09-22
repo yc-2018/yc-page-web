@@ -90,6 +90,7 @@ const SeeTimeChart = () => {
     getSeeData()
   };
 
+  /** 格式化显示日期选择框的日期 */
   const formatSeeRange = () => {
     switch (seeDataConfig.seeRange) {
       case DAY:
@@ -105,6 +106,22 @@ const SeeTimeChart = () => {
     }
   }
 
+  /**
+   * 给多天的柱子点击事件 点击月和周的都跳转到日  点击年的跳转到月
+   *
+   * @param dateStr 日期字符串 格式YYYY-MM-DD 或 YYYY-MM
+   * @author Yc
+   * @since 2024/9/22 15:45
+   */
+  const multiDayColumnClick = (dateStr) => {
+    if (seeDataConfig.seeRange === YEAR) {
+      seeDataConfig.seeRange = MONTH;
+      dateChange(dayjs(dateStr, 'YYYY-MM'));
+    } else {
+      seeDataConfig.seeRange = DAY;
+      dateChange(dayjs(dateStr, 'YYYY-MM-DD'));
+    }
+  }
 
   return (
     <div style={{width: '99%', height: '100%', marginLeft: 10}}>
@@ -134,7 +151,9 @@ const SeeTimeChart = () => {
           </b>
 
           {seeDataConfig.seeRange === DAY && <OneDayChart seeDataList={seeDataList}/>}
-          {seeDataConfig.seeRange !== DAY && <MultiDay seeDataList={seeDataList} seeDataConfig={seeDataConfig}/>}
+          {seeDataConfig.seeRange !== DAY &&
+            <MultiDay seeDataList={seeDataList} seeDataConfig={seeDataConfig} onClick={multiDayColumnClick}/>
+          }
 
         </div>
       </div>
