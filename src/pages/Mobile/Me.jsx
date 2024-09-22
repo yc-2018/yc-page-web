@@ -1,5 +1,5 @@
 import React, {useRef, useState} from "react";
-import {Button, Avatar, List, Dialog, Toast,Grid} from 'antd-mobile'
+import {Button, Avatar, List, Dialog, Toast, Grid, Collapse} from 'antd-mobile'
 
 import UserStore from "../../store/UserStore";
 import JWTUtils from "../../utils/JWTUtils";
@@ -96,9 +96,13 @@ export default ({setBarItem}) => {
         >
             打赏
         </List.Item>
-        <List.Item style={{textAlign: 'center', color: 'gray'}}>————工具————</List.Item>
-        <List.Item onClick={() => ggVisible[1](true)}>gg比价器</List.Item>
       </List>
+
+      <Collapse accordion>
+        <Collapse.Panel title={<div style={{textAlign: 'center'}}>————工具————</div>} key={1}>
+          <div onClick={() => ggVisible[1](true)}>gg比价器</div>
+        </Collapse.Panel>
+      </Collapse>
 
       {/*退出登录*/}
       <Button block color='danger'
