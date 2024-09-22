@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import {getSeeTime} from "../../request/otherRequest";
 import {typeMapper, typeMapperEn} from "./mapper";
 import OneDayChart, {OneDayBottomInfo} from "./OneDayChart";
-import MultiDay from "./MultiDayChart";
+import MultiDay, {MultiDayBottomInfo} from "./MultiDayChart";
 
 let sxIndex = 0;
 
@@ -55,7 +55,6 @@ const SeeTimeChart = () => {
     const changeSeeRange = type => {
       seeDataConfig.seeRange = type
       dateChange(dayjs())
-      getSeeData()
     }
     return (
       <Button
@@ -73,10 +72,12 @@ const SeeTimeChart = () => {
   /**
    * 日期改变事件
    *
+   * @param date dayjs类型
    * @author Yc
    * @since 2024/9/11 1:59
    */
   const dateChange = (date) => {
+    if (seeDataConfig.seeRange === WEEK && date.day() === 0) date = date.subtract(1, 'day') // 如果是周日会被认为是另外一个星期的开始导致星期拿错，所以减一天就对了
     let start = date.startOf(typeMapperEn[seeDataConfig.seeRange])
     let end = date.endOf(typeMapperEn[seeDataConfig.seeRange])
     if (seeDataConfig.seeRange === WEEK) {  // 周 默认周日开始，我这里设置为周一开始
@@ -89,6 +90,7 @@ const SeeTimeChart = () => {
     getSeeData()
   };
 
+  /** 格式化显示日期选择框的日期 */
   const formatSeeRange = () => {
     switch (seeDataConfig.seeRange) {
       case DAY:
@@ -104,6 +106,22 @@ const SeeTimeChart = () => {
     }
   }
 
+  /**
+   * 给多天的柱子点击事件 点击月和周的都跳转到日  点击年的跳转到月
+   *
+   * @param dateStr 日期字符串 格式YYYY-MM-DD 或 YYYY-MM
+   * @author Yc
+   * @since 2024/9/22 15:45
+   */
+  const multiDayColumnClick = (dateStr) => {
+    if (seeDataConfig.seeRange === YEAR) {
+      seeDataConfig.seeRange = MONTH;
+      dateChange(dayjs(dateStr, 'YYYY-MM'));
+    } else {
+      seeDataConfig.seeRange = DAY;
+      dateChange(dayjs(dateStr, 'YYYY-MM-DD'));
+    }
+  }
 
   return (
     <div style={{width: '99%', height: '100%', marginLeft: 10}}>
@@ -133,7 +151,9 @@ const SeeTimeChart = () => {
           </b>
 
           {seeDataConfig.seeRange === DAY && <OneDayChart seeDataList={seeDataList}/>}
-          {seeDataConfig.seeRange !== DAY && <MultiDay seeDataList={seeDataList} seeDataConfig={seeDataConfig}/>}
+          {seeDataConfig.seeRange !== DAY &&
+            <MultiDay seeDataList={seeDataList} seeDataConfig={seeDataConfig} onClick={multiDayColumnClick}/>
+          }
 
         </div>
       </div>
@@ -141,17 +161,33 @@ const SeeTimeChart = () => {
       {/*————————————————————————————底部功能————————————————————————————*/}
       <Space size="large">
         <Button onClick={getSeeData}>刷新</Button>
-        <DatePicker
-          allowClear={false}
-          onChange={dateChange}
-          format={formatSeeRange}   // 设置显示的格式
-          picker={typeMapperEn[seeDataConfig.seeRange]}
-          value={dayjs(seeDataConfig.startDate)}
-          minDate={dayjs('2024-08-30')}
-          maxDate={dayjs()}
-        />
+        <Button onClick={() => (seeDataConfig.seeRange = DAY) && dateChange(dayjs())}>今天</Button>
+        <div>
+          <Button
+            onClick={() => dateChange(dayjs(seeDataConfig.startDate).subtract(1, typeMapperEn[seeDataConfig.seeRange]))}
+            disabled={dayjs(seeDataConfig.startDate).isBefore(dayjs('2024-08-30'))}
+          >
+            上一{typeMapper[seeDataConfig.seeRange]}
+          </Button>
+          <DatePicker
+            allowClear={false}
+            onChange={dateChange}
+            format={formatSeeRange}   // 设置显示的格式
+            picker={typeMapperEn[seeDataConfig.seeRange]}
+            value={dayjs(seeDataConfig.startDate)}
+            minDate={dayjs('2024-08-30')}
+            maxDate={dayjs()}
+          />
+          <Button
+            onClick={() => dateChange(dayjs(seeDataConfig.endDate).add(1, typeMapperEn[seeDataConfig.seeRange]))}
+            disabled={dayjs(seeDataConfig.endDate).isAfter(dayjs())}
+          >
+            下一{typeMapper[seeDataConfig.seeRange]}
+          </Button>
+        </div>
 
         {seeDataConfig.seeRange === DAY && < OneDayBottomInfo seeDataList={seeDataList}/>}
+        {seeDataConfig.seeRange !== DAY && < MultiDayBottomInfo seeDataList={seeDataList}/>}
 
       </Space>
     </div>

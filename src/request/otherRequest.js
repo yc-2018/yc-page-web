@@ -19,7 +19,9 @@ export async function saveSeeTime(body) {
 
 export async function getSeeTime(body) {
   try {
+    CommonStore.setLoading(true);
     const {data:{data}} = await myAxios({url:'/other/getSeeTime',method: 'post', data : body});
     return data ?? [];
   } catch (error) {return []}
+  finally {CommonStore.setLoading(false);}
 }
