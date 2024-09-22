@@ -392,7 +392,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           </Tag>
         }
         <div style={{height: '38vh', overflowY: 'scroll'}}>
-          <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px'}}>
+          <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px', fontFamily: 'unset'}}>
             {visible?.content}
           </pre>
         </div>

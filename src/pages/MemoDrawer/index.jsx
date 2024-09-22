@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {observer} from 'mobx-react-lite'
-import TextArea from "antd/es/input/TextArea";
 import {
   BookOutlined,
   CaretDownOutlined, ColumnHeightOutlined,
@@ -270,9 +269,18 @@ const MemoDrawer = () => {
             title: '查看备忘',
             maskClosable: true,
             closable: true,
-            width: 888,
+            width: '80vw',
+            style: {top: '5vh'},
             icon: <BookOutlined/>,
-            content: <TextArea rows={14} value={itemObj.content} style={{margin: '0 0 0 -14px'}}/>,
+            content:
+              <div
+                className={styles.gun}
+                style={{height: '70vh', border: '1px solid #ccc', borderRadius: '6px', padding: 9, overflow: 'auto'}}
+              >
+                <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px', margin: 0, fontFamily: 'unset'}}>
+                  {itemObj.content}
+                </pre>
+              </div>,
           })
           seeModel.update({ // 添加按钮分开写是因为 seeModel直接写会没初始化完成 导致没发关闭
             footer:
