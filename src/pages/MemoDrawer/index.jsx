@@ -244,6 +244,30 @@ const MemoDrawer = () => {
    */
   const formatTime = strTime => strTime?.replace('T00:00:00', ' ').replace('T', ' ')
 
+
+  /**
+   * 定义函数来检测和转换 URL 为链接
+   *
+   * @author Yc
+   * @since 2024/9/23 1:27
+   */
+  const linkify = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+    return text.split(urlRegex).map((part, index) => {
+      // 如果匹配到的是 URL，将其转换为 <a> 标签
+      if (part.match(urlRegex)) {
+        return (
+          <a key={index} href={part} target="_blank" rel="noopener noreferrer">
+            {part}
+          </a>
+        );
+      }
+      // 否则，返回普通文本
+      return part;
+    });
+  };
+
   /** 处理待办列表的操作 */
   const listHandleAction = async event => {
 
@@ -278,7 +302,7 @@ const MemoDrawer = () => {
                 style={{height: '70vh', border: '1px solid #ccc', borderRadius: '6px', padding: 9, overflow: 'auto'}}
               >
                 <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px', margin: 0, fontFamily: 'unset'}}>
-                  {itemObj.content}
+                  {linkify(itemObj.content)}
                 </pre>
               </div>,
           })
