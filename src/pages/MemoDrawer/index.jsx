@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {observer} from 'mobx-react-lite'
-import TextArea from "antd/es/input/TextArea";
 import {
   BookOutlined,
   CaretDownOutlined, ColumnHeightOutlined,
@@ -245,6 +244,30 @@ const MemoDrawer = () => {
    */
   const formatTime = strTime => strTime?.replace('T00:00:00', ' ').replace('T', ' ')
 
+
+  /**
+   * 定义函数来检测和转换 URL 为链接
+   *
+   * @author Yc
+   * @since 2024/9/23 1:27
+   */
+  const linkify = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+    return text.split(urlRegex).map((part, index) => {
+      // 如果匹配到的是 URL，将其转换为 <a> 标签
+      if (part.match(urlRegex)) {
+        return (
+          <a key={index} href={part} target="_blank" rel="noopener noreferrer">
+            {part}
+          </a>
+        );
+      }
+      // 否则，返回普通文本
+      return part;
+    });
+  };
+
   /** 处理待办列表的操作 */
   const listHandleAction = async event => {
 
@@ -270,9 +293,18 @@ const MemoDrawer = () => {
             title: '查看备忘',
             maskClosable: true,
             closable: true,
-            width: 888,
+            width: '80vw',
+            style: {top: '5vh'},
             icon: <BookOutlined/>,
-            content: <TextArea rows={14} value={itemObj.content} style={{margin: '0 0 0 -14px'}}/>,
+            content:
+              <div
+                className={styles.gun}
+                style={{height: '70vh', border: '1px solid #ccc', borderRadius: '6px', padding: 9, overflow: 'auto'}}
+              >
+                <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px', margin: 0, fontFamily: 'unset'}}>
+                  {linkify(itemObj.content)}
+                </pre>
+              </div>,
           })
           seeModel.update({ // 添加按钮分开写是因为 seeModel直接写会没初始化完成 导致没发关闭
             footer:
