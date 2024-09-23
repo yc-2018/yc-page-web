@@ -10,7 +10,7 @@ import {
   Drawer, List, Skeleton, Button, Tag,
   Spin, Tooltip, Select, Divider,
   Badge, Space, Dropdown, App, DatePicker,
-  Switch
+  Switch, Popover
 } from "antd";
 import moment from 'moment';
 
@@ -251,19 +251,60 @@ const MemoDrawer = () => {
    * @author Yc
    * @since 2024/9/23 1:27
    */
-  const linkify = (text) => {
+  const linkifyContent = (text) => {
+    // 正则表达式匹配不同类型的 URL
     const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const imageRegex = /\.(jpeg|jpg|gif|png|bmp|webp|svg)$/i; // 匹配图片格式
+    const videoRegex = /\.(mp4|webm|ogg|mov)$/i; // 匹配视频格式
 
     return text.split(urlRegex).map((part, index) => {
-      // 如果匹配到的是 URL，将其转换为 <a> 标签
       if (part.match(urlRegex)) {
+        // 检查是否是图片格式
+        if (imageRegex.test(part)) {
+          return (
+            <Popover
+              content={
+                <div style={{maxWidth: 400, maxHeight: 400}}>
+                  <img
+                    key={index}
+                    src={part}
+                    alt="Embedded content"
+                    style={{width: '100%', maxHeight: '100%', display: 'block', margin: '10px 0'}}
+                  />
+                </div>
+              }
+            >
+              <a key={index} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
+            </Popover>
+          );
+        }
+        // 检查是否是视频格式
+        if (videoRegex.test(part)) {
+          return (
+            <Popover
+              content={
+                <div style={{maxWidth: 600, maxHeight: 600}}>
+                  <video
+                    key={index}
+                    controls
+                    src={part}
+                    style={{width: '100%', display: 'block', margin: '10px 0'}}
+                  />
+                </div>
+              }
+            >
+              <a key={index} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
+            </Popover>
+          );
+        }
+        // 对其他链接格式使用 <a> 标签
         return (
           <a key={index} href={part} target="_blank" rel="noopener noreferrer">
             {part}
           </a>
         );
       }
-      // 否则，返回普通文本
+      // 返回普通文本
       return part;
     });
   };
@@ -302,7 +343,7 @@ const MemoDrawer = () => {
                 style={{height: '70vh', border: '1px solid #ccc', borderRadius: '6px', padding: 9, overflow: 'auto'}}
               >
                 <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px', margin: 0, fontFamily: 'unset'}}>
-                  {linkify(itemObj.content)}
+                  {linkifyContent(itemObj.content)}
                 </pre>
               </div>,
           })
