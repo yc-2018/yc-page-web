@@ -16,7 +16,7 @@
 
 /*每一个书签的文字样式*/
 .dndContent{
-    text-align: left;
+    justify-content: flex-start;   /*文字靠左*/
     padding:0 2px;
     color: black;
     width: 100%;
