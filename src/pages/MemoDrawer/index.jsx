@@ -268,8 +268,8 @@ const MemoDrawer = () => {
                   <img
                     key={index}
                     src={part}
-                    alt="Embedded content"
-                    style={{width: '100%', maxHeight: '100%', display: 'block', margin: '10px 0'}}
+                    alt="备忘录里面识别的图片链接"
+                    style={{width: '100%', maxHeight: 400, display: 'block', margin: '10px 0'}}
                   />
                 </div>
               }
