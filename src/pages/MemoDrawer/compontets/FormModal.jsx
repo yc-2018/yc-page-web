@@ -215,7 +215,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
       <TextArea rows={14}
                 showCount
                 ref={textRef}
-                maxLength={2000}
+                maxLength={formData?.itemType === 5 ? 4000 : 2000}
                 value={formData?.content}
                 placeholder="请输入备忘内容"
                 onChange={e => setFormData({...formData, content: e.target.value})}
