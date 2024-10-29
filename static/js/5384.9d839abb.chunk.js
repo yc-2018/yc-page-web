@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkantd_demo=self.webpackChunkantd_demo||[]).push([[5384],{35384:(e,s,a)=>{a.r(s),a.d(s,{default:()=>d});const d={helloUserName:"head_helloUserName__Eef9N",userImg:"head_userImg__cunGN"}}}]);
+//# sourceMappingURL=5384.9d839abb.chunk.js.map
