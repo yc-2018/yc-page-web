@@ -470,17 +470,16 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           </div>
           <TextArea
             rows={13}
+            showCount
             ref={textRef}
+            value={content}
             style={{height: '250px'}}
-            maxLength={2000} showCount
             placeholder="请输入备忘内容"
-            value={content} onChange={value => setContent(value)}
+            maxLength={itemType === 5 ? 4000 : 2000}
+            onChange={value => setContent(value)}
           />
           <br/>
-          <div className={'█required'}>
-            请选择类型
-          </div>
-
+          <div className={'█required'}>请选择类型</div>
           <Radio.Group value={itemType} onChange={value => setItemType(() => value)}>
             <Radio value={0} className={'█Radio'}>普通</Radio>
             <Radio value={1} className={'█Radio'}>循环</Radio>

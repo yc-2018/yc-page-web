@@ -254,8 +254,8 @@ const MemoDrawer = () => {
   const linkifyContent = (text) => {
     // 正则表达式匹配不同类型的 URL
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const imageRegex = /\.(jpeg|jpg|gif|png|bmp|webp|svg)$/i; // 匹配图片格式
-    const videoRegex = /\.(mp4|webm|ogg|mov)$/i; // 匹配视频格式
+    const imageRegex = /\.(jpeg|jpg|gif|png|bmp|webp|svg)|ipfs/i; // 匹配图片格式 i是忽略大小写 ipfs当图片算了
+    const videoRegex = /\.(mp4|webm|ogg|mov)$/i; // 匹配视频格式 加了$就是要结尾才匹配
 
     return text.split(urlRegex).map((part, index) => {
       if (part.match(urlRegex)) {
