@@ -10,7 +10,7 @@ import {
   Drawer, List, Skeleton, Button, Tag,
   Spin, Tooltip, Select, Divider,
   Badge, Space, Dropdown, App, DatePicker,
-  Switch, Popover
+  Switch, Popover, Input
 } from "antd";
 import moment from 'moment';
 
@@ -29,7 +29,10 @@ import styles from '../../common.module.css'
 import ActionBtn from "./compontets/ActionBtn";
 import HighlightKeyword from "../../utils/HighlightKeyword";
 
-window.ikunSelectDate = undefined    // 用于完成或+1时是否主动选择日期
+/** 用于完成或+1时是否主动选择日期 */
+window.ikunSelectDate = undefined
+/** 用于完成或+1时是否主动写备注 */
+window.ikunOkText = undefined
 
 let i = 0;                   // 页面刷新次数
 let total = -1;              // 初始化待办总数
@@ -178,11 +181,11 @@ const MemoDrawer = () => {
   const getLoopMemoTimeList = (id, updateTime) =>
     <Dropdown
       destroyPopupOnHide   // 关闭销毁
-      trigger={['click']}
+      trigger={['click']}  // 点击展开
       onOpenChange={async open => {
-        if (open) {
+        if (open) {        // 展开时加载数据
           await getLoopMemoTimeData(id)
-        } else {
+        } else {           // 关闭时清空数据
           setLoopTimeTotal(0)
           setLoopTimeList([])
           setLoopTimePage(1)
@@ -191,9 +194,10 @@ const MemoDrawer = () => {
       }}
       dropdownRender={() =>
         <div className={`ant-dropdown-menu ${styles['dropdown-menu']} ${styles.gun}`}>
-          {loopTimeList?.map(({id, memoDate}, index) =>
-            <div key={id} style={{margin: '0 10px'}}>
+          {loopTimeList?.map(({id, memoDate, loopText}, index) =>
+            <div key={id} className="memoLoopListItem">
               {index + 1}：{memoDate?.replace('T00:00:00', ' ').replace('T', ' ')}
+              {loopText && <div className="loop-text">{loopText}</div>}
             </div>
           )}
           {/* 尾部 */
@@ -224,15 +228,20 @@ const MemoDrawer = () => {
   /** 完成或加1时 可以选择日期 */
   const selectDate = text =>
     <>
-      直接点击确定,【{text}时间】就是现在(带时分秒)
-      <div>当然也允许您往前几天去选择日期(不带时分秒)</div>
+      指定{text}时间：
       <DatePicker
         allowClear
-        size={"small"}
+        size="small"
         style={{width: '90%'}}
-        placeholder={'选择日期,或默认当前时间:' + new Date().toLocaleString()}
-        disabledDate={current => current && (current < moment().subtract(7, 'days') || current > moment())}
+        placeholder="选择日期(不带时间),或默认当前时间"
+        disabledDate={current => current && (current < moment().subtract(30, 'days') || current > moment())}
         onChange={(_, dateStr) => window.ikunSelectDate = dateStr ? dateStr + 'T00:00:00' : undefined}
+      />
+      <div>{text}备注：</div>
+      <Input
+        allowClear
+        count={{show: true, max: 99}}
+        onChange={e => {window.ikunOkText = e.target.value}}
       />
     </>
 
@@ -363,6 +372,7 @@ const MemoDrawer = () => {
       },
       finish: (func) => {
         window.ikunSelectDate = undefined
+        window.ikunOkText = undefined
         return modal.confirm({
           maskClosable: true,         // 点遮罩可以关闭
           title: `确定${itemObj.completed ? '取消' : ''}完成?`,
@@ -373,7 +383,8 @@ const MemoDrawer = () => {
               const finishResponse = await saveOrUpdateToDoItem({
                 id,
                 completed: itemObj.completed ? 0 : 1,
-                updateTime: window.ikunSelectDate
+                updateTime: window.ikunSelectDate,
+                okText: itemObj.completed ? '' : window.ikunOkText,
               }, 'put')
               if (finishResponse) {
                 if (func) func()    // 执行传入方法（关闭查看窗口)
@@ -405,6 +416,7 @@ const MemoDrawer = () => {
       },
       addOne: () => {
         window.ikunSelectDate = undefined
+        window.ikunOkText = undefined
         return modal.confirm({
           title: `确定加一吗?`,
           icon: <QuestionCircleFilled/>,
@@ -415,7 +427,8 @@ const MemoDrawer = () => {
               const body = {
                 id,
                 numberOfRecurrences: 666,
-                updateTime: window.ikunSelectDate
+                updateTime: window.ikunSelectDate,
+                okText: window.ikunOkText,
               }
               if (await saveOrUpdateToDoItem(body, 'put')) {
                 sxSj()
@@ -485,12 +498,13 @@ const MemoDrawer = () => {
               {/* 添加按钮 */}
               <Tooltip title={'添加一个待办'} mouseEnterDelay={1}>
                 <Button
+                  size="small"
+                  className="addItemButton"
                   icon={<PlusOutlined/>}
                   onClick={() => {
                     setFModalData(undefined)
                     setFormModal(true)
                   }}
-                  size={"small"} className={"addItemButton"}
                 />
               </Tooltip>
               
@@ -595,7 +609,8 @@ const MemoDrawer = () => {
                            completed,
                            updateTime,
                            createTime,
-                           numberOfRecurrences
+                           numberOfRecurrences,
+                           okText,
                          }) => (
               <List.Item key={id} className={completed && 'finish'}>
                 <Skeleton avatar title={false} loading={loading} active>
@@ -629,7 +644,9 @@ const MemoDrawer = () => {
                             </span>
                           }
                         </div>
-
+                        
+                        {Boolean(completed) && okText && <div className="ok-text"><b>完成备注：</b>{okText}</div>}
+                        
                         {/*————————————————备忘项 的功能按钮和 创建修改时间显示————————————————*/}
                         <div style={{display: 'flex',marginTop: 10}}>
                           {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
