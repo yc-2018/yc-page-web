@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkantd_demo=self.webpackChunkantd_demo||[]).push([[1228,8158],{41228:(t,a,e)=>{e.r(a),e.d(a,{default:()=>c});e(72791);var n=e(98158),d=e(80184);const c=t=>{let{actionName:a,children:e,show:c=!0}=t;return c&&(0,d.jsx)("div",{"data-action":a,className:n.default.btn,children:e})}},98158:(t,a,e)=>{e.r(a),e.d(a,{default:()=>n});const n={btn:"actionBtn_btn__dB-QR"}}}]);
+//# sourceMappingURL=1228.d6b50fa5.chunk.js.map
