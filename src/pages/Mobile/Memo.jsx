@@ -3,7 +3,7 @@ import {
   InfiniteScroll, List, Popup, SwipeAction, Toast,
   Button, Tag, Radio, TextArea, Dialog, PullToRefresh,
   SearchBar, Badge, Ellipsis, CalendarPicker, Dropdown,
-  Space
+  Space, Input
 } from 'antd-mobile'
 
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest.js";
@@ -15,6 +15,7 @@ import HighlightKeyword from "../../utils/HighlightKeyword";
 
 
 let updateTime;     // 待办更新时间
+let okText;         // 待办完成或循环时可添加的文字
 let 循环时间页数 = 1;
 let 循环备忘主键 = null;
 
@@ -87,13 +88,19 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       // 取消|完成 //////////////////////////////////////////////////////////////
       case 'success':
         updateTime = undefined  // 重置更新时间
+        okText = undefined      // 重置完成文字
         await Dialog.confirm({
           content: text === '完成' ?
             <div>
               完成时间为现在或
-              <a ref={dateRef}            // 改日期显示
-                 onClick={() => setDateVisible(true)}
-              >选择日期</a>
+              <a ref={dateRef} onClick={() => setDateVisible(true)}>选择日期</a>
+              <div style={{marginTop: 9}}>加一备注：</div>
+              <Input
+                clearable
+                type="text"
+                placeholder="可输入循环备注"
+                onChange={v => okText = v}
+              />
             </div>
             :
             '确定取消完成吗？',
@@ -102,7 +109,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             const finishResp = await saveOrUpdateToDoItem({
               id,
               updateTime,
-              completed: text === '完成' ? 1 : 0
+              completed: text === '完成' ? 1 : 0,
+              okText: text === '完成' ? okText : '',
             }, 'put')
             if (finishResp) {
               Toast.show({icon: 'success', content: '成功'})
@@ -110,6 +118,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               completed === -1 && setData(val => val.map(item => item.id === id ? {
                 ...item,
                 completed: text === '完成' ? 1 : 0,
+                okText: text === '完成' ? okText : '',
                 updateTime: updateTime || new Date().toLocaleString()
               } : item))
               /* 类型变了不属于显示范畴了 */
@@ -126,18 +135,24 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       // +1 ///////////////////////////////////////////////////////////////////////
       case 'addOne':
         updateTime = undefined  // 重置更新时间
+        okText = undefined      // 重置完成文字
         await Dialog.confirm({
           content:
             <div>
               循环时间为现在或
-              <a ref={dateRef}            // 改日期显示
-                 onClick={() => setDateVisible(true)}
-              >选择日期</a>
+              <a ref={dateRef} onClick={() => setDateVisible(true)}>选择日期</a>
+              <div style={{marginTop: 9}}>加一备注：</div>
+              <Input
+                clearable
+                type="text"
+                placeholder="可输入循环备注"
+                onChange={v => okText = v}
+              />
             </div>
           ,
           onConfirm: async () => {
             showLoading('loading', '加载中…')
-            const addOneResp = await saveOrUpdateToDoItem({id, updateTime, numberOfRecurrences: 777}, 'put')
+            const addOneResp = await saveOrUpdateToDoItem({id, updateTime, okText, numberOfRecurrences: 777}, 'put')
             if (addOneResp) {
               Toast.show({icon: 'success', content: '成功'})
               setData(val => val.map(item => item.id === id ? {
@@ -183,6 +198,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             } else Toast.show({icon: 'fail', content: '删除失败'})
           },
         })
+        break;
+      default:
+        Toast.show({icon: 'fail', content: '你是怎么做到的？🧐'})
     }
   }
 
@@ -392,6 +410,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           </Tag>
         }
         <div style={{height: '38vh', overflowY: 'scroll'}}>
+          {visible?.okText && <div className={styles.okText}><b>完成备注：</b>{visible.okText}</div>}
           <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px', fontFamily: 'unset'}}>
             {visible?.content}
           </pre>
@@ -508,6 +527,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               {loopTime?.map((item, index) =>
                 <List.Item key={item.id}>
                   {index + 1}：{item.memoDate.replace('T00:00:00', '').replace('T', ' ')}
+                  {item.loopText && <div className={styles.loopText}>{item.loopText}</div>}
                 </List.Item>
               )}
             </List>

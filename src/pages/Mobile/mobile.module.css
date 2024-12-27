@@ -1,30 +1,48 @@
 /*匹配手机的样式*/
-.mobile{
-    width: 100%;
-    height: 100%;
-    position: relative;
-    font-size: 28pt;
-    font-family: Arial, Helvetica, sans-serif;
-    line-height: 1.5;
+.mobile {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  font-size: 28pt;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
 }
 
-.qrCode{
-    width: 80%;
-    border-radius: 10px;
-    box-shadow: 4px -2px 12px #857d7d;
+.qrCode {
+  width: 80%;
+  border-radius: 10px;
+  box-shadow: 4px -2px 12px #857d7d;
 }
 
-.popupButton{
-    width: 45%;
-    margin: 5px;
+.popupButton {
+  width: 45%;
+  margin: 5px;
 }
 
 /*底部导航栏*/
-.tabBar{
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background-color: white;
-    z-index: 1;
+.tabBar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: white;
+  z-index: 1;
 }
 
+.okText {
+  background: #fff;
+  border: 1px dashed #d2caca;
+  border-radius: 5px;
+  color: #0014ff;
+  font-size: 12px;
+  margin-top: 5px;
+  padding: 1px 5px;
+}
+
+.okText b {
+  color: #000;
+}
+
+.loopText {
+  font-size: 14px;
+  color: #999;
+}
