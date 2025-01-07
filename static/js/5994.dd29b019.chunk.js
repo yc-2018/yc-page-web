@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkantd_demo=self.webpackChunkantd_demo||[]).push([[5994],{65994:(e,p,a)=>{a.r(p),a.d(p,{aWeek:()=>k,typeMapper:()=>t,typeMapperCn:()=>d,typeMapperEn:()=>n});const t={1:"\u65e5",2:"\u5468",3:"\u6708",4:"\u5e74"},n={1:"day",2:"week",3:"month",4:"year"},d={"\u65e5":1,"\u5468":2,"\u6708":3,"\u5e74":4},k=["\u5468\u4e00","\u5468\u4e8c","\u5468\u4e09","\u5468\u56db","\u5468\u4e94","\u5468\u516d","\u5468\u65e5"]}}]);
+//# sourceMappingURL=5994.dd29b019.chunk.js.map
