@@ -49,7 +49,7 @@ export default ({bookmarkItems,setModal,groupId,setGroup}) => {
             height={18}
             preview={false}
             src={URL[0]+'/favicon.ico'}
-            fallback={`https://api.iowen.cn/favicon/${URL[1]}.png`}
+            fallback={`https://api.qqsuu.cn/api/dm-get?url=${URL[1]}`}
         />
 
 
