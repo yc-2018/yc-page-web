@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const blogBaseURL = 'https://mynote-apa.pages.dev';
+export const blogBaseURL = 'https://blog.245556.xyz';
 
 const blogAxios = axios.create({
     baseURL: blogBaseURL, // 设置基础 URL

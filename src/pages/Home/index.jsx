@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import axios from "axios";
 import {observer} from 'mobx-react-lite'
-import {Avatar, Button, FloatButton, Input, Slider} from "antd";
+import {Avatar, Button, FloatButton, Input, Popover, Slider} from "antd";
 import {
   PictureTwoTone,
   SnippetsTwoTone,
@@ -13,7 +13,8 @@ import {
   CloudUploadOutlined,
   CloudDownloadOutlined,
   QuestionCircleTwoTone,
-  SmileTwoTone, EditOutlined, LayoutTwoTone
+  EditOutlined, LayoutTwoTone,
+  ReadOutlined, ProductOutlined, LinkOutlined,
 } from "@ant-design/icons";
 import {useNavigate} from 'react-router-dom'
 
@@ -27,10 +28,12 @@ import UserStore from "../../store/UserStore";
 import SearchStore from "../../store/SearchStore";
 import CommonStore from "../../store/CommonStore";
 import {reImagesUrl, uploadInfo, getPageInfo} from "../../request/homeRequest";
+import {getToolsList, toolsBaseURL} from "../../request/toolsRequest";
 
 
 function Home() {
   const [images, setImages] = useState('/Default-wallpaper.jpg');// 背景背景
+  const [tools, setTools] = useState([]);
 
   const {msg} = CommonStore;
   const navigate = useNavigate()   // 路由跳转
@@ -45,6 +48,11 @@ function Home() {
 
     })();
   }, [jwt])
+
+  /**  */
+  useEffect(() => {
+    getToolsList().then(dataList=>setTools(dataList)).catch(()=>{CommonStore.msg.error('获取工具列表失败');})
+  },[])
 
   /**
    * 获取背景请求
@@ -302,15 +310,35 @@ function Home() {
           {/*跳转到博客***********************************************************/}
           <FloatButton
             onClick={() => navigate('/blog')}
-            onContextMenu={e => e.preventDefault() || navigate('/seeTime')}
-            icon={<SmileTwoTone/>}
+            icon={<ReadOutlined style={{color: '#1677ff', fontSize: 20}}/>}
             tooltip="博客"
             style={{right: 300}}
             className='buttonOpacity'
           />
 
-          
-          
+          {/*打开工具***********************************************************/}
+          <Popover
+            title={<div style={{textAlign: 'center'}}>仰晨工具箱</div>}
+            content={
+            <div style={{display: 'flex', flexDirection: 'column', gap: 5}}>
+              <Button block onClick={() => navigate('/utils-specialChar')}>特殊字母|数字</Button>
+              {tools.map(([name, uri]) =>
+                <Button block onClick={() => window.open(toolsBaseURL + uri, '_blank')}>
+                  <LinkOutlined />{name}
+                </Button>
+              )}
+            </div>
+          }
+          >
+          <FloatButton
+            onClick={() => window.open(toolsBaseURL, '_blank')}
+            onContextMenu={e => e.preventDefault() || navigate('/seeTime')}
+            icon={<ProductOutlined style={{color: '#1677ff', fontSize: 20}}/>}
+            style={{right: 355}}
+            className='buttonOpacity'
+          />
+          </Popover>
+
           {/* 侧边半透明的边 移动到上面显示抽屉 */}
           <div
             onMouseEnter={() => showOrNot.setMemoDrawerShow(true)}
