@@ -323,7 +323,7 @@ function Home() {
             <div style={{display: 'flex', flexDirection: 'column', gap: 5}}>
               <Button block onClick={() => navigate('/utils-specialChar')}>特殊字母|数字</Button>
               {tools.map(([name, uri]) =>
-                <Button block onClick={() => window.open(toolsBaseURL + uri, '_blank')}>
+                <Button key={name} block onClick={() => window.open(toolsBaseURL + uri, '_blank')}>
                   <LinkOutlined />{name}
                 </Button>
               )}

@@ -1,5 +1,5 @@
 import {useRoutes} from 'react-router-dom'
-import React, {lazy, Suspense, useEffect} from 'react';
+import {lazy, Suspense, useEffect} from 'react';
 import {App, message, Spin} from "antd";
 
 import './App.css';
@@ -31,7 +31,7 @@ export default observer(() => {
   return (
     <App message={{maxCount: 5}}>
       {contextMsg}
-        <Suspense fallback={/* 懒加载等待时显示的组件 */<LoaderWhite/>}>
+      <Suspense fallback={/* 懒加载等待时显示的组件 */<LoaderWhite/>}>
         {isMobile() ? null : window.location.pathname !== '/' && <Head/>}
         {element}
         {

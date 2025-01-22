@@ -5,7 +5,7 @@ import styles from "./bookmark.module.css"
 import MyDnd from "../../../compontets/MyDnd";
 import {dragSort} from "../../../request/homeRequest";
 import CommonStore from "../../../store/CommonStore";
-import action from "./action";
+import action from "./action.jsx";
 import ContextMenu from "../../../compontets/ContextMenu";
 
 /**

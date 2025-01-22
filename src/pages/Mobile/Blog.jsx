@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Collapse, DotLoading} from 'antd-mobile'
 
 import Md from "../../compontets/Md";
-import {blogMenu} from "../../store/NoLoginData";
+import {blogMenu} from "../../store/NoLoginData.jsx";
 import {blogBaseURL, getBlogItemIconObj, getBlogList, getBlogMd} from "../../request/blogRequest";
 import LoaderWhite from "../../compontets/common/LoaderWhite";
 import CommonStore from "../../store/CommonStore";

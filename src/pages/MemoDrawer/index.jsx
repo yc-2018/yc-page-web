@@ -19,15 +19,14 @@ import UserStore from "../../store/UserStore";
 import FormModal from "./compontets/FormModal";
 import ShowOrNot from "../../store/ShowOrNot";
 import JWTUtils from "../../utils/JWTUtils";
-import {sortingOptions, tagNameMapper} from "../../store/NoLoginData";
+import {sortingOptions, tagNameMapper} from "../../store/NoLoginData.jsx";
 import SortSelect from "../../compontets/SortSelect";
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest.js"
 import SearchBox from "../../compontets/common/SearchBox";
 
 import './MemoDrawer.css'
-import styles from '../../common.module.css'
 import ActionBtn from "./compontets/ActionBtn";
-import HighlightKeyword from "../../utils/HighlightKeyword";
+import HighlightKeyword from "../../utils/HighlightKeyword.jsx";
 
 /** 用于完成或+1时是否主动选择日期 */
 window.ikunSelectDate = undefined
@@ -164,7 +163,7 @@ const MemoDrawer = () => {
            overflowCount={9999}    // 展示封顶的数字值
            count={type === TypeNum && total > 0 ? total : unFinishCounts?.[TypeNum]}
     >
-      <Tag className={`${styles.pointer} ${type === TypeNum ? styles.currentTag : ''}`}
+      <Tag className={`pointer ${type === TypeNum ? 'currentTag' : ''}`}
            color={color ?? "processing"}
            onClick={() => {
              setSearchEmpty(true)    // 搜索框为空重置
@@ -193,7 +192,7 @@ const MemoDrawer = () => {
         }
       }}
       dropdownRender={() =>
-        <div className={`ant-dropdown-menu ${styles['dropdown-menu']} ${styles.gun}`}>
+        <div className={`ant-dropdown-menu dropdown-menu gun`}>
           {loopTimeList?.map(({id, memoDate, loopText}, index) =>
             <div key={id} className="memoLoopListItem">
               {index + 1}：{memoDate?.replace('T00:00:00', ' ').replace('T', ' ')}
@@ -208,7 +207,7 @@ const MemoDrawer = () => {
         </div>
       }
     >
-        <span className={styles.pointer}>
+        <span className={'pointer'}>
           &nbsp;&nbsp;&nbsp;<CaretDownOutlined/>循环:{updateTime}<CaretDownOutlined/>
         </span>
     </Dropdown>
@@ -348,7 +347,7 @@ const MemoDrawer = () => {
             icon: <BookOutlined/>,
             content:
               <div
-                className={styles.gun}
+                className={'gun'}
                 style={{height: '70vh', border: '1px solid #ccc', borderRadius: '6px', padding: 9, overflow: 'auto'}}
               >
                 <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px', margin: 0, fontFamily: 'unset'}}>
@@ -620,7 +619,7 @@ const MemoDrawer = () => {
                         <div
                           data-action="see"
                           style={{userSelect: 'auto'}}
-                          className={(itemType === 3 && !completed && styles.gradientText) || null}
+                          className={(itemType === 3 && !completed && 'gradientText') || null}
                         >
                           {!searchEmpty && <HighlightKeyword content={content} keyword={keyword}/>}
                           {searchEmpty && content?.slice(0, 100)}

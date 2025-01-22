@@ -7,11 +7,11 @@ import {
 } from 'antd-mobile'
 
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest.js";
-import {finishName, columns, leftActions, rightActions, orderByName} from "./data";
+import {finishName, columns, leftActions, rightActions, orderByName} from "./data.jsx";
 import {ExclamationCircleFilled} from "@ant-design/icons";
-import {sortingOptions} from "../../store/NoLoginData";
+import {sortingOptions} from "../../store/NoLoginData.jsx";
 import styles from './mobile.module.css'
-import HighlightKeyword from "../../utils/HighlightKeyword";
+import HighlightKeyword from "../../utils/HighlightKeyword.jsx";
 
 
 let updateTime;     // 待办更新时间

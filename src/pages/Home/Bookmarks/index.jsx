@@ -10,7 +10,7 @@ import JWTUtils from "../../../utils/JWTUtils";
 import {addBookmarks, dragSort, getBookmarks, updateBookmark} from "../../../request/homeRequest";
 import CommonStore from "../../../store/CommonStore";
 import ContextMenu from "../../../compontets/ContextMenu";
-import action from "./action";
+import action from "./action.jsx";
 
 let setCurrentGroupItems;   //组内传过来的设置列表的方法 放在方法内会报错 应该是会重新变成空
 

@@ -2,7 +2,6 @@ import React, {useEffect, useRef, useState} from "react";
 import {QuestionCircleTwoTone, SmileTwoTone} from "@ant-design/icons";
 import {Modal, Input, Radio, Button, DatePicker, Popover, Row, Col, App} from 'antd';
 import {saveOrUpdateToDoItem} from "../../../request/memoRequest.js";
-import styles from '../../../common.module.css'
 import modalStyle from './formModal.module.css'
 import CommonStore from "../../../store/CommonStore";
 
@@ -196,7 +195,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
       onCancel={closeModal}
       footer={footerButtons}
     >
-      <div className={styles.lrCenter}>
+      <div className={'lrCenter'}>
         <Radio.Group
           onChange={(e) => setFormData({...formData, itemType: e.target.value})}
           value={formData?.itemType}

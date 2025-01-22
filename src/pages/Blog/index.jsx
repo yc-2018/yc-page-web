@@ -4,7 +4,7 @@ import {useNavigate} from "react-router-dom"
 import {BookOutlined} from '@ant-design/icons'
 
 import styles from './blog.module.css'
-import {blogMenu} from "../../store/NoLoginData"
+import {blogMenu} from "../../store/NoLoginData.jsx"
 import {blogBaseURL, getBlogItemIconObj, getBlogList, getBlogMd} from "../../request/blogRequest";
 import LoaderWhite from "../../compontets/common/LoaderWhite";
 import Md from "../../compontets/Md";
