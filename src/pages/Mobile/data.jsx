@@ -1,4 +1,4 @@
-import {sortingOptions} from "../../store/NoLoginData";
+import {sortingOptions} from "../../store/NoLoginData.jsx";
 import {BookOutlined, UnorderedListOutlined, UserOutlined} from "@ant-design/icons";
 import React from "react";
 

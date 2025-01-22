@@ -4,7 +4,6 @@ import {Button, Col, Row, Radio, Card} from "antd";
 import {CopyToClipboard} from "react-copy-to-clipboard/src";
 
 import CommonStore from "../../../store/CommonStore";
-import styles from "../../../common.module.css"
 
 
 // 普通字母
@@ -84,7 +83,7 @@ export default () => {
     </Col>
   
   return <div
-    className={styles.gun}
+    className={'gun'}
     style={{
       padding: 10,
       backgroundColor: 'rgba(220,220,220,.2)',

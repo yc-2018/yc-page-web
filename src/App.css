@@ -4,22 +4,22 @@
 
 /* 鼠标变小手 */
 .pointer{
-    cursor: pointer;
-    user-select: none;
+  cursor: pointer;
+  user-select: none;
 }
 
 /* 鼠标变移动 */
 .mouseMove{
-    cursor: move;
-    user-select: none;
+  cursor: move;
+  user-select: none;
 }
 
 /* 弹性居中 */
 .flex-center{
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
 }
 
 .m5{
-    margin: 5px;
+  margin: 5px;
 }

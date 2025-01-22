@@ -10,14 +10,13 @@ import showOrNot from "../../store/ShowOrNot";
 import UserStore from "../../store/UserStore";
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/memoRequest.js";
 import MyEmpty from "../../compontets/common/MyEmpty";
-import {englishSortingOptions, tagList} from "../../store/NoLoginData";
+import {englishSortingOptions, tagList} from "../../store/NoLoginData.jsx";
 import MyButton from "../../compontets/MyButton";
 import CommonStore from "../../store/CommonStore";
 import SortSelect from "../../compontets/SortSelect";
 import LoaderWhite from "../../compontets/common/LoaderWhite";
 import JWTUtils from "../../utils/JWTUtils";
 
-import styles from "../../common.module.css"
 
 
 let total = 0;    // 初始化待办总数
@@ -179,14 +178,14 @@ function EnglishDrawer() {
              color={color}
              onClick={onClick}
              bordered={bordered}
-             className={`${styles.pointer} ${firstLetter===value? styles.eCurrentTag: ''}`}
+             className={`pointer ${firstLetter===value? 'eCurrentTag': ''}`}
         >
             {value}
         </Tag>
 
     /** 英语列表生成器 */
     const buildList = () => listData?.map(item => (
-            <Space key={item.id?? 'newItem'} className={[styles.topBottMargin5, (item.id===editId && styles.borderLight)||''].join(' ')} >
+            <Space key={item.id?? 'newItem'} className={['topBottMargin5', (item.id===editId && 'borderLight')||''].join(' ')} >
                 <Space.Compact>
                     {/*查看时是编辑按钮 添加时是完成按钮*/}
                     <Button icon={editId===item.id?<CheckOutlined /> : <EditOutlined />}
@@ -207,7 +206,7 @@ function EnglishDrawer() {
 
                     {/*查看时是删除按钮 编辑时是取消按钮*/}
                     <Button icon={editId===item.id?<CloseOutlined /> : <DeleteOutlined />}
-                            className={styles.rightRadius6}
+                            className={'rightRadius6'}
                             onClick={() => deleteOrCancel(item)} />
                 </Space.Compact>
             </Space>

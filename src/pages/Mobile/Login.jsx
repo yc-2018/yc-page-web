@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import {Form, Input, Button, Toast, Selector} from 'antd-mobile'
 import {login} from "../../request/commonRequest";
 import styles from './mobile.module.css'
-import {getWelcomePic, loginTime} from "./data";
+import {getWelcomePic, loginTime} from "./data.jsx";
 import Filing from "../../compontets/Filing";
 
 export default () => {
