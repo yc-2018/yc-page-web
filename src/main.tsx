@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import 'dayjs/locale/zh-cn';    // 导入（日历）中文本地化文件
+import 'dayjs/locale/zh-cn';
 import zhCN from 'antd/locale/zh_CN';
 import {ConfigProvider} from "antd";
 import App from './App.jsx'
@@ -9,7 +9,7 @@ import './index.css'
 
 createRoot(document.getElementById('root')!).render(
   <ConfigProvider locale={zhCN} theme={{components: {Message: {zIndexPopup: 9999999}}}}>
-    <BrowserRouter>
+    <BrowserRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}>
       <StrictMode>
         <App/>
       </StrictMode>
