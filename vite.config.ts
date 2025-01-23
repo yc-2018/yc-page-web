@@ -1,10 +1,17 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+// import legacy from '@vitejs/plugin-legacy'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  // base: './',
+  plugins: [
+    react(),
+    // legacy({  // 为了html能直接运行 参考：https://www.cnblogs.com/lingern/p/17789995.html  打包速度降几倍 10秒变三四十秒
+    //   targets: ['ie >= 11'],
+    //   additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
+    // }),
+  ],
+  base: './',
   server: {
     proxy: {
       // 代理 /api 请求到我后端的服务器
