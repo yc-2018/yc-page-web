@@ -28,12 +28,18 @@ const items = (blogMenu, blogIcon = {}) => blogMenu.map(item => ({
 // antd布局组件
 const {Content, Sider} = Layout
 
+const initContent = `
+# 欢迎来到仰晨博客
+看看菜单有什么感兴趣或者需要的吧
+
+其他：[CSDN](https://blog.csdn.net/weixin_46665865)  [GitHub](https://github.com/yc-2018)  [Gitee](https://gitee.com/yc556)
+`
 
 /**
  * 博客页
  * */
 const Blog = () => {
-  const [content, setContent] = useState('# 欢迎来到仰晨博客');
+  const [content, setContent] = useState(initContent);
   const [loading, setLoading] = useState(false)      // 加载状态
   const [initLoad, setInitLoad] = useState(true)    // 初始加载菜单状态
   const [menu, setMenu] = useState(items(blogMenu))                   // 菜单项
