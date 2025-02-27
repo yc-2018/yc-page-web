@@ -177,7 +177,7 @@ function Search() {
               icon={<ThunderboltOutlined/>}
               onClick={() => onSearch(item.engineUrl)}
               style={{
-                backgroundImage: searchStore.quickSearchIcon ? `url(https://api.iowen.cn/favicon/${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]}.png)` : undefined,
+                backgroundImage: searchStore.quickSearchIcon ? `url(https://api.qqsuu.cn/api/dm-get?url=${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]})` : undefined,
                 backgroundColor: `rgba(255, 255, 255, ${(searchStore.searchIconTransparency * 0.01)})`,
               }}
             >
