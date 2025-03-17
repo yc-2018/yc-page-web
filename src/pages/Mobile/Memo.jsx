@@ -6,7 +6,7 @@ import {
   Space, Input, Modal
 } from 'antd-mobile'
 
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest.js";
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data.jsx";
 import {ExclamationCircleFilled} from "@ant-design/icons";
 import {sortingOptions} from "../../store/NoLoginData.jsx";
@@ -18,8 +18,12 @@ import {symbols} from "../MemoDrawer/compontets/FormModal.jsx";
 
 let updateTime;     // 待办更新时间
 let okText;         // 待办完成或循环时可添加的文字
-let 循环时间页数 = 1;
-let 循环备忘主键 = null;
+let v = {      // 循环装中文变量
+  '循环时间页数': 1,
+  '循环备忘主键': null,
+  '循环次数继续加载': false,
+  '翻页加载中': false,
+}
 
 /**
  * @param type                要渲染的待办类型
@@ -40,7 +44,6 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [editVisible, setEditVisible] = useState(undefined);          // 编辑弹窗的显示和隐藏(新增时值是“新增"，编辑时值是item对象，关闭时值是false
   const [dateVisible, setDateVisible] = useState(false);     // 日期弹窗的显示和隐藏
   const [loopTime, setLoopTime] = useState(undefined)                 // 循环时间弹窗的显示和隐藏(用数据来控制)
-  const [loopTimeHasMore, setLoopTimeHasMore] = useState(null)        // 循环时间是否自动翻页(布尔值bug有时无法启动副作用的启动)
   const [editDateVisible, setEditDateVisible] = useState(false);     // 编辑框日期弹窗的显示和隐藏
 
   const [content, setContent] = useState('')                   // 表单内容
@@ -263,16 +266,18 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
   /** 获取循环时间显示 */
   const showLoopTime = async () => {
-    const resp = await selectLoopMemoTimeList(循环备忘主键, 循环时间页数);
+    if (v['翻页加载中'] || !v['循环次数继续加载']) return
+    v['翻页加载中'] = true
+    const resp = await selectLoopMemoTimeList(v['循环备忘主键'], v['循环时间页数']);
     loading.current?.close()    // 关闭加载蒙版
 
     if (resp?.records?.length > 0) {
-      循环时间页数++
+      v['循环时间页数']++
       setLoopTime(list => [...list ?? [], ...resp.records])
     } else Toast.show({icon: 'fail', content: '获取失败'})
-
-    if (resp?.records?.length % 10 !== 0 && (loopTime?.length ?? 0 + resp?.records?.length > resp?.total ?? 0))
-      setLoopTimeHasMore(false)
+    
+    v['循环次数继续加载'] = resp?.current < resp?.pages
+    v['翻页加载中'] = false
   }
   
   /** 在光标位置后面插入文本的函数 */
@@ -417,9 +422,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             fill='outline'
             onClick={() => {
               setLoopTime([])
-              setLoopTimeHasMore(visible.id)
-              循环时间页数=1
-              循环备忘主键 = visible.id
+              v['循环次数继续加载'] = visible.id
+              v['循环时间页数'] = 1
+              v['循环备忘主键'] = visible.id
+              v['翻页加载中'] = false
               showLoopTime()
               loading.current = Toast.show({
                 icon: 'loading',
@@ -581,7 +587,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                 </List.Item>
               )}
             </List>
-            <InfiniteScroll loadMore={showLoopTime} hasMore={loopTime?.length % 10 === 0 && !!loopTimeHasMore}/>
+            <InfiniteScroll loadMore={showLoopTime} hasMore={Boolean(v['循环次数继续加载'])}/>
           </>
         }
       </Popup>
