@@ -380,12 +380,12 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       >
         {/*显示创建时间*/}
         <Tag color='primary' fill='outline' style={{'--border-radius': '6px', '--background-color': '#c5f1f7'}}>
-          创建时间:{visible?.createTime?.replace('T', ' ')}
+          创建时间:{visible?.createTime}
         </Tag>
 
         {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
           <Tag color='success' fill='outline' style={{'--background-color': '#c8f7c5', margin: '3px 10px'}}>
-            {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace('T00:00:00', '').replace('T', ' ')}
+            {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace(' 00:00:00', '')}
           </Tag>
         }
         {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
@@ -526,7 +526,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             <List>
               {loopTime?.map((item, index) =>
                 <List.Item key={item.id}>
-                  {index + 1}：{item.memoDate.replace('T00:00:00', '').replace('T', ' ')}
+                  {index + 1}：{item.memoDate.replace(' 00:00:00', '')}
                   {item.loopText && <div className={styles.loopText}>{item.loopText}</div>}
                 </List.Item>
               )}
