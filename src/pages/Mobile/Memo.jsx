@@ -12,6 +12,7 @@ import {ExclamationCircleFilled} from "@ant-design/icons";
 import {sortingOptions} from "../../store/NoLoginData.jsx";
 import styles from './mobile.module.css'
 import HighlightKeyword from "../../utils/HighlightKeyword.jsx";
+import dayjs from "dayjs";
 
 
 let updateTime;     // 待办更新时间
@@ -39,6 +40,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [dateVisible, setDateVisible] = useState(false);     // 日期弹窗的显示和隐藏
   const [loopTime, setLoopTime] = useState(undefined)                 // 循环时间弹窗的显示和隐藏(用数据来控制)
   const [loopTimeHasMore, setLoopTimeHasMore] = useState(null)        // 循环时间是否自动翻页(布尔值bug有时无法启动副作用的启动)
+  const [editDateVisible, setEditDateVisible] = useState(false);     // 编辑框日期弹窗的显示和隐藏
 
   const [content, setContent] = useState('')                   // 表单内容
   const [itemType, setItemType] = useState(0)                 // 表单类型
@@ -271,6 +273,26 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     if (resp?.records?.length % 10 !== 0 && (loopTime?.length ?? 0 + resp?.records?.length > resp?.total ?? 0))
       setLoopTimeHasMore(false)
   }
+  
+  /** 在光标位置后面插入文本的函数 */
+  const insertAtCursor = (textToInsert) => {
+    textRef.current?.focus()
+    const selectionStart = textRef.current.nativeElement.selectionStart;  // 获取光标开始位置
+    const selectionEnd = textRef.current.nativeElement.selectionEnd;      // 获取光标结束位置
+    
+    const currentValue = content ?? ''
+    const beforeText = currentValue.slice(0, selectionStart);
+    const afterText = currentValue.slice(selectionEnd);
+    
+    setContent(beforeText + `${textToInsert}` + afterText)
+    window.setTimeout(() => { // setContent是异步的哇 所以一定要比它还要晚一点 因为它是属于全覆盖 光标自然在最后
+      // 重新定位光标到插入点之后
+      if (textRef.current) {
+        textRef.current?.nativeElement.setSelectionRange(selectionStart + textToInsert.length, selectionStart + textToInsert.length)
+        textRef.current.focus();
+      }
+    }, 100)
+  }
 
   return (
     <>
@@ -484,14 +506,16 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       >
 
         <div style={{padding: '10px'}}>
-          <div className={'█required'}>
-            内容
+          <div className={'█required editBoxTitle'}>
+            内容 &nbsp;
+            <Button size="small" onClick={() => setEditDateVisible(true)}>插入日期</Button>
           </div>
           <TextArea
             rows={13}
             showCount
             ref={textRef}
             value={content}
+            className="contentText"
             style={{height: '250px'}}
             placeholder="请输入备忘内容"
             maxLength={itemType === 5 ? 4000 : 2000}
@@ -555,6 +579,24 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           dateRef.current.innerHTML = updateTime.replace(' 00:00:00', '')
         }}
       />
+      
+      {/*日期选择器（antd实验性组件）*/}
+      <CalendarPicker
+        popupStyle={{zIndex: 99999}}
+        visible={editDateVisible}
+        selectionMode='range'
+        onClose={() => setEditDateVisible(false)}
+        onMaskClick={() => setEditDateVisible(false)}
+        onConfirm={date => {
+          if (!date) return;
+          const startDate = dayjs(date[0]).format('YYYY-MM-DD')
+          let endDate = dayjs(date[1]).format('YYYY-MM-DD')
+          endDate = startDate === endDate ? '' : `~${endDate} `
+          const textToInsert = `${startDate}${endDate}`
+          insertAtCursor(textToInsert)
+        }}
+      />
+      
     </>
   )
 }
