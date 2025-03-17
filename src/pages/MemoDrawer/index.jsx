@@ -195,7 +195,7 @@ const MemoDrawer = () => {
         <div className={`ant-dropdown-menu dropdown-menu gun`}>
           {loopTimeList?.map(({id, memoDate, loopText}, index) =>
             <div key={id} className="memoLoopListItem">
-              {index + 1}：{memoDate?.replace('T00:00:00', ' ').replace('T', ' ')}
+              {index + 1}：{memoDate?.replace(' 00:00:00', ' ')}
               {loopText && <div className="loop-text">{loopText}</div>}
             </div>
           )}
@@ -234,7 +234,7 @@ const MemoDrawer = () => {
         style={{width: '90%'}}
         placeholder="选择日期(不带时间),或默认当前时间"
         disabledDate={current => current && (current < moment().subtract(30, 'days') || current > moment())}
-        onChange={(_, dateStr) => window.ikunSelectDate = dateStr ? dateStr + 'T00:00:00' : undefined}
+        onChange={(_, dateStr) => window.ikunSelectDate = dateStr ? dateStr + ' 00:00:00' : undefined}
       />
       <div>{text}备注：</div>
       <Input
@@ -250,7 +250,7 @@ const MemoDrawer = () => {
    * @author ChenGuangLong
    * @since 2024/5/29 16:43
    */
-  const formatTime = strTime => strTime?.replace('T00:00:00', ' ').replace('T', ' ')
+  const formatTime = strTime => strTime?.replace(' 00:00:00', ' ')
 
 
   /**
@@ -660,7 +660,7 @@ const MemoDrawer = () => {
                           <ActionBtn actionName={'delete'}>删除</ActionBtn>
                           
                           <div style={{fontSize: 10, height: 22, lineHeight: '25px', marginLeft: 10}}>
-                            创建于:{createTime?.replace('T', ' ')}
+                            创建于:{createTime}
                             {createTime !== updateTime && itemType === 1 ?
                               getLoopMemoTimeList(id, formatTime(updateTime))
                               :
