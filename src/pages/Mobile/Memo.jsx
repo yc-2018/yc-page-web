@@ -432,62 +432,63 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             {`循环次数: ${visible?.numberOfRecurrences}▼`}
           </Tag>
         }
-        <div style={{height: '38vh', overflowY: 'scroll'}}>
+        <div style={{height: '42vh', overflowY: 'scroll', border: '1px solid #ccc', borderRadius: 10, marginTop: 5}}>
           {visible?.okText && <div className={styles.okText}><b>完成备注：</b>{visible.okText}</div>}
-          <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px', fontFamily: 'unset'}}>
+          <pre style={{whiteSpace: 'pre-wrap', fontSize: 14, fontFamily: 'unset', padding: 8, margin: 0}}>
             {visible?.content}
           </pre>
         </div>
-
-
-        {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
-          <Button
-            color='primary'
-            className={styles.popupButton}
-            onClick={() => onAction({key: 'edit', id: visible?.id})}
-          >
-            修改
-          </Button>
-        }
-        {/*未完成的显示完成按钮 */ visible?.completed === 0 &&
-          <Button
-            color='success'
-            className={styles.popupButton}
-            onClick={() => onAction({key: 'success', text: '完成', id: visible?.id})}
-          >
-            完成
-          </Button>
-        }
-
-        {/*完成的显示取消完成按钮 */ visible?.completed === 1 &&
-          <Button
-            className={styles.popupButton}
-            style={{background: '#f6b234', border: 'none', color: '#fff'}}
-            onClick={() => onAction({key: 'success', text: '取消完成', id: visible?.id})}
-          >
-            取消完成
-          </Button>
-        }
-
-        {/*显示删除按钮*/
-          <Button
-            color='danger'
-            className={styles.popupButton}
-            onClick={() => onAction({key: 'delete', id: visible?.id})}
-          >
-            删除
-          </Button>
-        }
-
-        {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
-          <Button
-            className={styles.popupButton}
-            style={{background: '#a934f6', border: 'none', color: '#fff'}}
-            onClick={() => onAction({key: 'addOne', id: visible?.id})}
-          >
-            +1
-          </Button>
-        }
+        
+        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr',gap:10,marginTop:10}}>
+          {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
+            <Button
+              block
+              color='primary'
+              onClick={() => onAction({key: 'edit', id: visible?.id})}
+            >
+              修改
+            </Button>
+          }
+          {/*未完成的显示完成按钮 */ visible?.completed === 0 &&
+            <Button
+              block
+              color='success'
+              onClick={() => onAction({key: 'success', text: '完成', id: visible?.id})}
+            >
+              完成
+            </Button>
+          }
+          
+          {/*完成的显示取消完成按钮 */ visible?.completed === 1 &&
+            <Button
+              block
+              style={{background: '#f6b234', border: 'none', color: '#fff'}}
+              onClick={() => onAction({key: 'success', text: '取消完成', id: visible?.id})}
+            >
+              取消完成
+            </Button>
+          }
+          
+          {/*显示删除按钮*/
+            <Button
+              block
+              color='danger'
+              onClick={() => onAction({key: 'delete', id: visible?.id})}
+            >
+              删除
+            </Button>
+          }
+          
+          {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
+            <Button
+              block
+              style={{background: '#a934f6', border: 'none', color: '#fff'}}
+              onClick={() => onAction({key: 'addOne', id: visible?.id})}
+            >
+              +1
+            </Button>
+          }
+        </div>
       </Popup>
 
 
