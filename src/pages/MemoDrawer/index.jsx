@@ -21,7 +21,7 @@ import ShowOrNot from "../../store/ShowOrNot";
 import JWTUtils from "../../utils/JWTUtils";
 import {sortingOptions, tagNameMapper} from "../../store/NoLoginData.jsx";
 import SortSelect from "../../compontets/SortSelect";
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest.js"
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest"
 import SearchBox from "../../compontets/common/SearchBox";
 
 import './MemoDrawer.css'

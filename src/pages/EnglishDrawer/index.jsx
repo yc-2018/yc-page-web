@@ -8,7 +8,7 @@ import {
 
 import showOrNot from "../../store/ShowOrNot";
 import UserStore from "../../store/UserStore";
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/memoRequest.js";
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/memoRequest";
 import MyEmpty from "../../compontets/common/MyEmpty";
 import {englishSortingOptions, tagList} from "../../store/NoLoginData.jsx";
 import MyButton from "../../compontets/MyButton";
