@@ -403,8 +403,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         visible={!!visible}
         closeOnSwipe /* 组件内向下滑动关闭 */
         onMaskClick={() => setVisible(undefined)}
-        // onClose={() => setVisible(undefined)}
-        bodyStyle={{height: '60vh', width: '95vw', padding: '10px', overflow: 'scroll'}}
+        bodyStyle={{height: '60vh', width: '95vw', padding: 10, overflow: 'scroll', borderRadius: '15px 15px 0 0'}}
       >
         {/*显示创建时间*/}
         <Tag color='primary' fill='outline' style={{'--border-radius': '6px', '--background-color': '#c5f1f7'}}>
@@ -604,11 +603,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         onMaskClick={() => setDateVisible(false)}
         onConfirm={date => {
           if (!date) return;
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份是从0开始的，所以需要加1
-          const day = String(date.getDate()).padStart(2, '0');
-          updateTime = `${year}-${month}-${day} 00:00:00`
-          dateRef.current.innerHTML = updateTime.replace(' 00:00:00', '')
+          const dayStr = dayjs(date).format('YYYY-MM-DD');
+          updateTime = `${dayStr} 00:00:00`
+          dateRef.current.innerHTML = dayStr
         }}
       />
       
