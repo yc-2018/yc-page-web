@@ -27,6 +27,14 @@
     color: red;
 }
 
+.editBoxTitle{
+    font-size: 16px;
+}
+
 .█tabsContainer .adm-tabs-content{
     padding-top: 0;
+}
+
+.contentText textarea{
+    padding: 0 10px;
 }
