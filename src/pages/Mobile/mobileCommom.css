@@ -5,13 +5,14 @@
     display: none;
 }
 .█Radio{
-    padding: 8px;
+    padding: 6px;
     box-shadow: 3px 3px 0 1px rgba(128, 147, 197, 0.38);							 /*阴影     水平偏移 垂直偏移  模糊  阴影大小*/
     border-radius: 9px;						  /*圆角*/
-    margin: 4px 1px;
+    margin: 0 2px 5px 2px;
 }
 .█Radio>.adm-radio-content{
     padding: 0;
+    font-size: 12px;
 }
 
 /* tab 标签头部 吸顶 */
@@ -21,11 +22,11 @@
     position: sticky;
     background: #fff;
 }
-/*必填红星前缀*/
-.█required:before{
-    content: "*";
-    color: red;
-}
+/*!*必填红星前缀*!*/
+/*.█required:before{*/
+/*    content: "*";*/
+/*    color: red;*/
+/*}*/
 
 .editBoxTitle{
     font-size: 16px;
@@ -36,5 +37,7 @@
 }
 
 .contentText textarea{
-    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 4px 10px;
 }
