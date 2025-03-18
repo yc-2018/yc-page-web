@@ -9,7 +9,8 @@ const {TextArea} = Input;
 /** 外部图片链接列表 */
 const externalImgBedList = [
   {src: 'https://playground.z.wiki/img-cloud/index.html', title: '外部图床1(可能失效,注意信息安全)'},
-  {src: 'https://ycimg.pages.dev/', title: '外部图床2(加载缓慢,最大支持5M)'},
+  {src: 'https://tools.245556.xyz/聚合图床', title: '外部图床2(数据在外部，注意信息安全)'},
+  // {src: 'https://ycimg.pages.dev/', title: '外部图床2(加载缓慢,最大支持5M)'},
 ]
 /**
  * 新增/编辑备忘录弹窗
