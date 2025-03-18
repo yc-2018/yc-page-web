@@ -3,21 +3,27 @@ import {
   InfiniteScroll, List, Popup, SwipeAction, Toast,
   Button, Tag, Radio, TextArea, Dialog, PullToRefresh,
   SearchBar, Badge, Ellipsis, CalendarPicker, Dropdown,
-  Space, Input
+  Space, Input, Modal
 } from 'antd-mobile'
 
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest.js";
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest";
 import {finishName, columns, leftActions, rightActions, orderByName} from "./data.jsx";
 import {ExclamationCircleFilled} from "@ant-design/icons";
 import {sortingOptions} from "../../store/NoLoginData.jsx";
 import styles from './mobile.module.css'
 import HighlightKeyword from "../../utils/HighlightKeyword.jsx";
+import dayjs from "dayjs";
+import {symbols} from "../MemoDrawer/compontets/FormModal.jsx";
 
 
 let updateTime;     // 待办更新时间
 let okText;         // 待办完成或循环时可添加的文字
-let 循环时间页数 = 1;
-let 循环备忘主键 = null;
+let v = {      // 循环装中文变量
+  '循环时间页数': 1,
+  '循环备忘主键': null,
+  '循环次数继续加载': false,
+  '翻页加载中': false,
+}
 
 /**
  * @param type                要渲染的待办类型
@@ -38,7 +44,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [editVisible, setEditVisible] = useState(undefined);          // 编辑弹窗的显示和隐藏(新增时值是“新增"，编辑时值是item对象，关闭时值是false
   const [dateVisible, setDateVisible] = useState(false);     // 日期弹窗的显示和隐藏
   const [loopTime, setLoopTime] = useState(undefined)                 // 循环时间弹窗的显示和隐藏(用数据来控制)
-  const [loopTimeHasMore, setLoopTimeHasMore] = useState(null)        // 循环时间是否自动翻页(布尔值bug有时无法启动副作用的启动)
+  const [editDateVisible, setEditDateVisible] = useState(false);     // 编辑框日期弹窗的显示和隐藏
 
   const [content, setContent] = useState('')                   // 表单内容
   const [itemType, setItemType] = useState(0)                 // 表单类型
@@ -260,16 +266,38 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
   /** 获取循环时间显示 */
   const showLoopTime = async () => {
-    const resp = await selectLoopMemoTimeList(循环备忘主键, 循环时间页数);
+    if (v['翻页加载中'] || !v['循环次数继续加载']) return
+    v['翻页加载中'] = true
+    const resp = await selectLoopMemoTimeList(v['循环备忘主键'], v['循环时间页数']);
     loading.current?.close()    // 关闭加载蒙版
 
     if (resp?.records?.length > 0) {
-      循环时间页数++
+      v['循环时间页数']++
       setLoopTime(list => [...list ?? [], ...resp.records])
     } else Toast.show({icon: 'fail', content: '获取失败'})
-
-    if (resp?.records?.length % 10 !== 0 && (loopTime?.length ?? 0 + resp?.records?.length > resp?.total ?? 0))
-      setLoopTimeHasMore(false)
+    
+    v['循环次数继续加载'] = resp?.current < resp?.pages
+    v['翻页加载中'] = false
+  }
+  
+  /** 在光标位置后面插入文本的函数 */
+  const insertAtCursor = (textToInsert) => {
+    textRef.current?.focus()
+    const selectionStart = textRef.current.nativeElement.selectionStart;  // 获取光标开始位置
+    const selectionEnd = textRef.current.nativeElement.selectionEnd;      // 获取光标结束位置
+    
+    const currentValue = content ?? ''
+    const beforeText = currentValue.slice(0, selectionStart);
+    const afterText = currentValue.slice(selectionEnd);
+    
+    setContent(beforeText + `${textToInsert}` + afterText)
+    window.setTimeout(() => { // setContent是异步的哇 所以一定要比它还要晚一点 因为它是属于全覆盖 光标自然在最后
+      // 重新定位光标到插入点之后
+      if (textRef.current) {
+        textRef.current?.nativeElement.setSelectionRange(selectionStart + textToInsert.length, selectionStart + textToInsert.length)
+        textRef.current.focus();
+      }
+    }, 100)
   }
 
   return (
@@ -375,17 +403,16 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         visible={!!visible}
         closeOnSwipe /* 组件内向下滑动关闭 */
         onMaskClick={() => setVisible(undefined)}
-        // onClose={() => setVisible(undefined)}
-        bodyStyle={{height: '60vh', width: '95vw', padding: '10px', overflow: 'scroll'}}
+        bodyStyle={{height: '60vh', width: '95vw', padding: 10, overflow: 'scroll', borderRadius: '15px 15px 0 0'}}
       >
         {/*显示创建时间*/}
         <Tag color='primary' fill='outline' style={{'--border-radius': '6px', '--background-color': '#c5f1f7'}}>
-          创建时间:{visible?.createTime?.replace('T', ' ')}
+          创建时间:{visible?.createTime}
         </Tag>
 
         {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
           <Tag color='success' fill='outline' style={{'--background-color': '#c8f7c5', margin: '3px 10px'}}>
-            {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace('T00:00:00', '').replace('T', ' ')}
+            {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace(' 00:00:00', '')}
           </Tag>
         }
         {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
@@ -394,9 +421,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             fill='outline'
             onClick={() => {
               setLoopTime([])
-              setLoopTimeHasMore(visible.id)
-              循环时间页数=1
-              循环备忘主键 = visible.id
+              v['循环次数继续加载'] = visible.id
+              v['循环时间页数'] = 1
+              v['循环备忘主键'] = visible.id
+              v['翻页加载中'] = false
               showLoopTime()
               loading.current = Toast.show({
                 icon: 'loading',
@@ -409,62 +437,63 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             {`循环次数: ${visible?.numberOfRecurrences}▼`}
           </Tag>
         }
-        <div style={{height: '38vh', overflowY: 'scroll'}}>
+        <div style={{height: '42vh', overflowY: 'scroll', border: '1px solid #ccc', borderRadius: 10, marginTop: 5}}>
           {visible?.okText && <div className={styles.okText}><b>完成备注：</b>{visible.okText}</div>}
-          <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px', fontFamily: 'unset'}}>
+          <pre style={{whiteSpace: 'pre-wrap', fontSize: 14, fontFamily: 'unset', padding: 8, margin: 0}}>
             {visible?.content}
           </pre>
         </div>
-
-
-        {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
-          <Button
-            color='primary'
-            className={styles.popupButton}
-            onClick={() => onAction({key: 'edit', id: visible?.id})}
-          >
-            修改
-          </Button>
-        }
-        {/*未完成的显示完成按钮 */ visible?.completed === 0 &&
-          <Button
-            color='success'
-            className={styles.popupButton}
-            onClick={() => onAction({key: 'success', text: '完成', id: visible?.id})}
-          >
-            完成
-          </Button>
-        }
-
-        {/*完成的显示取消完成按钮 */ visible?.completed === 1 &&
-          <Button
-            className={styles.popupButton}
-            style={{background: '#f6b234', border: 'none', color: '#fff'}}
-            onClick={() => onAction({key: 'success', text: '取消完成', id: visible?.id})}
-          >
-            取消完成
-          </Button>
-        }
-
-        {/*显示删除按钮*/
-          <Button
-            color='danger'
-            className={styles.popupButton}
-            onClick={() => onAction({key: 'delete', id: visible?.id})}
-          >
-            删除
-          </Button>
-        }
-
-        {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
-          <Button
-            className={styles.popupButton}
-            style={{background: '#a934f6', border: 'none', color: '#fff'}}
-            onClick={() => onAction({key: 'addOne', id: visible?.id})}
-          >
-            +1
-          </Button>
-        }
+        
+        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr',gap:10,marginTop:10}}>
+          {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
+            <Button
+              block
+              color='primary'
+              onClick={() => onAction({key: 'edit', id: visible?.id})}
+            >
+              修改
+            </Button>
+          }
+          {/*未完成的显示完成按钮 */ visible?.completed === 0 &&
+            <Button
+              block
+              color='success'
+              onClick={() => onAction({key: 'success', text: '完成', id: visible?.id})}
+            >
+              完成
+            </Button>
+          }
+          
+          {/*完成的显示取消完成按钮 */ visible?.completed === 1 &&
+            <Button
+              block
+              style={{background: '#f6b234', border: 'none', color: '#fff'}}
+              onClick={() => onAction({key: 'success', text: '取消完成', id: visible?.id})}
+            >
+              取消完成
+            </Button>
+          }
+          
+          {/*显示删除按钮*/
+            <Button
+              block
+              color='danger'
+              onClick={() => onAction({key: 'delete', id: visible?.id})}
+            >
+              删除
+            </Button>
+          }
+          
+          {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
+            <Button
+              block
+              style={{background: '#a934f6', border: 'none', color: '#fff'}}
+              onClick={() => onAction({key: 'addOne', id: visible?.id})}
+            >
+              +1
+            </Button>
+          }
+        </div>
       </Popup>
 
 
@@ -484,33 +513,59 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       >
 
         <div style={{padding: '10px'}}>
-          <div className={'█required'}>
-            内容
+          
+          <div style={{textAlign: 'center'}}>
+            <Radio.Group value={itemType} onChange={value => setItemType(() => value)}>
+              <Radio value={0} className={'█Radio'}>普通</Radio>
+              <Radio value={1} className={'█Radio'}>循环</Radio>
+              <Radio value={2} className={'█Radio'}>长期</Radio>
+              <Radio value={3} className={'█Radio'}>紧急</Radio>
+              <Radio value={5} className={'█Radio'}>日记</Radio>
+              <Radio value={6} className={'█Radio'}>工作</Radio>
+              <Radio value={7} className={'█Radio'}>其他</Radio>
+            </Radio.Group>
           </div>
+          
           <TextArea
             rows={13}
             showCount
             ref={textRef}
             value={content}
-            style={{height: '250px'}}
+            className="contentText"
+            style={{height: '300px'}}
             placeholder="请输入备忘内容"
             maxLength={itemType === 5 ? 4000 : 2000}
             onChange={value => setContent(value)}
           />
-          <br/>
-          <div className={'█required'}>请选择类型</div>
-          <Radio.Group value={itemType} onChange={value => setItemType(() => value)}>
-            <Radio value={0} className={'█Radio'}>普通</Radio>
-            <Radio value={1} className={'█Radio'}>循环</Radio>
-            <Radio value={2} className={'█Radio'}>长期</Radio>
-            <Radio value={3} className={'█Radio'}>紧急</Radio>
-            <Radio value={5} className={'█Radio'}>日记</Radio>
-            <Radio value={6} className={'█Radio'}>工作</Radio>
-            <Radio value={7} className={'█Radio'}>其他</Radio>
-          </Radio.Group>
-          <br/>
-          <br/>
-          <br/>
+          <div style={{margin: '10px 0'}}>
+            <Button size="small" onClick={() => setEditDateVisible(true)}>插入日期</Button>
+            &nbsp;
+            <Button
+              size="small"
+              onClick={() =>{
+                const handler =  Modal.show({
+                  content:
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 2}}>
+                      {symbols.map((item) =>
+                        <div
+                          key={item}
+                          style={{padding: 5, border: '1px solid #ccc', textAlign: 'center'}}
+                          onClick={() => insertAtCursor(item)||handler.close()}
+                        >
+                          {item}
+                        </div>
+                      )}
+                    </div>,
+                  closeOnMaskClick: true,
+                  closeOnAction: true,
+                  actions: [{key: 'close', text: '关闭'}]
+                })
+              }}
+            >
+              插入符号
+            </Button>
+          </div>
+          
           <Button block onClick={submit}> 提交 </Button>
         </div>
       </Popup>
@@ -526,18 +581,18 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             <List>
               {loopTime?.map((item, index) =>
                 <List.Item key={item.id}>
-                  {index + 1}：{item.memoDate.replace('T00:00:00', '').replace('T', ' ')}
+                  {index + 1}：{item.memoDate.replace(' 00:00:00', '')}
                   {item.loopText && <div className={styles.loopText}>{item.loopText}</div>}
                 </List.Item>
               )}
             </List>
-            <InfiniteScroll loadMore={showLoopTime} hasMore={loopTime?.length % 10 === 0 && !!loopTimeHasMore}/>
+            <InfiniteScroll loadMore={showLoopTime} hasMore={Boolean(v['循环次数继续加载'])}/>
           </>
         }
       </Popup>
 
 
-      {/*日期选择器（antd实验性组件）*/}
+      {/*日期选择器（antd实验性组件）完成或+1 用 */}
       <CalendarPicker
         popupStyle={{zIndex: 99999}}
         min={new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)}    // 前7天
@@ -548,13 +603,29 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         onMaskClick={() => setDateVisible(false)}
         onConfirm={date => {
           if (!date) return;
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份是从0开始的，所以需要加1
-          const day = String(date.getDate()).padStart(2, '0');
-          updateTime = `${year}-${month}-${day}T00:00:00`
-          dateRef.current.innerHTML = updateTime.replace('T00:00:00', '')
+          const dayStr = dayjs(date).format('YYYY-MM-DD');
+          updateTime = `${dayStr} 00:00:00`
+          dateRef.current.innerHTML = dayStr
         }}
       />
+      
+      {/*日期选择器（antd实验性组件）编辑插入用*/}
+      <CalendarPicker
+        popupStyle={{zIndex: 99999}}
+        visible={editDateVisible}
+        selectionMode='range'
+        onClose={() => setEditDateVisible(false)}
+        onMaskClick={() => setEditDateVisible(false)}
+        onConfirm={date => {
+          if (!date) return;
+          const startDate = dayjs(date[0]).format('YYYY-MM-DD')
+          let endDate = dayjs(date[1]).format('YYYY-MM-DD')
+          endDate = startDate === endDate ? '' : `~${endDate} `
+          const textToInsert = `${startDate}${endDate}`
+          insertAtCursor(textToInsert)
+        }}
+      />
+      
     </>
   )
 }

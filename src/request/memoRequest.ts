@@ -11,7 +11,7 @@ import myAxios from "./myAxios";
  * @param keyword  搜索关键词
  * @param dateRange   日期范围: 开始时间戳/结束时间戳/0：修改时间 1：创建时间
  */
-export async function getToDoItems({type = 0, page = 1, completed = 0, orderBy, firstLetter, keyword, dateRange}) {
+export async function getToDoItems({type = 0, page = 1, completed = 0, orderBy, firstLetter, keyword, dateRange}: any) {
     let pageSize = type === 1 ? '&pageSize=30' : '';   // 如果是循环待办就默认30条
     type === 4 && (pageSize = '&pageSize=20');
     page = `?page=${page}`;
@@ -27,9 +27,9 @@ export async function getToDoItems({type = 0, page = 1, completed = 0, orderBy, 
 }
 
 /** 保存或修改一个待办 */
-export async function saveOrUpdateToDoItem(body,requestType='post') {
+export async function saveOrUpdateToDoItem(body: any, requestType = 'post') {
     try {
-        const response = await myAxios({url: '/toDoItems',method: requestType, data : body});
+        const response = await myAxios({url: '/toDoItems', method: requestType, data: body});
         if (response.data.code === 1) {
             CommonStore.msg.success('成功');
             return response.data.data;
@@ -38,7 +38,7 @@ export async function saveOrUpdateToDoItem(body,requestType='post') {
 }
 
 /** 删除一个待办 */
-export async function delToDoItem(id) {
+export async function delToDoItem(id: number) {
     try {
         const response = await myAxios.delete(`/toDoItems/${id}`);
         if (response.data.code === 1) {
@@ -57,7 +57,7 @@ export async function delToDoItem(id) {
  * @return {object}          待办时间对象或空
  * @author ChenGuangLong
  */
-export async function selectLoopMemoTimeList(id, page=1) {
+export async function selectLoopMemoTimeList(id: number, page: number = 1): Promise<any> {
     try {
         const response = await myAxios.get(`/loopMemoTime/${id}?page=${page}`);
         return response?.data?.data;

@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {QuestionCircleTwoTone, SmileTwoTone} from "@ant-design/icons";
 import {Modal, Input, Radio, Button, DatePicker, Popover, Row, Col, App} from 'antd';
-import {saveOrUpdateToDoItem} from "../../../request/memoRequest.js";
+import {saveOrUpdateToDoItem} from "../../../request/memoRequest";
 import modalStyle from './formModal.module.css'
 import CommonStore from "../../../store/CommonStore";
 
@@ -9,7 +9,8 @@ const {TextArea} = Input;
 /** 外部图片链接列表 */
 const externalImgBedList = [
   {src: 'https://playground.z.wiki/img-cloud/index.html', title: '外部图床1(可能失效,注意信息安全)'},
-  {src: 'https://ycimg.pages.dev/', title: '外部图床2(加载缓慢,最大支持5M)'},
+  {src: 'https://tools.245556.xyz/聚合图床', title: '外部图床2(数据在外部，注意信息安全)'},
+  // {src: 'https://ycimg.pages.dev/', title: '外部图床2(加载缓慢,最大支持5M)'},
 ]
 /**
  * 新增/编辑备忘录弹窗
@@ -241,7 +242,7 @@ export default FormModal;
 
 
 /** 符号列表 */
-const symbols = [
+export const symbols = [
     '●', '𝟭、', '𝟮、', '𝟯、', '𝟰、', '𝟱、', '𝟲、', '𝟳、', '𝟴、', '𝟵、', '𝟬、',
     '♻', '▣', '〓', '▬', '█', '▶', '🞉', '⚫',
     '𖡎', '𒈞', '🡆', '🡄', '🢄', '🢅',
