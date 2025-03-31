@@ -2,15 +2,15 @@ import React, {useEffect, useState} from "react";
 import {Button, Dropdown} from "antd";
 import {PlusOutlined} from "@ant-design/icons";
 
-import BookmarksItem from "./BookmarksItem";
-import MyDnd from "../../../compontets/MyDnd";
+import BookmarksItem from "@/pages/Home/Bookmarks/BookmarksItem";
+import MyDnd from "@/compontets/MyDnd";
 import FormModal from "./FormModal";
-import UserStore from "../../../store/UserStore";
-import JWTUtils from "../../../utils/JWTUtils";
-import {addBookmarks, dragSort, getBookmarks, updateBookmark} from "../../../request/homeRequest";
-import CommonStore from "../../../store/CommonStore";
-import ContextMenu from "../../../compontets/ContextMenu";
-import action from "./action.jsx";
+import UserStore from "@/store/UserStore";
+import JWTUtils from "@/utils/JWTUtils";
+import {addBookmarks, dragSort, getBookmarks, updateBookmark} from "@/request/homeRequest";
+import CommonStore from "@/store/CommonStore";
+import ContextMenu from "@/compontets/ContextMenu";
+import action from "@/pages/Home/Bookmarks/action";
 
 let setCurrentGroupItems;   //组内传过来的设置列表的方法 放在方法内会报错 应该是会重新变成空
 

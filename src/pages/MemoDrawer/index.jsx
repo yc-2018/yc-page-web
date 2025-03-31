@@ -14,19 +14,19 @@ import {
 } from "antd";
 import moment from 'moment';
 
-import showOrNot from "../../store/ShowOrNot";
-import UserStore from "../../store/UserStore";
-import FormModal from "./compontets/FormModal";
-import ShowOrNot from "../../store/ShowOrNot";
-import JWTUtils from "../../utils/JWTUtils";
-import {sortingOptions, tagNameMapper} from "../../store/NoLoginData.jsx";
-import SortSelect from "../../compontets/SortSelect";
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest"
-import SearchBox from "../../compontets/common/SearchBox";
-
-import './MemoDrawer.css'
-import ActionBtn from "./compontets/ActionBtn";
-import HighlightKeyword from "../../utils/HighlightKeyword.jsx";
+import showOrNot from "@/store/ShowOrNot";
+import UserStore from "@/store/UserStore";
+import FormModal from "@/pages/MemoDrawer/compontets/FormModal";
+import ShowOrNot from "@/store/ShowOrNot";
+import {sortingOptions, tagNameMapper} from "@/store/NoLoginData";
+import SortSelect from "@/compontets/SortSelect";
+import SearchBox from "@/compontets/common/SearchBox";
+import LinkifyContent from "@/compontets/LinkifyContent/index";
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "@/request/memoRequest.js"
+import ActionBtn from "@/pages/MemoDrawer/compontets/ActionBtn";
+import JWTUtils from "@/utils/JWTUtils";
+import HighlightKeyword from "@/utils/HighlightKeyword";
+import '@/pages/MemoDrawer/MemoDrawer.css'
 
 /** 用于完成或+1时是否主动选择日期 */
 window.ikunSelectDate = undefined
@@ -38,7 +38,7 @@ let total = -1;              // 初始化待办总数
 let orderBy = 1;             // 《表单》默认排序方式
 let isQueryOnClick = false; // 防止点太快了
 let openMemoText = 0;       //  控制全部展开备忘录内容 1展开 非1收缩
-let dates = [] ;              // 未处理的筛选日期
+let dates = [];              // 未处理的筛选日期
 let filterDate = '';         // 筛选日期 格式： 开始时间戳/结束时间戳/0：修改时间 1：创建时间
 let filterDateType = 1;     // 筛选日期类型 0：修改时间 1：创建时间
 
@@ -65,7 +65,7 @@ const MemoDrawer = () => {
   const [searchEmpty, setSearchEmpty] = useState(true);       // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
 
   const {notification, modal} = App.useApp();
-  
+
   const sxYm = () => setRefresh(++i)        // 刷新页面
   const sxSj = () => setRefreshTrigger(++i) // 刷新数据列表
 
@@ -135,7 +135,14 @@ const MemoDrawer = () => {
     );
 
     // 使用 axios 发起请求
-    const {data: respData} = await getToDoItems({type, page: page + 1, completed, orderBy, keyword, dateRange: filterDate});
+    const {data: respData} = await getToDoItems({
+      type,
+      page: page + 1,
+      completed,
+      orderBy,
+      keyword,
+      dateRange: filterDate
+    });
     if (!respData) return;      // 保持代码的健壮性
     // 结合旧数据和新数据
     const newData = data.concat(respData.records);
@@ -240,7 +247,9 @@ const MemoDrawer = () => {
       <Input
         allowClear
         count={{show: true, max: 99}}
-        onChange={e => {window.ikunOkText = e.target.value}}
+        onChange={e => {
+          window.ikunOkText = e.target.value
+        }}
       />
     </>
 
@@ -251,71 +260,6 @@ const MemoDrawer = () => {
    * @since 2024/5/29 16:43
    */
   const formatTime = strTime => strTime?.replace(' 00:00:00', ' ')
-
-
-  /**
-   * 定义函数来检测和转换 URL 为链接
-   *
-   * @author Yc
-   * @since 2024/9/23 1:27
-   */
-  const linkifyContent = (text) => {
-    // 正则表达式匹配不同类型的 URL
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const imageRegex = /\.(jpeg|jpg|gif|png|bmp|webp|svg)|ipfs/i; // 匹配图片格式 i是忽略大小写 ipfs当图片算了
-    const videoRegex = /\.(mp4|webm|ogg|mov)$/i; // 匹配视频格式 加了$就是要结尾才匹配
-
-    return text.split(urlRegex).map((part, index) => {
-      if (part.match(urlRegex)) {
-        // 检查是否是图片格式
-        if (imageRegex.test(part)) {
-          return (
-            <Popover
-              content={
-                <div style={{maxWidth: 400, maxHeight: 400}}>
-                  <img
-                    key={index}
-                    src={part}
-                    alt="备忘录里面识别的图片链接"
-                    style={{width: '100%', maxHeight: 400, display: 'block', margin: '10px 0'}}
-                  />
-                </div>
-              }
-            >
-              <a key={index} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
-            </Popover>
-          );
-        }
-        // 检查是否是视频格式
-        if (videoRegex.test(part)) {
-          return (
-            <Popover
-              content={
-                <div style={{maxWidth: 600, maxHeight: 600}}>
-                  <video
-                    key={index}
-                    controls
-                    src={part}
-                    style={{width: '100%', display: 'block', margin: '10px 0'}}
-                  />
-                </div>
-              }
-            >
-              <a key={index} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
-            </Popover>
-          );
-        }
-        // 对其他链接格式使用 <a> 标签
-        return (
-          <a key={index} href={part} target="_blank" rel="noopener noreferrer">
-            {part}
-          </a>
-        );
-      }
-      // 返回普通文本
-      return part;
-    });
-  };
 
   /** 处理待办列表的操作 */
   const listHandleAction = async event => {
@@ -347,18 +291,52 @@ const MemoDrawer = () => {
             icon: <BookOutlined/>,
             content:
               <div
-                className={'gun'}
+                className="gun"
                 style={{height: '70vh', border: '1px solid #ccc', borderRadius: '6px', padding: 9, overflow: 'auto'}}
               >
                 <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px', margin: 0, fontFamily: 'unset'}}>
-                  {linkifyContent(itemObj.content)}
+                  <LinkifyContent   // 会识别链接和视频图片的文本内容/备忘录内容/待办内容
+                    linkImg={(link, index)=>
+                      <Popover
+                        content={
+                          <div style={{maxWidth: 400, maxHeight: 400}}>
+                            <img
+                              key={index}
+                              src={link}
+                              alt="备忘录里面识别的图片链接"
+                              style={{width: '100%', maxHeight: 400, display: 'block', margin: '10px 0'}}
+                            />
+                          </div>
+                        }
+                      >
+                        <a key={index} href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+                      </Popover>
+                    }
+                    linkVideo={(link, index)=>
+                      <Popover
+                        content={
+                          <video
+                            key={index}
+                            controls
+                            src={link}
+                            style={{maxWidth: '100%', maxHeight: 600, margin: '10px 0'}}
+                          />
+                        }
+                      >
+                        <a key={index} href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+                      </Popover>
+                    }
+                  >
+                    {itemObj.content}
+                  </LinkifyContent>
                 </pre>
               </div>,
           })
           seeModel.update({ // 添加按钮分开写是因为 seeModel直接写会没初始化完成 导致没发关闭
             footer:
               <div style={{display: 'flex', justifyContent: 'flex-end', gap: 5, position: 'relative', top: 9}}>
-                <Button onClick={() => actionObj.finish(seeModel.destroy)}>{`${itemObj.completed ? '取消' : ''}完成`}</Button>
+                <Button
+                  onClick={() => actionObj.finish(seeModel.destroy)}>{`${itemObj.completed ? '取消' : ''}完成`}</Button>
                 <Button onClick={() => seeModel.destroy() || setFModalData(itemObj) || setFormModal(true)}>编辑</Button>
                 <Button type="primary" onClick={seeModel.destroy}>关闭</Button>
               </div>
@@ -441,14 +419,14 @@ const MemoDrawer = () => {
     }
     if (actionObj[action]) actionObj[action]()
   }
-  
+
   /**
    * 设置是否展开备忘录内容
    * @author ChenGuangLong
    * @since 2024/7/6 16:52
-  */
+   */
   const setOpenMemoText = v => sxYm(openMemoText = v);
-  
+
   /**
    * 筛选日期
    * @author ChenGuangLong
@@ -493,7 +471,7 @@ const MemoDrawer = () => {
                 <SyncOutlined className='refresh' spin={webLoading} onClick={sxSj}/>
               </Tooltip>
               备忘录
-              
+
               {/* 添加按钮 */}
               <Tooltip title={'添加一个待办'} mouseEnterDelay={1}>
                 <Button
@@ -506,7 +484,7 @@ const MemoDrawer = () => {
                   }}
                 />
               </Tooltip>
-              
+
               <Select                 /*下拉框看《待办状态》*/
                 size='small'
                 value={completed}
@@ -518,7 +496,7 @@ const MemoDrawer = () => {
                   {label: '全部', value: -1}
                 ]}
               />
-              
+
               <SortSelect             /*自己搞的《排序下拉框》*/
                 value={orderBy}
                 onChange={value => sxSj(orderBy = value)/*这不是传参，就是赋值*/}
@@ -556,7 +534,7 @@ const MemoDrawer = () => {
                 />
                 {' '}
               </Tooltip>
-              
+
               {/*收起文本*/}
               <Tooltip title="收起文本，对全部长备忘录的收起">
                 <Button
@@ -566,12 +544,12 @@ const MemoDrawer = () => {
                   onClick={() => setOpenMemoText(-1)}
                 />
               </Tooltip>
-              
+
             </div>
             <Space size={'large'}>
               {getTag(0, "普通")}
               {getTag(6, "工作")}
-              {getTag(3, "紧急","red")}
+              {getTag(3, "紧急", "red")}
               {getTag(1, "循环", "magenta")}
               {getTag(2, "长期", "gold")}
               {getTag(5, "日记", "cyan")}
@@ -643,11 +621,11 @@ const MemoDrawer = () => {
                             </span>
                           }
                         </div>
-                        
+
                         {Boolean(completed) && okText && <div className="ok-text"><b>完成备注：</b>{okText}</div>}
-                        
+
                         {/*————————————————备忘项 的功能按钮和 创建修改时间显示————————————————*/}
-                        <div style={{display: 'flex',marginTop: 10}}>
+                        <div style={{display: 'flex', marginTop: 10}}>
                           {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
                             <Badge count={numberOfRecurrences}
                                    style={{backgroundColor: '#52c41a'}} offset={[-13, -1]}
@@ -658,7 +636,7 @@ const MemoDrawer = () => {
                           <ActionBtn actionName={'finish'}>{!!completed && '取消'}完成</ActionBtn>
                           <ActionBtn actionName={'edit'} show={!completed}>编辑</ActionBtn> {/*完成了就不要显示编辑了*/}
                           <ActionBtn actionName={'delete'}>删除</ActionBtn>
-                          
+
                           <div style={{fontSize: 10, height: 22, lineHeight: '25px', marginLeft: 10}}>
                             创建于:{createTime}
                             {createTime !== updateTime && itemType === 1 ?
@@ -668,7 +646,7 @@ const MemoDrawer = () => {
                             }
                           </div>
                         </div>
-                        
+
                       </div>
                     }
                   />

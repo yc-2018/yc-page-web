@@ -8,13 +8,13 @@ import {
   deleteSearchEngine,
   getSearchEngineList,
   updateSearchEngine
-} from "../../../request/homeRequest";
-import MySearch from '../../../compontets/MySearch';
-import searchStore from '../../../store/SearchStore';
-import {searchData} from '../../../store/NoLoginData.jsx';
-import UserStore from "../../../store/UserStore";
-import CommonStore from "../../../store/CommonStore";
-import "./Search.css"
+} from "@/request/homeRequest";
+import MySearch from '@/compontets/MySearch';
+import searchStore from '@/store/SearchStore';
+import {searchData} from '@/store/NoLoginData';
+import UserStore from "@/store/UserStore";
+import CommonStore from "@/store/CommonStore";
+import "@/pages/Home/Search/Search.css"
 
 const SEARCH_OPTION = 'searchOption'
 const QUICK_SEARCH = 'quickSearch'

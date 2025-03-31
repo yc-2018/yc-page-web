@@ -23,10 +23,10 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.61",
+    "@types/node": "^22.13.14",
     "antd": "^5.16.0",
     "antd-mobile": "^5.34.0",
-    "axios": "^1.7.9",
+    "axios": "1.8.2",
     "dayjs": "^1.11.13",
     "fetch-jsonp": "^1.3.0",
     "markdown-to-jsx": "^7.4.4",
@@ -51,7 +51,7 @@
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
     "typescript-eslint": "^8.18.2",
-    "vite": "^6.0.5"
+    "vite": "6.2.3"
   },
   "resolutions": {
     "dayjs": "1.11.13"
