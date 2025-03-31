@@ -3,17 +3,17 @@ import {
   InfiniteScroll, List, Popup, SwipeAction, Toast,
   Button, Tag, Radio, TextArea, Dialog, PullToRefresh,
   SearchBar, Badge, Ellipsis, CalendarPicker, Dropdown,
-  Space, Input, Modal
+  Space, Input, Modal, ImageViewer
 } from 'antd-mobile'
-
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "../../request/memoRequest";
-import {finishName, columns, leftActions, rightActions, orderByName} from "./data.jsx";
-import {ExclamationCircleFilled} from "@ant-design/icons";
-import {sortingOptions} from "../../store/NoLoginData.jsx";
-import styles from './mobile.module.css'
-import HighlightKeyword from "../../utils/HighlightKeyword.jsx";
 import dayjs from "dayjs";
-import {symbols} from "../MemoDrawer/compontets/FormModal.jsx";
+import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "@/request/memoRequest";
+import {finishName, columns, leftActions, rightActions, orderByName} from "@/pages/Mobile/data";
+import {sortingOptions} from "@/store/NoLoginData";
+import HighlightKeyword from "@/utils/HighlightKeyword";
+import {ExclamationCircleFilled} from "@ant-design/icons";
+import LinkifyContent from "@/compontets/LinkifyContent/index";
+import {symbols} from "@/pages/MemoDrawer/compontets/FormModal";
+import styles from '@/pages/Mobile/mobile.module.css'
 
 
 let updateTime;     // 待办更新时间
@@ -354,9 +354,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         />
       }
       <PullToRefresh
-        pullingText={'用点力拉🤤'}
-        canReleaseText={'忍住，别放开🥺'}
-        completeText={'哎呦，你干嘛🥴'}
+        pullingText="用点力拉🤤"
+        canReleaseText="放开就要刷新了🥺"
+        completeText="哎呦，你干嘛🥴"
         onRefresh={async () => resetList()}
       >
         <List>
@@ -440,7 +440,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         <div style={{height: '42vh', overflowY: 'scroll', border: '1px solid #ccc', borderRadius: 10, marginTop: 5}}>
           {visible?.okText && <div className={styles.okText}><b>完成备注：</b>{visible.okText}</div>}
           <pre style={{whiteSpace: 'pre-wrap', fontSize: 14, fontFamily: 'unset', padding: 8, margin: 0}}>
-            {visible?.content}
+            <LinkifyContent
+              linkImg={link => <a key={link} onClick={() => ImageViewer.show({image: link})}>{link}</a>}
+            >
+              {visible?.content}
+            </LinkifyContent>
           </pre>
         </div>
         

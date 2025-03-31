@@ -1,5 +1,5 @@
 import {Popup} from "antd-mobile";
-import GgComparator from "../../UtilsPage/GgComparator";
+import GgComparator from "@/pages/UtilsPage/GgComparator";
 
 export default ({v: [visible, setVisible]}) => {
 
