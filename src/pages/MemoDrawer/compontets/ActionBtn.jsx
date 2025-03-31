@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './actionBtn.module.css'
+import styles from '@/pages/MemoDrawer/compontets/actionBtn.module.css'
 
 
 /**
