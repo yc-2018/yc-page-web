@@ -3,14 +3,14 @@ import {observer} from 'mobx-react-lite'
 import {
   BookOutlined,
   CaretDownOutlined, ColumnHeightOutlined,
-  PlusOutlined, QuestionCircleFilled,
+  PlusOutlined, QuestionCircleFilled, QuestionCircleOutlined,
   SyncOutlined, VerticalAlignMiddleOutlined
 } from "@ant-design/icons";
 import {
   Drawer, List, Skeleton, Button, Tag,
   Spin, Tooltip, Select, Divider,
   Badge, Space, Dropdown, App, DatePicker,
-  Switch, Popover, Input
+  Switch, Popover, Input, TimePicker
 } from "antd";
 import moment from 'moment';
 
@@ -27,6 +27,8 @@ import ActionBtn from "@/pages/MemoDrawer/compontets/ActionBtn";
 import JWTUtils from "@/utils/JWTUtils";
 import HighlightKeyword from "@/utils/HighlightKeyword";
 import '@/pages/MemoDrawer/MemoDrawer.css'
+import CommonStore from "@/store/CommonStore";
+import {formatMemoTime} from "@/utils/DateUtils";
 
 /** 用于完成或+1时是否主动选择日期 */
 window.ikunSelectDate = undefined
@@ -184,7 +186,7 @@ const MemoDrawer = () => {
 
 
   /** 获取循环备忘录时间列表 */
-  const getLoopMemoTimeList = (id, updateTime) =>
+  const getLoopMemoTimeList = (id) =>
     <Dropdown
       destroyPopupOnHide   // 关闭销毁
       trigger={['click']}  // 点击展开
@@ -215,7 +217,7 @@ const MemoDrawer = () => {
       }
     >
         <span className={'pointer'}>
-          &nbsp;&nbsp;&nbsp;<CaretDownOutlined/>循环:{updateTime}<CaretDownOutlined/>
+          &nbsp;&nbsp;&nbsp;<CaretDownOutlined/>循环<CaretDownOutlined/>
         </span>
     </Dropdown>
 
@@ -234,15 +236,35 @@ const MemoDrawer = () => {
   /** 完成或加1时 可以选择日期 */
   const selectDate = text =>
     <>
-      指定{text}时间：
+      <div>
+        指定{text}时间：
+        <Tooltip title="非必填,不填默认当前时间。填日期不填时间，则时间为空(0)">
+          <QuestionCircleOutlined />
+        </Tooltip>
+      </div>
       <DatePicker
         allowClear
         size="small"
-        style={{width: '90%'}}
-        placeholder="选择日期(不带时间),或默认当前时间"
+        style={{width: '50%'}}
         disabledDate={current => current && (current < moment().subtract(30, 'days') || current > moment())}
-        onChange={(_, dateStr) => window.ikunSelectDate = dateStr ? dateStr + ' 00:00:00' : undefined}
+        onChange={(_, dateStr) => {
+          window.ikunSelectDate = dateStr ? dateStr + ' 00:00:00' : undefined
+          const okTimeElement = window.document.querySelector('#okTimePicker');
+          if (okTimeElement) okTimeElement.style.display = dateStr ? 'inline-block' : 'none'
+        }}
       />
+      <span id="okTimePicker" style={{display: 'none', marginLeft: 5}}>
+        <TimePicker
+          size="small"
+          onChange={(t, ts) => {
+            if (!window.ikunSelectDate) return CommonStore.msg.error('请选择时间');
+            let dateTimeArr = window.ikunSelectDate.split(' ');
+            dateTimeArr[1] = ts ?? '00:00:00';
+            window.ikunSelectDate = dateTimeArr.join(' ');
+          }}
+        />
+      </span>
+
       <div>{text}备注：</div>
       <Input
         allowClear
@@ -252,14 +274,6 @@ const MemoDrawer = () => {
         }}
       />
     </>
-
-  /**
-   * 格式化时间（去0去T）
-   * @param strTime 时间字符串
-   * @author ChenGuangLong
-   * @since 2024/5/29 16:43
-   */
-  const formatTime = strTime => strTime?.replace(' 00:00:00', ' ')
 
   /** 处理待办列表的操作 */
   const listHandleAction = async event => {
@@ -404,7 +418,7 @@ const MemoDrawer = () => {
               const body = {
                 id,
                 numberOfRecurrences: 666,
-                updateTime: window.ikunSelectDate,
+                okTime: window.ikunSelectDate,
                 okText: window.ikunOkText,
               }
               if (await saveOrUpdateToDoItem(body, 'put')) {
@@ -587,6 +601,7 @@ const MemoDrawer = () => {
                            updateTime,
                            createTime,
                            numberOfRecurrences,
+                           okTime,
                            okText,
                          }) => (
               <List.Item key={id} className={completed && 'finish'}>
@@ -627,22 +642,28 @@ const MemoDrawer = () => {
                         {/*————————————————备忘项 的功能按钮和 创建修改时间显示————————————————*/}
                         <div style={{display: 'flex', marginTop: 10}}>
                           {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
-                            <Badge count={numberOfRecurrences}
-                                   style={{backgroundColor: '#52c41a'}} offset={[-13, -1]}
-                                   size={'small'}>
-                              <ActionBtn actionName={'addOne'}>循环+1</ActionBtn>
+                            <Badge
+                              size="small"
+                              offset={[-13, -1]}
+                              count={numberOfRecurrences}
+                              style={{backgroundColor: '#52c41a'}}
+                            >
+                              <ActionBtn actionName="addOne">循环+1</ActionBtn>
                             </Badge>
                           }
-                          <ActionBtn actionName={'finish'}>{!!completed && '取消'}完成</ActionBtn>
-                          <ActionBtn actionName={'edit'} show={!completed}>编辑</ActionBtn> {/*完成了就不要显示编辑了*/}
-                          <ActionBtn actionName={'delete'}>删除</ActionBtn>
+                          <ActionBtn actionName="finish">{!!completed && '取消'}完成</ActionBtn>
+                          <ActionBtn actionName="edit" show={!completed}>编辑</ActionBtn> {/*完成了就不要显示编辑了*/}
+                          <ActionBtn actionName="delete">删除</ActionBtn>
 
                           <div style={{fontSize: 10, height: 22, lineHeight: '25px', marginLeft: 10}}>
-                            创建于:{createTime}
-                            {createTime !== updateTime && itemType === 1 ?
-                              getLoopMemoTimeList(id, formatTime(updateTime))
-                              :
-                              ` ${completed ? '完成' : '修改'}于:` + formatTime(updateTime)
+                            {createTime !== updateTime && itemType === 1 &&
+                              getLoopMemoTimeList(id, formatMemoTime(updateTime))
+                            }
+                            &nbsp;&nbsp;
+                            创建:{createTime}
+                            &nbsp;&nbsp;
+                            {createTime !== updateTime &&
+                              ` ${completed ? `完成:${formatMemoTime(okTime)}` : `修改:${formatMemoTime(updateTime)}`}`
                             }
                           </div>
                         </div>

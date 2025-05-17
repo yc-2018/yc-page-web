@@ -22,7 +22,8 @@ export default defineConfig({
     proxy: {
       // 代理 /api 请求到我后端的服务器
       '/api': {
-        target: 'https://yc556.cn', // 目标服务器地址
+        // target: 'https://yc556.cn', // 目标服务器地址
+        target: 'http://127.0.0.1:8080', // 目标服务器地址
         changeOrigin: true, // 允许跨域
         rewrite: (path: string) => path.replace(/^\/api/, ''), // 重写路径，去掉 /api 前缀
       },

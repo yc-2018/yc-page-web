@@ -1,5 +1,7 @@
 import CommonStore from "../store/CommonStore";
 import myAxios from "./myAxios";
+import {R} from "../interface/R";
+import {LoopMemoTime} from "../interface/LoopMemoTime";
 
 /** 获取一个类型的待办列表 循环的先默认给个30条其他的还是默认10条
  * @param page      第几页
@@ -64,4 +66,20 @@ export async function selectLoopMemoTimeList(id: number, page: number = 1): Prom
     }catch (error) {console.log('待办请求失败:', error)}
 }
 
+/**
+ * 更新循环备忘录
+ * @param loopMemoTime 循环备忘录对象
+ * @since 2025/5/14 2:33
+ */
+export const updateLoopMemoTime =  (loopMemoTime: LoopMemoTime) : Promise<R<LoopMemoTime>> =>
+  myAxios.put('/loopMemoTime', loopMemoTime);
 
+/**
+ * 删除循环备忘录
+ *
+ * @param memoId 备忘录id
+ * @param loopId 循环id
+ * @return {@code R<Boolean> }
+ */
+export const deleteLoopMemoTime = (memoId: number, loopId: number): Promise<R<Boolean>> =>
+  myAxios.delete(`/loopMemoTime/${memoId}/${loopId}`);
