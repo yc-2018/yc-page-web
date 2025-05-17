@@ -39,8 +39,14 @@ export default () => {
     <Collapse accordion>
       {
         blogMenu.map(itemList =>
-          <Collapse.Panel key={itemList[0]} title={<> <img src={`${blogBaseURL}/icon/${icon[itemList[0]]}`}
-                                                           alt="图标"/> {itemList[0]}</>}>
+          <Collapse.Panel
+            key={itemList[0]}
+            title={
+            <>
+              <img src={`${blogBaseURL}/icon/${icon[itemList[0]]}`} alt="图标"/>
+              <span style={{marginLeft: 5}}>{itemList[0]}</span>
+            </>}
+          >
             <Collapse accordion>
               {itemList.slice(1).map(item =>
                 <Collapse.Panel key={item} title={item}>

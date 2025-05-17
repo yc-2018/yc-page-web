@@ -28,6 +28,7 @@ import JWTUtils from "@/utils/JWTUtils";
 import HighlightKeyword from "@/utils/HighlightKeyword";
 import '@/pages/MemoDrawer/MemoDrawer.css'
 import CommonStore from "@/store/CommonStore";
+import {formatMemoTime} from "@/utils/DateUtils";
 
 /** 用于完成或+1时是否主动选择日期 */
 window.ikunSelectDate = undefined
@@ -273,14 +274,6 @@ const MemoDrawer = () => {
         }}
       />
     </>
-
-  /**
-   * 格式化时间（去0去T）
-   * @param strTime 时间字符串
-   * @author ChenGuangLong
-   * @since 2024/5/29 16:43
-   */
-  const formatTime = strTime => strTime?.replace(' 00:00:00', ' ')
 
   /** 处理待办列表的操作 */
   const listHandleAction = async event => {
@@ -664,13 +657,13 @@ const MemoDrawer = () => {
 
                           <div style={{fontSize: 10, height: 22, lineHeight: '25px', marginLeft: 10}}>
                             {createTime !== updateTime && itemType === 1 &&
-                              getLoopMemoTimeList(id, formatTime(updateTime))
+                              getLoopMemoTimeList(id, formatMemoTime(updateTime))
                             }
                             &nbsp;&nbsp;
                             创建:{createTime}
                             &nbsp;&nbsp;
                             {createTime !== updateTime &&
-                              ` ${completed ? `完成:${formatTime(okTime)}` : `修改:${formatTime(updateTime)}`}`
+                              ` ${completed ? `完成:${formatMemoTime(okTime)}` : `修改:${formatMemoTime(updateTime)}`}`
                             }
                           </div>
                         </div>

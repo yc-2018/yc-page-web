@@ -14,9 +14,10 @@ import {ExclamationCircleFilled} from "@ant-design/icons";
 import LinkifyContent from "@/compontets/LinkifyContent/index";
 import {symbols} from "@/pages/MemoDrawer/compontets/FormModal";
 import styles from '@/pages/Mobile/mobile.module.css'
+import {formatMemoTime} from "@/utils/DateUtils";
 
 
-let updateTime;     // 待办更新时间
+let okTime;     // 待办更新时间
 let okText;         // 待办完成或循环时可添加的文字
 let v = {      // 循环装中文变量
   '循环时间页数': 1,
@@ -93,7 +94,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     switch (action.key) {
       // 取消|完成 //////////////////////////////////////////////////////////////
       case 'success':
-        updateTime = undefined  // 重置更新时间
+        okTime = undefined  // 重置更新时间
         okText = undefined      // 重置完成文字
         await Dialog.confirm({
           content: text === '完成' ?
@@ -114,7 +115,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             showLoading('loading', '加载中…')
             const finishResp = await saveOrUpdateToDoItem({
               id,
-              updateTime,
+              okTime,
               completed: text === '完成' ? 1 : 0,
               okText: text === '完成' ? okText : '',
             }, 'put')
@@ -125,7 +126,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                 ...item,
                 completed: text === '完成' ? 1 : 0,
                 okText: text === '完成' ? okText : '',
-                updateTime: updateTime || new Date().toLocaleString()
+                okTime: okTime || new Date().toLocaleString()
               } : item))
               /* 类型变了不属于显示范畴了 */
               completed !== -1 && setData(val => val.filter(item => item.id !== id))
@@ -140,7 +141,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
       // +1 ///////////////////////////////////////////////////////////////////////
       case 'addOne':
-        updateTime = undefined  // 重置更新时间
+        okTime = undefined      // 重置更新时间
         okText = undefined      // 重置完成文字
         await Dialog.confirm({
           content:
@@ -158,13 +159,13 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           ,
           onConfirm: async () => {
             showLoading('loading', '加载中…')
-            const addOneResp = await saveOrUpdateToDoItem({id, updateTime, okText, numberOfRecurrences: 777}, 'put')
+            const addOneResp = await saveOrUpdateToDoItem({id, okTime, okText, numberOfRecurrences: 777}, 'put')
             if (addOneResp) {
               Toast.show({icon: 'success', content: '成功'})
               setData(val => val.map(item => item.id === id ? {
                 ...item,
                 numberOfRecurrences: item.numberOfRecurrences + 1,
-                updateTime: updateTime || new Date().toLocaleString()
+                okTime: okTime || new Date().toLocaleString()
               } : item))
               setVisible(undefined)
             } else Toast.show({icon: 'fail', content: '失败'})
@@ -243,7 +244,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           ...body,
           id: result,
           createTime: new Date().toLocaleString(),
-          updateTime: new Date().toLocaleString(),
+          okTime: new Date().toLocaleString(),
           numberOfRecurrences: 0,
           completed: 0
         }, ...data])
@@ -254,7 +255,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           ...item,
           itemType: body.itemType || item.itemType,
           content: body.content || item.content,
-          updateTime: new Date().toLocaleString()
+          okTime: new Date().toLocaleString()
         } : item))
       else {  // 把类型修改到别的地方去了 就不要它了
         setData(data => data.filter(item => item.id !== body.id))
@@ -407,12 +408,16 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       >
         {/*显示创建时间*/}
         <Tag color='primary' fill='outline' style={{'--border-radius': '6px', '--background-color': '#c5f1f7'}}>
-          创建时间:{visible?.createTime}
+          创建:{visible?.createTime}
         </Tag>
 
         {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
           <Tag color='success' fill='outline' style={{'--background-color': '#c8f7c5', margin: '3px 10px'}}>
-            {` ${visible?.completed ? '完成' : '修改'}于:` + visible?.updateTime?.replace(' 00:00:00', '')}
+            {visible?.completed ?
+              `完成:${formatMemoTime(visible?.okTime)}`
+              :
+              `修改:${formatMemoTime(visible?.updateTime)}`
+            }
           </Tag>
         }
         {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
@@ -585,7 +590,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             <List>
               {loopTime?.map((item, index) =>
                 <List.Item key={item.id}>
-                  {index + 1}：{item.memoDate.replace(' 00:00:00', '')}
+                  {index + 1}：{formatMemoTime(item.memoDate)}
                   {item.loopText && <div className={styles.loopText}>{item.loopText}</div>}
                 </List.Item>
               )}
@@ -608,7 +613,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         onConfirm={date => {
           if (!date) return;
           const dayStr = dayjs(date).format('YYYY-MM-DD');
-          updateTime = `${dayStr} 00:00:00`
+          okTime = `${dayStr} 00:00:00`
           dateRef.current.innerHTML = dayStr
         }}
       />

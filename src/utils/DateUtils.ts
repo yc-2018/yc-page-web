@@ -67,3 +67,11 @@ export default class DateUtils {
     return num < 10 ? `0${num}` : `${num}`
   }
 }
+
+/**
+ * 格式化备忘录时间
+ *
+ * @author Yc
+ * @since 2025/5/17 3:38
+ */
+export const formatMemoTime = (strTime?: string) => strTime?.replace(' 00:00:00', ' ')
