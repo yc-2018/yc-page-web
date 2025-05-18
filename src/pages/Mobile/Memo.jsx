@@ -3,7 +3,7 @@ import {
   InfiniteScroll, List, Popup, SwipeAction, Toast,
   Button, Tag, Radio, TextArea, Dialog, PullToRefresh,
   SearchBar, Badge, Ellipsis, CalendarPicker, Dropdown,
-  Space, Input, Modal, ImageViewer
+  Space, Input, Modal, ImageViewer, Picker
 } from 'antd-mobile'
 import dayjs from "dayjs";
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "@/request/memoRequest";
@@ -45,6 +45,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [editVisible, setEditVisible] = useState(undefined);          // 编辑弹窗的显示和隐藏(新增时值是“新增"，编辑时值是item对象，关闭时值是false
   const [dateVisible, setDateVisible] = useState(false);     // 日期弹窗的显示和隐藏
   const [loopTime, setLoopTime] = useState(undefined)                 // 循环时间弹窗的显示和隐藏(用数据来控制)
+  const [hhMmVisible, setHhMmVisible] = useState(false);     // 时分弹窗的显示和隐藏
+  const [loopItemVisible, setLoopItemVisible] = useState(null);       // 备忘循环项 弹窗的显示和隐藏 有对象就是显示然有没有好有
   const [editDateVisible, setEditDateVisible] = useState(false);     // 编辑框日期弹窗的显示和隐藏
 
   const [content, setContent] = useState('')                   // 表单内容
@@ -99,8 +101,15 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         await Dialog.confirm({
           content: text === '完成' ?
             <div>
-              完成时间为现在或
-              <a ref={dateRef} onClick={() => setDateVisible(true)}>选择日期</a>
+              <div>完成时间:</div>
+              <a ref={dateRef} onClick={() => setDateVisible(true)}>现在</a>
+              <a
+                id="timing"
+                onClick={() => setHhMmVisible(true)}
+                style={{marginLeft: 9, display: 'none'}}
+              >
+                (可选)选择时间
+              </a>
               <div style={{marginTop: 9}}>加一备注：</div>
               <Input
                 clearable
@@ -146,8 +155,15 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         await Dialog.confirm({
           content:
             <div>
-              循环时间为现在或
-              <a ref={dateRef} onClick={() => setDateVisible(true)}>选择日期</a>
+              <div>循环时间:</div>
+              <a ref={dateRef} onClick={() => setDateVisible(true)}>现在</a>
+              <a
+                id="timing"
+                onClick={() => setHhMmVisible(true)}
+                style={{marginLeft: 9, display: 'none'}}
+              >
+                (可选)选择时间
+              </a>
               <div style={{marginTop: 9}}>加一备注：</div>
               <Input
                 clearable
@@ -414,9 +430,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
           <Tag color='success' fill='outline' style={{'--background-color': '#c8f7c5', margin: '3px 10px'}}>
             {visible?.completed ?
-              `完成:${formatMemoTime(visible?.okTime)}`
+              <span onClick={() => Toast.show({content: `修改:${visible.updateTime}`})}>
+                完成:{formatMemoTime(visible.okTime)}
+              </span>
               :
-              `修改:${formatMemoTime(visible?.updateTime)}`
+              `修改:${formatMemoTime(visible.updateTime)}`
             }
           </Tag>
         }
@@ -439,12 +457,12 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             }}
             style={{'--background-color': '#fcecd8', '--border-radius': '6px'}}
           >
-            {`循环次数: ${visible?.numberOfRecurrences}▼`}
+            {`循环次数: ${visible.numberOfRecurrences}▼`}
           </Tag>
         }
         <div style={{height: '42vh', overflowY: 'scroll', border: '1px solid #ccc', borderRadius: 10, marginTop: 5}}>
           {visible?.okText && <div className={styles.okText}><b>完成备注：</b>{visible.okText}</div>}
-          <pre style={{whiteSpace: 'pre-wrap', fontSize: 14, fontFamily: 'unset', padding: 8, margin: 0}}>
+          <pre style={{whiteSpace: 'pre-wrap', wordWrap: 'break-word', fontSize: 14, fontFamily: 'unset', padding: 8, margin: 0}}>
             <LinkifyContent
               linkImg={link => <a key={link} onClick={() => ImageViewer.show({image: link})}>{link}</a>}
             >
@@ -458,7 +476,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             <Button
               block
               color='primary'
-              onClick={() => onAction({key: 'edit', id: visible?.id})}
+              onClick={() => onAction({key: 'edit', id: visible.id})}
             >
               修改
             </Button>
@@ -477,7 +495,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             <Button
               block
               style={{background: '#f6b234', border: 'none', color: '#fff'}}
-              onClick={() => onAction({key: 'success', text: '取消完成', id: visible?.id})}
+              onClick={() => onAction({key: 'success', text: '取消完成', id: visible.id})}
             >
               取消完成
             </Button>
@@ -497,7 +515,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             <Button
               block
               style={{background: '#a934f6', border: 'none', color: '#fff'}}
-              onClick={() => onAction({key: 'addOne', id: visible?.id})}
+              onClick={() => onAction({key: 'addOne', id: visible.id})}
             >
               +1
             </Button>
@@ -589,7 +607,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           <>
             <List>
               {loopTime?.map((item, index) =>
-                <List.Item key={item.id}>
+                <List.Item key={item.id} onClick={() => setLoopItemVisible(item)}>
                   {index + 1}：{formatMemoTime(item.memoDate)}
                   {item.loopText && <div className={styles.loopText}>{item.loopText}</div>}
                 </List.Item>
@@ -597,6 +615,21 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             </List>
             <InfiniteScroll loadMore={showLoopTime} hasMore={Boolean(v['循环次数继续加载'])}/>
           </>
+        }
+      </Popup>
+
+      <Popup      /* 循环项操作的弹出层 *********/
+        visible={Boolean(loopItemVisible)}
+        onMaskClick={() => setLoopItemVisible(null)}
+        bodyStyle={{height: '20vh'}}
+      >
+        {Boolean(loopItemVisible) &&
+          <div style={{padding: 10, display: 'flex', flexWrap: 'wrap', gap: 10}}>
+            <Button block>编辑备注</Button>
+            <Button block color="danger">删除此项</Button>
+            <div>创建时间:{loopItemVisible.createTime}</div>
+            {loopItemVisible.updateTime && <div>更新时间:{loopItemVisible.updateTime}</div>}
+          </div>
         }
       </Popup>
 
@@ -613,8 +646,13 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         onConfirm={date => {
           if (!date) return;
           const dayStr = dayjs(date).format('YYYY-MM-DD');
-          okTime = `${dayStr} 00:00:00`
+          if (okTime) {
+            okTime = `${dayStr} ${okTime.split(' ')[1]}`
+          }else okTime = `${dayStr} 00:00:00`;
           dateRef.current.innerHTML = dayStr
+          const element = window.document.querySelector('#timing');
+          if (element) element.style.display = 'inline-block'
+
         }}
       />
       
@@ -634,7 +672,33 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           insertAtCursor(textToInsert)
         }}
       />
-      
+
+      {/* 时分选择器 */}
+      <Picker
+        popupStyle={{zIndex: 99999}}
+        defaultValue={[dayjs().format('HH'), dayjs().format('mm')]}
+        columns={[
+          // 小时列（0-23）
+          Array.from({ length: 24 }, (_, i) => ({
+            label: i.toString().padStart(2, '0'),
+            value: i.toString().padStart(2, '0'),
+          })),
+          // 分钟列（0-59）
+          Array.from({ length: 60 }, (_, i) => ({
+            label: i.toString().padStart(2, '0'),
+            value: i.toString().padStart(2, '0'),
+          }))
+        ]}
+        visible={hhMmVisible}
+        onClose={() => setHhMmVisible(false)}
+        onConfirm={v => {
+          setHhMmVisible(false)
+          if (!okTime) return Toast.show({icon: 'fail', content: '未选择日期'});
+          const time = ` ${v[0]}:${v[1]}:00`
+          okTime = okTime.split(' ')[0] + time
+          window.document.querySelector('#timing').innerText = `${v[0]}:${v[1]}`
+        }}
+      />
     </>
   )
 }
