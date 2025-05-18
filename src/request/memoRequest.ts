@@ -71,8 +71,10 @@ export async function selectLoopMemoTimeList(id: number, page: number = 1): Prom
  * @param loopMemoTime 循环备忘录对象
  * @since 2025/5/14 2:33
  */
-export const updateLoopMemoTime =  (loopMemoTime: LoopMemoTime) : Promise<R<LoopMemoTime>> =>
-  myAxios.put('/loopMemoTime', loopMemoTime);
+export const updateLoopMemoTime = async (loopMemoTime: LoopMemoTime): Promise<R<LoopMemoTime>> => {
+    const promise = await myAxios.put('/loopMemoTime', loopMemoTime);
+    return promise.data
+}
 
 /**
  * 删除循环备忘录
@@ -81,5 +83,7 @@ export const updateLoopMemoTime =  (loopMemoTime: LoopMemoTime) : Promise<R<Loop
  * @param loopId 循环id
  * @return {@code R<Boolean> }
  */
-export const deleteLoopMemoTime = (memoId: number, loopId: number): Promise<R<Boolean>> =>
-  myAxios.delete(`/loopMemoTime/${memoId}/${loopId}`);
+export const deleteLoopMemoTime = async (memoId: number, loopId: number): Promise<R<Boolean>> => {
+    const promise = await myAxios.delete(`/loopMemoTime/${memoId}/${loopId}`);
+    return promise.data
+}

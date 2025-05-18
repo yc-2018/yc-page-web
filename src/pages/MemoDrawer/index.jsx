@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {observer} from 'mobx-react-lite'
 import {
   BookOutlined,
-  CaretDownOutlined, ColumnHeightOutlined,
+  CaretDownOutlined, ColumnHeightOutlined, ExclamationCircleOutlined,
   PlusOutlined, QuestionCircleFilled, QuestionCircleOutlined,
   SyncOutlined, VerticalAlignMiddleOutlined
 } from "@ant-design/icons";
@@ -22,7 +22,13 @@ import {sortingOptions, tagNameMapper} from "@/store/NoLoginData";
 import SortSelect from "@/compontets/SortSelect";
 import SearchBox from "@/compontets/common/SearchBox";
 import LinkifyContent from "@/compontets/LinkifyContent/index";
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "@/request/memoRequest.js"
+import {
+  deleteLoopMemoTime,
+  delToDoItem,
+  getToDoItems,
+  saveOrUpdateToDoItem,
+  selectLoopMemoTimeList, updateLoopMemoTime
+} from "@/request/memoRequest.js"
 import ActionBtn from "@/pages/MemoDrawer/compontets/ActionBtn";
 import JWTUtils from "@/utils/JWTUtils";
 import HighlightKeyword from "@/utils/HighlightKeyword";
@@ -43,6 +49,7 @@ let openMemoText = 0;       //  控制全部展开备忘录内容 1展开 非1�
 let dates = [];              // 未处理的筛选日期
 let filterDate = '';         // 筛选日期 格式： 开始时间戳/结束时间戳/0：修改时间 1：创建时间
 let filterDateType = 1;     // 筛选日期类型 0：修改时间 1：创建时间
+let editLoopMemoText = '';   // 循环备忘项备注修改
 
 
 const MemoDrawer = () => {
@@ -184,6 +191,51 @@ const MemoDrawer = () => {
       </Tag>
     </Badge>
 
+  /**
+   * 删除循环备忘子项
+   * @author Yc
+   * @since 2025/5/18 18:23
+   */
+  const deleteLoopMemo = (momoId,id) =>
+    modal.confirm({
+      title: '确定要删除吗？',
+      icon: <ExclamationCircleOutlined/>,
+      content: '删除后不可恢复',
+      okText: '确定',
+      cancelText: '取消',
+      onOk: async () => {
+        const resp = await deleteLoopMemoTime(momoId,id)
+        if (!resp.success) return CommonStore.msg.error("删除失败")
+        CommonStore.msg.success("删除成功")
+        // const loopTimes = loopTimeList.filter(item => item.id !== id);
+        // setLoopTimeList(loopTimes);
+        const memos = list.map(memo => {
+          if (memo.id === momoId) memo.numberOfRecurrences -= 1
+          return memo
+        });
+        setList(memos);
+      }
+    })
+
+  const updateLoopMemo = (memoId, id, loopText) =>{
+    editLoopMemoText = loopText
+    modal.confirm({
+      title: '修改循环备忘子项备注',
+      icon: <ExclamationCircleOutlined/>,
+      content:
+        <Input
+          placeholder="请输入备注"
+          defaultValue={editLoopMemoText}
+          onChange={e => editLoopMemoText = e.target.value}
+        />,
+      onOk: async () => {
+        const resp = await updateLoopMemoTime({memoId, id, loopText: editLoopMemoText})
+        if (resp.success) CommonStore.msg.success("修改成功")
+        else CommonStore.msg.error("修改失败")
+      }
+    })
+  }
+
 
   /** 获取循环备忘录时间列表 */
   const getLoopMemoTimeList = (id) =>
@@ -201,12 +253,33 @@ const MemoDrawer = () => {
         }
       }}
       dropdownRender={() =>
-        <div className={`ant-dropdown-menu dropdown-menu gun`}>
-          {loopTimeList?.map(({id, memoDate, loopText}, index) =>
-            <div key={id} className="memoLoopListItem">
-              {index + 1}：{memoDate?.replace(' 00:00:00', ' ')}
-              {loopText && <div className="loop-text">{loopText}</div>}
-            </div>
+        <div className="ant-dropdown-menu dropdown-menu gun">
+          {loopTimeList?.map(({id, memoId, memoDate, loopText, createTime, updateTime}, index) =>
+            <Popover
+              content={
+                <div>
+                  <Space>
+                    <Button onClick={() => updateLoopMemo(memoId, id, loopText)}>
+                      修改备注
+                    </Button>
+                    <Button onClick={() => deleteLoopMemo(memoId, id)}>
+                      删除此项
+                    </Button>
+                  </Space>
+                  <div style={{color: '#999'}}>
+                    <div>创建时间：{createTime}</div>
+                    {updateTime && <div>更新时间：{updateTime}</div>}
+                  </div>
+                </div>
+              }
+              title="操作"
+              trigger="click"
+            >
+              <div key={id} className="memoLoopListItem" style={{cursor: 'pointer'}}>
+                {index + 1}：{formatMemoTime(memoDate)}
+                {loopText && <div className="loop-text">{loopText}</div>}
+              </div>
+            </Popover>
           )}
           {/* 尾部 */
             loopTimeWebLoading ? <><SyncOutlined spin/> 正在加载中</> :
