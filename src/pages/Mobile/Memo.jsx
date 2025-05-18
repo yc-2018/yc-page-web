@@ -46,6 +46,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [dateVisible, setDateVisible] = useState(false);     // 日期弹窗的显示和隐藏
   const [loopTime, setLoopTime] = useState(undefined)                 // 循环时间弹窗的显示和隐藏(用数据来控制)
   const [hhMmVisible, setHhMmVisible] = useState(false);     // 时分弹窗的显示和隐藏
+  const [loopItemVisible, setLoopItemVisible] = useState(null);       // 备忘循环项 弹窗的显示和隐藏 有对象就是显示然有没有好有
   const [editDateVisible, setEditDateVisible] = useState(false);     // 编辑框日期弹窗的显示和隐藏
 
   const [content, setContent] = useState('')                   // 表单内容
@@ -606,7 +607,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           <>
             <List>
               {loopTime?.map((item, index) =>
-                <List.Item key={item.id}>
+                <List.Item key={item.id} onClick={() => setLoopItemVisible(item)}>
                   {index + 1}：{formatMemoTime(item.memoDate)}
                   {item.loopText && <div className={styles.loopText}>{item.loopText}</div>}
                 </List.Item>
@@ -614,6 +615,21 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             </List>
             <InfiniteScroll loadMore={showLoopTime} hasMore={Boolean(v['循环次数继续加载'])}/>
           </>
+        }
+      </Popup>
+
+      <Popup      /* 循环项操作的弹出层 *********/
+        visible={Boolean(loopItemVisible)}
+        onMaskClick={() => setLoopItemVisible(null)}
+        bodyStyle={{height: '20vh'}}
+      >
+        {Boolean(loopItemVisible) &&
+          <div style={{padding: 10, display: 'flex', flexWrap: 'wrap', gap: 10}}>
+            <Button block>编辑备注</Button>
+            <Button block color="danger">删除此项</Button>
+            <div>创建时间:{loopItemVisible.createTime}</div>
+            {loopItemVisible.updateTime && <div>更新时间:{loopItemVisible.updateTime}</div>}
+          </div>
         }
       </Popup>
 
