@@ -6,7 +6,14 @@ import {
   Space, Input, Modal, ImageViewer, Picker
 } from 'antd-mobile'
 import dayjs from "dayjs";
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem, selectLoopMemoTimeList} from "@/request/memoRequest";
+import {
+  deleteLoopMemoTime,
+  delToDoItem,
+  getToDoItems,
+  saveOrUpdateToDoItem,
+  selectLoopMemoTimeList,
+  updateLoopMemoTime
+} from "@/request/memoRequest";
 import {finishName, columns, leftActions, rightActions, orderByName} from "@/pages/Mobile/data";
 import {sortingOptions} from "@/store/NoLoginData";
 import HighlightKeyword from "@/utils/HighlightKeyword";
@@ -227,13 +234,12 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     }
   }
 
-  /*打开添加弹窗*/
+  /** 打开添加弹窗 */
   const openAdd = () => {
     setEditVisible('新增');
     setContent('');
     setItemType(type);
     window.setTimeout(() => textRef.current?.focus(), 100) // 点击添加按钮后自动获得焦点,但是没在页面上所以要延迟一点点
-
   }
 
   /** 编辑或新增的提交表单 */
@@ -296,6 +302,65 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     v['循环次数继续加载'] = resp?.current < resp?.pages
     v['翻页加载中'] = false
   }
+
+  /**
+   * 编辑循环备忘子项备注
+   *
+   * @author Yc
+   * @since 2025/5/20 1:15
+   */
+  const editLoopMemoItem = async (loop) => {
+    okText = loop.loopText
+    await Dialog.confirm({
+      content:
+          <div>
+            <div style={{marginTop: 9}}>备注：</div>
+            <Input
+                type="text"
+                defaultValue={okText}
+                placeholder="请输入循环备注,空为不修改"
+                onChange={v => okText = v}
+            />
+          </div>
+      ,
+      onConfirm: async () => {
+        const resp = await updateLoopMemoTime({...loop, loopText: okText})
+        if (resp.success) {
+          Toast.show({icon: 'success', content: '成功'})
+          setLoopTime(val => val.map(item => item.id === loop.id ? {
+            ...item,
+            loopText: okText,
+            updateTime: new Date().toLocaleString()
+          } : item))
+        } else Toast.show({icon: 'fail', content: '失败'})
+      }
+    })
+  }
+
+  /**
+   * 删除循环备忘子项
+   * @author Yc
+   * @since 2025/5/20 1:09
+   */
+  const delLoopMemoItem = async (memoId, id) => {
+    await Dialog.confirm({
+      content:
+          <div style={{textAlign: 'center'}}>
+            <ExclamationCircleFilled style={{color: 'red'}}/>
+            确定删除该条循环吗
+          </div>,
+      onConfirm: async () => {
+        const result = await deleteLoopMemoTime(memoId, id)
+        if (result.success) {
+          Toast.show({icon: 'success', content: '删除成功'})
+          // 刷新列表
+          setLoopTime(val => val.filter(item => item.id !== id))
+          setLoopItemVisible(null)
+        } else Toast.show({icon: 'fail', content: '删除失败'})
+      },
+    })
+  }
+
   
   /** 在光标位置后面插入文本的函数 */
   const insertAtCursor = (textToInsert) => {
@@ -625,8 +690,12 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       >
         {Boolean(loopItemVisible) &&
           <div style={{padding: 10, display: 'flex', flexWrap: 'wrap', gap: 10}}>
-            <Button block>编辑备注</Button>
-            <Button block color="danger">删除此项</Button>
+            <Button block onClick={() => editLoopMemoItem(loopItemVisible)}>
+              编辑备注
+            </Button>
+            <Button block color="danger" onClick={() => delLoopMemoItem(loopItemVisible.memoId, loopItemVisible.id)}>
+              删除此项
+            </Button>
             <div>创建时间:{loopItemVisible.createTime}</div>
             {loopItemVisible.updateTime && <div>更新时间:{loopItemVisible.updateTime}</div>}
           </div>
