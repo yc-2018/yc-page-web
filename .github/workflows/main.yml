@@ -1,0 +1,73 @@
+name: 构建和部署
+
+# 当代码被推送到 main 分支时触发此工作流程
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # 设置 Node.js 环境，版本为 18
+    - name: 设置 Nodejs版本
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    # 安装项目依赖
+    - name: 安装依赖
+      run: yarn install
+
+    # 执行打包脚本
+    - name: 打包构建
+      run: yarn run build
+
+
+    # 先设置时区并获取东八区当前时间
+    - name: 获取北京时间
+      id: beijing_time
+      run: echo "BEIJING_TIME=$(TZ=Asia/Shanghai date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
+
+
+    # 推送构建结果到 build 分支
+    - name: 推送构建结果到build分支
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "Yc Action"
+        git checkout --orphan temp-build
+        git rm -rf .
+        rm -rf node_modules                       # 移除 node_modules
+        # find . -name "*s.map" -exec rm -f {} \;   # 移除所有js.map和css.map文件
+        mv dist/* .
+        git add -f *
+        git commit -m "yc自动打包 - ${{ env.BEIJING_TIME }}"
+        git push origin HEAD:build -f
+
+    # 请求脚本并获取返回值
+    - name: 请求服务器更新前端并获取结果
+      run: |
+        echo "SCRIPT_OUTPUT=$(curl -s ${{ secrets.URL }})" >> $GITHUB_ENV
+
+      # 构建成功后发送邮件
+    - name: 成功后发送电子邮件通知我
+      if: success() # 这会确保只在成功时发送邮件
+      uses: dawidd6/action-send-mail@v2
+      with: # 以下是发送邮件需要提供的一些配置信息
+        server_address: smtp.qq.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: 打包成功 - ${{ env.SCRIPT_OUTPUT }}
+        to: ${{ secrets.TO_EMAIL }}
+        from: GitHub Actions
+        body: 构建成功。构建时间：${{ env.BEIJING_TIME }}。脚本输出：${{ env.SCRIPT_OUTPUT }}
+
+#    # 推送构建结果到 Gitee
+#    - name: 强制推送构建结果到Gitee
+#      run: |
+#        git remote add gitee https://yc556:${{ secrets.GITEE_TOKEN }}@gitee.com/yc556/yc556.git
+#        git push gitee HEAD:build -f
