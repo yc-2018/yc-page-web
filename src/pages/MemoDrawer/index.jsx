@@ -319,7 +319,7 @@ const MemoDrawer = () => {
         allowClear
         size="small"
         style={{width: '50%'}}
-        disabledDate={current => current && (current < moment().subtract(30, 'days') || current > moment())}
+        disabledDate={current => current && (current < moment().subtract(60, 'days') || current > moment())}
         onChange={(_, dateStr) => {
           window.ikunSelectDate = dateStr ? dateStr + ' 00:00:00' : undefined
           const okTimeElement = window.document.querySelector('#okTimePicker');

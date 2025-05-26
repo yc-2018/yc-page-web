@@ -706,7 +706,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       {/*日期选择器（antd实验性组件）完成或+1 用 */}
       <CalendarPicker
         popupStyle={{zIndex: 99999}}
-        min={new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)}    // 前7天
+        min={new Date(Date.now() - 59 * 24 * 60 * 60 * 1000)}    // 前59天
         max={new Date()}                                              // 今天
         visible={dateVisible}
         selectionMode='single'
