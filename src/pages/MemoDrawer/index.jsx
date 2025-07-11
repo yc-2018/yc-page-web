@@ -391,6 +391,7 @@ const MemoDrawer = () => {
                               key={index}
                               src={link}
                               alt="备忘录里面识别的图片链接"
+                              referrerPolicy="no-referrer"
                               style={{width: '100%', maxHeight: 400, display: 'block', margin: '10px 0'}}
                             />
                           </div>
