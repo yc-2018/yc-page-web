@@ -1,4 +1,4 @@
-import {Segmented, Flex, Button, Modal, Form, Input, Alert, Divider, Dropdown, App} from 'antd'
+import {Segmented, Flex, Button, Modal, Form, Input, Alert, Divider, Dropdown, App, Avatar} from 'antd'
 import React, {useState, useEffect} from 'react';
 import {observer} from 'mobx-react-lite'
 import {ThunderboltOutlined, PlusOutlined} from '@ant-design/icons';
@@ -66,17 +66,18 @@ function Search() {
   }, [editSearchData])
 
   // 点击搜索按钮 或回车触发的事件 及快速搜索事件
-  const onSearch = quickSearchUrl => {
-    if (!searchValue && isNull) {
+  const onSearch = (quickSearchUrl, searchTerm) => {
+    searchTerm = searchTerm ?? searchValue
+    if (!searchTerm && isNull) {
       isNull = false
       setTimeout(() => isNull = true, 3000)
       return msg.info('检测到搜索框内容为空哦~ 真想为空搜索三秒内再次点击');
     }
     if (quickSearchUrl)   // 点击的是快速搜索
-      window.open(quickSearchUrl.replace('@@@', searchValue ?? ''), '_blank')
+      window.open(quickSearchUrl.replace('@@@', searchTerm ?? ''), '_blank')
     else {    // 不是快速搜索  通过搜索引擎名字找到他对应的URL=》这就要求名字在一个用户中是唯一的
       const engineUrl = searchOptions.find(option => option.name === searchStore.searchEngines).engineUrl;
-      window.open(engineUrl.replace('@@@', searchValue ?? ''), '_blank');
+      window.open(engineUrl.replace('@@@', searchTerm ?? ''), '_blank');
     }
   }
 
@@ -174,8 +175,13 @@ function Search() {
           <Dropdown menu={{items, onClick}} trigger={['contextMenu']} onContextMenu={onContextMenu} key={item.id}>
             <Button
               className={"searchButton"}
-              icon={<ThunderboltOutlined/>}
               onClick={() => onSearch(item.engineUrl)}
+              icon={
+                <Avatar
+                  size={20}
+                  icon={<ThunderboltOutlined/>}
+                  src={`https://api.qqsuu.cn/api/dm-get?url=${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]}`}
+                />}
               style={{
                 backgroundImage: searchStore.quickSearchIcon ? `url(https://api.qqsuu.cn/api/dm-get?url=${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]})` : undefined,
                 backgroundColor: `rgba(255, 255, 255, ${(searchStore.searchIconTransparency * 0.01)})`,
@@ -194,7 +200,7 @@ function Search() {
 
 
       {/* ————————————————————————————————————搜索框———————————————————————————————————— */}
-      <MySearch onSearch={() => onSearch()} setSearchValue={setSearchValue}/>
+      <MySearch onSearch={onSearch} setSearchValue={setSearchValue}/>
 
 
       <br/>
