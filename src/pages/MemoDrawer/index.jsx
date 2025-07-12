@@ -720,6 +720,7 @@ const MemoDrawer = () => {
                               size="small"
                               offset={[-13, -1]}
                               count={numberOfRecurrences}
+                              overflowCount={9999}
                               style={{backgroundColor: '#52c41a'}}
                             >
                               <ActionBtn actionName="addOne">循环+1</ActionBtn>
