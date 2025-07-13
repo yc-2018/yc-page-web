@@ -14,6 +14,7 @@ import searchStore from '@/store/SearchStore';
 import {searchData} from '@/store/NoLoginData';
 import UserStore from "@/store/UserStore";
 import CommonStore from "@/store/CommonStore";
+import {tryGetFavicon, tryGetFavicon1} from "@/utils/urlUtils";
 import "@/pages/Home/Search/Search.css"
 
 const SEARCH_OPTION = 'searchOption'
@@ -179,11 +180,17 @@ function Search() {
               icon={
                 <Avatar
                   size={20}
-                  icon={<ThunderboltOutlined/>}
-                  src={`https://api.qqsuu.cn/api/dm-get?url=${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]}`}
-                />}
+                  icon={
+                    <Avatar
+                      size={20}
+                      src={item.iconUrl ?? tryGetFavicon1(item.engineUrl)}
+                      icon={<ThunderboltOutlined/>}
+                    />}
+                  src={tryGetFavicon(item.engineUrl)}
+                />
+              }
               style={{
-                backgroundImage: searchStore.quickSearchIcon ? `url(https://api.qqsuu.cn/api/dm-get?url=${item.engineUrl.match(/^(?:https?:\/\/)?([^\/]+)/)[1]})` : undefined,
+                backgroundImage: searchStore.quickSearchIcon && `url(${tryGetFavicon1(item.engineUrl)})`,
                 backgroundColor: `rgba(255, 255, 255, ${(searchStore.searchIconTransparency * 0.01)})`,
               }}
             >
