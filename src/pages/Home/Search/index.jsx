@@ -189,10 +189,6 @@ function Search() {
                   src={tryGetFavicon(item.engineUrl)}
                 />
               }
-              style={{
-                backgroundImage: searchStore.quickSearchIcon && `url(${tryGetFavicon1(item.engineUrl)})`,
-                backgroundColor: `rgba(255, 255, 255, ${(searchStore.searchIconTransparency * 0.01)})`,
-              }}
             >
               {item.name}
             </Button>

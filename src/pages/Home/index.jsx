@@ -9,7 +9,6 @@ import {
   SyncOutlined,
   DownloadOutlined,
   PoweroffOutlined,
-  SettingOutlined,
   CloudUploadOutlined,
   CloudDownloadOutlined,
   QuestionCircleTwoTone,
@@ -109,6 +108,9 @@ function Home() {
           {/*搜索框*/}
           <Search/>
 
+          
+          
+          
           {/*显示备忘录***********************************************************/}
           <FloatButton
             onClick={() => showOrNot.setMemoDrawerShow(true)}
@@ -119,8 +121,9 @@ function Home() {
 
           {/*背景***********************************************************/}
           <FloatButton.Group
-            style={{right: 80}}
+            style={{insetInlineEnd: 24 + 56}}
             trigger="hover"
+            tooltip={{title: '背景图', placement: 'bottom'}}
             icon={<PictureTwoTone/>}
             className='buttonOpacity'
           >
@@ -130,7 +133,7 @@ function Home() {
                   {/*获取服务器背景 */}
                   <FloatButton
                     icon={<CloudDownloadOutlined/>}
-                    tooltip="获取云端背景"
+                    tooltip={{title: '从服务器获取背景', placement: 'left'}}
                     className='buttonOpacity'
                     onClick={async () => {
                       const {backgroundUrl} = await getPageInfo()
@@ -142,7 +145,7 @@ function Home() {
                   {/* 上传背景到服务器 */}
                   <FloatButton
                     icon={<CloudUploadOutlined/>}
-                    tooltip="上传背景到云端"
+                    tooltip={{title: '上传背景到服务器', placement: 'left'}}
                     className='buttonOpacity'
                     onClick={() => uploadInfo({backgroundUrl: getBgImage()})}
                   />
@@ -153,7 +156,7 @@ function Home() {
             {/* 下载背景 */}
             <FloatButton
               icon={<DownloadOutlined/>}
-              tooltip="下载当前背景"
+              tooltip={{title: '下载背景图片', placement: 'left'}}
               className='buttonOpacity'
               onClick={async () => {
                 CommonStore.setLoading(true, '开始缓存该背景...');
@@ -184,20 +187,24 @@ function Home() {
             <FloatButton
               onClick={() => reImages("bing")}
               icon={<SyncOutlined/>}
-              tooltip={<div style={{textAlign: 'center'}} onClick={event => event.stopPropagation()}>
-                <div>默认bing随机壁纸当背景</div>
-                <Button onClick={() => reImages("风景")}>(慢)风景背景</Button>
-                <Button onClick={() => reImages("漫画")}>漫画背景</Button>
-                <Input placeholder="自定义背景链接，回车加载" onPressEnter={event => {
-                  if (/^(http|https):\/\/.+/.test(event.target.value))
-                    setBgImage(event.target.value, '正在设置中...') // 设置背景
-                  else msg.error('请输入正确的链接');
-                }}/>
-              </div>}
+              tooltip={{
+                placement: 'left',
+                title:
+                  <div style={{textAlign: 'center'}} onClick={event => event.stopPropagation()}>
+                    <div>默认bing随机壁纸当背景</div>
+                    <Button onClick={() => reImages("风景")}>(慢)风景背景</Button>
+                    <Button onClick={() => reImages("漫画")}>漫画背景</Button>
+                    <Input placeholder="自定义背景链接，回车加载" onPressEnter={event => {
+                      if (/^(http|https):\/\/.+/.test(event.target.value))
+                        setBgImage(event.target.value, '正在设置中...') // 设置背景
+                      else msg.error('请输入正确的链接');
+                    }}/>
+                  </div>,
+              }}
               className='buttonOpacity'
             />
           </FloatButton.Group>
-
+          
           {jwt ?
             (
               /*用户登录后选项***********************************************************/
@@ -205,18 +212,18 @@ function Home() {
                 trigger="hover"
                 icon={  // 头像
                   <Avatar size={30}
-                          style={{backgroundColor: '#FFFFFF72',position:'relative',left:'-5px'}}
+                          style={{backgroundColor: '#FFFFFF72', position: 'relative', left: '-5px'}}
                           src={JWTUtils.getAvatar()}
                           icon={<UserOutlined style={{color: 'blue'}}/>}
                   />
                 }
-                tooltip={"用户:" + JWTUtils.getName()}
-                style={{right: 135, opacity: .5}}
+                tooltip={{title: "用户:" + JWTUtils.getName(), placement: 'bottom'}}
+                style={{insetInlineEnd: 24 + 56 + 56, opacity: .5}}
                 className='buttonOpacity'
               >
                 <FloatButton
                   icon={<PoweroffOutlined/>}
-                  tooltip="退出登录"
+                  tooltip={{title: '退出登录', placement: 'left'}}
                   className='buttonOpacity'
                   onClick={() => {
                     UserStore.clearJwt()
@@ -225,7 +232,7 @@ function Home() {
                 />
                 <FloatButton
                   icon={<EditOutlined />}
-                  tooltip="修改信息"
+                  tooltip={{title: '修改信息', placement: 'left'}}
                   className='buttonOpacity'
                   onClick={() => UserStore.setInfoModal(true)}
                 />
@@ -237,7 +244,7 @@ function Home() {
               <FloatButton
                 icon={<UserOutlined/>}
                 tooltip="用户登录"
-                style={{right: 135}}
+                style={{insetInlineEnd: 24 + 56 + 56}}
                 className='buttonOpacity'
                 onClick={() => {
                   UserStore.setOpenModal(true);
@@ -247,63 +254,23 @@ function Home() {
           }
           
           {/*页面设置***********************************************************/}
-          <FloatButton.Group
+          <FloatButton
             trigger="hover"
             icon={<LayoutTwoTone />}
-            tooltip="页面设置"
-            style={{right: 190, opacity: .5}}
+            tooltip={{title: '页面设置'}}
+            style={{insetInlineEnd: 24 + 56 + 56 + 56, opacity: .5}}
             className='buttonOpacity'
+            onClick={() => msg.info('没什么好设置的')}
           >
-            <FloatButton
-              icon={<SettingOutlined/>}
-              tooltip={
-                <div onClick={event => event.stopPropagation()}>
-                  <div style={{textAlign: 'center'}}>页面样式配置</div>
-                  
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={SearchStore.quickSearchIcon}
-                      onChange={e => SearchStore.setQuickSearchIcon(e.target.checked)}
-                    />
-                    快速搜索是否显示图标
-                  </label>
-                  <div style={{textAlign: 'center',margin:'5px 20px'}}>
-                    快速搜索图标的透明度
-                  <Slider
-                    min={10}
-                    max={90}
-                    value={SearchStore.searchIconTransparency}
-                    disabled={!SearchStore.quickSearchIcon}
-                    onChange={value => SearchStore.setSearchIconTransparency(value)}
-                    styles={{
-                    track: {
-                      background: '#FFF',
-                    },
-                    tracks: {
-                      background: "#a46e6e",
-                    },
-                    rail:{
-                      background: "#7b7b7b",
-                    },
-                  }}/>
-                  </div>
-                  
-                </div>
-              }
-              className='buttonOpacity'
-              onClick={() => {
-                msg.info('未完待续...');
-              }}
-            />
-          </FloatButton.Group>
+          
+          </FloatButton>
 
           {/*跳转到帮助***********************************************************/}
           <FloatButton
             onClick={() => navigate('/help')}
             icon={<QuestionCircleTwoTone/>}
             tooltip="帮助"
-            style={{right: 245}}
+            style={{insetInlineEnd: 24 + 56 + 56 + 56 + 56}}
             className='buttonOpacity'
           />
 
@@ -312,7 +279,7 @@ function Home() {
             onClick={() => navigate('/blog')}
             icon={<ReadOutlined style={{color: '#1677ff', fontSize: 20}}/>}
             tooltip="博客"
-            style={{right: 300}}
+            style={{insetInlineEnd: 24 + 56 + 56 + 56 + 56 + 56}}
             className='buttonOpacity'
           />
 
@@ -334,7 +301,7 @@ function Home() {
             onClick={() => window.open(toolsBaseURL, '_blank')}
             onContextMenu={e => e.preventDefault() || navigate('/seeTime')}
             icon={<ProductOutlined style={{color: '#1677ff', fontSize: 20}}/>}
-            style={{right: 355}}
+            style={{insetInlineEnd: 24 + 56 + 56 + 56 + 56 + 56 + 56}}
             className='buttonOpacity'
           />
           </Popover>

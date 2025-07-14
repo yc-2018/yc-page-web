@@ -2,9 +2,6 @@ import { makeAutoObservable } from 'mobx'
 
 class SearchStore {
   searchEngines: string = localStorage.getItem('searchEngines') || 'Bing'
-  quickSearchIcon: any = localStorage.getItem('quickSearchIcon') ?? true
-  _searchIconTransparency:any = localStorage.getItem('searchIconTransparency') ?? 88
-
   
     //构造函数
     constructor() {
@@ -15,21 +12,6 @@ class SearchStore {
     setSearchEngines(searchEngines:any) {
       localStorage.setItem('searchEngines',searchEngines)
       this.searchEngines = searchEngines;
-    }
-
-    setQuickSearchIcon(quickSearchIcon:boolean) {
-      localStorage.setItem('quickSearchIcon', quickSearchIcon ? 'ikun' : '')
-      this.quickSearchIcon = quickSearchIcon;
-    }
-
-    setSearchIconTransparency(searchIconTransparency:number) {
-      localStorage.setItem('searchIconTransparency', searchIconTransparency.toString())
-      this._searchIconTransparency = searchIconTransparency;
-    }
-
-    get searchIconTransparency(){
-      // 转数字再输出
-      return parseInt(this._searchIconTransparency)
     }
 
     // get print() {
