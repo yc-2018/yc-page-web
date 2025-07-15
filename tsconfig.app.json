@@ -33,6 +33,7 @@
     /*允许 TypeScript 直接导入 JavaScript 文件*/
     "allowJs": true,
     //"checkJs": true // 可选：检查 JavaScript 文件的类型
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src"]
 }

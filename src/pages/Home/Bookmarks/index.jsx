@@ -152,7 +152,7 @@ export default function Bookmarks() {
                     <MyDnd.Item key={group.id} id={group.id} styles={{padding: '1px 0'}}
                                 drag={<span style={{color: '#00000030'}}>☰</span>}>
                         <Dropdown // 下拉菜单
-                            dropdownRender={() =>
+                            popupRender={() =>
                                 <div className={'ant-dropdown-menu'}>
                                     <BookmarksItem bookmarkItems={getSortBookmarks(group)}
                                                    setModal={setModal}

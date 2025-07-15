@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import axios from "axios";
 import {observer} from 'mobx-react-lite'
-import {Avatar, Button, FloatButton, Input, Popover, Slider} from "antd";
+import {Avatar, Button, FloatButton, Input, Popover} from "antd";
 import {
   PictureTwoTone,
   SnippetsTwoTone,
@@ -21,13 +21,13 @@ import JWTUtils from "@/utils/JWTUtils"
 import Filing from "@/components/Filing";
 import showOrNot from '@/store/ShowOrNot';
 import UserStore from "@/store/UserStore";
-import SearchStore from "@/store/SearchStore";
 import CommonStore from "@/store/CommonStore";
 import {reImagesUrl, uploadInfo, getPageInfo} from "@/request/homeRequest";
 import Bookmarks from "@/pages/Home/Bookmarks/index";
 import {getToolsList, toolsBaseURL} from "@/request/toolsRequest";
-import Search from "@/pages/Home/Search/index";
+import HomeSearch from "./HomeSearch";
 import "@/pages/Home/Home.css"
+import Search from "@/pages/Home/Search";
 
 
 function Home() {
@@ -107,6 +107,7 @@ function Home() {
           <br/>
           {/*搜索框*/}
           <Search/>
+          {/*<HomeSearch/>*/}
 
           
           

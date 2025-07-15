@@ -1,9 +1,8 @@
-import React, {useState, createRef, useEffect} from 'react';
+import {useState, createRef, useEffect, FC} from 'react';
 import {AutoComplete, Input} from 'antd';
-import searchStore from '../../store/SearchStore';
+import searchStore from '@/store/SearchStore';
 import {SendOutlined} from '@ant-design/icons';
-
-import {getThinkList} from "../../request/homeRequest";
+import {getThinkList} from "@/request/homeRequest";
 import "./MySearch.css"
 
 const {Search} = Input;
@@ -14,11 +13,8 @@ interface ChildComponentProps {
   setSearchValue: (value: any) => void;
 }
 
-const MySearch: React.FC<ChildComponentProps> = ({onSearch, setSearchValue}) => {
+const MySearch: FC<ChildComponentProps> = ({onSearch, setSearchValue}) => {
   const [anotherOptions, setAnotherOptions] = useState<{ value: any }[]>([]);
-  const inputRef = createRef<any>();  // 搜索框ref
-
-  useEffect(() => inputRef.current.focus(), [])
 
   //存搜索框的值
   let searchValue:any = undefined;
@@ -48,7 +44,6 @@ const MySearch: React.FC<ChildComponentProps> = ({onSearch, setSearchValue}) => 
       value={searchValue}                 //输入框的值
       options={anotherOptions}            //联想列表
       style={{width: 500, margin: '5px 0 15px 0'}}
-      //onSelect={v=>console.log(v,"#########")}                                    //选中联想列表的回调
       onChange={v => {
         setSearchValue(v);
         searchValue = v;
@@ -58,7 +53,7 @@ const MySearch: React.FC<ChildComponentProps> = ({onSearch, setSearchValue}) => 
     >
       <Search
         size="large"
-        ref={inputRef}
+        autoFocus
         onSearch={() => onSearch()}                                                    //点击搜索按钮的回调
         placeholder="求知若渴，解惑在斯。"
         enterButton={[searchStore.searchEngines, <SendOutlined key={'搜索按钮'}/>]}      //搜索按钮
