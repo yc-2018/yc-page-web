@@ -5,6 +5,7 @@
     "lib": ["ES2023"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "typ嗯es": ["node"], // 确保包含 node 类型
 
     /* Bundler mode */
     "moduleResolution": "bundler",

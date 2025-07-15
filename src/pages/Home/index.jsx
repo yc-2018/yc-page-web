@@ -18,7 +18,7 @@ import {
 import {useNavigate} from 'react-router-dom'
 
 import JWTUtils from "@/utils/JWTUtils"
-import Filing from "@/compontets/Filing";
+import Filing from "@/components/Filing";
 import showOrNot from '@/store/ShowOrNot';
 import UserStore from "@/store/UserStore";
 import SearchStore from "@/store/SearchStore";

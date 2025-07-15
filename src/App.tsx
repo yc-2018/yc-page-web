@@ -6,13 +6,13 @@ import './App.css';
 import routes from "./routes";
 import CommonStore from "./store/CommonStore";
 import {observer} from "mobx-react-lite";
-import isMobile from "./utils/winUtils";
-import LoaderWhite from "./compontets/common/LoaderWhite";
+import isMobile from "@/utils/winUtils";
+import LoaderWhite from "@/components/common/LoaderWhite";
 
 // 动态导入组件
 const Head = lazy(() => import('./pages/Head'));
-const LoginModal = lazy(() => import('./compontets/LoginModal'));
-const InfoModal = lazy(() => import('./compontets/InfoModal'));
+const LoginModal = lazy(() => import('@/components/LoginModal'));
+const InfoModal = lazy(() => import('@/components/InfoModal'));
 const MemoDrawer = lazy(() => import('./pages/MemoDrawer'));
 const EnglishDrawer = lazy(() => import('./pages/EnglishDrawer'));
 
@@ -25,7 +25,7 @@ export default observer(() => {
 
   // 设置页面标题
   useEffect(() => {
-    document.title = element.props.match.route.title
+    document.title = element?.props.match.route.title
   }, [element]);
 
   return (

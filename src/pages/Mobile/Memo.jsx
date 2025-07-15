@@ -18,7 +18,7 @@ import {finishName, columns, leftActions, rightActions, orderByName} from "@/pag
 import {sortingOptions} from "@/store/NoLoginData";
 import HighlightKeyword from "@/utils/HighlightKeyword";
 import {ExclamationCircleFilled} from "@ant-design/icons";
-import LinkifyContent from "@/compontets/LinkifyContent/index";
+import LinkifyContent from "@/components/LinkifyContent/index";
 import {symbols} from "@/pages/MemoDrawer/compontets/FormModal";
 import styles from '@/pages/Mobile/mobile.module.css'
 import {formatMemoTime} from "@/utils/DateUtils";

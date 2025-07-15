@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {Collapse, DotLoading} from 'antd-mobile'
 
-import Md from "@/compontets/Md";
+import Md from "@/components/Md";
 import {blogMenu} from "@/store/NoLoginData.jsx";
 import {blogBaseURL, getBlogItemIconObj, getBlogList, getBlogMd} from "@/request/blogRequest";
-import LoaderWhite from "@/compontets/common/LoaderWhite";
+import LoaderWhite from "@/components/common/LoaderWhite";
 import CommonStore from "@/store/CommonStore";
 
 let menu = blogMenu;  // 菜单项

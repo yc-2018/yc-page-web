@@ -3,7 +3,7 @@ import axios from 'axios';
 import CommonStore from "../store/CommonStore";
 
 import UserStore from '../store/UserStore';
-import JWTUtils from "../utils/JWTUtils";
+import JWTUtils from "@/utils/JWTUtils";
 
 export const baseURL = 'https://yc556.cn/api'; // 基础URL
 

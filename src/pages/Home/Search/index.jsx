@@ -9,7 +9,7 @@ import {
   getSearchEngineList,
   updateSearchEngine
 } from "@/request/homeRequest";
-import MySearch from '@/compontets/MySearch';
+import MySearch from '@/components/MySearch';
 import searchStore from '@/store/SearchStore';
 import {searchData} from '@/store/NoLoginData';
 import UserStore from "@/store/UserStore";

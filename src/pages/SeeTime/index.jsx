@@ -5,7 +5,7 @@ import {saveSeeTime} from "../../request/otherRequest";
 import JWTUtils from "../../utils/JWTUtils";
 import DateUtils from "../../utils/DateUtils";
 import {observer} from "mobx-react-lite";
-import MyEmpty from "../../compontets/common/MyEmpty";
+import MyEmpty from "@/components/common/MyEmpty";
 import SeeTimeChart from "./SeeTimeChart";
 import dayjs from "dayjs";
 import {LeftOutlined} from "@ant-design/icons";

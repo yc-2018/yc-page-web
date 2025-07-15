@@ -9,12 +9,12 @@ import {
 import showOrNot from "../../store/ShowOrNot";
 import UserStore from "../../store/UserStore";
 import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/memoRequest";
-import MyEmpty from "../../compontets/common/MyEmpty";
+import MyEmpty from "@/components/common/MyEmpty";
 import {englishSortingOptions, tagList} from "../../store/NoLoginData.jsx";
-import MyButton from "../../compontets/MyButton";
+import MyButton from "@/components/MyButton";
 import CommonStore from "../../store/CommonStore";
-import SortSelect from "../../compontets/SortSelect";
-import LoaderWhite from "../../compontets/common/LoaderWhite";
+import SortSelect from "@/components/SortSelect";
+import LoaderWhite from "@/components/common/LoaderWhite";
 import JWTUtils from "../../utils/JWTUtils";
 
 

@@ -22,6 +22,14 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
+    /* 添加以下配置 */
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["node"], // 确保包含 node 类型
+
+
     /*允许 TypeScript 直接导入 JavaScript 文件*/
     "allowJs": true,
     //"checkJs": true // 可选：检查 JavaScript 文件的类型

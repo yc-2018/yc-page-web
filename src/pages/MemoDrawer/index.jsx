@@ -12,16 +12,15 @@ import {
   Badge, Space, Dropdown, App, DatePicker,
   Switch, Popover, Input, TimePicker
 } from "antd";
-import moment from 'moment';
 
 import showOrNot from "@/store/ShowOrNot";
 import UserStore from "@/store/UserStore";
 import FormModal from "@/pages/MemoDrawer/compontets/FormModal";
 import ShowOrNot from "@/store/ShowOrNot";
 import {sortingOptions, tagNameMapper} from "@/store/NoLoginData";
-import SortSelect from "@/compontets/SortSelect";
-import SearchBox from "@/compontets/common/SearchBox";
-import LinkifyContent from "@/compontets/LinkifyContent/index";
+import SortSelect from "@/components/SortSelect";
+import SearchBox from "@/components/common/SearchBox";
+import LinkifyContent from "@/components/LinkifyContent/index";
 import {
   deleteLoopMemoTime,
   delToDoItem,
@@ -35,6 +34,7 @@ import HighlightKeyword from "@/utils/HighlightKeyword";
 import '@/pages/MemoDrawer/MemoDrawer.css'
 import CommonStore from "@/store/CommonStore";
 import {formatMemoTime} from "@/utils/DateUtils";
+import dayjs from "dayjs";
 
 /** 用于完成或+1时是否主动选择日期 */
 window.ikunSelectDate = undefined
@@ -240,7 +240,6 @@ const MemoDrawer = () => {
   /** 获取循环备忘录时间列表 */
   const getLoopMemoTimeList = (id) =>
     <Dropdown
-      destroyPopupOnHide   // 关闭销毁
       trigger={['click']}  // 点击展开
       onOpenChange={async open => {
         if (open) {        // 展开时加载数据
@@ -252,7 +251,7 @@ const MemoDrawer = () => {
           setLoopTimeWebLoading(false)
         }
       }}
-      dropdownRender={() =>
+      popupRender={() =>
         <div className="ant-dropdown-menu dropdown-menu gun">
           {loopTimeList?.map(({id, memoId, memoDate, loopText, createTime, updateTime}, index) =>
             <Popover
@@ -319,7 +318,8 @@ const MemoDrawer = () => {
         allowClear
         size="small"
         style={{width: '50%'}}
-        disabledDate={current => current && (current < moment().subtract(60, 'days') || current > moment())}
+        minDate={dayjs().subtract(60, 'days')}
+        maxDate={dayjs()}
         onChange={(_, dateStr) => {
           window.ikunSelectDate = dateStr ? dateStr + ' 00:00:00' : undefined
           const okTimeElement = window.document.querySelector('#okTimePicker');

@@ -1,6 +1,6 @@
-import React, {lazy} from "react";
-import isMobile from "../utils/winUtils.js";
-import NoPage from "../compontets/404/NoPage.jsx";
+import {lazy} from "react";
+import isMobile from "@/utils/winUtils";
+import NoPage from "@/components/404/NoPage";
 
 const Home = lazy(() => import('../pages/Home'));
 const Help = lazy(() => import('../pages/Help'));

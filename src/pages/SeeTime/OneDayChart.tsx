@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import React from "react";
 import DateUtils from "../../utils/DateUtils";
 import {SeeData} from "./interface";
-import MyEmpty from "../../compontets/common/MyEmpty";
+import MyEmpty from "@/components/common/MyEmpty";
 
 let seeTimeRange: number[] = [];  // 显示的时间范围
 

@@ -2,8 +2,8 @@ import {useState} from "react";
 import {Button, Image} from "antd";
 
 import {dragSort} from "@/request/homeRequest";
-import MyDnd from "@/compontets/MyDnd";
-import ContextMenu from "@/compontets/ContextMenu";
+import MyDnd from "@/components/MyDnd";
+import ContextMenu from "@/components/ContextMenu";
 import {getBaseUrl, tryGetFavicon1} from "@/utils/urlUtils";
 import CommonStore from "@/store/CommonStore";
 import action from "./action.jsx";

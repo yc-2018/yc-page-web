@@ -3,7 +3,7 @@ import {Form, Input, Button, Toast, Selector} from 'antd-mobile'
 import {login} from "../../request/commonRequest";
 import styles from './mobile.module.css'
 import {getWelcomePic, loginTime} from "./data.jsx";
-import Filing from "../../compontets/Filing";
+import Filing from "@/components/Filing";
 
 export default () => {
     const formRef = useRef()

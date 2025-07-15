@@ -3,7 +3,7 @@ import React from "react";
 import {Popover, Space} from "antd";
 import dayjs from "dayjs";
 import {aWeek, typeMapperCn} from "./mapper";
-import MyEmpty from "../../compontets/common/MyEmpty";
+import MyEmpty from "@/components/common/MyEmpty";
 import DateUtils from "../../utils/DateUtils";
 
 interface MultiDayChartProps {
