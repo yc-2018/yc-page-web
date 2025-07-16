@@ -13,7 +13,7 @@ import {
   getMemos,
   selectLoopMemoItemList,
   updateLoopMemoItem, updateMemo
-} from "@/request/memoRequest";
+} from "@/request/memoApi";
 import {finishName, columns, leftActions, rightActions, orderByName} from "@/pages/Mobile/data";
 import {sortingOptions} from "@/store/NoLoginData";
 import HighlightKeyword from "@/utils/HighlightKeyword";

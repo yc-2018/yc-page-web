@@ -27,7 +27,7 @@ import {
   deleteMemo,
   getMemos,
   selectLoopMemoItemList, updateLoopMemoItem, updateMemo
-} from "@/request/memoRequest.js"
+} from "@/request/memoApi"
 import ActionBtn from "@/pages/MemoDrawer/compontets/ActionBtn";
 import JWTUtils from "@/utils/JWTUtils";
 import HighlightKeyword from "@/utils/HighlightKeyword";
@@ -50,7 +50,7 @@ let dates = [];              // 未处理的筛选日期
 let filterDate = '';         // 筛选日期 格式： 开始时间戳/结束时间戳/0：修改时间 1：创建时间
 let filterDateType = 1;     // 筛选日期类型 0：修改时间 1：创建时间
 let editLoopMemoText = '';   // 循环备忘项备注修改
-
+const {msg} = CommonStore
 
 const MemoDrawer = () => {
   const [initLoading, setInitLoading] = useState(true);       // 初始化加载
@@ -205,10 +205,9 @@ const MemoDrawer = () => {
       cancelText: '取消',
       onOk: async () => {
         const resp = await deleteLoopMemoItem(momoId,id)
-        if (!resp.success) return CommonStore.msg.error("删除失败")
-        CommonStore.msg.success("删除成功")
-        // const loopTimes = loopTimeList.filter(item => item.id !== id);
-        // setLoopTimeList(loopTimes);
+        if (!resp.success) return msg.error("删除失败")
+        msg.success("删除成功")
+
         const memos = list.map(memo => {
           if (memo.id === momoId) memo.numberOfRecurrences -= 1
           return memo
@@ -230,8 +229,8 @@ const MemoDrawer = () => {
         />,
       onOk: async () => {
         const resp = await updateLoopMemoItem({memoId, id, loopText: editLoopMemoText})
-        if (resp.success) CommonStore.msg.success("修改成功")
-        else CommonStore.msg.error("修改失败")
+        if (resp.success) msg.success("修改成功")
+        else msg.error("修改失败")
       }
     })
   }
@@ -484,11 +483,12 @@ const MemoDrawer = () => {
           content: selectDate('加一'),
           maskClosable: true,         // 点遮罩可以关闭
           onOk: async () => {
-            await addLoopMemoItem({
+            const result = await addLoopMemoItem({
               memoId: id,
               memoDate: window.ikunSelectDate,
               loopText: window.ikunOkText,
-            })
+            });
+            if (result.success) msg.success('成功+1')
             sxSj()
           }
         })

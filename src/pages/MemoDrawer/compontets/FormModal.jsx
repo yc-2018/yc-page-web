@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {QuestionCircleTwoTone, SmileTwoTone} from "@ant-design/icons";
 import {Modal, Input, Radio, Button, DatePicker, Popover, Row, Col, App} from 'antd';
-import {addMemo, updateMemo} from "@/request/memoRequest";
+import {addMemo, updateMemo} from "@/request/memoApi";
 import modalStyle from '@/pages/MemoDrawer/compontets/formModal.module.css'
 import CommonStore from "@/store/CommonStore";
 
