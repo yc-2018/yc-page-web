@@ -7,12 +7,12 @@ import {
 } from 'antd-mobile'
 import dayjs from "dayjs";
 import {
-  deleteLoopMemoTime,
-  delToDoItem,
-  getToDoItems,
-  saveOrUpdateToDoItem,
-  selectLoopMemoTimeList,
-  updateLoopMemoTime
+  addLoopMemoItem, addMemo,
+  deleteLoopMemoItem,
+  deleteMemo,
+  getMemos,
+  selectLoopMemoItemList,
+  updateLoopMemoItem, updateMemo
 } from "@/request/memoRequest";
 import {finishName, columns, leftActions, rightActions, orderByName} from "@/pages/Mobile/data";
 import {sortingOptions} from "@/store/NoLoginData";
@@ -76,7 +76,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
   /** 加载更多 */
   const loadMore = async () => {
-    const append = await getToDoItems({type, page, completed, orderBy, keyword});
+    const append = await getMemos({type, page, completed, orderBy, keyword});
     if (!append) return showLoading('fail', '获取数据失败') || setHasMore(false)
     setData(val => [...val, ...append.data.records])
     setHasMore(data.length < append.data.total)
@@ -84,7 +84,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
     total = append.data.total
     // 给父组件传值：未完成总数s
-    setIncompleteCounts(v => ({...v, ...append?.map.groupToDoItemsCounts, [type]: total}))
+    setIncompleteCounts(v => ({...v, ...append?.map.groupMemosCounts, [type]: total}))
   }
 
   /** 改变总数 给父组件传值：未完成总数s */
@@ -129,12 +129,12 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             '确定取消完成吗？',
           onConfirm: async () => {
             showLoading('loading', '加载中…')
-            const finishResp = await saveOrUpdateToDoItem({
+            const finishResp = await updateMemo({
               id,
               okTime,
               completed: text === '完成' ? 1 : 0,
               okText: text === '完成' ? okText : '',
-            }, 'put')
+            })
             if (finishResp) {
               Toast.show({icon: 'success', content: '成功'})
               /*全部的还是要显示在列表上*/
@@ -182,7 +182,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           ,
           onConfirm: async () => {
             showLoading('loading', '加载中…')
-            const addOneResp = await saveOrUpdateToDoItem({id, okTime, okText, numberOfRecurrences: 777}, 'put')
+            const addOneResp = await addLoopMemoItem({memoId: id, memoDate: okTime, loopText: okText})
             if (addOneResp) {
               Toast.show({icon: 'success', content: '成功'})
               setData(val => val.map(item => item.id === id ? {
@@ -218,7 +218,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               <ExclamationCircleFilled style={{color: 'red'}}/> 确定删除该条备忘吗
             </div>,
           onConfirm: async () => {
-            const deleteResponse = await delToDoItem(id)
+            const deleteResponse = await deleteMemo(id)
             if (deleteResponse) {
               Toast.show({icon: 'success', content: '删除成功'})
               // 刷新列表
@@ -254,7 +254,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     if (!body.content && !body.itemType) return Toast.show({icon: 'fail', content: '没有变化'}) && setEditVisible(false)
     body.id = editVisible?.id;
     showLoading('loading', '处理中…')
-    let result = await saveOrUpdateToDoItem(body, editVisible === '新增' ? 'post' : "put");
+    let result = await (editVisible === '新增' ? addMemo : updateMemo)(body);
     if (result) {
       showLoading('success', '成功')
       setEditVisible(false);
@@ -291,7 +291,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const showLoopTime = async () => {
     if (v['翻页加载中'] || !v['循环次数继续加载']) return
     v['翻页加载中'] = true
-    const resp = await selectLoopMemoTimeList(v['循环备忘主键'], v['循环时间页数']);
+    const resp = await selectLoopMemoItemList(v['循环备忘主键'], v['循环时间页数']);
     loading.current?.close()    // 关闭加载蒙版
 
     if (resp?.records?.length > 0) {
@@ -324,7 +324,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           </div>
       ,
       onConfirm: async () => {
-        const resp = await updateLoopMemoTime({...loop, loopText: okText})
+        const resp = await updateLoopMemoItem({...loop, loopText: okText})
         if (resp.success) {
           Toast.show({icon: 'success', content: '成功'})
           setLoopTime(val => val.map(item => item.id === loop.id ? {
@@ -350,7 +350,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             确定删除该条循环吗
           </div>,
       onConfirm: async () => {
-        const result = await deleteLoopMemoTime(memoId, id)
+        const result = await deleteLoopMemoItem(memoId, id)
         if (result.success) {
           Toast.show({icon: 'success', content: '删除成功'})
           // 刷新列表

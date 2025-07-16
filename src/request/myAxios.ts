@@ -1,11 +1,52 @@
-// myAxios.js
 import axios from 'axios';
-import CommonStore from "../store/CommonStore";
+import CommonStore from "@/store/CommonStore";
 
-import UserStore from '../store/UserStore';
+import UserStore from '@/store/UserStore';
 import JWTUtils from "@/utils/JWTUtils";
+import R from "@/interface/R";
 
 export const baseURL = 'https://yc556.cn/api'; // 基础URL
+const {msg} = CommonStore
+
+export const myGet = async <T>(url: string): Promise<R<T>> => {
+  try {
+    const axiosResponse = await myAxios.get(url);
+    return axiosResponse?.data ?? {};
+  } catch (error) {
+    console.log(`%c${url}的get请求失败:`, 'color: red;font-size: 20px;', error)
+    return {success: false, code: 0, msg: 'get请求失败'}
+  }
+};
+
+export const myPost = async <T>(url: string, data?: any): Promise<R<T>> => {
+  try {
+    const axiosResponse = await myAxios.post(url, data);
+    return axiosResponse?.data ?? {};
+  }catch (error) {
+    console.log(`%c${url}的post请求失败:`, 'color: red;font-size: 20px;', error)
+    return {success: false, code: 0, msg: 'post请求失败'}
+  }
+};
+
+export const myPut = async <T>(url: string, data?: any): Promise<R<T>> => {
+  try {
+    const axiosResponse = await myAxios({url, method: 'put', data});
+    return axiosResponse?.data ?? {};
+  } catch (error) {
+    console.log(`%c${url}的put请求失败:`, 'color: red;font-size: 20px;', error)
+    return {success: false, code: 0, msg: 'put请求失败'}
+  }
+};
+
+export const myDelete = async <T>(url: string, data?: any): Promise<R<T>> => {
+  try {
+    const axiosResponse = await myAxios({url, method: 'delete', data});
+    return axiosResponse?.data ?? {};
+  } catch (error) {
+    console.log(`%c${url}的delete请求失败:`, 'color: red;font-size: 20px;', error)
+    return {success: false, code: 0, msg: 'delete请求失败'}
+  }
+};
 
 const myAxios = axios.create({
     baseURL, // 设置基础 URL
@@ -33,7 +74,7 @@ myAxios.interceptors.request.use(
 /** 添加myAxios《响应》拦截器 */
 myAxios.interceptors.response.use(
     response => {
-        if(response.data.code !== 1) CommonStore.msg.error(response.data.msg);
+        if(response.data.code !== 1) msg.error(response.data.msg);
         // 如果响应正常，直接返回响应
         return response;
     },
@@ -54,7 +95,7 @@ myAxios.interceptors.response.use(
             // 网络错误或其他错误
             err = '网络错误，请检查您的网络连接'
         }
-        CommonStore.msg.error(err);
+        msg.error(err);
         // 继续传递错误，以便可以进行其他处理
         return {code: 0, msg: error.message};
     }

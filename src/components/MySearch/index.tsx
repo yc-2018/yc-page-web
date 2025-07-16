@@ -1,4 +1,4 @@
-import {useState, createRef, useEffect, FC} from 'react';
+import {useState, FC} from 'react';
 import {AutoComplete, Input} from 'antd';
 import searchStore from '@/store/SearchStore';
 import {SendOutlined} from '@ant-design/icons';
@@ -49,7 +49,6 @@ const MySearch: FC<ChildComponentProps> = ({onSearch, setSearchValue}) => {
         searchValue = v;
       }}                         //输入框的值改变的回调
       onSearch={autoSearch}    //输入框值改变时联想列表的回调
-      size="large"
     >
       <Search
         size="large"

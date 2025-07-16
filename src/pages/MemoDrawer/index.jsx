@@ -22,11 +22,11 @@ import SortSelect from "@/components/SortSelect";
 import SearchBox from "@/components/common/SearchBox";
 import LinkifyContent from "@/components/LinkifyContent/index";
 import {
-  deleteLoopMemoTime,
-  delToDoItem,
-  getToDoItems,
-  saveOrUpdateToDoItem,
-  selectLoopMemoTimeList, updateLoopMemoTime
+  addLoopMemoItem,
+  deleteLoopMemoItem,
+  deleteMemo,
+  getMemos,
+  selectLoopMemoItemList, updateLoopMemoItem, updateMemo
 } from "@/request/memoRequest.js"
 import ActionBtn from "@/pages/MemoDrawer/compontets/ActionBtn";
 import JWTUtils from "@/utils/JWTUtils";
@@ -87,7 +87,7 @@ const MemoDrawer = () => {
       setPage(1)              // 待办翻页重置
       total = -1;                   // 待办总数重置
       // 使用 axios 发起请求 获取又一次初始化待办列表
-      const resp = await getToDoItems({type, page: 1, completed, orderBy, keyword, dateRange: filterDate});
+      const resp = await getMemos({type, page: 1, completed, orderBy, keyword, dateRange: filterDate});
       if (!(resp?.code === 1)) {
         setInitLoading(false);
         setWebLoading(false);
@@ -97,9 +97,9 @@ const MemoDrawer = () => {
       setData(data.records);
       setList(data.records);
 
-      if (completed === 0) setUnFinishCounts(map.groupToDoItemsCounts)
+      if (completed === 0) setUnFinishCounts(map.groupMemosCounts)
       // 如果刚打开时有未完成的紧急备忘 而且抽屉没打开 就弹出提醒
-      if (initLoading && !showOrNot.memoDrawerShow && map.groupToDoItemsCounts['3'] > 0 && total === -1) {
+      if (initLoading && !showOrNot.memoDrawerShow && map.groupMemosCounts['3'] > 0 && total === -1) {
         const key = `open${Date.now()}`;
         notification.info({
           message: '有未完成的紧急备忘',
@@ -144,7 +144,7 @@ const MemoDrawer = () => {
     );
 
     // 使用 axios 发起请求
-    const {data: respData} = await getToDoItems({
+    const {data: respData} = await getMemos({
       type,
       page: page + 1,
       completed,
@@ -204,7 +204,7 @@ const MemoDrawer = () => {
       okText: '确定',
       cancelText: '取消',
       onOk: async () => {
-        const resp = await deleteLoopMemoTime(momoId,id)
+        const resp = await deleteLoopMemoItem(momoId,id)
         if (!resp.success) return CommonStore.msg.error("删除失败")
         CommonStore.msg.success("删除成功")
         // const loopTimes = loopTimeList.filter(item => item.id !== id);
@@ -229,7 +229,7 @@ const MemoDrawer = () => {
           onChange={e => editLoopMemoText = e.target.value}
         />,
       onOk: async () => {
-        const resp = await updateLoopMemoTime({memoId, id, loopText: editLoopMemoText})
+        const resp = await updateLoopMemoItem({memoId, id, loopText: editLoopMemoText})
         if (resp.success) CommonStore.msg.success("修改成功")
         else CommonStore.msg.error("修改失败")
       }
@@ -296,7 +296,7 @@ const MemoDrawer = () => {
   // 获取循环备忘录时间列表
   const getLoopMemoTimeData = async id => {
     setLoopTimeWebLoading(true)
-    const resp = await selectLoopMemoTimeList(id, loopTimePage);
+    const resp = await selectLoopMemoItemList(id, loopTimePage);
     setLoopTimeWebLoading(false)
     if (resp?.records?.length > 0) {
       setLoopTimeList(item => ([...item, ...resp.records]))
@@ -443,21 +443,17 @@ const MemoDrawer = () => {
           title: `确定${itemObj.completed ? '取消' : ''}完成?`,
           icon: <QuestionCircleFilled/>,
           content: itemObj.completed ? '' : selectDate('完成'),
-          onOk() {
-            return new Promise(async (resolve, reject) => {
-              const finishResponse = await saveOrUpdateToDoItem({
-                id,
-                completed: itemObj.completed ? 0 : 1,
-                updateTime: window.ikunSelectDate,
-                okText: itemObj.completed ? '' : window.ikunOkText,
-              }, 'put')
-              if (finishResponse) {
-                if (func) func()    // 执行传入方法（关闭查看窗口)
-                sxSj()
-                return resolve()    // 成功,关闭按钮加载 关闭窗口
-              }
-              return reject() // 失败，关闭按钮加载,关闭窗口
+          onOk: async () => {
+            const finishResponse = await updateMemo({
+              id,
+              completed: itemObj.completed ? 0 : 1,
+              updateTime: window.ikunSelectDate,
+              okText: itemObj.completed ? '' : window.ikunOkText,
             })
+            if (finishResponse) {
+              if (func) func()    // 执行传入方法（关闭查看窗口)
+              sxSj()
+            }
           }
         })
       },
@@ -465,7 +461,7 @@ const MemoDrawer = () => {
         // 如果按钮已经在删除确认状态
         if (target.classList.contains('confirm-delete')) {
           setWebLoading(true)
-          const deleteResponse = await delToDoItem(id)
+          const deleteResponse = await deleteMemo(id)
           if (deleteResponse) sxSj()
           setWebLoading(false)
         } else {
@@ -487,20 +483,13 @@ const MemoDrawer = () => {
           icon: <QuestionCircleFilled/>,
           content: selectDate('加一'),
           maskClosable: true,         // 点遮罩可以关闭
-          onOk() {
-            return new Promise(async (resolve, reject) => {
-              const body = {
-                id,
-                numberOfRecurrences: 666,
-                okTime: window.ikunSelectDate,
-                okText: window.ikunOkText,
-              }
-              if (await saveOrUpdateToDoItem(body, 'put')) {
-                sxSj()
-                return resolve()    // 成功,关闭按钮加载 关闭窗口
-              }
-              return reject() // 失败，关闭按钮加载,关闭窗口
+          onOk: async () => {
+            await addLoopMemoItem({
+              memoId: id,
+              memoDate: window.ikunSelectDate,
+              loopText: window.ikunOkText,
             })
+            sxSj()
           }
         })
       },
@@ -510,14 +499,14 @@ const MemoDrawer = () => {
 
   /**
    * 设置是否展开备忘录内容
-   * @author ChenGuangLong
+   * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
    * @since 2024/7/6 16:52
    */
   const setOpenMemoText = v => sxYm(openMemoText = v);
 
   /**
    * 筛选日期
-   * @author ChenGuangLong
+   * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
    * @since 2024/8/8 11:49
    */
   const handleFilterDate = () => {

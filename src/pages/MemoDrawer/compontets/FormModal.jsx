@@ -1,11 +1,12 @@
 import React, {useEffect, useRef, useState} from "react";
 import {QuestionCircleTwoTone, SmileTwoTone} from "@ant-design/icons";
 import {Modal, Input, Radio, Button, DatePicker, Popover, Row, Col, App} from 'antd';
-import {saveOrUpdateToDoItem} from "@/request/memoRequest";
+import {addMemo, updateMemo} from "@/request/memoRequest";
 import modalStyle from '@/pages/MemoDrawer/compontets/formModal.module.css'
 import CommonStore from "@/store/CommonStore";
 
 const {TextArea} = Input;
+const {msg} = CommonStore
 /** 外部图片链接列表 */
 const externalImgBedList = [
   {src: 'https://playground.z.wiki/img-cloud/index.html', title: '外部图床1(可能失效,注意信息安全)'},
@@ -66,8 +67,8 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
   
   /** 确定按钮（编辑完成给后端发请求） */
   const handleOk = async () => {
-    if (!formData.itemType?.toString()) return CommonStore.msg.error('备忘类型不能为空')
-    if (!formData.content) return CommonStore.msg.error('备忘内容不能为空')
+    if (!formData.itemType?.toString()) return msg.error('备忘类型不能为空')
+    if (!formData.content) return msg.error('备忘内容不能为空')
     
     setConfirmLoading(true);
     // 构造请求体
@@ -75,7 +76,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
     body.content = formData.content === data?.content ? null : formData.content;
     body.itemType = formData.itemType === data?.itemType ? null : formData.itemType;
     body.id = data?.id;
-    let result = await saveOrUpdateToDoItem(body, data && "put");
+    let result = await (data ? updateMemo : addMemo)(body);
     if (result) {
       closeModal(false);
       reList() // 刷新列表

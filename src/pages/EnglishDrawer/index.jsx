@@ -8,9 +8,9 @@ import {
 
 import showOrNot from "../../store/ShowOrNot";
 import UserStore from "../../store/UserStore";
-import {delToDoItem, getToDoItems, saveOrUpdateToDoItem} from "../../request/memoRequest";
+import {addMemo, deleteMemo, getMemos, updateMemo} from "@/request/memoRequest";
 import MyEmpty from "@/components/common/MyEmpty";
-import {englishSortingOptions, tagList} from "../../store/NoLoginData.jsx";
+import {englishSortingOptions, tagList} from "@/store/NoLoginData";
 import MyButton from "@/components/MyButton";
 import CommonStore from "../../store/CommonStore";
 import SortSelect from "@/components/SortSelect";
@@ -52,10 +52,10 @@ function EnglishDrawer() {
     /** 获取列表数据 */
     const getListData = async () => {
         setWebLoading(true)     // 网络加载
-        const resp = await getToDoItems({type:4, page,orderBy, firstLetter, keyword})
+        const resp = await getMemos({type:4, page,orderBy, firstLetter, keyword})
         setWebLoading(false)    // 网络加载
-        if (resp?.code === 1) {
-            listData = ([...listData, ...resp.data?.records])
+        if (resp.code === 1) {
+            listData = ([...listData, ...resp.data.records])
             total = resp.data.total;
             page++
         }
@@ -105,7 +105,7 @@ function EnglishDrawer() {
 
             if(!editId) {   // 新增请求
                 setReqLoading(true)
-                const saveResp = await saveOrUpdateToDoItem({itemType: 4,content})
+                const saveResp = await addMemo({itemType: 4,content})
                 setReqLoading(false)
                 if(saveResp) {
                     item.id = saveResp
@@ -114,7 +114,7 @@ function EnglishDrawer() {
                 }
             }else{          // 修改请求
                 setReqLoading(true)
-                const updateResp = await saveOrUpdateToDoItem({id: item.id,content},'put')
+                const updateResp = await updateMemo({id: item.id, content})
                 setReqLoading(false)
                 if(updateResp) {
                     setEditId(-1)
@@ -145,7 +145,7 @@ function EnglishDrawer() {
                 maskClosable: true,  // 点遮罩可以关闭
                 onOk () {
                     return new Promise(async (resolve, reject)=>{
-                        const delResp = await delToDoItem(id)
+                        const delResp = await deleteMemo(id)
                         if (delResp) {
                             --total
                             setEditId(-1 * id)  // 驱动页面变化，因为listData不是状态，无法驱动页面的改变,异步的放前面就行

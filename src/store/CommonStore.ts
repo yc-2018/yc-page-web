@@ -1,8 +1,9 @@
 import { makeAutoObservable } from 'mobx'
+import {MessageInstance} from "antd/es/message/interface";
 
 class CommonStore {
     loading = false // 壁纸加载都用这个
-    msg                     // 消息提示
+    msg: MessageInstance     // 消息提示
 
     //构造函数
     constructor() {
