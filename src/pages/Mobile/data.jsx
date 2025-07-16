@@ -1,4 +1,4 @@
-import {sortingOptions} from "../../store/NoLoginData.jsx";
+import {sortingOptions} from "@/store/NoLoginData";
 import {BookOutlined, UnorderedListOutlined, UserOutlined} from "@ant-design/icons";
 import React from "react";
 
@@ -50,7 +50,6 @@ export const orderByName =(column)=> sortingOptions.find(i => i.value === column
 /*列表随机返回一张欢迎图*/
 export const getWelcomePic = () => {
     const welcomePicList = [
-        // 'https://i.niupic.com/images/2024/01/18/fqoW.png',
         '21/4ov5.512X512-1',
         '21/dIpc.1536X1024-2',
         '21/lgpi.512X512-3',

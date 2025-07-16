@@ -100,6 +100,13 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   /** 执行动作 */
   const onAction = async action => {
     const {id, text} = action;
+
+    const showContent = () => {
+      const obj = data.find(item => item.id === id);
+      if ( !obj) return
+      return (<div className={styles.tipContent}>{obj.content}</div>)
+    }
+
     switch (action.key) {
       // 取消|完成 //////////////////////////////////////////////////////////////
       case 'success':
@@ -108,6 +115,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         await Dialog.confirm({
           content: text === '完成' ?
             <div>
+              {showContent()}
               <div>完成时间:</div>
               <a ref={dateRef} onClick={() => setDateVisible(true)}>现在</a>
               <a
@@ -162,6 +170,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         await Dialog.confirm({
           content:
             <div>
+              {showContent()}
               <div>循环时间:</div>
               <a ref={dateRef} onClick={() => setDateVisible(true)}>现在</a>
               <a
@@ -215,6 +224,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         await Dialog.confirm({
           content:
             <div style={{textAlign: 'center'}}>
+              {showContent()}
               <ExclamationCircleFilled style={{color: 'red'}}/> 确定删除该条备忘吗
             </div>,
           onConfirm: async () => {
