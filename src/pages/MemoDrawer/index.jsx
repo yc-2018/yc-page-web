@@ -305,8 +305,11 @@ const MemoDrawer = () => {
   }
 
   /** 完成或加1时 可以选择日期 */
-  const selectDate = text =>
+  const selectDate = (text, content) =>
     <>
+      <div className="memoCompleteOrAdd1Text">
+        {content}
+      </div>
       <div>
         指定{text}时间：
         <Tooltip title="非必填,不填默认当前时间。填日期不填时间，则时间为空(0)">
@@ -441,7 +444,7 @@ const MemoDrawer = () => {
           maskClosable: true,         // 点遮罩可以关闭
           title: `确定${itemObj.completed ? '取消' : ''}完成?`,
           icon: <QuestionCircleFilled/>,
-          content: itemObj.completed ? '' : selectDate('完成'),
+          content: itemObj.completed ? '' : selectDate('完成', itemObj.content),
           onOk: async () => {
             const finishResponse = await updateMemo({
               id,
@@ -480,7 +483,7 @@ const MemoDrawer = () => {
         return modal.confirm({
           title: `确定加一吗?`,
           icon: <QuestionCircleFilled/>,
-          content: selectDate('加一'),
+          content: selectDate('加一', itemObj.content),
           maskClosable: true,         // 点遮罩可以关闭
           onOk: async () => {
             const result = await addLoopMemoItem({
