@@ -3,7 +3,7 @@ import {
   InfiniteScroll, List, Popup, SwipeAction, Toast,
   Button, Tag, Radio, TextArea, Dialog, PullToRefresh,
   SearchBar, Badge, Ellipsis, CalendarPicker, Dropdown,
-  Space, Input, Modal, ImageViewer, Picker
+  Space, Input, Modal, ImageViewer, Picker, ImageUploader
 } from 'antd-mobile'
 import dayjs from "dayjs";
 import {
@@ -17,13 +17,14 @@ import {
 import {finishName, columns, leftActions, rightActions, orderByName} from "@/pages/Mobile/data";
 import {sortingOptions} from "@/store/NoLoginData";
 import HighlightKeyword from "@/utils/HighlightKeyword";
-import {ExclamationCircleFilled} from "@ant-design/icons";
+import {ExclamationCircleFilled, PictureOutlined} from "@ant-design/icons";
 import LinkifyContent from "@/components/LinkifyContent/index";
 import {symbols} from "@/pages/MemoDrawer/compontets/FormModal";
 import styles from '@/pages/Mobile/mobile.module.css'
 import {formatMemoTime} from "@/utils/DateUtils";
+import {uploadImgByJD} from "@/request/toolsRequest";
 
-
+let imgArr;     // 多张图片字符串，用,分割
 let okTime;     // 待办更新时间
 let okText;         // 待办完成或循环时可添加的文字
 let v = {      // 循环装中文变量
@@ -97,6 +98,21 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   /** 显示加载动画 */
   const showLoading = (icon, content) => {Toast.show({icon, content})}
 
+  /**
+   * 上传图片
+   * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
+   * @since 2025/7/18 2:33
+   */
+  const uploadToJD = async (file) => {
+    if (file.size > 1024 * 1024 * 5) Toast.show({content: '图片超5M,自动压缩中...'})
+    const result = await uploadImgByJD(file);
+    if (result.errno === 1 || !result.data?.url) {
+      Toast.show({icon: 'fail', content: result.message ?? '上传成功'})
+      throw new Error('上传失败')
+    }
+    return {url: result.data.url}
+  }
+
   /** 执行动作 */
   const onAction = async action => {
     const {id, text} = action;
@@ -167,6 +183,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       case 'addOne':
         okTime = undefined      // 重置更新时间
         okText = undefined      // 重置完成文字
+        imgArr = undefined      // 重置图片
         await Dialog.confirm({
           content:
             <div>
@@ -181,17 +198,22 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                 (可选)选择时间
               </a>
               <div style={{marginTop: 9}}>加一备注：</div>
-              <Input
-                clearable
-                type="text"
+              <TextArea
+                autoFocus
                 placeholder="可输入循环备注"
                 onChange={v => okText = v}
+              />
+              <ImageUploader
+                maxCount={3}
+                showFailed={false}
+                upload={uploadToJD}
+                onChange={(items) => imgArr = items.map(item => item.url).join(',')}
               />
             </div>
           ,
           onConfirm: async () => {
             showLoading('loading', '加载中…')
-            const addOneResp = await addLoopMemoItem({memoId: id, memoDate: okTime, loopText: okText})
+            const addOneResp = await addLoopMemoItem({memoId: id, memoDate: okTime, loopText: okText, imgArr})
             if (addOneResp) {
               Toast.show({icon: 'success', content: '成功'})
               setData(val => val.map(item => item.id === id ? {
@@ -683,7 +705,21 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             <List>
               {loopTime?.map((item, index) =>
                 <List.Item key={item.id} onClick={() => setLoopItemVisible(item)}>
-                  {index + 1}：{formatMemoTime(item.memoDate)}
+                  <div style={{display: 'flex', gap: 18}}>
+                    {index + 1}：{formatMemoTime(item.memoDate)}
+                    {item.imgArr &&
+                      <div
+                        style={{color: '#406df3'}}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          ImageViewer.Multi.show({images: item.imgArr.split(',')})
+                        }}
+                      >
+                        <PictureOutlined/>
+                        *{item.imgArr.split(',').length}
+                      </div>
+                    }
+                  </div>
                   {item.loopText && <div className={styles.loopText}>{item.loopText}</div>}
                 </List.Item>
               )}
