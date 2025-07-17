@@ -1,5 +1,5 @@
 import {ExclamationCircleFilled} from "@ant-design/icons";
-import {delBookmark} from "@/request/homeRequest";
+import {delBookmark} from "@/request/homeApi";
 import React from "react";
 import CommonStore from "@/store/CommonStore";
 import {App} from "antd";

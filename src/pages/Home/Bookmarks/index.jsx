@@ -7,7 +7,7 @@ import MyDnd from "@/components/MyDnd";
 import FormModal from "./FormModal";
 import UserStore from "@/store/UserStore";
 import JWTUtils from "@/utils/JWTUtils";
-import {addBookmarks, dragSort, getBookmarks, updateBookmark} from "@/request/homeRequest";
+import {addBookmarks, dragSort, getBookmarks, updateBookmark} from "@/request/homeApi";
 import CommonStore from "@/store/CommonStore";
 import ContextMenu from "@/components/ContextMenu";
 import action from "@/pages/Home/Bookmarks/action";

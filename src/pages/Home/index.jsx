@@ -22,7 +22,7 @@ import Filing from "@/components/Filing";
 import showOrNot from '@/store/ShowOrNot';
 import UserStore from "@/store/UserStore";
 import CommonStore from "@/store/CommonStore";
-import {reImagesUrl, uploadInfo, getPageInfo} from "@/request/homeRequest";
+import {reImagesUrl, uploadInfo, getPageInfo} from "@/request/homeApi";
 import Bookmarks from "@/pages/Home/Bookmarks/index";
 import {getToolsList, toolsBaseURL} from "@/request/toolsRequest";
 import HomeSearch from "./HomeSearch";

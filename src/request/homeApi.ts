@@ -1,6 +1,6 @@
 import axios from 'axios';
 import CommonStore from "../store/CommonStore";
-import myAxios from "./myAxios";
+import myAxios, {myGet, myPut} from "./myAxios";
 import bingWallpaperList from "../store/bingWallpaper";
 import fetchJsonp from "fetch-jsonp";
 
@@ -54,23 +54,17 @@ const getBgFns = {
 
 
 /** 上传页面配置信息到云端 */
-export async function uploadInfo(Info) {
+export async function uploadInfo(info) {
   CommonStore.setLoading(true, "开始上传");
-  try {
-    const {data: {data}} = await myAxios({url: '/pageParameters', method: 'put', data: Info});
-
-    data._ || CommonStore.setLoading(false, "上传成功", 'success');
-  } catch (error) {
-    CommonStore.setLoading(false);
-  }
+  const result = await myPut<boolean>('/pageParameters', info);
+  if (result.success) CommonStore.setLoading(false, "上传成功", 'success');
+  else CommonStore.setLoading(false);
 }
 
 /** 从云端获取页面配置信息 */
 export async function getPageInfo() {
-  try {
-    const {data: {data}} = await myAxios.get('/pageParameters');
-    return data;
-  } catch (error) {}
+   const result = await myGet<any>('/pageParameters');
+   if (result.success) return result.data;
 }
 
 

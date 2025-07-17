@@ -2,7 +2,7 @@ import {useState, FC} from 'react';
 import {AutoComplete, Input} from 'antd';
 import searchStore from '@/store/SearchStore';
 import {SendOutlined} from '@ant-design/icons';
-import {getThinkList} from "@/request/homeRequest";
+import {getThinkList} from "@/request/homeApi";
 import "./MySearch.css"
 
 const {Search} = Input;

@@ -1,6 +1,6 @@
 import {useRef, useState} from "react";
 import {SendOutlined} from "@ant-design/icons";
-import {getThinkList} from "@/request/homeRequest";
+import {getThinkList} from "@/request/homeApi";
 import CommonStore from "@/store/CommonStore";
 import {AutoComplete, Input} from "antd";
 

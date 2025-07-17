@@ -8,7 +8,7 @@ import {
   deleteSearchEngine,
   getSearchEngineList,
   updateSearchEngine
-} from "@/request/homeRequest";
+} from "@/request/homeApi";
 import MySearch from '@/components/MySearch';
 import searchStore from '@/store/SearchStore';
 import {searchData} from '@/store/NoLoginData';
