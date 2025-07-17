@@ -3,7 +3,7 @@ import {
   InfiniteScroll, List, Popup, SwipeAction, Toast,
   Button, Tag, Radio, TextArea, Dialog, PullToRefresh,
   SearchBar, Badge, Ellipsis, CalendarPicker, Dropdown,
-  Space, Input, Modal, ImageViewer, Picker, ImageUploader
+  Space, Modal, ImageViewer, Picker, ImageUploader
 } from 'antd-mobile'
 import dayjs from "dayjs";
 import {
@@ -79,7 +79,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const loadMore = async () => {
     const append = await getMemos({type, page, completed, orderBy, keyword});
     if (!append) return showLoading('fail', '获取数据失败') || setHasMore(false)
-    setData(val => [...val, ...append.data.records])
+    setData(val => [...val, ...append.data?.records])
     setHasMore(data.length < append.data.total)
     setPage(val => val + 1)
 
@@ -141,11 +141,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               >
                 (可选)选择时间
               </a>
-              <div style={{marginTop: 9}}>加一备注：</div>
-              <Input
-                clearable
-                type="text"
-                placeholder="可输入循环备注"
+              <div style={{marginTop: 9}}>完成备注：</div>
+              <TextArea
+                autoFocus
+                placeholder="可输入完成备注"
                 onChange={v => okText = v}
               />
             </div>
@@ -213,6 +212,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           ,
           onConfirm: async () => {
             showLoading('loading', '加载中…')
+            imgArr = imgArr ?? undefined
             const addOneResp = await addLoopMemoItem({memoId: id, memoDate: okTime, loopText: okText, imgArr})
             if (addOneResp) {
               Toast.show({icon: 'success', content: '成功'})
@@ -330,7 +330,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       v['循环时间页数']++
       setLoopTime(list => [...list ?? [], ...resp.records])
     } else Toast.show({icon: 'fail', content: '获取失败'})
-    
+
     v['循环次数继续加载'] = resp?.current < resp?.pages
     v['翻页加载中'] = false
   }
@@ -341,22 +341,30 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
    * @author Yc
    * @since 2025/5/20 1:15
    */
-  const editLoopMemoItem = async (loop) => {
+  const editLoopMemoItem = (loop) => {
     okText = loop.loopText
-    await Dialog.confirm({
+    imgArr = loop.imgArr
+    Dialog.confirm({
       content:
-          <div>
-            <div style={{marginTop: 9}}>备注：</div>
-            <Input
-                type="text"
-                defaultValue={okText}
-                placeholder="请输入循环备注,空为不修改"
-                onChange={v => okText = v}
-            />
-          </div>
+        <div id="编辑循环备忘子项框">
+          <div style={{marginTop: 9}}>备注：</div>
+          <TextArea
+            autoFocus
+            defaultValue={okText}
+            placeholder="请输入循环备注,空为不修改"
+            onChange={v => okText = v}
+          />
+          <ImageUploader
+            defaultValue={imgArr ? imgArr.split(',').map(url => ({url})) : undefined}
+            maxCount={3}
+            showFailed={false}
+            upload={uploadToJD}
+            onChange={(items) => imgArr = items.map(item => item.url).join(',')}
+          />
+        </div>
       ,
       onConfirm: async () => {
-        const resp = await updateLoopMemoItem({...loop, loopText: okText})
+      const resp = await updateLoopMemoItem({...loop, loopText: okText, imgArr})
         if (resp.success) {
           Toast.show({icon: 'success', content: '成功'})
           setLoopTime(val => val.map(item => item.id === loop.id ? {
@@ -393,17 +401,17 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     })
   }
 
-  
+
   /** 在光标位置后面插入文本的函数 */
   const insertAtCursor = (textToInsert) => {
     textRef.current?.focus()
     const selectionStart = textRef.current.nativeElement.selectionStart;  // 获取光标开始位置
     const selectionEnd = textRef.current.nativeElement.selectionEnd;      // 获取光标结束位置
-    
+
     const currentValue = content ?? ''
     const beforeText = currentValue.slice(0, selectionStart);
     const afterText = currentValue.slice(selectionEnd);
-    
+
     setContent(beforeText + `${textToInsert}` + afterText)
     window.setTimeout(() => { // setContent是异步的哇 所以一定要比它还要晚一点 因为它是属于全覆盖 光标自然在最后
       // 重新定位光标到插入点之后
@@ -567,7 +575,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             </LinkifyContent>
           </pre>
         </div>
-        
+
         <div style={{display:'grid', gridTemplateColumns:'1fr 1fr',gap:10,marginTop:10}}>
           {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
             <Button
@@ -587,7 +595,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               完成
             </Button>
           }
-          
+
           {/*完成的显示取消完成按钮 */ visible?.completed === 1 &&
             <Button
               block
@@ -597,7 +605,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               取消完成
             </Button>
           }
-          
+
           {/*显示删除按钮*/
             <Button
               block
@@ -607,7 +615,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               删除
             </Button>
           }
-          
+
           {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
             <Button
               block
@@ -637,7 +645,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       >
 
         <div style={{padding: '10px'}}>
-          
+
           <div style={{textAlign: 'center'}}>
             <Radio.Group value={itemType} onChange={value => setItemType(() => value)}>
               <Radio value={0} className={'█Radio'}>普通</Radio>
@@ -649,7 +657,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               <Radio value={7} className={'█Radio'}>其他</Radio>
             </Radio.Group>
           </div>
-          
+
           <TextArea
             rows={13}
             showCount
@@ -689,7 +697,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               插入符号
             </Button>
           </div>
-          
+
           <Button block onClick={submit}> 提交 </Button>
         </div>
       </Popup>
@@ -770,7 +778,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
         }}
       />
-      
+
       {/*日期选择器（antd实验性组件）编辑插入用*/}
       <CalendarPicker
         popupStyle={{zIndex: 99999}}
