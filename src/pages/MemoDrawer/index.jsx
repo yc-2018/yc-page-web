@@ -305,50 +305,58 @@ const MemoDrawer = () => {
   }
 
   /** 完成或加1时 可以选择日期 */
-  const selectDate = (text, content) =>
-    <>
-      <div className="memoCompleteOrAdd1Text">
-        {content}
-      </div>
-      <div>
-        指定{text}时间：
-        <Tooltip title="非必填,不填默认当前时间。填日期不填时间，则时间为空(0)">
-          <QuestionCircleOutlined />
-        </Tooltip>
-      </div>
-      <DatePicker
-        allowClear
-        size="small"
-        style={{width: '50%'}}
-        minDate={dayjs().subtract(60, 'days')}
-        maxDate={dayjs()}
-        onChange={(_, dateStr) => {
-          window.ikunSelectDate = dateStr ? dateStr + ' 00:00:00' : undefined
-          const okTimeElement = window.document.querySelector('#okTimePicker');
-          if (okTimeElement) okTimeElement.style.display = dateStr ? 'inline-block' : 'none'
-        }}
-      />
-      <span id="okTimePicker" style={{display: 'none', marginLeft: 5}}>
-        <TimePicker
-          size="small"
-          onChange={(t, ts) => {
-            if (!window.ikunSelectDate) return CommonStore.msg.error('请选择时间');
-            let dateTimeArr = window.ikunSelectDate.split(' ');
-            dateTimeArr[1] = ts ?? '00:00:00';
-            window.ikunSelectDate = dateTimeArr.join(' ');
-          }}
-        />
-      </span>
+  const selectDate = (text, content) => {
+    setTimeout(() => document.querySelector('#备注输入框')?.focus(), 100)
+    return (
+      <div id="完成或加一弹窗" style={{display: 'flex', flexDirection: 'column', gap: 12}}>
+        <div className="memoCompleteOrAdd1Text" id="内容复现框">
+          {content}
+        </div>
 
-      <div>{text}备注：</div>
-      <Input
-        allowClear
-        count={{show: true, max: 99}}
-        onChange={e => {
-          window.ikunOkText = e.target.value
-        }}
-      />
-    </>
+        <div>
+          <div>
+            指定{text}时间：
+            <Tooltip title="非必填,不填默认当前时间。填日期不填时间，则时间为空(0)">
+              <QuestionCircleOutlined/>
+            </Tooltip>
+          </div>
+          <DatePicker
+            allowClear
+            size="small"
+            style={{width: '50%'}}
+            minDate={dayjs().subtract(60, 'days')}
+            maxDate={dayjs()}
+            onChange={(_, dateStr) => {
+              window.ikunSelectDate = dateStr ? dateStr + ' 00:00:00' : undefined
+              const okTimeElement = window.document.querySelector('#okTimePicker');
+              if (okTimeElement) okTimeElement.style.display = dateStr ? 'inline-block' : 'none'
+            }}
+          />
+          <span id="okTimePicker" style={{display: 'none', marginLeft: 5}}>
+          <TimePicker
+            size="small"
+            onChange={(t, ts) => {
+              if (!window.ikunSelectDate) return CommonStore.msg.error('请选择时间');
+              let dateTimeArr = window.ikunSelectDate.split(' ');
+              dateTimeArr[1] = ts ?? '00:00:00';
+              window.ikunSelectDate = dateTimeArr.join(' ');
+            }}
+          />
+        </span>
+        </div>
+
+        <div id="备注输入块" style={{marginBottom: 12}}>
+          {text}备注：
+          <Input.TextArea
+            id="备注输入框"
+            allowClear
+            count={{show: true, max: 99}}
+            onChange={e => window.ikunOkText = e.target.value}
+          />
+        </div>
+      </div>
+    )
+  }
 
   /** 处理待办列表的操作 */
   const listHandleAction = async event => {
