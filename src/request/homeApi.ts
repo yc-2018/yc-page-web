@@ -1,23 +1,24 @@
 import axios from 'axios';
-import CommonStore from "../store/CommonStore";
-import myAxios, {myGet, myPut} from "./myAxios";
-import bingWallpaperList from "../store/bingWallpaper";
 import fetchJsonp from "fetch-jsonp";
+import CommonStore from "@/store/CommonStore";
+import bingWallpaperList from "@/store/bingWallpaper";
+import myAxios, {myDelete, myGet, myPost, myPut} from "./myAxios";
+import IBookmark from "@/interface/IBookmark";
 
 
 /** jsonp获取百度联想列表 */
-export async function getThinkList(param) {
-  if (!param) return;
-  const result = await fetchJsonp(`https://www.baidu.com/sugrec?ie=utf-&prod=pc&from=pc_web&wd=${param}`)
-  if (result.ok) return (await result.json()).g?.map(item => ({ value: item.q }))
+export async function getThinkList(text: string) {
+  if (!text) return;
+  const result = await fetchJsonp(`https://www.baidu.com/sugrec?ie=utf-&prod=pc&from=pc_web&wd=${text}`)
+  if (result.ok) return (await result.json()).g?.map((item: { q: string }) => ({value: item.q}))
 }
 
 
 /**
  * 获取首页背景图（搞多几个做备份）
- * @returns {Promise<null|string>} 随机壁纸URL
+ * @return 随机壁纸URL
  */
-export async function reImagesUrl(bzType) {
+export async function reImagesUrl(bzType: 'bing' | '漫画' | '风景') {
   CommonStore.setLoading(true);
   try {
     CommonStore.setLoading(true);
@@ -45,16 +46,14 @@ const getBgFns = {
   },
   '风景': async () => {
     const {data: [image]} = await axios.get('/jfApi/home/bg/ajaxbg');
-
-
     // return 'https://i0.wp.com/www.jianfast.com' + image.replace('/400', '');
     return 'https://image.baidu.com/search/down?url=https://www.jianfast.com' + image.replace('/400', '');
   },
 }
 
 
-/** 上传页面配置信息到云端 */
-export async function uploadInfo(info) {
+/** 上传页面配置信息到云端 todo */
+export async function uploadInfo(info: object) {
   CommonStore.setLoading(true, "开始上传");
   const result = await myPut<boolean>('/pageParameters', info);
   if (result.success) CommonStore.setLoading(false, "上传成功", 'success');
@@ -63,21 +62,19 @@ export async function uploadInfo(info) {
 
 /** 从云端获取页面配置信息 */
 export async function getPageInfo() {
-   const result = await myGet<any>('/pageParameters');
-   if (result.success) return result.data;
+  const result = await myGet<any>('/pageParameters');
+  if (result.success) return result.data;
 }
 
 
 /** 从云端获取搜索引擎列表 */
 export async function getSearchEngineList(type = null) {
-  try {
-    const {data: {data}} = await myAxios.get(`/searchEngines/list${type ? '?type=' + type : ''}`);
-    return data;
-  } catch (error) {}
+  const result = await myGet<any>(`/searchEngines/list${type ? '?type=' + type : ''}`);
+  return result.data;
 }
 
 /** 添加搜索引擎 */
-export async function addSearchEngine(body) {
+export async function addSearchEngine(body: object) {
   CommonStore.setLoading(true);
   try {
     const {data: {data}} = await myAxios({url: '/searchEngines', method: 'post', data: body});
@@ -89,7 +86,7 @@ export async function addSearchEngine(body) {
 }
 
 /** 修改搜索引擎 */
-export async function updateSearchEngine(bodyList) {
+export async function updateSearchEngine(bodyList: any[]) {
   CommonStore.setLoading(true);
   try {
     const {data: {data}} = await myAxios({url: '/searchEngines', method: 'put', data: bodyList});
@@ -101,7 +98,7 @@ export async function updateSearchEngine(bodyList) {
 }
 
 /** 删除搜索引擎《支持批量》 */
-export async function deleteSearchEngine(idList) {
+export async function deleteSearchEngine(idList: number[]) {
   try {
     const {data: {data}} = await myAxios({url: '/searchEngines', method: 'delete', data: idList});
     data._ || CommonStore.setLoading(false, "删除成功", 'success');
@@ -114,13 +111,13 @@ export async function deleteSearchEngine(idList) {
 /**
  * 获取书签
  *
- * @return {promise<Array>} 当前用户的所有书签
+ * return 当前用户的所有书签
  * @author ChenGuangLong
  * @since 2024/02/29 23:38
  */
 export async function getBookmarks() {
   const {data: {data}} = await myAxios.get('/bookmarks')
-  if (!data instanceof Array) return []
+  if (!data || !(data instanceof Array)) return []
   return data
 }
 
@@ -128,13 +125,13 @@ export async function getBookmarks() {
  * 新增书签|组
  *
  * @param bookmark 书签
- * @return {promise<number|undefined>} 新增的书签id
+ * return 新增的书签id
  * @author ChenGuangLong
  * @since 2024/03/1 00:14
  */
-export async function addBookmarks(bookmark) {
-  const {data: {data}} = await myAxios({url: '/bookmarks', method: 'post', data: bookmark})
-  return data
+export async function addBookmarks(bookmark: IBookmark) {
+  const result = await myPost<number>('/bookmarks', bookmark);
+  return result.data
 }
 
 /**
@@ -145,25 +142,26 @@ export async function addBookmarks(bookmark) {
  * @author ChenGuangLong
  * @since 2024/03/5
  */
-export async function updateBookmark(bookmark) {
-  const {data: {data} = {}} = await myAxios({url: '/bookmarks', method: 'put', data: bookmark}) || {}
-  return data
+export async function updateBookmark(bookmark: any) {
+  const result = await myPut<boolean>('/bookmarks', bookmark);
+  return result.success
 }
 
 /**
  * 拖动排序书签
  * @param bookmark 书签dto
  */
-export async function dragSort(bookmark) {
+export async function dragSort(bookmark: { id: number; type: number; sort: string; }) {
   CommonStore.setLoading(true);
-  const {data: {data} = {}} = await myAxios({url: '/bookmarks/dragSort', method: 'put', data: bookmark}) || {}
+  const result = await myPut('/bookmarks/dragSort', bookmark);
   CommonStore.setLoading(false);
-  return data
+  return result.success
 }
 
 /**删除书签*/
-export async function delBookmark(bookmark) {
-  const {data: {data} = {}} = await myAxios({url: '/bookmarks', method: 'delete', data: bookmark}) || {}
-  data && CommonStore.msg.success('删除成功')
-  return data
+export async function delBookmark(bookmark: any) {
+  const result = await myDelete('/bookmarks', bookmark);
+  const success = result.success;
+  success && CommonStore.msg.success('删除成功')
+  return success
 }
