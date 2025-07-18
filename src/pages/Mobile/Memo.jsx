@@ -203,7 +203,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                 onChange={v => okText = v}
               />
               <ImageUploader
+                columns={3}
                 maxCount={3}
+                capture="camera"
                 showFailed={false}
                 upload={uploadToJD}
                 onChange={(items) => imgArr = items.map(item => item.url).join(',')}
