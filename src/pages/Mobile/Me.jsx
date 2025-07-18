@@ -4,7 +4,7 @@ import {Button, Avatar, List, Dialog, Toast, Grid, Collapse} from 'antd-mobile'
 import UserStore from "../../store/UserStore";
 import JWTUtils from "../../utils/JWTUtils";
 import {Input} from "antd";
-import {updateNameOrAvatar} from "../../request/commonRequest";
+import {updateNameOrAvatar} from "@/request/commonRequest";
 import GgComparator from "./Tools/GgComparator";
 
 

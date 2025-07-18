@@ -341,10 +341,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
    * @author Yc
    * @since 2025/5/20 1:15
    */
-  const editLoopMemoItem = (loop) => {
+  const editLoopMemoItem = async (loop) => {
     okText = loop.loopText
     imgArr = loop.imgArr
-    Dialog.confirm({
+    await Dialog.confirm({
       content:
         <div id="编辑循环备忘子项框">
           <div style={{marginTop: 9}}>备注：</div>
@@ -355,7 +355,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             onChange={v => okText = v}
           />
           <ImageUploader
-            defaultValue={imgArr ? imgArr.split(',').map(url => ({url})) : undefined}
+            defaultValue={imgArr ? imgArr.split(',').map(url => ({url})) : undefined} // 防止空字符串生成一个无效的
             maxCount={3}
             showFailed={false}
             upload={uploadToJD}
@@ -365,6 +365,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       ,
       onConfirm: async () => {
       const resp = await updateLoopMemoItem({...loop, loopText: okText, imgArr})
+        setLoopItemVisible(null)
         if (resp.success) {
           Toast.show({icon: 'success', content: '成功'})
           setLoopTime(val => val.map(item => item.id === loop.id ? {
