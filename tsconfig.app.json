@@ -1,39 +1,39 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",    // 增量编译信息存储位置
+    "target": "ES2020",                                                   // 编译目标ES版本（现代浏览器特性）
+    "useDefineForClassFields": true,                                      // 使用标准ECMAScript类字段定义
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],                             // 包含浏览器环境API类型定义
+    "module": "ESNext",                                                   // 生成ES模块格式代码
+    "skipLibCheck": true,                                                 // 跳过声明文件类型检查（加速编译）
 
     /* Bundler mode */
-    "moduleResolution": "node",
-    "allowImportingTsExtensions": false,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
+    "moduleResolution": "node",                                           // 使用Node.js模块解析策略
+    "allowImportingTsExtensions": false,                                  // 禁止导入.ts扩展名
+    "isolatedModules": true,                                              // 确保单文件安全编译（Babel兼容）
+    "moduleDetection": "force",                                           // 强制所有文件作为模块处理
+    "noEmit": true,                                                       // 不输出JS文件（Vite负责编译）
+    "jsx": "react-jsx",                                                   // 使用React 17+的JSX运行时
 
     /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
+    "strict": true,                                                       // 启用所有严格类型检查
+    "noUnusedLocals": true,                                               // 未使用局部变量报错
+    "noUnusedParameters": true,                                           // 未使用函数参数报错
+    "noFallthroughCasesInSwitch": true,                                   // switch语句穿透检查
+    "noUncheckedSideEffectImports": true,                                 // 禁止副作用导入类型绕过
 
-    /* 添加以下配置 */
-    "baseUrl": "./",
+    /* 路径映射 */
+    "baseUrl": "./",                                                       // 基础路径解析起点
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"]                                                     // 别名映射：@/ → src/
     },
-    "types": ["node"], // 确保包含 node 类型
+    "types": ["node"],                                                     // 包含Node.js全局类型声明
 
 
     /*允许 TypeScript 直接导入 JavaScript 文件*/
-    "allowJs": true,
-    //"checkJs": true // 可选：检查 JavaScript 文件的类型
-    "allowSyntheticDefaultImports": true
+    "allowJs": true,                                                        // 允许导入.js文件
+    //"checkJs": true                                                       // 可选：检查 JavaScript 文件的类型
+    "allowSyntheticDefaultImports": true                                    // 允许无默认导出的模块默认导入
   },
-  "include": ["src"]
+  "include": ["src"]                                                        // 仅处理src目录下文件
 }

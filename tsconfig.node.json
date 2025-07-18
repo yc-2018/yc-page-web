@@ -1,25 +1,25 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "target": "ES2022",
-    "lib": ["ES2023"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "types": ["node"], // 确保包含 node 类型
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",   // 增量编译信息存储位置
+    "target": "ES2022",                                                   // Node.js支持的ES版本
+    "lib": ["ES2023"],                                                    // Node.js运行环境API类型
+    "module": "ESNext",                                                   // ESM模块格式
+    "skipLibCheck": true,                                                 // 跳过声明文件类型检查
+    "types": ["node"],                                                    // 声明使用Node.js全局类型
 
     /* Bundler mode */
-    "moduleResolution": "node",
-    "allowImportingTsExtensions": false,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
+    "moduleResolution": "node",                                           // Node风格模块解析
+    "allowImportingTsExtensions": false,                                  // 禁止导入.ts扩展名
+    "isolatedModules": true,                                              // 单文件编译保证
+    "moduleDetection": "force",                                           // 强制所有文件作为模块
+    "noEmit": true,                                                       // 不输出JS文件（仅类型检查）
 
     /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "strict": true,                                                        // 启用所有严格检查
+    "noUnusedLocals": true,                                                // 未使用局部变量报错
+    "noUnusedParameters": true,                                            // 未使用函数参数报错
+    "noFallthroughCasesInSwitch": true,                                    // switch语句未处理的情况报错
+    "noUncheckedSideEffectImports": true                                   // 未检查的副作用导入报错
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts"]                                            // 仅处理Vite配置文件
 }

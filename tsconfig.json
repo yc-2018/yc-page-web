@@ -1,13 +1,7 @@
 {
-  "compilerOptions": {
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"]
-    }
-  },
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+  "files": [],                              // 显式指定要包含在编译中的文件列表
+  "references": [                           // 项目引用配置
+    { "path": "./tsconfig.app.json" },      // 指向前端配置
+    { "path": "./tsconfig.node.json" }      // 指向Node配置
   ]
 }
