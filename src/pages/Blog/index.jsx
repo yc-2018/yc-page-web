@@ -4,7 +4,7 @@ import {useNavigate} from "react-router-dom"
 import {BookOutlined} from '@ant-design/icons'
 
 import styles from './blog.module.css'
-import {blogMenu} from "../../store/NoLoginData.jsx"
+import {blogMenu} from "@/store/NoLoginData"
 import {blogBaseURL, getBlogItemIconObj, getBlogList, getBlogMd} from "../../request/blogRequest";
 import LoaderWhite from "@/components/common/LoaderWhite";
 import Md from "@/components/Md";
@@ -95,8 +95,8 @@ const Blog = () => {
       setContent(`请求失败，请检查网络连接`)
     }).finally(() => setLoading(false))
   }
-  
-  
+
+
   return (
     <Layout style={{maxHeight: 'calc(100vh - 64px)'}}>
       {/*------- 页面左侧 -------*/}

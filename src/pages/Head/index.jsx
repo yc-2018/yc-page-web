@@ -4,7 +4,7 @@ import {UserOutlined} from "@ant-design/icons";
 import {Avatar, Col, Dropdown, Layout, Menu, Row} from "antd";
 import {useLocation, useNavigate} from "react-router-dom";
 
-import {items} from "../../store/NoLoginData.jsx";
+import {items} from "@/store/NoLoginData";
 import showOrNot from "../../store/ShowOrNot";
 import JWTUtils from "../../utils/JWTUtils";
 import UserStore from "../../store/UserStore";

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Collapse, DotLoading} from 'antd-mobile'
 
 import Md from "@/components/Md";
-import {blogMenu} from "@/store/NoLoginData.jsx";
+import {blogMenu} from "@/store/NoLoginData";
 import {blogBaseURL, getBlogItemIconObj, getBlogList, getBlogMd} from "@/request/blogRequest";
 import LoaderWhite from "@/components/common/LoaderWhite";
 import CommonStore from "@/store/CommonStore";
@@ -14,13 +14,13 @@ let sxIndex = 0                     // 刷新页面状态变量
 export default () => {
   const [, setSxYm] = useState(0)   // 刷新页面状态
   const sxYm = () => setSxYm(++sxIndex)
-  
-  
+
+
   /** 初始化获取最新菜单和图标 */
   useEffect(() => {
     init()
   }, [])
-  
+
   const init = async () => {
     try {
       icon = await getBlogItemIconObj();
@@ -33,7 +33,7 @@ export default () => {
       sxYm(initLoad = false)
     }
   }
-  
+
   /** 构建菜单 */
   const buildMenu = blogMenu =>
     <Collapse accordion>
@@ -58,7 +58,7 @@ export default () => {
         )
       }
     </Collapse>
-  
+
   return initLoad ? <LoaderWhite loadName="获取菜单中..."/> : buildMenu(menu)
 }
 
@@ -66,7 +66,7 @@ export default () => {
 const DynamicContent = ({keyPath}) => {
   const [finished, setFinished] = useState(false)
   const [content, setContent] = useState('# 欢迎来到仰晨博客');
-  
+
   useEffect(() => {
     getBlogMd(keyPath).then(data => {
       setContent(data)
@@ -74,7 +74,7 @@ const DynamicContent = ({keyPath}) => {
       setContent(`请求失败，请检查网络连接`)
     }).finally(() => setFinished(true))
   }, [])
-  
+
   return finished ?
     <div style={{width: '94vw', wordBreak: 'break-all'}}>
       <Md>{content}</Md>

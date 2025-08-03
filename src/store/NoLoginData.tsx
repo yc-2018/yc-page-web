@@ -1,3 +1,5 @@
+import ISearchEngines from "@/interface/ISearchEngines";
+
 /** 搜索引擎数据 */
 const searchDatas = [
   0, '百度', 'www.baidu.com/s?wd=@@@',
@@ -5,7 +7,7 @@ const searchDatas = [
   0, '谷歌', 'www.google.com/search?q=@@@',
   0, '360', 'www.so.com/s?q=@@@',
   0, '搜狗', 'www.sogou.com/web?query=@@@',
-  
+
   1, '百度', 'www.baidu.com/s?wd=@@@',
   1, 'Bing', 'www.bing.com/search?q=@@@',
   1, '谷歌', 'www.google.com/search?q=@@@',
@@ -28,18 +30,18 @@ const searchDatas = [
  * @since 2024/7/1 19:56
  */
 const buildSearchData = () => {
-  const searchData = []
+  const searchData: ISearchEngines[] = []
   for (let i = 0; i < searchDatas.length; i += 3) {
     searchData.push({
       id: i,
-      isQuickSearch: searchDatas[i],
-      name: searchDatas[i + 1],
+      isQuickSearch: Number(searchDatas[i]),
+      name: `${searchDatas[i + 1]}`,
       engineUrl: 'https://' + searchDatas[i + 2],
     })
   }
   return searchData
 }
-export const searchData = buildSearchData()
+export const searchData: ISearchEngines[] = buildSearchData()
 
 
 /** 头部导航数据 */

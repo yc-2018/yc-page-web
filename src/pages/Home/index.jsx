@@ -50,8 +50,10 @@ function Home() {
 
   /**  */
   useEffect(() => {
-    getToolsList().then(dataList=>setTools(dataList)).catch(()=>{CommonStore.msg.error('获取工具列表失败');})
-  },[])
+    getToolsList().then(dataList => setTools(dataList)).catch(() => {
+      CommonStore.msg.error('获取工具列表失败');
+    })
+  }, [])
 
   /**
    * 获取背景请求
@@ -109,9 +111,7 @@ function Home() {
           <Search/>
           {/*<HomeSearch/>*/}
 
-          
-          
-          
+
           {/*显示备忘录***********************************************************/}
           <FloatButton
             onClick={() => showOrNot.setMemoDrawerShow(true)}
@@ -205,7 +205,7 @@ function Home() {
               className='buttonOpacity'
             />
           </FloatButton.Group>
-          
+
           {jwt ?
             (
               /*用户登录后选项***********************************************************/
@@ -232,7 +232,7 @@ function Home() {
                   }}
                 />
                 <FloatButton
-                  icon={<EditOutlined />}
+                  icon={<EditOutlined/>}
                   tooltip={{title: '修改信息', placement: 'left'}}
                   className='buttonOpacity'
                   onClick={() => UserStore.setInfoModal(true)}
@@ -253,17 +253,17 @@ function Home() {
               />
             )
           }
-          
+
           {/*页面设置***********************************************************/}
           <FloatButton
             trigger="hover"
-            icon={<LayoutTwoTone />}
+            icon={<LayoutTwoTone/>}
             tooltip={{title: '页面设置'}}
             style={{insetInlineEnd: 24 + 56 + 56 + 56, opacity: .5}}
             className='buttonOpacity'
             onClick={() => msg.info('没什么好设置的')}
           >
-          
+
           </FloatButton>
 
           {/*跳转到帮助***********************************************************/}
@@ -288,23 +288,23 @@ function Home() {
           <Popover
             title={<div style={{textAlign: 'center'}}>仰晨工具箱</div>}
             content={
-            <div style={{display: 'flex', flexDirection: 'column', gap: 5}}>
-              <Button block onClick={() => navigate('/utils-specialChar')}>特殊字母|数字</Button>
-              {tools.map(([name, uri]) =>
-                <Button key={name} block onClick={() => window.open(toolsBaseURL + uri, '_blank')}>
-                  <LinkOutlined />{name}
-                </Button>
-              )}
-            </div>
-          }
+              <div style={{display: 'flex', flexDirection: 'column', gap: 5}}>
+                <Button block onClick={() => navigate('/utils-specialChar')}>特殊字母|数字</Button>
+                {tools.map(([name, uri]) =>
+                  <Button key={name} block onClick={() => window.open(toolsBaseURL + uri, '_blank')}>
+                    <LinkOutlined/>{name}
+                  </Button>
+                )}
+              </div>
+            }
           >
-          <FloatButton
-            onClick={() => window.open(toolsBaseURL, '_blank')}
-            onContextMenu={e => e.preventDefault() || navigate('/seeTime')}
-            icon={<ProductOutlined style={{color: '#1677ff', fontSize: 20}}/>}
-            style={{insetInlineEnd: 24 + 56 + 56 + 56 + 56 + 56 + 56}}
-            className='buttonOpacity'
-          />
+            <FloatButton
+              onClick={() => window.open(toolsBaseURL, '_blank')}
+              onContextMenu={e => e.preventDefault() || navigate('/seeTime')}
+              icon={<ProductOutlined style={{color: '#1677ff', fontSize: 20}}/>}
+              style={{insetInlineEnd: 24 + 56 + 56 + 56 + 56 + 56 + 56}}
+              className='buttonOpacity'
+            />
           </Popover>
 
           {/* 侧边半透明的边 移动到上面显示抽屉 */}
@@ -325,7 +325,7 @@ function Home() {
       </div>
       {/*备案号显示*/}
       <Filing/>
-      
+
     </div>
 
   );

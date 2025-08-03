@@ -4,6 +4,7 @@ import CommonStore from "@/store/CommonStore";
 import bingWallpaperList from "@/store/bingWallpaper";
 import myAxios, {myDelete, myGet, myPost, myPut} from "./myAxios";
 import IBookmark from "@/interface/IBookmark";
+import ISearchEngines from "@/interface/ISearchEngines";
 
 
 /** jsonp获取百度联想列表 */
@@ -69,7 +70,7 @@ export async function getPageInfo() {
 
 /** 从云端获取搜索引擎列表 */
 export async function getSearchEngineList(type = null) {
-  const result = await myGet<any>(`/searchEngines/list${type ? '?type=' + type : ''}`);
+  const result = await myGet<ISearchEngines[]>(`/searchEngines/list${type ? '?type=' + type : ''}`);
   return result.data;
 }
 

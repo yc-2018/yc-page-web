@@ -6,7 +6,7 @@ import MyDnd from "@/components/MyDnd";
 import ContextMenu from "@/components/ContextMenu";
 import {getBaseUrl, tryGetFavicon1} from "@/utils/urlUtils";
 import CommonStore from "@/store/CommonStore";
-import action from "./action.jsx";
+import action from "./action";
 import styles from "./bookmark.module.css"
 
 /**
@@ -18,7 +18,7 @@ import styles from "./bookmark.module.css"
  */
 export default ({bookmarkItems, setModal, groupId, setGroup}) => {
   const [items, setItems] = useState(bookmarkItems)
-  
+
   const {msg} = CommonStore
   const addItemButton = () =>
     <Button type="dashed" block size={'small'} onClick={() => {
@@ -28,7 +28,7 @@ export default ({bookmarkItems, setModal, groupId, setGroup}) => {
     >
       ➕
     </Button>
-  
+
   /**
    * 拖动后请求排序
    */
@@ -39,7 +39,7 @@ export default ({bookmarkItems, setModal, groupId, setGroup}) => {
     if (result) msg.success('排序成功')
     else setItems(oldList)
   }
-  
+
   /**
    * 获取书签图标
    * @param URLs 正则匹配后的URLs是个列表  [0]:带http..  [1]:不带http..
@@ -52,11 +52,11 @@ export default ({bookmarkItems, setModal, groupId, setGroup}) => {
       src={URLs[0] + '/favicon.ico'}
       fallback={tryGetFavicon1(URLs[1])}
     />
-  
-  
+
+
   /**右键菜单点击后的功能*/
   const lambdaObj = action(setItems, setModal, () => setGroup(groupId, setItems))
-  
+
   return (items.length > 0 ?
       <MyDnd dndIds={items} setItems={setItems} style={{}} dragEndFunc={dragSortReq}>
         {items.map(item =>

@@ -1,9 +1,9 @@
 import React, {lazy, useState} from 'react'
 import {observer} from "mobx-react-lite";
 
-import JWTUtils from "../../utils/JWTUtils";
+import JWTUtils from "@/utils/JWTUtils";
 import {TabBar} from "antd-mobile";
-import {tabs} from "./data.jsx";
+import {tabs} from "./data";
 
 import styles from "./mobile.module.css";
 import './mobileCommom.css';

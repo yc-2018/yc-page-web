@@ -35,6 +35,11 @@ export default class JWTUtils {
         return payload?.username || 'ikun' + payload?.userId?.substring(0, 10) + '...'
     }
 
+    static getId() {
+        const payload = this.parseJWT();
+        return payload?.userId || 'noLogin'
+    }
+
     // 从 JWT 中获取 头像URL
     static getAvatar() {
         const payload = this.parseJWT();

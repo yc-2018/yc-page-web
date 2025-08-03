@@ -4,7 +4,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/hljs';    // 浅蓝底docco
 
 import styles from './md.module.css'
-import {mdCodeLanguageList} from "../../store/NoLoginData.jsx";
+import {mdCodeLanguageList} from "@/store/NoLoginData";
 import {CopyToClipboard} from "react-copy-to-clipboard/src";
 import CommonStore from "../../store/CommonStore";
 
