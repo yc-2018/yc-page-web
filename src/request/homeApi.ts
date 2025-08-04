@@ -5,6 +5,8 @@ import bingWallpaperList from "@/store/bingWallpaper";
 import myAxios, {myDelete, myGet, myPost, myPut} from "./myAxios";
 import IBookmark from "@/interface/IBookmark";
 import ISearchEngines from "@/interface/ISearchEngines";
+import IUserConfig from "@/interface/IUserConfig";
+import IUser from "@/interface/IUser";
 
 
 /** jsonp获取百度联想列表 */
@@ -53,19 +55,19 @@ const getBgFns = {
 }
 
 
-/** 上传页面配置信息到云端 todo */
-export async function uploadInfo(info: object) {
-  CommonStore.setLoading(true, "开始上传");
-  const result = await myPut<boolean>('/pageParameters', info);
-  if (result.success) CommonStore.setLoading(false, "上传成功", 'success');
+/** 上传页面配置信息到云端 */
+export async function updateUserConfig(info: IUserConfig) {
+  CommonStore.setLoading(true, "处理中...");
+  const result = await myPut<IUserConfig>('/UserConfig', info);
+  if (result.success) CommonStore.setLoading(false, "处理成功", 'success');
   else CommonStore.setLoading(false);
 }
 
-/** 从云端获取页面配置信息 */
-export async function getPageInfo() {
-  const result = await myGet<any>('/pageParameters');
-  if (result.success) return result.data;
-}
+/** 从云端获取背景图片 */
+export const getBg = () => myGet<IUserConfig>('/UserConfig/getBg')
+
+/** 从云端获取头像信息 */
+export const getNameAndAvatar = () => myGet<IUser>('/users/getNameAndAvatar')
 
 
 /** 从云端获取搜索引擎列表 */

@@ -1,44 +1,64 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Button, Avatar, List, Dialog, Toast, Grid, Collapse} from 'antd-mobile'
 
-import UserStore from "../../store/UserStore";
-import JWTUtils from "../../utils/JWTUtils";
+import UserStore from "@/store/UserStore";
+import JWTUtils from "@/utils/JWTUtils";
 import {Input} from "antd";
 import {updateNameOrAvatar} from "@/request/commonRequest";
 import GgComparator from "./Tools/GgComparator";
+import {_getNameAndAvatar, _setNameAndAvatar} from "@/utils/localStorageUtils";
+import {getNameAndAvatar} from "@/request/homeApi";
 
 
-let username = JWTUtils.getName()   // 获取用户名
-let avatar = JWTUtils.getAvatar()   // 获取头像
+let username = ''
+let avatar = ''
 
 /**
  * @param setBarItem {function} 设置当前页面:用来退出后登录设置会到待办页面，不然重新登录进来会有bug
  * */
 export default ({setBarItem}) => {
   const avatarRef = useRef()        // 头像ref 因为弹窗是静态的 用不了state 所以用ref
+  const [info, setInfo] = useState(_getNameAndAvatar());
   const ggVisible = useState(false) // gg工具弹窗
+
+  let {jwt} = UserStore;
+
+  /** 初始化背景 和头像 */
+  useEffect(() => {
+    // 头像 昵称
+    if (!JWTUtils.isExpired()) {
+      getNameAndAvatar().then(info => {
+        if (info.data?.avatar) {
+          setInfo(info.data ?? {});
+          _setNameAndAvatar(info.data);
+        }
+      })
+    }
+  }, [jwt])
 
   return (
     <div style={{padding: '10px'}}>
       <List>
         <List.Item
-          prefix={<Avatar src={JWTUtils.getAvatar()}/>}
-          description={`${getGreeting()},${JWTUtils.getName()}`}
+          prefix={<Avatar src={info.avatar}/>}
+          description={`${getGreeting()},${info.username}`}
           onClick={() => {
+            username = info.username
+            avatar = info.avatar
             Dialog.confirm({
               content: <>
                 <span>昵称：</span>
                 <Input
-                  defaultValue={username}
+                  defaultValue={info.username}
                   placeholder='请输入用户名'
-                  onChange={v => {username=v.target.value}}
+                  onChange={v => username = v.target.value}
                 />
                 <br/>
 
                 <div>头像：</div>
                 <img
                   width={100}
-                  src={avatar}
+                  src={info.avatar}
                   style={{display: 'inline-block'}}
                   ref={avatarRef}
                   alt={'头像'}
@@ -69,7 +89,7 @@ export default ({setBarItem}) => {
             })
           }}
         >
-          {JWTUtils.getName()}
+          {info.username}
         </List.Item>
 
         {/*意见反馈*/}

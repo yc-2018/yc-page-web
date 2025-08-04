@@ -1,9 +1,10 @@
+// [查看][修改]用户名字/头像【弹窗】
+import React, {useState} from "react";
 import {observer} from "mobx-react-lite";
 import {Avatar, Col, Form, Input, Modal, Row} from "antd";
-import UserStore from "../../store/UserStore";
-import React, {useState} from "react";
-import JWTUtils from "../../utils/JWTUtils";
-import {updateNameOrAvatar} from "../../request/commonRequest";
+import UserStore from "@/store/UserStore";
+import JWTUtils from "@/utils/JWTUtils";
+import {updateNameOrAvatar} from "@/request/commonRequest";
 import {UserOutlined} from "@ant-design/icons";
 
 export default observer(() => {

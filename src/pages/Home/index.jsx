@@ -22,33 +22,45 @@ import Filing from "@/components/Filing";
 import showOrNot from '@/store/ShowOrNot';
 import UserStore from "@/store/UserStore";
 import CommonStore from "@/store/CommonStore";
-import {reImagesUrl, uploadInfo, getPageInfo} from "@/request/homeApi";
+import {reImagesUrl, updateUserConfig, getBg, getNameAndAvatar} from "@/request/homeApi";
 import Bookmarks from "@/pages/Home/Bookmarks/index";
 import {getToolsList, toolsBaseURL} from "@/request/toolsRequest";
 import HomeSearch from "./HomeSearch";
 import "@/pages/Home/Home.css"
 import Search from "@/pages/Home/Search";
+import {_getBackgroundUrl, _setNameAndAvatar, _setBackgroundUrl} from "@/utils/localStorageUtils";
 
 
 function Home() {
-  const [images, setImages] = useState('/Default-wallpaper.jpg');// 背景背景
+  const [bgImg, setBgImg] = useState('/Default-wallpaper.jpg');// 背景背景
+  const [info, setInfo] = useState({});
   const [tools, setTools] = useState([]);
 
   const {msg} = CommonStore;
   const navigate = useNavigate()   // 路由跳转
-  let backgroundImage = localStorage.getItem('backgroundImages'); // 尝试获取本地存储的背景URL
   let {jwt} = UserStore;
 
+  /** 初始化背景 和头像名称 */
   useEffect(() => {
-    if (!JWTUtils.isExpired() && !backgroundImage) (async () => {
-      // 获取云端保存的页面信息
-      const info = await getPageInfo()
-      if (info?.backgroundUrl) setBgImage(info.backgroundUrl);
-
-    })();
+    const bgUrl = _getBackgroundUrl();
+    if (bgUrl) setBgImage(bgUrl);
+    if (!bgUrl && !JWTUtils.isExpired()) {
+      getBg().then(info => {
+        if (info.data?.backgroundUrl) setBgImage(info.data.backgroundUrl);
+      })
+    }
+    // 头像 昵称
+    if (!JWTUtils.isExpired()) {
+      getNameAndAvatar().then(info => {
+        if (info.data?.avatar) {
+          setInfo(info.data ?? {});
+          _setNameAndAvatar(info.data);
+        }
+      })
+    }
   }, [jwt])
 
-  /**  */
+  /** 获取工具 */
   useEffect(() => {
     getToolsList().then(dataList => setTools(dataList)).catch(() => {
       CommonStore.msg.error('获取工具列表失败');
@@ -64,13 +76,10 @@ function Home() {
     else msg.error('获取背景出错');
   }
 
-  /**  获取本地记录背景URL */
-  const getBgImage = () => backgroundImage || images
-
   /** 保存背景URL到本地 */
   const setBgImage = (backgroundUrl, msg = null) => {
-    localStorage.setItem('backgroundImages', backgroundUrl);
-    setImages(backgroundUrl);
+    _setBackgroundUrl(backgroundUrl);
+    setBgImg(backgroundUrl);
     return msg && CommonStore.msg.info(msg);
   }
 
@@ -83,7 +92,7 @@ function Home() {
         height: '100vh',
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
-        backgroundImage: `linear-gradient( rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.4)),url(${getBgImage()})`,
+        backgroundImage: `linear-gradient( rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.4)),url(${bgImg})`,
       }}
     >
 
@@ -137,7 +146,7 @@ function Home() {
                     tooltip={{title: '从服务器获取背景', placement: 'left'}}
                     className='buttonOpacity'
                     onClick={async () => {
-                      const {backgroundUrl} = await getPageInfo()
+                      const {backgroundUrl} = await getBg()
                       if (backgroundUrl) setBgImage(backgroundUrl, '获取背景成功')   // 设置背景
                       else msg.error('您还没有上传过背景到服务器哦');
                     }}
@@ -148,7 +157,7 @@ function Home() {
                     icon={<CloudUploadOutlined/>}
                     tooltip={{title: '上传背景到服务器', placement: 'left'}}
                     className='buttonOpacity'
-                    onClick={() => uploadInfo({backgroundUrl: getBgImage()})}
+                    onClick={() => updateUserConfig({backgroundUrl: bgImg})}
                   />
                 </>
               )
@@ -162,7 +171,7 @@ function Home() {
               onClick={async () => {
                 CommonStore.setLoading(true, '开始缓存该背景...');
                 try {
-                  const response = await axios.get(backgroundImage || images, {
+                  const response = await axios.get(bgImg, {
                     responseType: 'blob', // 重要：这会告诉 Axios 返回一个 Blob 对象
                   });
 
@@ -180,7 +189,7 @@ function Home() {
                   CommonStore.setLoading(false, '缓存完成,请保存');
                 } catch (error) {
                   CommonStore.setLoading(false, '该图片无法直接下载,请在新标签页中保存')
-                  window.open(backgroundImage || images, '_blank'); // 在新标签页中打开图片
+                  window.open(bgImg, '_blank'); // 在新标签页中打开图片
                 }
               }}
             />
@@ -214,11 +223,11 @@ function Home() {
                 icon={  // 头像
                   <Avatar size={30}
                           style={{backgroundColor: '#FFFFFF72', position: 'relative', left: '-5px'}}
-                          src={JWTUtils.getAvatar()}
+                          src={info.avatar}
                           icon={<UserOutlined style={{color: 'blue'}}/>}
                   />
                 }
-                tooltip={{title: "用户:" + JWTUtils.getName(), placement: 'bottom'}}
+                tooltip={{title: "用户:" + info.username, placement: 'bottom'}}
                 style={{insetInlineEnd: 24 + 56 + 56, opacity: .5}}
                 className='buttonOpacity'
               >

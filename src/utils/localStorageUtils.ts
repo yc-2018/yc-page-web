@@ -2,6 +2,7 @@
 
 import ISearchEngines from "@/interface/ISearchEngines";
 import JWTUtils from "@/utils/JWTUtils";
+import IUser from "@/interface/IUser";
 
 const saveLocal = (key: string, value: any) => {
   if (typeof value === 'object') value = JSON.stringify(value)
@@ -25,4 +26,15 @@ export const _getDefaultEngine = () => {
   const defaultEngine = getLocal('defaultEngine');
   if (defaultEngine) return JSON.parse(defaultEngine)
   return {id: 0, engineUrl: "https://www.baidu.com/s?wd=@@@", name: "百度"}
+}
+
+/** 背景图片url */
+export const _setBackgroundUrl = (url: string) => saveLocal('backgroundUrl', url)
+export const _getBackgroundUrl = () => getLocal('backgroundUrl')
+
+/** 头像url */
+export const _setNameAndAvatar = (user: IUser) => saveLocal('nameAndAvatar', user)
+export const _getNameAndAvatar = (): IUser => {
+  const nameAndAvatar = getLocal('nameAndAvatar');
+  return nameAndAvatar ? JSON.parse(nameAndAvatar) : {name: '-'}
 }
