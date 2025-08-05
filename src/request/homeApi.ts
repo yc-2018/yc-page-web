@@ -58,13 +58,13 @@ const getBgFns = {
 /** 上传页面配置信息到云端 */
 export async function updateUserConfig(info: IUserConfig) {
   CommonStore.setLoading(true, "处理中...");
-  const result = await myPut<IUserConfig>('/UserConfig', info);
+  const result = await myPut<IUserConfig>('/userConfig', info);
   if (result.success) CommonStore.setLoading(false, "处理成功", 'success');
   else CommonStore.setLoading(false);
 }
 
 /** 从云端获取背景图片 */
-export const getBg = () => myGet<IUserConfig>('/UserConfig/getBg')
+export const getBg = () => myGet<IUserConfig>('/userConfig/getBg')
 
 /** 从云端获取头像信息 */
 export const getNameAndAvatar = () => myGet<IUser>('/users/getNameAndAvatar')
