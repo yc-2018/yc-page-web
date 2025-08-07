@@ -1,6 +1,5 @@
 import {Dispatch, FC, SetStateAction, useEffect, useState} from "react";
-import UserStore from "@/store/UserStore";
-import {deleteSearchEngine, getSearchEngineList} from "@/request/homeApi";
+import {deleteSearchEngine} from "@/request/homeApi";
 import {searchData} from "@/store/NoLoginData";
 import {App, Avatar, Button, Dropdown, Flex} from "antd";
 import {tryGetFavicon, tryGetFavicon1} from "@/utils/urlUtils";
@@ -12,8 +11,10 @@ import {_setDefaultEngine} from "@/utils/localStorageUtils";
 import JWTUtils from "@/utils/JWTUtils";
 
 interface ISearchEngineList {
-  q?: string,
-  setEngine: Dispatch<SetStateAction<ISearchEngines>>
+  q?: string,   // 搜索关键字
+  searchList?: ISearchEngines[],  // 搜索引擎列表
+  setSearchList: Dispatch<SetStateAction<ISearchEngines[] | undefined>> // 设置搜索引擎列表
+  setEngine: Dispatch<SetStateAction<ISearchEngines>>   // 设置默认搜索引擎
 }
 
 const {msg} = CommonStore
@@ -29,7 +30,7 @@ const LOW_USE = '4'
  * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
  * @since 2025/8/3 20:16
  */
-const SearchEngineList: FC<ISearchEngineList> = ({q, setEngine}) => {
+const SearchEngineList: FC<ISearchEngineList> = ({q, setEngine, searchList, setSearchList}) => {
   const [searchItems, setSearchItems] = useState(searchData)
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
 
@@ -42,17 +43,8 @@ const SearchEngineList: FC<ISearchEngineList> = ({q, setEngine}) => {
   ];
 
   useEffect(() => {
-    // 登录更新搜索引擎列表
-    if (UserStore.jwt){
-      getSearchEngineList().then(list => {
-        if (list) {
-          const iSearchEngines = list.filter(item => item.isQuickSearch === 1);
-          setSearchItems(iSearchEngines)
-        }
-      })
-    }
-
-  }, [UserStore.jwt])
+    searchList && setSearchItems(searchList)
+  }, [searchList])
 
   /**
    * 触发搜索
@@ -74,9 +66,10 @@ const SearchEngineList: FC<ISearchEngineList> = ({q, setEngine}) => {
         title: `确定删除 ${searchItem.name} 吗?`,
         content: '删除了就不能撤回了哟...',
         async onOk() {
-          const result = await deleteSearchEngine([searchItem.id]); // todo 不需要批量  后面再控制排序
-          if (result) {
-            setSearchItems(items => items.filter(item => item.id !== searchItem.id))
+          const result = await deleteSearchEngine(searchItem.id);
+          if (result.success) {
+            setSearchList(items => items?.filter(item => item.id !== searchItem.id))
+            msg.success('删除成功');
           }
         }
       })

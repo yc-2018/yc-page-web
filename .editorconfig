@@ -13,9 +13,9 @@ insert_final_newline = true      # 文件末尾添加空行
 trim_trailing_whitespace = true  # 删除行尾空格
 max_line_length = 100            # 最大行长度(可选)
 
-# JSON文件设置
-[*.json]
-indent_size = 2                  # JSON文件也使用2空格缩进
+# # JSON文件设置
+# [*.json]
+# indent_size = 2                  # JSON文件也使用2空格缩进
 
 # Markdown文件特殊设置
 [*.md]
@@ -25,7 +25,3 @@ max_line_length = off            # 关闭行长限制
 # Makefile必须使用tab
 [Makefile]
 indent_style = tab
-
-# 测试文件特殊设置
-[test/**]
-indent_size = 4

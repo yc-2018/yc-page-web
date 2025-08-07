@@ -1,10 +1,11 @@
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {SendOutlined} from "@ant-design/icons";
-import {getThinkList} from "@/request/homeApi";
+import {getSearchEngines, getThinkList} from "@/request/homeApi";
 import {AutoComplete, Input} from "antd";
 import SearchEngines from "@/pages/Home/HomeSearch/SearchEngines";
 import {_getDefaultEngine} from "@/utils/localStorageUtils";
 import ISearchEngines from "@/interface/ISearchEngines";
+import JWTUtils from "@/utils/JWTUtils";
 
 let timer: number;
 
@@ -15,10 +16,17 @@ let timer: number;
  * @since 2025/7/16 2:01
  */
 const SearchBox = () => {
+  const [searchList, setSearchList] = useState<ISearchEngines[]>()
   const [anotherOptions, setAnotherOptions] = useState<{ value: any }[]>([]);
   const [nowSearch, setNowSearch] = useState<ISearchEngines>(_getDefaultEngine())
   const searchValue = useRef<string>();
 
+  useEffect(() => {
+    // 获取搜索引擎列表
+    !JWTUtils.isExpired() && getSearchEngines(false).then(response => {
+      if (response.success) setSearchList(response.data)
+    })
+  }, [])
 
   /**
    * 搜索【新页面打开】
@@ -63,7 +71,12 @@ const SearchBox = () => {
   return (
     <div id="搜索组件">
 
-      <SearchEngines q={searchValue.current} setEngine={setNowSearch}/>
+      <SearchEngines
+        q={searchValue.current}
+        setEngine={setNowSearch}
+        searchList={searchList}
+        setSearchList={setSearchList}
+      />
 
       <AutoComplete
         size="large"

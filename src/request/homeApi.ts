@@ -70,11 +70,14 @@ export const getBg = () => myGet<IUserConfig>('/userConfig/getBg')
 export const getNameAndAvatar = () => myGet<IUser>('/users/getNameAndAvatar')
 
 
-/** 从云端获取搜索引擎列表 */
+/** todo 从云端获取搜索引擎列表 */
 export async function getSearchEngineList(type = null) {
   const result = await myGet<ISearchEngines[]>(`/searchEngines/list${type ? '?type=' + type : ''}`);
   return result.data;
 }
+
+export const getSearchEngines = (isLowUsage: boolean) =>
+  myGet<ISearchEngines[]>(`/searchEngines?isLowUsage=${isLowUsage}`)
 
 /** 添加搜索引擎 */
 export async function addSearchEngine(body: object) {
@@ -100,16 +103,8 @@ export async function updateSearchEngine(bodyList: any[]) {
   }
 }
 
-/** 删除搜索引擎《支持批量》 */
-export async function deleteSearchEngine(idList: number[]) {
-  try {
-    const {data: {data}} = await myAxios({url: '/searchEngines', method: 'delete', data: idList});
-    data._ || CommonStore.setLoading(false, "删除成功", 'success');
-    return data;
-  } catch (error) {
-    console.log('删除搜索引擎错误=>', error)
-  }
-}
+/** 删除搜索引擎 */
+export const deleteSearchEngine = (id: number) => myDelete<boolean>(`/searchEngines/${id}`)
 
 /**
  * 获取书签

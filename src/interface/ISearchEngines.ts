@@ -9,8 +9,6 @@ export default interface ISearchEngines {
   id: number
   /** 搜索引擎URL  */
   engineUrl: string
-  /** 是否快速搜索 1快 0普通  */
-  isQuickSearch?: number
   /** 不常用 1是 0否  */
   lowUsage?: number
   /** 名称  */
