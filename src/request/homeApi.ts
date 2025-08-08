@@ -76,6 +76,7 @@ export async function getSearchEngineList(type = null) {
   return result.data;
 }
 
+/** 搜索引擎列表 */
 export const getSearchEngines = (isLowUsage: boolean) =>
   myGet<ISearchEngines[]>(`/searchEngines?isLowUsage=${isLowUsage}`)
 
@@ -91,7 +92,7 @@ export async function addSearchEngine(body: object) {
   }
 }
 
-/** 修改搜索引擎 */
+/** todo 修改搜索引擎 */
 export async function updateSearchEngine(bodyList: any[]) {
   CommonStore.setLoading(true);
   try {
@@ -102,6 +103,9 @@ export async function updateSearchEngine(bodyList: any[]) {
     CommonStore.setLoading(false)
   }
 }
+/** 修改搜索引擎 */
+export const updateSearchEngines = (searchEngines: ISearchEngines) =>
+  myPut<ISearchEngines>('/searchEngines', searchEngines)
 
 /** 删除搜索引擎 */
 export const deleteSearchEngine = (id: number) => myDelete<boolean>(`/searchEngines/${id}`)

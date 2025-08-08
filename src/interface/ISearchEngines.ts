@@ -10,7 +10,7 @@ export default interface ISearchEngines {
   /** 搜索引擎URL  */
   engineUrl: string
   /** 不常用 1是 0否  */
-  lowUsage?: number
+  lowUsage: number
   /** 名称  */
   name: string
   /** 图标URL  */

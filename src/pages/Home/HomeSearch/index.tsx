@@ -1,13 +1,20 @@
 import {useEffect, useRef, useState} from "react";
 import {SendOutlined} from "@ant-design/icons";
-import {getSearchEngines, getThinkList} from "@/request/homeApi";
-import {AutoComplete, Input} from "antd";
+import {getSearchEngines, getThinkList, updateSearchEngines} from "@/request/homeApi";
+import {Alert, AutoComplete, Checkbox, Divider, Form, Input, Modal} from "antd";
 import SearchEngines from "@/pages/Home/HomeSearch/SearchEngines";
 import {_getDefaultEngine} from "@/utils/localStorageUtils";
 import ISearchEngines from "@/interface/ISearchEngines";
 import JWTUtils from "@/utils/JWTUtils";
+import UserStore from "@/store/UserStore";
+import CommonStore from "@/store/CommonStore";
 
 let timer: number;
+const {msg} = CommonStore
+interface IEditOrAdd {
+  open: boolean;
+  edit?: ISearchEngines;
+}
 
 /**
  * 首页搜索框组件
@@ -17,16 +24,20 @@ let timer: number;
  */
 const SearchBox = () => {
   const [searchList, setSearchList] = useState<ISearchEngines[]>()
+  const [searchLowList, setSearchLowList] = useState<ISearchEngines[]>()
   const [anotherOptions, setAnotherOptions] = useState<{ value: any }[]>([]);
   const [nowSearch, setNowSearch] = useState<ISearchEngines>(_getDefaultEngine())
+  const [editOrAddData, setEditOrAddData] = useState<IEditOrAdd>({open: false})
+  const [modalLoading, setModalLoading] = useState(false)
   const searchValue = useRef<string>();
+  const [form] = Form.useForm(); // 创建一个表单域
 
   useEffect(() => {
     // 获取搜索引擎列表
     !JWTUtils.isExpired() && getSearchEngines(false).then(response => {
       if (response.success) setSearchList(response.data)
     })
-  }, [])
+  }, [UserStore.jwt])
 
   /**
    * 搜索【新页面打开】
@@ -68,6 +79,47 @@ const SearchBox = () => {
     }, 50)
   }
 
+  /** 打开编辑或新增弹窗 */
+  const openModal = (edit?: ISearchEngines) => {
+    setEditOrAddData({open: true, edit})
+    form.setFieldsValue(edit)
+  }
+
+  /** 新增或编辑弹窗的确定处理 */
+  const modalOnOk = () => {
+    form.validateFields().then((values:ISearchEngines) => {
+      values.lowUsage = values.lowUsage ? 1 : 0
+      const editSearch = editOrAddData.edit;
+      if (editSearch?.id) {
+        // ———————————— 修改 ————————————
+        setModalLoading(true);
+        updateSearchEngines({...editSearch, ...values}).then(result => {
+          if (result.success && result.data) {
+            const updateData = result.data;
+            const setXxxSearchList = editSearch.lowUsage === 0 ? setSearchList : setSearchLowList;
+            // 数据回显 ( 考虑 常用和不常用列表的转换
+            if (updateData.lowUsage === editSearch!.lowUsage) {
+              setXxxSearchList(items =>
+                  items?.map(item => item.id === updateData.id ? updateData : item));
+            } else {  // ——数据换列表——
+              // 移除原列表那个数据
+              setXxxSearchList(items => items?.filter(item => item.id !== updateData.id));
+              // 反转设置某列表方法
+              const setToXxxSearchList = setXxxSearchList === setSearchList ? setSearchLowList : setSearchList
+              // 放到新列表：考虑新列表是否为空？空就算了
+              setToXxxSearchList(items => items ? [...items, updateData] : undefined);
+            }
+            msg.success('修改成功');
+            setEditOrAddData({open: false})
+          } else msg.error('修改失败(返回数据异常')
+        }).finally(() => setModalLoading(false));
+      } else {
+        // ———————————— 新增 ————————————
+      }
+    })
+
+  }
+
   return (
     <div id="搜索组件">
 
@@ -76,6 +128,7 @@ const SearchBox = () => {
         setEngine={setNowSearch}
         searchList={searchList}
         setSearchList={setSearchList}
+        openModal={openModal}
       />
 
       <AutoComplete
@@ -94,6 +147,77 @@ const SearchBox = () => {
           enterButton={[nowSearch.name, <SendOutlined key="搜索按钮"/>]}      // 搜索按钮
         />
       </AutoComplete>
+
+      {/*————————————————————————————————————新增或编辑弹窗————————————————————————————————————*/}
+      <Modal
+          title={editOrAddData.edit?.id ? '修改搜索引擎' : '添加搜索引擎'}
+          open={editOrAddData.open}
+          onOk={modalOnOk}
+          confirmLoading={modalLoading}
+          onCancel={() => setEditOrAddData({open: false})}
+      >
+        {!editOrAddData.edit && // 新增时提示
+          <Alert
+            type="success"
+            description={
+              <>
+                提示 添加搜索引擎时用@@@替代你要搜索的内容哦，比如百度的：
+                <Divider style={{color: 'blue'}}>https://www.baidu.com/s?wd=@@@</Divider>
+              </>}
+          />
+        }
+
+        <br/>
+        <Form<ISearchEngines>
+            form={form}
+            labelCol={{span: 6}}
+            wrapperCol={{span: 16}}
+            style={{maxWidth: 600}}
+            initialValues={editOrAddData.edit}
+        >
+          <Form.Item
+            label="引擎名称" name="name"
+            rules={[
+              {required: true, message: '请输入引擎名字'},
+              {max: 10, message: '引擎名称不能超过10个字符'}
+            ]}
+          >
+            <Input/>
+          </Form.Item>
+
+          <Form.Item
+            label="引擎URL" name="engineUrl"
+            rules={[
+              {required: true, message: '请输入引擎URL'},
+              {max: 255, message: '引擎URL不能超过255个字符'},
+              {
+                pattern: /^(http|https):\/\/.*@@@.*$/,
+                message: 'URL必须以 http:// 或 https:// 开头，并且包含 "@@@"'
+              }
+            ]}
+          >
+            <Input/>
+          </Form.Item>
+
+          <Form.Item
+              label="图标" name="iconUrl"
+              rules={[
+                {max: 255, message: '引擎URL不能超过255个字符'},
+                {
+                  pattern: /^(http|https):\/\//,
+                  message: 'URL必须以 http:// 或 https:// 开头'
+                }
+              ]}
+          >
+            <Input/>
+          </Form.Item>
+
+          <Form.Item label="不常用" name="lowUsage" valuePropName="checked">
+            <Checkbox/>
+          </Form.Item>
+
+        </Form>
+      </Modal>
     </div>
   );
 }

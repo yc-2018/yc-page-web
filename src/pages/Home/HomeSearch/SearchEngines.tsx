@@ -15,6 +15,7 @@ interface ISearchEngineList {
   searchList?: ISearchEngines[],  // 搜索引擎列表
   setSearchList: Dispatch<SetStateAction<ISearchEngines[] | undefined>> // 设置搜索引擎列表
   setEngine: Dispatch<SetStateAction<ISearchEngines>>   // 设置默认搜索引擎
+  openModal: (edit?: ISearchEngines) => void      // 打开模态框
 }
 
 const {msg} = CommonStore
@@ -30,7 +31,12 @@ const LOW_USE = '4'
  * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
  * @since 2025/8/3 20:16
  */
-const SearchEngineList: FC<ISearchEngineList> = ({q, setEngine, searchList, setSearchList}) => {
+const SearchEngineList: FC<ISearchEngineList> = (
+    {q,
+      setEngine,
+      searchList,
+      setSearchList,
+      openModal,}) => {
   const [searchItems, setSearchItems] = useState(searchData)
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
 
@@ -59,7 +65,7 @@ const SearchEngineList: FC<ISearchEngineList> = ({q, setEngine, searchList, setS
 
   const menuOnClick = (e: MenuInfo, searchItem:ISearchEngines) => {
     if (e.key === EDIT) {
-      msg.info('正在编辑搜索引擎')
+      openModal(searchItem)
     }
     if (e.key === DELETE) {
       modal.confirm({
@@ -102,13 +108,13 @@ const SearchEngineList: FC<ISearchEngineList> = ({q, setEngine, searchList, setS
                     <Avatar
                       size={20}
                       shape="square"  // 方形
-                      src={searchItem.iconUrl ?? tryGetFavicon1(searchItem.engineUrl)}
+                      src={tryGetFavicon1(searchItem.engineUrl)}
                       icon={<QuestionCircleTwoTone style={{color: '#888', fontSize: 16}}/>}
                       style={{backgroundColor: 'unset'}}
                     />}
                   shape="square"
                   style={{backgroundColor: 'unset'}}
-                  src={tryGetFavicon(searchItem.engineUrl)}
+                  src={searchItem.iconUrl || tryGetFavicon(searchItem.engineUrl)}
                 />
               }
             >
