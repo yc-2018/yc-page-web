@@ -38,3 +38,10 @@ export const _getNameAndAvatar = (): IUser => {
   const nameAndAvatar = getLocal('nameAndAvatar');
   return nameAndAvatar ? JSON.parse(nameAndAvatar) : {name: '-'}
 }
+
+/** 搜索引擎普通列表 */
+export const _setSearchEngines = (searchEngines: ISearchEngines[]) => saveLocal('searchEngines', searchEngines)
+export const _getSearchEngines = (): ISearchEngines[] | undefined => {
+  const searchEngines = getLocal('searchEngines');
+  return searchEngines ? JSON.parse(searchEngines) : undefined
+}

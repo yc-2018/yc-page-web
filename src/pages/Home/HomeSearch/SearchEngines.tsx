@@ -1,4 +1,4 @@
-import {Dispatch, FC, SetStateAction, useEffect, useState} from "react";
+import {CSSProperties, Dispatch, FC, ReactNode, SetStateAction, useEffect, useState} from "react";
 import {deleteSearchEngine} from "@/request/homeApi";
 import {searchData} from "@/store/NoLoginData";
 import {App, Avatar, Button, Dropdown, Flex} from "antd";
@@ -11,11 +11,16 @@ import {_setDefaultEngine} from "@/utils/localStorageUtils";
 import JWTUtils from "@/utils/JWTUtils";
 
 interface ISearchEngineList {
+  id?: string,  // 元素ID
   q?: string,   // 搜索关键字
   searchList?: ISearchEngines[],  // 搜索引擎列表
   setSearchList: Dispatch<SetStateAction<ISearchEngines[] | undefined>> // 设置搜索引擎列表
-  setEngine: Dispatch<SetStateAction<ISearchEngines>>   // 设置默认搜索引擎
-  openModal: (edit?: ISearchEngines) => void      // 打开模态框
+  setEngine: Dispatch<SetStateAction<ISearchEngines>>                   // 设置默认搜索引擎
+  openModal: (edit?: ISearchEngines) => void                            // 打开模态框
+  changeLowUsage: (search: ISearchEngines) => void                      // 修改搜索引擎的常用性
+  extraElement?: ReactNode                                              // 额外元素
+  changeLowName?: string                                                // 菜单中的常用名称
+  btnStyle?: CSSProperties                                              // 按钮样式
 }
 
 const {msg} = CommonStore
@@ -32,17 +37,24 @@ const LOW_USE = '4'
  * @since 2025/8/3 20:16
  */
 const SearchEngineList: FC<ISearchEngineList> = (
-    {q,
+    {
+      id = "搜索引擎列表",
+      q,
       setEngine,
       searchList,
       setSearchList,
-      openModal,}) => {
-  const [searchItems, setSearchItems] = useState(searchData)
+      openModal,
+      extraElement,
+      changeLowUsage,
+      changeLowName = '设为不常用',
+      btnStyle = {},
+    }) => {
+  const [searchItems, setSearchItems] = useState(searchList ?? searchData)
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
 
   const items = [
     {label: '设为主搜索', key: SET_SEARCH},
-    {label: '设为不常用', key: LOW_USE, disabled: JWTUtils.isExpired()},
+    {label: changeLowName, key: LOW_USE, disabled: JWTUtils.isExpired()},
     {label: '编 辑', key: EDIT, disabled: JWTUtils.isExpired()},  // todo
     {label: '删 除', key: DELETE, disabled: JWTUtils.isExpired()},
     {label: '排 序', key: SORT, disabled: JWTUtils.isExpired()},
@@ -66,6 +78,9 @@ const SearchEngineList: FC<ISearchEngineList> = (
   const menuOnClick = (e: MenuInfo, searchItem:ISearchEngines) => {
     if (e.key === EDIT) {
       openModal(searchItem)
+    }
+    if (e.key === LOW_USE) {
+      changeLowUsage(searchItem)
     }
     if (e.key === DELETE) {
       modal.confirm({
@@ -91,7 +106,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
   }
 
   return (
-    <div id="搜索引擎列表">
+    <div id={id}>
       <Flex style={{margin: "5px 80px"}} wrap="wrap" gap="small" justify='center'>
         {searchItems.map(searchItem =>
           <Dropdown
@@ -100,7 +115,9 @@ const SearchEngineList: FC<ISearchEngineList> = (
             trigger={['contextMenu']}
           >
             <Button
+              key={searchItem.id}
               onClick={() => onSearch(searchItem.engineUrl)}
+              style={btnStyle}
               icon={
                 <Avatar
                   size={20}
@@ -122,11 +139,9 @@ const SearchEngineList: FC<ISearchEngineList> = (
             </Button>
           </Dropdown>
         )}
-        {
-          /*登录后显示添加快速搜索按钮*/
-          // UserStore.jwt &&
-          // <Button icon={<PlusOutlined/>} className={"addButton"} onClick={() => addSearch(1)}/>
-        }
+
+        {extraElement}
+
       </Flex>
     </div>
   )

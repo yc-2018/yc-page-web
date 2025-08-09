@@ -76,36 +76,38 @@ export async function getSearchEngineList(type = null) {
   return result.data;
 }
 
-/** 搜索引擎列表 */
-export const getSearchEngines = (isLowUsage: boolean) =>
-  myGet<ISearchEngines[]>(`/searchEngines?isLowUsage=${isLowUsage}`)
-
 /** 添加搜索引擎 */
-export async function addSearchEngine(body: object) {
-  CommonStore.setLoading(true);
-  try {
-    const {data: {data}} = await myAxios({url: '/searchEngines', method: 'post', data: body});
-    data._ || CommonStore.setLoading(false, "添加成功", 'success');
-    return data;
-  } catch (error) {
-    CommonStore.setLoading(false)
-  }
+export async function addSearchEngine(/*body: object*/) {
+  // CommonStore.setLoading(true);
+  // try {
+  //   const {data: {data}} = await myAxios({url: '/searchEngines', method: 'post', data: body});
+  //   data._ || CommonStore.setLoading(false, "添加成功", 'success');
+  //   return data;
+  // } catch (error) {
+  //   CommonStore.setLoading(false)
+  // }
 }
 
 /** todo 修改搜索引擎 */
-export async function updateSearchEngine(bodyList: any[]) {
-  CommonStore.setLoading(true);
-  try {
-    const {data: {data}} = await myAxios({url: '/searchEngines', method: 'put', data: bodyList});
-    data._ || CommonStore.setLoading(false, "修改成功", 'success');
-    return data;
-  } catch (error) {
-    CommonStore.setLoading(false)
-  }
+export async function updateSearchEngine(/*bodyList: any[]*/) {
+  // CommonStore.setLoading(true);
+  // try {
+  //   const {data: {data}} = await myAxios({url: '/searchEngines', method: 'put', data: bodyList});
+  //   data._ || CommonStore.setLoading(false, "修改成功", 'success');
+  //   return data;
+  // } catch (error) {
+  //   CommonStore.setLoading(false)
+  // }
 }
+
+/** 搜索引擎列表 */
+export const getSearchEngines = (isLowUsage: boolean) => myGet<ISearchEngines[]>(`/searchEngines?isLowUsage=${isLowUsage}`)
+
+/** 增加搜索引擎 */
+export const addSearchEngines = (searchEngines: ISearchEngines) => myPost<ISearchEngines>('/searchEngines', searchEngines)
+
 /** 修改搜索引擎 */
-export const updateSearchEngines = (searchEngines: ISearchEngines) =>
-  myPut<ISearchEngines>('/searchEngines', searchEngines)
+export const updateSearchEngines = (searchEngines: ISearchEngines) => myPut<ISearchEngines>('/searchEngines', searchEngines)
 
 /** 删除搜索引擎 */
 export const deleteSearchEngine = (id: number) => myDelete<boolean>(`/searchEngines/${id}`)

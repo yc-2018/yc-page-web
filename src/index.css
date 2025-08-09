@@ -168,3 +168,11 @@ button:focus-visible {
   display: grid;
   justify-content: center;
 }
+
+.opacity30to100 {
+  opacity: .3;
+}
+
+.opacity30to100:hover {
+  opacity: 1;
+}

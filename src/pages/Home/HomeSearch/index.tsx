@@ -1,9 +1,14 @@
 import {useEffect, useRef, useState} from "react";
-import {SendOutlined} from "@ant-design/icons";
-import {getSearchEngines, getThinkList, updateSearchEngines} from "@/request/homeApi";
-import {Alert, AutoComplete, Checkbox, Divider, Form, Input, Modal} from "antd";
+import {DownCircleOutlined, PlusOutlined, SendOutlined} from "@ant-design/icons";
+import {
+  addSearchEngines,
+  getSearchEngines,
+  getThinkList,
+  updateSearchEngines
+} from "@/request/homeApi";
+import {Alert, App, AutoComplete, Button, Checkbox, Divider, Form, Input, Modal} from "antd";
 import SearchEngines from "@/pages/Home/HomeSearch/SearchEngines";
-import {_getDefaultEngine} from "@/utils/localStorageUtils";
+import {_getDefaultEngine, _getSearchEngines, _setSearchEngines} from "@/utils/localStorageUtils";
 import ISearchEngines from "@/interface/ISearchEngines";
 import JWTUtils from "@/utils/JWTUtils";
 import UserStore from "@/store/UserStore";
@@ -23,21 +28,42 @@ interface IEditOrAdd {
  * @since 2025/7/16 2:01
  */
 const SearchBox = () => {
-  const [searchList, setSearchList] = useState<ISearchEngines[]>()
+  const getDefaultEngine = _getDefaultEngine();
+  const [searchList, setSearchList] = useState<ISearchEngines[] | undefined>(_getSearchEngines())
   const [searchLowList, setSearchLowList] = useState<ISearchEngines[]>()
   const [anotherOptions, setAnotherOptions] = useState<{ value: any }[]>([]);
-  const [nowSearch, setNowSearch] = useState<ISearchEngines>(_getDefaultEngine())
+  const [nowSearch, setNowSearch] = useState<ISearchEngines>(getDefaultEngine)
   const [editOrAddData, setEditOrAddData] = useState<IEditOrAdd>({open: false})
   const [modalLoading, setModalLoading] = useState(false)
+  const [lowLoading, setLowLoading] = useState(false)
+  const [q, setQ] = useState(); // 搜索框的值,当前组件用不上,子组件传useRef有问题，就用这个
   const searchValue = useRef<string>();
   const [form] = Form.useForm(); // 创建一个表单域
+  const {modal} = App.useApp();      // 获取在App组件的上下文的modal
 
   useEffect(() => {
     // 获取搜索引擎列表
-    !JWTUtils.isExpired() && getSearchEngines(false).then(response => {
-      if (response.success) setSearchList(response.data)
-    })
+    if (!JWTUtils.isExpired()) {
+      getSearchEngines(false).then(response => {
+        if (response.success) setSearchList(response.data)
+      });
+      getDefaultEngine && setNowSearch(getDefaultEngine)  // 获取默认搜索引擎(登录时)
+    }
   }, [UserStore.jwt])
+
+  /** 索引列表变化就记录 */
+  useEffect(() => {
+    !JWTUtils.isExpired() && searchList?.length && _setSearchEngines(searchList)
+  }, [searchList])
+
+
+  /** 获取不常用搜索列表 */
+  const getSearchLowList = () => {
+    setLowLoading(true)
+    getSearchEngines(true).then(response => {
+      if (response.success) setSearchLowList(response.data ?? [])
+    }).finally(() => setLowLoading(false));
+  }
 
   /**
    * 搜索【新页面打开】
@@ -75,14 +101,38 @@ const SearchBox = () => {
     window.clearTimeout(timer)
     timer = window.setTimeout(async () => {
       const list: { value: string }[] = await getThinkList(text);
-      setAnotherOptions(list.map(item => ({value: getOption(item)})))
+      setAnotherOptions(list?.map(item => ({value: item.value, label: getOption(item)})) ?? [])
     }, 50)
   }
 
   /** 打开编辑或新增弹窗 */
   const openModal = (edit?: ISearchEngines) => {
     setEditOrAddData({open: true, edit})
+    form.resetFields()
     form.setFieldsValue(edit)
+  }
+
+  /** 设置为[常用/不常用](换) */
+  const changeLowUsage = (search: ISearchEngines) => {
+    const lowTo = search.lowUsage === 0 ? '不常用' : '常用'
+    modal.confirm({
+      title: `确定把【${search.name}】切换到 ${lowTo}吗?`,
+      content: `放到【${lowTo}】列表的最后`,
+      async onOk() {
+        const setXxxSearchList = search.lowUsage === 0 ? setSearchList : setSearchLowList
+        if (search?.lowUsage === 0) search.lowUsage = 1
+        else search.lowUsage = 0
+        updateSearchEngines(search).then(res => {
+          if (res.success) {
+            // 本身列表中移除
+            setXxxSearchList(v => v?.filter(item => item.id !== search.id))
+            // 添加到另外列表中
+            const setXxxToSearchList = setXxxSearchList === setSearchList ? setSearchLowList : setSearchList
+            setXxxToSearchList(v => v ? [...v, res.data!] : undefined)
+          }
+        })
+      }
+    })
   }
 
   /** 新增或编辑弹窗的确定处理 */
@@ -115,6 +165,13 @@ const SearchBox = () => {
         }).finally(() => setModalLoading(false));
       } else {
         // ———————————— 新增 ————————————
+        addSearchEngines(values).then(result => {
+          if (result.success) {
+            const setXxxSearchList = values.lowUsage === 0 ? setSearchList : setSearchLowList;
+            setXxxSearchList(v => v ? [...v, result.data!] : undefined)
+            setEditOrAddData({open: false})
+          }
+        })
       }
     })
 
@@ -124,19 +181,57 @@ const SearchBox = () => {
     <div id="搜索组件">
 
       <SearchEngines
-        q={searchValue.current}
+        id="搜索引擎列表"
+        q={q}
         setEngine={setNowSearch}
         searchList={searchList}
         setSearchList={setSearchList}
         openModal={openModal}
+        changeLowUsage={changeLowUsage}
+        extraElement={UserStore.jwt &&
+          <>
+            {!searchLowList &&
+              <Button
+                loading={lowLoading}
+                title="展开不常用搜索引擎"
+                icon={<DownCircleOutlined/>}
+                className="opacity30to100"
+                onClick={() => getSearchLowList()}
+              />
+            }
+            <Button
+              title="添加新的搜索引擎"
+              icon={<PlusOutlined/>}
+              className="opacity30to100"
+              onClick={() => openModal()}
+            />
+          </>
+        }
       />
+
+      {searchLowList &&
+        <SearchEngines
+          id="不常用搜索引擎列表"
+          changeLowName="设为常用"
+          q={q}
+          setEngine={setNowSearch}
+          searchList={searchLowList}
+          setSearchList={setSearchLowList}
+          openModal={openModal}
+          changeLowUsage={changeLowUsage}
+          btnStyle={{borderColor: '#fff', background: '#555050', color: 'white'}}
+        />
+      }
 
       <AutoComplete
         size="large"
         onSearch={autoThink}                          // 输入框值改变时联想列表的回调
         options={anotherOptions}                      // 联想列表
         // value={searchValue.current}                // 输入框的值
-        onChange={v => searchValue.current = v}       // 输入框的值改变的回调
+        onChange={v => {
+          setQ(v)
+          searchValue.current = v
+        }}       // 输入框的值改变的回调
         classNames={{popup: {root: 'thinkList'}}}
         style={{width: 500, margin: '5px 0 15px 0'}}
       >
@@ -173,7 +268,6 @@ const SearchBox = () => {
             labelCol={{span: 6}}
             wrapperCol={{span: 16}}
             style={{maxWidth: 600}}
-            initialValues={editOrAddData.edit}
         >
           <Form.Item
             label="引擎名称" name="name"
