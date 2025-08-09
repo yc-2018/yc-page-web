@@ -221,6 +221,14 @@ const SearchBox = () => {
           openModal={openModal}
           changeLowUsage={changeLowUsage}
           btnStyle={{borderColor: '#fff', background: '#555050', color: 'white'}}
+          extraElement={
+            <Button
+              title="隐藏不常用搜索引擎"
+              className="opacity30to100"
+              onClick={() => setSearchLowList(undefined)}
+              icon={<DownCircleOutlined style={{transform: 'rotate(180deg)'}}/>}
+            />
+          }
         />
       }
 
