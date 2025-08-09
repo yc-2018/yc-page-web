@@ -86,6 +86,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
       modal.confirm({
         title: `确定删除 ${searchItem.name} 吗?`,
         content: '删除了就不能撤回了哟...',
+        maskClosable: true,
         async onOk() {
           const result = await deleteSearchEngine(searchItem.id);
           if (result.success) {
