@@ -70,35 +70,8 @@ export const getBg = () => myGet<IUserConfig>('/userConfig/getBg')
 export const getNameAndAvatar = () => myGet<IUser>('/users/getNameAndAvatar')
 
 
-/** todo 从云端获取搜索引擎列表 */
-export async function getSearchEngineList(type = null) {
-  const result = await myGet<ISearchEngines[]>(`/searchEngines/list${type ? '?type=' + type : ''}`);
-  return result.data;
-}
 
-/** 添加搜索引擎 */
-export async function addSearchEngine(/*body: object*/) {
-  // CommonStore.setLoading(true);
-  // try {
-  //   const {data: {data}} = await myAxios({url: '/searchEngines', method: 'post', data: body});
-  //   data._ || CommonStore.setLoading(false, "添加成功", 'success');
-  //   return data;
-  // } catch (error) {
-  //   CommonStore.setLoading(false)
-  // }
-}
 
-/** todo 修改搜索引擎 */
-export async function updateSearchEngine(/*bodyList: any[]*/) {
-  // CommonStore.setLoading(true);
-  // try {
-  //   const {data: {data}} = await myAxios({url: '/searchEngines', method: 'put', data: bodyList});
-  //   data._ || CommonStore.setLoading(false, "修改成功", 'success');
-  //   return data;
-  // } catch (error) {
-  //   CommonStore.setLoading(false)
-  // }
-}
 
 /** 搜索引擎列表 */
 export const getSearchEngines = (isLowUsage: boolean) => myGet<ISearchEngines[]>(`/searchEngines?isLowUsage=${isLowUsage}`)
@@ -111,6 +84,10 @@ export const updateSearchEngines = (searchEngines: ISearchEngines) => myPut<ISea
 
 /** 删除搜索引擎 */
 export const deleteSearchEngine = (id: number) => myDelete<boolean>(`/searchEngines/${id}`)
+
+/** 排序搜索引擎 */
+export const sortSearchEngine = (sort: string, isLowUsage: boolean) => myPost<boolean>(`/searchEngines/sort?sort=${sort}&isLowUsage=${isLowUsage}`)
+
 
 /**
  * 获取书签

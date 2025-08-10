@@ -176,3 +176,7 @@ button:focus-visible {
 .opacity30to100:hover {
   opacity: 1;
 }
+
+.rootSpin{
+  z-index: 99999;
+}

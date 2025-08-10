@@ -1,5 +1,5 @@
 import {CSSProperties, Dispatch, FC, ReactNode, SetStateAction, useEffect, useState} from "react";
-import {deleteSearchEngine} from "@/request/homeApi";
+import {deleteSearchEngine, sortSearchEngine} from "@/request/homeApi";
 import {searchData} from "@/store/NoLoginData";
 import {App, Avatar, Button, Dropdown, Flex} from "antd";
 import {tryGetFavicon, tryGetFavicon1} from "@/utils/urlUtils";
@@ -9,6 +9,8 @@ import {MenuInfo} from "rc-menu/lib/interface";
 import ISearchEngines from "@/interface/ISearchEngines";
 import {_setDefaultEngine} from "@/utils/localStorageUtils";
 import JWTUtils from "@/utils/JWTUtils";
+import MyDnd from "@/components/MyDnd";
+import styles from './SearchEngines.module.css'
 
 interface ISearchEngineList {
   id?: string,  // 元素ID
@@ -37,19 +39,20 @@ const LOW_USE = '4'
  * @since 2025/8/3 20:16
  */
 const SearchEngineList: FC<ISearchEngineList> = (
-    {
-      id = "搜索引擎列表",
-      q,
-      setEngine,
-      searchList,
-      setSearchList,
-      openModal,
-      extraElement,
-      changeLowUsage,
-      changeLowName = '设为不常用',
-      btnStyle = {},
-    }) => {
+  {
+    id = "搜索引擎列表",
+    q,
+    setEngine,
+    searchList,
+    setSearchList,
+    openModal,
+    extraElement,
+    changeLowUsage,
+    changeLowName = '设为不常用',
+    btnStyle = {},
+  }) => {
   const [searchItems, setSearchItems] = useState(searchList ?? searchData)
+  const [isDrag, setIsDrag] = useState(false)
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
 
   const items = [
@@ -60,9 +63,11 @@ const SearchEngineList: FC<ISearchEngineList> = (
     {label: '排 序', key: SORT, disabled: JWTUtils.isExpired()},
   ];
 
+  /** 父组件数据改变的话，子组件数据也设置改变 */
   useEffect(() => {
     searchList && setSearchItems(searchList)
   }, [searchList])
+
 
   /**
    * 触发搜索
@@ -75,7 +80,35 @@ const SearchEngineList: FC<ISearchEngineList> = (
     window.open(engineUrl.replace('@@@', q ?? ''), '_blank');
   }
 
-  const menuOnClick = (e: MenuInfo, searchItem:ISearchEngines) => {
+  /** 取消拖拽 */
+  const cancelDrag = () => {
+    setIsDrag(false)
+    setSearchList(v => v ? [...v] : undefined)
+  }
+
+  /** 确认排序 */
+  const confirmSort = () => {
+    const son = searchItems.map(v => v.id).join('/');
+    const main = searchList?.map(v => v.id).join('/');
+
+    if (son === main) {
+      msg.warning('没变...')
+      setIsDrag(false)
+    }
+
+    const lowUsage = !!searchItems[0].lowUsage;
+    CommonStore.setLoading(true, '正在排序...')
+    sortSearchEngine(son, lowUsage).then(res => {
+      if (res.success) {
+        setSearchList([...searchItems])
+        msg.success('排序成功')
+        setIsDrag(false)
+      } else msg.error(res.msg)
+    }).finally(() => CommonStore.setLoading(false))
+  }
+
+  /** 右键菜单逻辑 */
+  const menuOnClick = (e: MenuInfo, searchItem: ISearchEngines) => {
     if (e.key === EDIT) {
       openModal(searchItem)
     }
@@ -102,47 +135,95 @@ const SearchEngineList: FC<ISearchEngineList> = (
       msg.info('已设置默认搜索引擎为：' + searchItem.name!)
     }
     if (e.key === SORT) {
-      msg.info('正在排序搜索引擎')
+      setIsDrag(true)
     }
   }
 
+  /**
+   * 是否拖拽组件
+   *
+   * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
+   * @since 2025/8/11 2:54
+   */
+  const IsMyDnd = ({children}: { children: ReactNode }) => isDrag ?
+    <MyDnd
+      dndIds={searchItems}
+      setItems={setSearchItems}
+      dragEndFunc={setSearchItems}
+      style={{display: "flex", flexWrap: "wrap", gap: 5, zIndex: 9999}}
+    >
+      {children}
+    </MyDnd>
+    :
+    <>{children}</>
+
+  /**
+   * 是否拖拽子组件
+   *
+   * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
+   * @since 2025/8/11 2:53
+   */
+  const IsMyDndItem = ({children, searchItem}: { children: ReactNode, searchItem: ISearchEngines }) => isDrag ?
+    <MyDnd.Item id={searchItem.id} key={searchItem.id}>
+      {children}
+    </MyDnd.Item>
+    :
+    <Dropdown
+      key={searchItem.id}
+      menu={{items, onClick: (e) => menuOnClick(e, searchItem)}}
+      trigger={['contextMenu']}
+    >
+      {children}
+    </Dropdown>
+
   return (
     <div id={id}>
-      <Flex style={{margin: "5px 80px"}} wrap="wrap" gap="small" justify='center'>
-        {searchItems.map(searchItem =>
-          <Dropdown
-            key={searchItem.id}
-            menu={{items, onClick: (e) => menuOnClick(e, searchItem)}}
-            trigger={['contextMenu']}
-          >
-            <Button
-              key={searchItem.id}
-              onClick={() => onSearch(searchItem.engineUrl)}
-              style={btnStyle}
-              icon={
-                <Avatar
-                  size={20}
-                  icon={
-                    <Avatar
-                      size={20}
-                      shape="square"  // 方形
-                      src={tryGetFavicon1(searchItem.engineUrl)}
-                      icon={<QuestionCircleTwoTone style={{color: '#888', fontSize: 16}}/>}
-                      style={{backgroundColor: 'unset'}}
-                    />}
-                  shape="square"
-                  style={{backgroundColor: 'unset'}}
-                  src={searchItem.iconUrl || tryGetFavicon(searchItem.engineUrl)}
-                />
-              }
-            >
-              {searchItem.name}
-            </Button>
-          </Dropdown>
-        )}
 
+      {isDrag &&  // 拖拽中 遮罩和功能键
+        <div className={styles.isDragBottom}>
+          <div className={styles.cancelDragAndDrop}>
+            <Button size="large" onClick={cancelDrag}>取消拖拽</Button>
+            <Button size="large" onClick={confirmSort}>确认排序</Button>
+          </div>
+        </div>
+      }
+
+      <Flex
+        gap="small"
+        wrap="wrap"
+        justify='center'
+        style={{margin: "5px 80px", zIndex: 8888}}
+      >
+        <IsMyDnd>
+          {searchItems.map(searchItem =>
+            <IsMyDndItem searchItem={searchItem} key={searchItem.id}>
+              <Button
+                key={searchItem.id}
+                onClick={() => onSearch(searchItem.engineUrl)}
+                style={btnStyle}
+                icon={
+                  <Avatar
+                    size={20}
+                    icon={
+                      <Avatar
+                        size={20}
+                        shape="square"  // 方形
+                        src={tryGetFavicon1(searchItem.engineUrl)}
+                        icon={<QuestionCircleTwoTone style={{color: '#888', fontSize: 16}}/>}
+                        style={{backgroundColor: 'unset'}}
+                      />}
+                    shape="square"
+                    style={{backgroundColor: 'unset'}}
+                    src={searchItem.iconUrl || tryGetFavicon(searchItem.engineUrl)}
+                  />
+                }
+              >
+                {searchItem.name}
+              </Button>
+            </IsMyDndItem>
+          )}
+        </IsMyDnd>
         {extraElement}
-
       </Flex>
     </div>
   )

@@ -54,6 +54,7 @@ const SearchBox = () => {
 
   /** 索引列表变化就记录 */
   useEffect(() => {
+    console.log('███████1>>>>', 1,'<<<<██████')
     !JWTUtils.isExpired() && searchList?.length && _setSearchEngines(searchList)
   }, [searchList])
 
