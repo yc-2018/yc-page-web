@@ -27,7 +27,6 @@ import Bookmarks from "@/pages/Home/Bookmarks/index";
 import {getToolsList, toolsBaseURL} from "@/request/toolsRequest";
 import HomeSearch from "./HomeSearch";
 import "@/pages/Home/Home.css"
-import Search from "@/pages/Home/Search";
 import {_getBackgroundUrl, _setNameAndAvatar, _setBackgroundUrl} from "@/utils/localStorageUtils";
 
 
@@ -117,7 +116,6 @@ function Home() {
           </div>
           <br/>
           {/*搜索框*/}
-          {/*<Search/>*/}
           <HomeSearch/>
 
 

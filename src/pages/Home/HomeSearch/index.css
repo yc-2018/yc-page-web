@@ -10,9 +10,10 @@
 
 .searchGo {
     background-color: rgba(95, 239, 227, 0.5);
-    padding: 0 15px;
     border-radius: 5px;
     transition: all 0.5s;
+    width: 50px;
+    text-align: center;
 }
 
 .searchGo:hover {

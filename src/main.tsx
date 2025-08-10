@@ -9,6 +9,7 @@ import './index.css'
 
 createRoot(document.getElementById('root')!).render(
   <ConfigProvider locale={zhCN} theme={{components: {Message: {zIndexPopup: 9999999}}}}>
+    {/*<BrowserRouter future={{v7_relativeSplatPath: true, v7_startTransition: true}}>*/}
     <BrowserRouter>
       <StrictMode>
         <App/>

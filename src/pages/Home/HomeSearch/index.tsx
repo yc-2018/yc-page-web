@@ -13,6 +13,7 @@ import ISearchEngines from "@/interface/ISearchEngines";
 import JWTUtils from "@/utils/JWTUtils";
 import UserStore from "@/store/UserStore";
 import CommonStore from "@/store/CommonStore";
+import './index.css'
 
 let timer: number;
 const {msg} = CommonStore
@@ -36,7 +37,7 @@ const SearchBox = () => {
   const [editOrAddData, setEditOrAddData] = useState<IEditOrAdd>({open: false})
   const [modalLoading, setModalLoading] = useState(false)
   const [lowLoading, setLowLoading] = useState(false)
-  const [q, setQ] = useState(); // 搜索框的值,当前组件用不上,子组件传useRef有问题，就用这个
+  const [q, setQ] = useState<string>(); // 搜索框的值,当前组件用不上,子组件传useRef有问题，就用这个
   const searchValue = useRef<string>();
   const [form] = Form.useForm(); // 创建一个表单域
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
@@ -83,11 +84,11 @@ const SearchBox = () => {
     <div
       key={item.value}
       style={{display: 'flex', justifyContent: 'space-between'}}
-      onClick={() => searchValue.current = item.value}
+      onClick={() => setKeyword(item.value)}
     >
       <span>{item.value}</span>
-      <div className="searchGo">
-        <SendOutlined onClick={() => setTimeout(onSearch, 50)}/>
+      <div className="searchGo" onClick={() => setTimeout(onSearch, 50)}>
+        <SendOutlined/>
       </div>
     </div>;
 
@@ -134,6 +135,12 @@ const SearchBox = () => {
         })
       }
     })
+  }
+
+  /** 设置关键字 */
+  const setKeyword = (v: string) => {
+    setQ(v)
+    searchValue.current = v
   }
 
   /** 新增或编辑弹窗的确定处理 */
@@ -233,16 +240,13 @@ const SearchBox = () => {
       }
 
       <AutoComplete
-        size="large"
         onSearch={autoThink}                          // 输入框值改变时联想列表的回调
         options={anotherOptions}                      // 联想列表
         // value={searchValue.current}                // 输入框的值
-        onChange={v => {
-          setQ(v)
-          searchValue.current = v
-        }}       // 输入框的值改变的回调
+        // open                                       // 测试用 一直展开联想列表
+        onChange={setKeyword}                         // 输入框的值改变的回调
         classNames={{popup: {root: 'thinkList'}}}
-        style={{width: 500, margin: '5px 0 15px 0'}}
+        style={{width: 500, height: 40, margin: '5px 0 15px 0'}}
       >
         <Input.Search
           size="large"
