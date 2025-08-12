@@ -10,7 +10,7 @@ import {
   Drawer, List, Skeleton, Button, Tag,
   Spin, Tooltip, Select, Divider,
   Badge, Space, Dropdown, App, DatePicker,
-  Switch, Popover, Input, TimePicker
+  Switch, Popover, Input, TimePicker, Image
 } from "antd";
 
 import showOrNot from "@/store/ShowOrNot";
@@ -216,17 +216,20 @@ const MemoDrawer = () => {
       }
     })
 
-  const updateLoopMemo = (memoId, id, loopText) =>{
+  const updateLoopMemo = (memoId, id, loopText, imgArr) => {
     editLoopMemoText = loopText
     modal.confirm({
       title: '修改循环备忘子项备注',
       icon: <ExclamationCircleOutlined/>,
       content:
-        <Input
-          placeholder="请输入备注"
-          defaultValue={editLoopMemoText}
-          onChange={e => editLoopMemoText = e.target.value}
-        />,
+        <div>
+          <Input
+            placeholder="请输入备注"
+            defaultValue={editLoopMemoText}
+            onChange={e => editLoopMemoText = e.target.value}
+          />
+          <div>todo 上传图片</div>
+        </div>,
       onOk: async () => {
         const resp = await updateLoopMemoItem({memoId, id, loopText: editLoopMemoText})
         if (resp.success) msg.success("修改成功")
@@ -252,12 +255,12 @@ const MemoDrawer = () => {
       }}
       popupRender={() =>
         <div className="ant-dropdown-menu dropdown-menu gun">
-          {loopTimeList?.map(({id, memoId, memoDate, loopText, createTime, updateTime}, index) =>
+          {loopTimeList?.map(({id, memoId, memoDate, loopText, imgArr, createTime, updateTime}, index) =>
             <Popover
               content={
                 <div>
                   <Space>
-                    <Button onClick={() => updateLoopMemo(memoId, id, loopText)}>
+                    <Button onClick={() => updateLoopMemo(memoId, id, loopText, imgArr)}>
                       修改备注
                     </Button>
                     <Button onClick={() => deleteLoopMemo(memoId, id)}>
@@ -274,8 +277,18 @@ const MemoDrawer = () => {
               trigger="click"
             >
               <div key={id} className="memoLoopListItem" style={{cursor: 'pointer'}}>
-                {index + 1}：{formatMemoTime(memoDate)}
+                <div>{index + 1}：{formatMemoTime(memoDate)}</div>
                 {loopText && <div className="loop-text">{loopText}</div>}
+                <div
+                  style={{display: 'flex', gap: 5}}
+                  onClick={event => event.stopPropagation()}
+                >
+                  {imgArr &&
+                    <Image.PreviewGroup>
+                      {imgArr.split(',').map((item) => <Image width={40} height={40} src={item} key={item}/>)}
+                    </Image.PreviewGroup>
+                  }
+                </div>
               </div>
             </Popover>
           )}

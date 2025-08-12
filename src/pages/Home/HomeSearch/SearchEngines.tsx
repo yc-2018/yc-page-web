@@ -199,7 +199,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
               <Button
                 key={searchItem.id}
                 onClick={() => onSearch(searchItem.engineUrl)}
-                style={btnStyle}
+                style={{cursor: isDrag ? "move" : "pointer", ...btnStyle}}
                 icon={
                   <Avatar
                     size={20}
