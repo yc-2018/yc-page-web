@@ -58,7 +58,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
   const items = [
     {label: '设为主搜索', key: SET_SEARCH},
     {label: changeLowName, key: LOW_USE, disabled: JWTUtils.isExpired()},
-    {label: '编 辑', key: EDIT, disabled: JWTUtils.isExpired()},  // todo
+    {label: '编 辑', key: EDIT, disabled: JWTUtils.isExpired()},
     {label: '删 除', key: DELETE, disabled: JWTUtils.isExpired()},
     {label: '排 序', key: SORT, disabled: JWTUtils.isExpired()},
   ];
