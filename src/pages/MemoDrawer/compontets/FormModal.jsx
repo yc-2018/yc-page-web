@@ -10,7 +10,8 @@ const {msg} = CommonStore
 /** 外部图片链接列表 */
 const externalImgBedList = [
   {src: 'https://playground.z.wiki/img-cloud/index.html', title: '外部图床1(可能失效,注意信息安全)'},
-  {src: 'https://tools.245556.xyz/聚合图床', title: '外部图床2(数据在外部，注意信息安全)'},
+  {src: 'https://tools.245556.xyz/聚合图床/', title: '外部图床2(数据在外部，注意信息安全)'},
+  {src: 'https://tools.245556.xyz/官方图床/', title: '官方图床3'},
   // {src: 'https://ycimg.pages.dev/', title: '外部图床2(加载缓慢,最大支持5M)'},
 ]
 /**
@@ -27,10 +28,10 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
   const [confirmLoading, setConfirmLoading] = useState(false)     // 提交按钮loading
   const [openDate, setOpenDate] = useState(false)                 // 日期选择
   const [openDateRange, setOpenDateRange] = useState(false)       // 日期范围选择
-  
+
   const textRef = useRef(null)  // 搜索框的ref 让它能自动获得焦点
     const { modal } = App.useApp();                   // 关闭时提示框
-  
+
   // 初始化数据
   useEffect(() => {
     if (data) setFormData(data)  // 编辑时，初始化数据
@@ -39,13 +40,13 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
       itemType: currentMemoType,
     })
   }, [data])
-  
+
   // 打开后自动获得焦点
   useEffect(() => {
     // 点击编辑或新增按钮后自动获得焦点,但是弹窗没这么快出现在页面上，所以获取焦点也要延迟一点点
     if (isOpen) window.setTimeout(() => textRef.current?.focus(), 100)
   }, [isOpen])
-  
+
   /** 关闭弹窗 */
   const closeModal = (notSubmit=true) => {
     // 编辑框有内容 && 内容发送改变 && 不是提交 ==>> 提示弹窗
@@ -57,19 +58,19 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
         onOk: close
       })
     }else close()
-    
+
     function close (){
       setOpenDateRange(false)                                 // 日期范围选择器关闭
       setOpenDate(false)                                      // 日期选择器关闭
       window.setTimeout(() => setOpen(false), 100)   // 延迟关闭，防止这个先关闭了时间选择器就关闭不了
     }
   };
-  
+
   /** 确定按钮（编辑完成给后端发请求） */
   const handleOk = async () => {
     if (!formData.itemType?.toString()) return msg.error('备忘类型不能为空')
     if (!formData.content) return msg.error('备忘内容不能为空')
-    
+
     setConfirmLoading(true);
     // 构造请求体
     let body = {};
@@ -83,20 +84,20 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
     }
     setConfirmLoading(false);
   };
-  
+
   /** 插入日期 */
   const insertDate = (_date, dateStr) => {
     insertAtCursor(`${dateStr}${formData.content ? '' : '\n'}`) // 插入日期 如果本来内容为空 那多加一个换行
     setOpenDate(false)
   }
-  
+
   /** 插入日期范围 */
   const insertDateRange = (_dates, date2Str) => {
     if (!date2Str[0]) return;
     insertAtCursor(`${date2Str.join('~')}${formData.content ? '' : '\n'}`) // 如果本来内容为空 那多加一个换行
     setOpenDateRange(false)
   }
-  
+
   /** 插入符号 */
   const signs =
     <Row>
@@ -106,23 +107,23 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
         </Col>
       )}
     </Row>
-  
+
   /** 在光标位置后面插入文本的函数 */
   const insertAtCursor = (textToInsert) => {
     // 获取原生的textarea元素
     const textareaElement = textRef.current?.resizableTextArea.textArea ?? {selectionStart: -1, selectionEnd: -1}
     const selectionStart = textareaElement.selectionStart;   // 光标位置
     const selectionEnd = textareaElement.selectionEnd        // 选择情况下的选中最后位置 没选中就是和光标位置一样
-    
+
     const currentValue = formData.content ?? ''
     const beforeText = currentValue.slice(0, selectionStart);
     const afterText = currentValue.slice(selectionEnd);
-    
+
     setFormData(formData => ({
       ...formData,
       content: `${beforeText}${textToInsert}${afterText}`
     }));
-    
+
     window.setTimeout(() => { // setFormData是异步的哇 所以一定要比它还要晚一点 因为它是属于全覆盖 光标自然在最后
       // 重新定位光标到插入点之后
       if (textRef.current) {
@@ -166,8 +167,8 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
         </Button>
       </p>
     </div>
-  
-  
+
+
   /** 自定义底部按钮 */
   const footerButtons = [
     ...externalImgBedList.map(({title, src}, index) =>
@@ -188,7 +189,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
     <Button key="back" onClick={closeModal}>返回</Button>,
     <Button key="submit" type="primary" onClick={handleOk} loading={confirmLoading}>提交</Button>,
   ]
-  
+
   return (
     <Modal
       width={888}
@@ -235,7 +236,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
         placement={'topRight'}
         style={{left: 100, height: 20, display: openDateRange ? '' : 'none'}}
       />
-    
+
     </Modal>
   )
 }
