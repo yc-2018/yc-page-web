@@ -5,7 +5,7 @@ import UserStore from '@/store/UserStore';
 import JWTUtils from "@/utils/JWTUtils";
 import R from "@/interface/R";
 
-export const baseURL = '/api'; // 基础URL
+export const baseURL = 'https://yc556.cn/api'; // 基础URL
 const {msg} = CommonStore
 
 export const myGet = async <T>(url: string): Promise<R<T>> => {
