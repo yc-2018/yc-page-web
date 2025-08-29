@@ -17,7 +17,7 @@ jobs:
     - name: 2. 然后才能设置环境
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: '18'
         cache: 'yarn'   # 使用 yarn 缓存:将 node_modules 目录缓存起来，下次运行时不需要重新下载所有依赖
 
 
