@@ -1,4 +1,4 @@
-name: 构建和部署
+name: 构建打包和部署
 
 # 当代码被推送到 main 分支时触发此工作流程
 on:
@@ -10,31 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: 1. 必须先获取代码！
+      uses: actions/checkout@v4 # 高级用法可以 with: ref: main 指定分支等
 
-    # 设置 Node.js 环境，版本为 18
-    - name: 设置 Nodejs版本
-      uses: actions/setup-node@v3
+
+    - name: 2. 然后才能设置环境
+      uses: actions/setup-node@v4
       with:
         node-version: 18
+        cache: 'yarn'   # 使用 yarn 缓存:将 node_modules 目录缓存起来，下次运行时不需要重新下载所有依赖
 
-    # 安装项目依赖
-    - name: 安装依赖
-      run: yarn install
 
-    # 执行打包脚本
-    - name: 打包构建
+    - name: 3. 然后才能安装依赖
+      run: yarn install --frozen-lockfile
+      env:
+        # 确保使用缓存的依赖
+        YARN_CACHE_FOLDER: ~/.cache/yarn
+
+
+    - name: 4. 打包构建
       run: yarn run build
 
 
-    # 先设置时区并获取东八区当前时间
-    - name: 获取北京时间
+    - name: 5. 获取北京时间
       id: beijing_time
       run: echo "BEIJING_TIME=$(TZ=Asia/Shanghai date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
 
 
-    # 推送构建结果到 build 分支
-    - name: 推送构建结果到build分支
+    - name: 6. 推送构建结果到build分支
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "Yc Action"
