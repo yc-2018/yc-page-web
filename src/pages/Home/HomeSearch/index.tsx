@@ -31,7 +31,8 @@ interface IEditOrAdd {
 const SearchBox = () => {
   const getDefaultEngine = _getDefaultEngine();
   const [searchList, setSearchList] = useState<ISearchEngines[] | undefined>(_getSearchEngines())
-  const [searchLowList, setSearchLowList] = useState<ISearchEngines[]>()
+  const [searchLowList, setSearchLowList] = useState<ISearchEngines[]>();
+  const [showLows, setShowLows] = useState(false);
   const [anotherOptions, setAnotherOptions] = useState<{ value: any }[]>([]);
   const [nowSearch, setNowSearch] = useState<ISearchEngines>(getDefaultEngine)
   const [editOrAddData, setEditOrAddData] = useState<IEditOrAdd>({open: false})
@@ -60,6 +61,9 @@ const SearchBox = () => {
 
   /** 获取不常用搜索列表 */
   const getSearchLowList = () => {
+    setShowLows(true)
+    if (searchLowList?.length) return; // 存在列表就不用请求了
+
     setLowLoading(true)
     getSearchEngines(true).then(response => {
       if (response.success) setSearchLowList(response.data ?? [])
@@ -198,7 +202,7 @@ const SearchBox = () => {
         changeLowUsage={changeLowUsage}
         extraElement={UserStore.jwt &&
           <>
-            {!searchLowList &&
+            {!showLows &&
               <Button
                 loading={lowLoading}
                 title="展开不常用搜索引擎"
@@ -217,7 +221,7 @@ const SearchBox = () => {
         }
       />
 
-      {searchLowList &&
+      {showLows &&
         <SearchEngines
           id="不常用搜索引擎列表"
           changeLowName="设为常用"
@@ -232,7 +236,7 @@ const SearchBox = () => {
             <Button
               title="隐藏不常用搜索引擎"
               className="opacity30to100"
-              onClick={() => setSearchLowList(undefined)}
+              onClick={() => setShowLows(false)}
               icon={<DownCircleOutlined style={{transform: 'rotate(180deg)'}}/>}
             />
           }
