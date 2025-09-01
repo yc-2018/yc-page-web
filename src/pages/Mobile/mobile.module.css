@@ -54,3 +54,9 @@
   margin-bottom: 10px;
   opacity: .6;
 }
+
+.memoPopupTag{
+  font-size: 14px;
+  padding: 4px;
+  --border-radius: 6px;
+}
