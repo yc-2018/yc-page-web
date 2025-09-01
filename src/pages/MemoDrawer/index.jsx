@@ -748,7 +748,7 @@ const MemoDrawer = () => {
                               getLoopMemoTimeList(id, fDate(updateTime))
                             }
                             &nbsp;&nbsp;
-                            创建:{createTime}
+                            创建:{fDate(createTime)}
                             &nbsp;&nbsp;
                             {createTime !== updateTime &&
                               ` ${completed ? `完成:${fDate(okTime)}` : `修改:${fDate(updateTime)}`}`
