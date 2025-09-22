@@ -33,7 +33,7 @@ import JWTUtils from "@/utils/JWTUtils";
 import HighlightKeyword from "@/utils/HighlightKeyword";
 import '@/pages/MemoDrawer/MemoDrawer.css'
 import CommonStore from "@/store/CommonStore";
-import {formatMemoTime} from "@/utils/DateUtils";
+import {fDate} from "@/utils/DateUtils";
 import dayjs from "dayjs";
 
 /** 用于完成或+1时是否主动选择日期 */
@@ -277,7 +277,7 @@ const MemoDrawer = () => {
               trigger="click"
             >
               <div key={id} className="memoLoopListItem" style={{cursor: 'pointer'}}>
-                <div>{index + 1}：{formatMemoTime(memoDate)}</div>
+                <div>{index + 1}：{fDate(memoDate)}</div>
                 {loopText && <div className="loop-text">{loopText}</div>}
                 <div
                   style={{display: 'flex', gap: 5}}
@@ -745,13 +745,13 @@ const MemoDrawer = () => {
 
                           <div style={{fontSize: 10, height: 22, lineHeight: '25px', marginLeft: 10}}>
                             {createTime !== updateTime && itemType === 1 &&
-                              getLoopMemoTimeList(id, formatMemoTime(updateTime))
+                              getLoopMemoTimeList(id, fDate(updateTime))
                             }
                             &nbsp;&nbsp;
-                            创建:{createTime}
+                            创建:{fDate(createTime)}
                             &nbsp;&nbsp;
                             {createTime !== updateTime &&
-                              ` ${completed ? `完成:${formatMemoTime(okTime)}` : `修改:${formatMemoTime(updateTime)}`}`
+                              ` ${completed ? `完成:${fDate(okTime)}` : `修改:${fDate(updateTime)}`}`
                             }
                           </div>
                         </div>

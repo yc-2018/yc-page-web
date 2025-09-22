@@ -21,7 +21,7 @@ import {ExclamationCircleFilled, PictureOutlined} from "@ant-design/icons";
 import LinkifyContent from "@/components/LinkifyContent/index";
 import {symbols} from "@/pages/MemoDrawer/compontets/FormModal";
 import styles from '@/pages/Mobile/mobile.module.css'
-import {formatMemoTime} from "@/utils/DateUtils";
+import {fDate} from "@/utils/DateUtils";
 import {uploadImgByJD} from "@/request/toolsRequest";
 
 let imgArr;     // 多张图片字符串，用,分割
@@ -528,46 +528,52 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         visible={!!visible}
         closeOnSwipe /* 组件内向下滑动关闭 */
         onMaskClick={() => setVisible(undefined)}
-        bodyStyle={{height: '60vh', width: '95vw', padding: 10, overflow: 'scroll', borderRadius: '15px 15px 0 0'}}
+        bodyStyle={{height: '62vh', width: '95vw', padding: 10, overflow: 'scroll', borderRadius: '15px 15px 0 0'}}
       >
-        {/*显示创建时间*/}
-        <Tag color='primary' fill='outline' style={{'--border-radius': '6px', '--background-color': '#c5f1f7'}}>
-          创建:{visible?.createTime}
-        </Tag>
+        {/*可左右滑动*/}
+        <div style={{display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 5}}>
+          {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
+            <Tag
+              color='warning'
+              fill='outline'
+              onClick={() => {
+                setLoopTime([])
+                v['循环次数继续加载'] = visible.id
+                v['循环时间页数'] = 1
+                v['循环备忘主键'] = visible.id
+                v['翻页加载中'] = false
+                showLoopTime()
+                loading.current = Toast.show({
+                  icon: 'loading',
+                  content: '加载中…',
+                  duration: 0,
+                })
+              }}
+              style={{'--background-color': '#fcecd8'}}
+              className={styles.memoPopupTag}
+            >
+              {`循环次数: ${visible.numberOfRecurrences}▼`}
+            </Tag>
+          }
 
-        {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
-          <Tag color='success' fill='outline' style={{'--background-color': '#c8f7c5', margin: '3px 10px'}}>
-            {visible?.completed ?
-              <span onClick={() => Toast.show({content: `修改:${visible.updateTime}`})}>
-                完成:{formatMemoTime(visible.okTime)}
-              </span>
-              :
-              `修改:${formatMemoTime(visible.updateTime)}`
-            }
+          {/*显示创建时间*/}
+          <Tag color='primary' fill='outline' className={styles.memoPopupTag} style={{'--background-color': '#c5f1f7'}}>
+            创建:{fDate(visible?.createTime)}
           </Tag>
-        }
-        {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
-          <Tag
-            color='warning'
-            fill='outline'
-            onClick={() => {
-              setLoopTime([])
-              v['循环次数继续加载'] = visible.id
-              v['循环时间页数'] = 1
-              v['循环备忘主键'] = visible.id
-              v['翻页加载中'] = false
-              showLoopTime()
-              loading.current = Toast.show({
-                icon: 'loading',
-                content: '加载中…',
-                duration: 0,
-              })
-            }}
-            style={{'--background-color': '#fcecd8', '--border-radius': '6px'}}
-          >
-            {`循环次数: ${visible.numberOfRecurrences}▼`}
-          </Tag>
-        }
+
+          {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
+            <Tag color='success' fill='outline' className={styles.memoPopupTag} style={{'--background-color': '#c8f7c5'}}>
+              {visible?.completed ?
+                <span onClick={() => Toast.show({content: `修改:${visible.updateTime}`})}>
+                  完成:{fDate(visible.okTime)}
+                </span>
+                :
+                <span>`修改:${fDate(visible.updateTime)}`</span>
+              }
+            </Tag>
+          }
+        </div>
+
         <div style={{height: '42vh', overflowY: 'scroll', border: '1px solid #ccc', borderRadius: 10, marginTop: 5}}>
           {visible?.okText && <div className={styles.okText}><b>完成备注：</b>{visible.okText}</div>}
           <pre style={{whiteSpace: 'pre-wrap', wordWrap: 'break-word', fontSize: 14, fontFamily: 'unset', padding: 8, margin: 0}}>
@@ -717,7 +723,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               {loopTime?.map((item, index) =>
                 <List.Item key={item.id} onClick={() => setLoopItemVisible(item)}>
                   <div style={{display: 'flex', gap: 18}}>
-                    {index + 1}：{formatMemoTime(item.memoDate)}
+                    {index + 1}：{fDate(item.memoDate)}
                     {item.imgArr &&
                       <div
                         style={{color: '#406df3'}}

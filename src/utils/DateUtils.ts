@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 /**
  * 日期工具类
  *
@@ -70,8 +72,13 @@ export default class DateUtils {
 
 /**
  * 格式化备忘录时间
- *
+ * 格式化为年月日 时分[周几]
  * @author Yc
  * @since 2025/5/17 3:38
  */
-export const formatMemoTime = (strTime?: string) => strTime?.replace(' 00:00:00', ' ')
+export const fDate = (strTime?: string) => {
+  const weekMap = ['[日]', '[一]', '[二]', '[三]', '[四]', '[五]', '[六]'];
+  const date = dayjs(strTime);
+  const week = date.day();
+  return `${date.format('YYYY-MM-DD HH:mm')} ${weekMap[week]}`;
+}
