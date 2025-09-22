@@ -16,20 +16,7 @@ export async function getBlogList() {
 
 /** 获取博客md */
 export async function getBlogMd([sub, parent]) {
-    const config = {
-        // responseType: 'text',
-        url: `/${parent}/${sub}?a=aa`,
-        headers: {
-            'Content-Type': 'text/markdown;charset=utf-8',
-            'Accept': 'text/markdown;charset=utf-8',
-            // 'Access-Control-Allow-Origin': '*',
-            // 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            // 'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
-        }
-    };
-
-
-    const {data} = await blogAxios(config);
+    const {data} = await blogAxios.get(`/${parent}/${sub}`);
     return data;
 }
 
