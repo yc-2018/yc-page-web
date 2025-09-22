@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// export const blogBaseURL = 'https://blog.245556.xyz';
-export const blogBaseURL = 'https://b.yc556.cn';
+export const blogBaseURL = 'https://blog.245556.xyz';
+// export const blogBaseURL = 'https://b.yc556.cn';
 
 const blogAxios = axios.create({
     baseURL: blogBaseURL, // 设置基础 URL
@@ -16,7 +16,20 @@ export async function getBlogList() {
 
 /** 获取博客md */
 export async function getBlogMd([sub, parent]) {
-    const {data} = await blogAxios.get(`/${parent}/${sub}`);
+    const config = {
+        // responseType: 'text',
+        url: `/${parent}/${sub}?a=aa`,
+        headers: {
+            'Content-Type': 'text/markdown;charset=utf-8',
+            'Accept': 'text/markdown;charset=utf-8',
+            // 'Access-Control-Allow-Origin': '*',
+            // 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            // 'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
+        }
+    };
+
+
+    const {data} = await blogAxios(config);
     return data;
 }
 
