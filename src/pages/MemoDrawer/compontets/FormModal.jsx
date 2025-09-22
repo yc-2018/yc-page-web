@@ -4,14 +4,15 @@ import {Modal, Input, Radio, Button, DatePicker, Popover, Row, Col, App} from 'a
 import {addMemo, updateMemo} from "@/request/memoApi";
 import modalStyle from '@/pages/MemoDrawer/compontets/formModal.module.css'
 import CommonStore from "@/store/CommonStore";
+import {toolsBaseURL} from "@/request/toolsRequest.js";
 
 const {TextArea} = Input;
 const {msg} = CommonStore
 /** 外部图片链接列表 */
 const externalImgBedList = [
   {src: 'https://playground.z.wiki/img-cloud/index.html', title: '外部图床1(可能失效,注意信息安全)'},
-  {src: 'https://tools.245556.xyz/聚合图床/', title: '外部图床2(数据在外部，注意信息安全)'},
-  {src: 'https://tools.245556.xyz/官方图床/', title: '官方图床3'},
+  {src: `${toolsBaseURL}/聚合图床/`, title: '外部图床2(数据在外部，注意信息安全)'},
+  {src: `${toolsBaseURL}/官方图床/`, title: '官方图床3'},
   // {src: 'https://ycimg.pages.dev/', title: '外部图床2(加载缓慢,最大支持5M)'},
 ]
 /**

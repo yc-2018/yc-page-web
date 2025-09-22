@@ -1,7 +1,8 @@
 import axios from "axios";
 import {compressImageToXMB} from "@/utils/compressImgUtils";
 
-export const toolsBaseURL = 'https://tools.245556.xyz';
+// export const toolsBaseURL = 'https://tools.245556.xyz';
+export const toolsBaseURL = 'https://gj.yc556.cn';
 
 const blogAxios = axios.create({
     baseURL: toolsBaseURL, // 设置基础 URL

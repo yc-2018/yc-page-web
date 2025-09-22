@@ -1,6 +1,7 @@
 import axios from "axios";
 
-export const blogBaseURL = 'https://blog.245556.xyz';
+// export const blogBaseURL = 'https://blog.245556.xyz';
+export const blogBaseURL = 'https://b.yc556.cn';
 
 const blogAxios = axios.create({
     baseURL: blogBaseURL, // 设置基础 URL
