@@ -5,7 +5,18 @@
 这个项目只要是用来当浏览器主页导航的还有写备忘/待办事项的,登录要通过微信订阅号来实现,后面还会有个人博客和一些其他的东西.
 
 ## 2.项目说明
-### 2. 项目主要结构
+
+### 2.1 项目环境
+- webStorm:
+  - Lingma                  : AI辅助
+  - Translation             : 翻译
+  - CharAutoReplace         : 符号替换
+  - Rainbow Brackets Lite   : 括号高亮
+- node: >=18.20.4
+- yarn: >=1.22.22
+
+
+### 2.2 项目主要结构
 ```text
 .
 ├── public : 静态文件
@@ -32,9 +43,8 @@
 ```
 ## 2.2 分支说明
 gitee:
-- master: 主分支
+- main: 主分支
 - build: 项目打包直接部署在gitee分支（由GitHub Action强制推送）(hash路由版)
-- ~~main: GitHub分支备份~~
 - ~~gitee-build: GitHub分支备份~~
 
 github:
