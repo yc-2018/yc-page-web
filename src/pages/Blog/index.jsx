@@ -5,7 +5,7 @@ import {BookOutlined} from '@ant-design/icons'
 
 import styles from './blog.module.css'
 import {blogMenu} from "@/store/NoLoginData"
-import {blogBaseURL, getBlogItemIconObj, getBlogList, getBlogMd} from "../../request/blogRequest";
+import {blogBaseURL, getBlogItemIconObj, getBlogList, getBlogMd} from "@/request/blogRequest.js";
 import LoaderWhite from "@/components/common/LoaderWhite";
 import Md from "@/components/Md";
 
@@ -19,8 +19,8 @@ const items = (blogMenu, blogIcon = {}) => blogMenu.map(item => ({
     {
       key: child,
       label:
-        <Popover placement="right" content={child.replace('.md', ' ')}>
-          <div style={{maxWidth: 230}}>{child.replace('.md', ' ')}</div>
+        <Popover placement="right" content={child.replace(/\.(?:md|json)\b/g, ' ')}>
+          <div style={{maxWidth: 230}}>{child.replace('.md', ' ').replace('.json', ' ')}</div>
         </Popover>
     }
   )) : []
