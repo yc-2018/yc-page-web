@@ -49,7 +49,7 @@ export default () => {
           >
             <Collapse accordion>
               {itemList.slice(1).map(item =>
-                <Collapse.Panel key={item} title={item.replace(/\.(?:md|json)\b/g, ' ')}>
+                <Collapse.Panel key={item} title={item.replace('.md', '')}>
                   <DynamicContent keyPath={[item, itemList[0]]}/>
                 </Collapse.Panel>
               )}

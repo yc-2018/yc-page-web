@@ -19,8 +19,8 @@ const items = (blogMenu, blogIcon = {}) => blogMenu.map(item => ({
     {
       key: child,
       label:
-        <Popover placement="right" content={child.replace(/\.(?:md|json)\b/g, ' ')}>
-          <div style={{maxWidth: 230}}>{child.replace('.md', ' ').replace('.json', ' ')}</div>
+        <Popover placement="right" content={child.replace('.md', '')}>
+          <div style={{maxWidth: 230}}>{child.replace('.md', '')}</div>
         </Popover>
     }
   )) : []
