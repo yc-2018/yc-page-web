@@ -60,8 +60,15 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [content, setContent] = useState('')                   // 表单内容
   const [itemType, setItemType] = useState(0)                 // 表单类型
 
-  useEffect(() => {type === changeType && resetList()}, [changeType])                // 新增或修改类型是当前类型 说明要在当前列表有变化
-  useEffect(() => {resetList()}, [completed, orderBy])                               // 筛选状态 或排序状态改变 就重置列表
+  // 新增或修改类型是当前类型 说明要在当前列表有变化
+  useEffect(() => {
+    type === changeType && resetList()
+  }, [changeType])
+
+  // 筛选状态 或排序状态改变 就重置列表
+  useEffect(() => {
+    resetList()
+  }, [completed, orderBy])
 
   const textRef = useRef()          // 搜索框的ref 让它能自动获得焦点
   const loading = useRef()          // 显示加载中
@@ -96,7 +103,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   }
 
   /** 显示加载动画 */
-  const showLoading = (icon, content) => {Toast.show({icon, content})}
+  const showLoading = (icon, content) => {
+    Toast.show({icon, content})
+  }
 
   /**
    * 上传图片
@@ -119,7 +128,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
     const showContent = () => {
       const obj = data.find(item => item.id === id);
-      if ( !obj) return
+      if (!obj) return
       return (<div className={styles.tipContent}>{obj.content}</div>)
     }
 
@@ -366,7 +375,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         </div>
       ,
       onConfirm: async () => {
-      const resp = await updateLoopMemoItem({...loop, loopText: okText, imgArr})
+        const resp = await updateLoopMemoItem({...loop, loopText: okText, imgArr})
         setLoopItemVisible(null)
         if (resp.success) {
           Toast.show({icon: 'success', content: '成功'})
@@ -388,10 +397,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const delLoopMemoItem = async (memoId, id) => {
     await Dialog.confirm({
       content:
-          <div style={{textAlign: 'center'}}>
-            <ExclamationCircleFilled style={{color: 'red'}}/>
-            确定删除该条循环吗
-          </div>,
+        <div style={{textAlign: 'center'}}>
+          <ExclamationCircleFilled style={{color: 'red'}}/>
+          确定删除该条循环吗
+        </div>,
       onConfirm: async () => {
         const result = await deleteLoopMemoItem(memoId, id)
         if (result.success) {
@@ -533,19 +542,19 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                     />
                   </div>
 
-                    {keyword ?
-                      <HighlightKeyword content={item.content} keyword={keyword}/>
-                      :
-                      <Ellipsis                       // 省略文本
-                        direction='end'             // 省略尾部
-                        content={item.content}      // 内容
-                        expandText='展开'
-                        collapseText='收起'
-                        rows={3}                                    // 超过3行才省略
-                        stopPropagationForActionButtons={['click']} // 阻止冒泡事件
-                      />
-                    }
-                  </div>
+                  {keyword ?
+                    <HighlightKeyword content={item.content} keyword={keyword}/>
+                    :
+                    <Ellipsis                       // 省略文本
+                      direction='end'             // 省略尾部
+                      content={item.content}      // 内容
+                      expandText='展开'
+                      collapseText='收起'
+                      rows={3}                                    // 超过3行才省略
+                      stopPropagationForActionButtons={['click']} // 阻止冒泡事件
+                    />
+                  }
+                </div>
               </List.Item>
             </SwipeAction>
           ))}
@@ -576,7 +585,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           }
 
           {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
-            <Tag color='success' fill='outline' className={styles.memoPopupTag} style={{'--background-color': '#c8f7c5'}}>
+            <Tag color='success' fill='outline' className={styles.memoPopupTag}
+                 style={{'--background-color': '#c8f7c5'}}>
               {visible?.completed ?
                 <span onClick={() => Toast.show({content: `修改:${visible.updateTime}`})}>
                   完成:{fDate(visible.okTime)}
@@ -595,7 +605,16 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
         <div style={{height: '42vh', overflowY: 'scroll', border: '1px solid #ccc', borderRadius: 10, marginTop: 5}}>
           {visible?.okText && <div className={styles.okText}><b>完成备注：</b>{visible.okText}</div>}
-          <pre style={{whiteSpace: 'pre-wrap', wordWrap: 'break-word', fontSize: 14, fontFamily: 'unset', padding: 8, margin: 0}}>
+          <pre
+            style={{
+              whiteSpace: 'pre-wrap',
+              wordWrap: 'break-word',
+              fontSize: 14,
+              fontFamily: 'unset',
+              padding: 8,
+              margin: 0
+            }}
+          >
             <LinkifyContent
               linkImg={link => <a key={link} onClick={() => ImageViewer.show({image: link})}>{link}</a>}
             >
@@ -604,7 +623,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           </pre>
         </div>
 
-        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr',gap:10,marginTop:10}}>
+        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10}}>
           {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
             <Button
               block
@@ -702,15 +721,15 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             &nbsp;
             <Button
               size="small"
-              onClick={() =>{
-                const handler =  Modal.show({
+              onClick={() => {
+                const handler = Modal.show({
                   content:
                     <div style={{display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 2}}>
                       {symbols.map((item) =>
                         <div
                           key={item}
                           style={{padding: 5, border: '1px solid #ccc', textAlign: 'center'}}
-                          onClick={() => insertAtCursor(item)||handler.close()}
+                          onClick={() => insertAtCursor(item) || handler.close()}
                         >
                           {item}
                         </div>
@@ -799,7 +818,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           const dayStr = dayjs(date).format('YYYY-MM-DD');
           if (okTime) {
             okTime = `${dayStr} ${okTime.split(' ')[1]}`
-          }else okTime = `${dayStr} 00:00:00`;
+          } else okTime = `${dayStr} 00:00:00`;
           dateRef.current.innerHTML = dayStr
           const element = window.document.querySelector('#timing');
           if (element) element.style.display = 'inline-block'
@@ -830,12 +849,12 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         defaultValue={[dayjs().format('HH'), dayjs().format('mm')]}
         columns={[
           // 小时列（0-23）
-          Array.from({ length: 24 }, (_, i) => ({
+          Array.from({length: 24}, (_, i) => ({
             label: i.toString().padStart(2, '0'),
             value: i.toString().padStart(2, '0'),
           })),
           // 分钟列（0-59）
-          Array.from({ length: 60 }, (_, i) => ({
+          Array.from({length: 60}, (_, i) => ({
             label: i.toString().padStart(2, '0'),
             value: i.toString().padStart(2, '0'),
           }))
