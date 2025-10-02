@@ -344,7 +344,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
    * @since 2025/5/20 1:15
    */
   const editLoopMemoItem = async (loop) => {
-    okText = loop.loopText
+    okText = loop.loopText ?? ''
     imgArr = loop.imgArr
     await Dialog.confirm({
       content:
@@ -404,6 +404,27 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     })
   }
 
+  /**
+   * 显示循环子项列表
+   *
+   * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
+   * @since 2025/10/3 2:58
+   */
+  const showLoopMemoItemList = (e, visibleObj) => {
+    e.stopPropagation()
+    visibleObj = visibleObj ?? visible
+    setLoopTime([]);
+    v['循环次数继续加载'] = visibleObj.id
+    v['循环时间页数'] = 1
+    v['循环备忘主键'] = visibleObj.id
+    v['翻页加载中'] = false
+    showLoopTime()
+    loading.current = Toast.show({
+      icon: 'loading',
+      content: '加载中…',
+      duration: 0,
+    })
+  }
 
   /** 在光标位置后面插入文本的函数 */
   const insertAtCursor = (textToInsert) => {
@@ -498,9 +519,20 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                 onClick={() => setVisible(item)}
                 clickable={false}
               >
-                {/*循环待办显示次数*/}
-                <Badge content={type === 1 && item.numberOfRecurrences} color={'#6ad59d'}>
-                  <span style={{width: '100%'}}>
+
+                <div style={{width: '100%', position: 'relative'}}>
+                  {/*循环待办显示次数*/}
+                  <div
+                    style={{position: "absolute", top: -18, right: -10}}
+                    onClick={e => showLoopMemoItemList(e, item)}
+                  >
+                    <Badge
+                      color="#987ee7"
+                      style={{padding: 3}}
+                      content={type === 1 && item.numberOfRecurrences}
+                    />
+                  </div>
+
                     {keyword ?
                       <HighlightKeyword content={item.content} keyword={keyword}/>
                       :
@@ -513,8 +545,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                         stopPropagationForActionButtons={['click']} // 阻止冒泡事件
                       />
                     }
-                  </span>
-                </Badge>
+                  </div>
               </List.Item>
             </SwipeAction>
           ))}
@@ -536,30 +567,13 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             <Tag
               color='warning'
               fill='outline'
-              onClick={() => {
-                setLoopTime([])
-                v['循环次数继续加载'] = visible.id
-                v['循环时间页数'] = 1
-                v['循环备忘主键'] = visible.id
-                v['翻页加载中'] = false
-                showLoopTime()
-                loading.current = Toast.show({
-                  icon: 'loading',
-                  content: '加载中…',
-                  duration: 0,
-                })
-              }}
+              onClick={showLoopMemoItemList}
               style={{'--background-color': '#fcecd8'}}
               className={styles.memoPopupTag}
             >
               {`循环次数: ${visible.numberOfRecurrences}▼`}
             </Tag>
           }
-
-          {/*显示创建时间*/}
-          <Tag color='primary' fill='outline' className={styles.memoPopupTag} style={{'--background-color': '#c5f1f7'}}>
-            创建:{fDate(visible?.createTime)}
-          </Tag>
 
           {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
             <Tag color='success' fill='outline' className={styles.memoPopupTag} style={{'--background-color': '#c8f7c5'}}>
@@ -568,10 +582,15 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                   完成:{fDate(visible.okTime)}
                 </span>
                 :
-                <span>`修改:${fDate(visible.updateTime)}`</span>
+                <span>修改:{fDate(visible.updateTime)}</span>
               }
             </Tag>
           }
+
+          {/*显示创建时间*/}
+          <Tag color='primary' fill='outline' className={styles.memoPopupTag} style={{'--background-color': '#c5f1f7'}}>
+            创建:{fDate(visible?.createTime)}
+          </Tag>
         </div>
 
         <div style={{height: '42vh', overflowY: 'scroll', border: '1px solid #ccc', borderRadius: 10, marginTop: 5}}>
