@@ -187,12 +187,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
         </div>
       }
 
-      <Flex
-        gap="small"
-        wrap="wrap"
-        justify='center'
-        style={{margin: "5px 80px", zIndex: 8888}}
-      >
+      <Flex gap="small" wrap="wrap" justify='center' style={{margin: "5px 80px"}}>
         <IsMyDnd>
           {searchItems.map(searchItem =>
             <IsMyDndItem searchItem={searchItem} key={searchItem.id}>

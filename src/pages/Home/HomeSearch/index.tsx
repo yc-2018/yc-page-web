@@ -212,6 +212,7 @@ const SearchBox = () => {
               />
             }
             <Button
+              style={{position: 'absolute', right: 6}}
               title="添加新的搜索引擎"
               icon={<PlusOutlined/>}
               className="opacity30to100"
