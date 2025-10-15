@@ -123,7 +123,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   }
 
   /** 执行动作 */
-  const onAction = async action => {
+  const onAction = async (action, addText) => {
     const {id, text} = action;
 
     const showContent = () => {
@@ -190,8 +190,18 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       // +1 ///////////////////////////////////////////////////////////////////////
       case 'addOne':
         okTime = undefined      // 重置更新时间
-        okText = undefined      // 重置完成文字
+        okText = addText        // 重置完成文字
         imgArr = undefined      // 重置图片
+
+        window.setTimeout(() => {
+          if (!addText) return
+          const textarea = document.getElementById('addOneText');
+          if (textarea) {
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+          }
+        }, 100)
+
         await Dialog.confirm({
           content:
             <div>
@@ -207,7 +217,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               </a>
               <div style={{marginTop: 9}}>加一备注：</div>
               <TextArea
+                id="addOneText"
                 autoFocus
+                defaultValue={addText}
                 placeholder="可输入循环备注"
                 onChange={v => okText = v}
               />
@@ -232,10 +244,14 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                 numberOfRecurrences: item.numberOfRecurrences + 1,
                 okTime: okTime || new Date().toLocaleString()
               } : item))
-              setVisible(undefined)
+
+              // 刷新列表
+              if (loopTime) showLoopMemoItemList(null, {id})
+
+              setVisible(undefined);
             } else Toast.show({icon: 'fail', content: '失败'})
           }
-        })
+        });
         break;
 
       // 编辑 //////////////////////////////////////////////////////////////////////
@@ -420,7 +436,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
    * @since 2025/10/3 2:58
    */
   const showLoopMemoItemList = (e, visibleObj) => {
-    e.stopPropagation()
+    e?.stopPropagation()
     visibleObj = visibleObj ?? visible
     setLoopTime([]);
     v['循环次数继续加载'] = visibleObj.id
@@ -520,7 +536,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               key={item.id}
               leftActions={leftActions(item)}
               rightActions={rightActions(item)}
-              onAction={onAction}
+              onAction={(a, _e) => onAction(a)}
             >
               <List.Item
                 key={item.id}
@@ -787,10 +803,23 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       <Popup      /* 循环项操作的弹出层 *********/
         visible={Boolean(loopItemVisible)}
         onMaskClick={() => setLoopItemVisible(null)}
-        bodyStyle={{height: '20vh'}}
+        bodyStyle={{height: '28vh'}}
       >
         {Boolean(loopItemVisible) &&
           <div style={{padding: 10, display: 'flex', flexWrap: 'wrap', gap: 10}}>
+            {loopItemVisible?.loopText &&
+              <Button block onClick={() => editLoopMemoItem(loopItemVisible)}>
+                按当前备注直接 +1
+              </Button>
+            }
+            {loopItemVisible?.loopText &&
+              <Button
+                block
+                onClick={() => onAction({key: 'addOne', id: loopItemVisible.memoId}, loopItemVisible?.loopText)}
+              >
+                +1 并按当前备注编辑
+              </Button>
+            }
             <Button block onClick={() => editLoopMemoItem(loopItemVisible)}>
               编辑备注
             </Button>
