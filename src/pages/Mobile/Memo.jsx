@@ -17,12 +17,13 @@ import {
 import {finishName, columns, leftActions, rightActions, orderByName} from "@/pages/Mobile/data";
 import {sortingOptions} from "@/store/NoLoginData";
 import HighlightKeyword from "@/utils/HighlightKeyword";
-import {ExclamationCircleFilled, PictureOutlined} from "@ant-design/icons";
+import {ExclamationCircleFilled} from "@ant-design/icons";
 import LinkifyContent from "@/components/LinkifyContent/index";
 import {symbols} from "@/pages/MemoDrawer/compontets/FormModal";
 import styles from '@/pages/Mobile/mobile.module.css'
 import {fDate} from "@/utils/DateUtils";
 import {uploadImgByJD} from "@/request/toolsRequest";
+import {thumbUrl} from "@/utils/urlUtils.js";
 
 let imgArr;     // 多张图片字符串，用,分割
 let okTime;     // 待办更新时间
@@ -152,6 +153,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               </a>
               <div style={{marginTop: 9}}>完成备注：</div>
               <TextArea
+                rows={4}
                 autoFocus
                 placeholder="可输入完成备注"
                 onChange={v => okText = v}
@@ -217,6 +219,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               </a>
               <div style={{marginTop: 9}}>加一备注：</div>
               <TextArea
+                rows={4}
                 id="addOneText"
                 autoFocus
                 defaultValue={addText}
@@ -290,6 +293,16 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         break;
       default:
         Toast.show({icon: 'fail', content: '你是怎么做到的？🧐'})
+    }
+  }
+
+  /** 直接+1 */
+  const directAddOne = async ({memoId, loopText}) => {
+    const addOneResp = await addLoopMemoItem({memoId, loopText});
+    if (addOneResp.success) {
+      setLoopItemVisible(null);
+      if (loopTime) showLoopMemoItemList(null, {id: memoId});   // 刷新列表
+      Toast.show({icon: 'success', content: '成功'});                     // 显示成功
     }
   }
 
@@ -376,6 +389,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         <div id="编辑循环备忘子项框">
           <div style={{marginTop: 9}}>备注：</div>
           <TextArea
+            rows={4}
             autoFocus
             defaultValue={okText}
             placeholder="请输入循环备注,空为不修改"
@@ -398,6 +412,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           setLoopTime(val => val.map(item => item.id === loop.id ? {
             ...item,
             loopText: okText,
+            imgArr: imgArr,
             updateTime: new Date().toLocaleString()
           } : item))
         } else Toast.show({icon: 'fail', content: '失败'})
@@ -776,20 +791,20 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             <List>
               {loopTime?.map((item, index) =>
                 <List.Item key={item.id} onClick={() => setLoopItemVisible(item)}>
-                  <div style={{display: 'flex', gap: 18}}>
+                  <div style={{display: 'flex', gap: 10}}>
                     {index + 1}：{fDate(item.memoDate)}
-                    {item.imgArr &&
-                      <div
-                        style={{color: '#406df3'}}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          ImageViewer.Multi.show({images: item.imgArr.split(',')})
-                        }}
-                      >
-                        <PictureOutlined/>
-                        *{item.imgArr.split(',').length}
-                      </div>
-                    }
+                    {item.imgArr && item.imgArr.split(',').map((url,i) =>
+                     <img
+                       alt="图片"
+                       key={url ?? i}
+                       src={thumbUrl(url)}
+                       style={{width: 25, height: 25, borderRadius: 3}}
+                       onClick={(e) => {
+                         e.stopPropagation()
+                         ImageViewer.Multi.show({images: item.imgArr.split(','), defaultIndex: i})
+                       }}
+                     />
+                    )}
                   </div>
                   {item.loopText && <div className={styles.loopText}>{item.loopText}</div>}
                 </List.Item>
@@ -808,7 +823,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         {Boolean(loopItemVisible) &&
           <div style={{padding: 10, display: 'flex', flexWrap: 'wrap', gap: 10}}>
             {loopItemVisible?.loopText &&
-              <Button block onClick={() => editLoopMemoItem(loopItemVisible)}>
+              <Button block onClick={() => directAddOne(loopItemVisible)}>
                 按当前备注直接 +1
               </Button>
             }

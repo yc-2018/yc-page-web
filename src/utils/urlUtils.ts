@@ -68,3 +68,4 @@ export function tryGetFavicon1(url: string) {
   return `https://api.qqsuu.cn/api/dm-get?url=${url}`
 }
 
+export const thumbUrl = (url: string) => url.replace('/cxxjwimg/jfs', '/jdcms/s180x180_jfs');
