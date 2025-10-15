@@ -35,6 +35,7 @@ import '@/pages/MemoDrawer/MemoDrawer.css'
 import CommonStore from "@/store/CommonStore";
 import {fDate} from "@/utils/DateUtils";
 import dayjs from "dayjs";
+import {thumbUrl} from "@/utils/urlUtils.js";
 
 /** 用于完成或+1时是否主动选择日期 */
 window.ikunSelectDate = undefined
@@ -284,8 +285,8 @@ const MemoDrawer = () => {
                   onClick={event => event.stopPropagation()}
                 >
                   {imgArr &&
-                    <Image.PreviewGroup>
-                      {imgArr.split(',').map((item) => <Image width={40} height={40} src={item} key={item}/>)}
+                    <Image.PreviewGroup items={imgArr.split(',')}>
+                      {imgArr.split(',').map((item) => <Image width={40} height={40} src={thumbUrl(item)} key={item}/>)}
                     </Image.PreviewGroup>
                   }
                 </div>
