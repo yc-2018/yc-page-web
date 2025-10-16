@@ -3,7 +3,7 @@ import {
   InfiniteScroll, List, Popup, SwipeAction, Toast,
   Button, Tag, Radio, TextArea, Dialog, PullToRefresh,
   SearchBar, Badge, Ellipsis, CalendarPicker, Dropdown,
-  Space, Modal, ImageViewer, Picker, ImageUploader
+  Space, Modal, ImageViewer, Picker, ImageUploader, Image
 } from 'antd-mobile'
 import dayjs from "dayjs";
 import {
@@ -205,6 +205,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         }, 100)
 
         await Dialog.confirm({
+          style: {zIndex: 1003},
           content:
             <div>
               {showContent()}
@@ -239,7 +240,12 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           onConfirm: async () => {
             showLoading('loading', '加载中…')
             imgArr = imgArr ?? undefined
-            const addOneResp = await addLoopMemoItem({memoId: id, memoDate: okTime, loopText: okText, imgArr})
+            const addOneResp = await addLoopMemoItem({
+              memoId: id,
+              memoDate: okTime,
+              loopText: okText,
+              imgArr
+            })
             if (addOneResp) {
               Toast.show({icon: 'success', content: '成功'})
               setData(val => val.map(item => item.id === id ? {
@@ -323,7 +329,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     let body = {};
     body.content = content === editVisible?.content ? null : content;       // 内容不一致时才更新
     body.itemType = itemType === editVisible?.itemType ? null : itemType;   // 内容不一致时才更新
-    if (!body.content && !body.itemType) return Toast.show({icon: 'fail', content: '没有变化'}) && setEditVisible(false)
+    if (!body.content && !body.itemType) return Toast.show({
+      icon: 'fail',
+      content: '没有变化'
+    }) && setEditVisible(false)
     body.id = editVisible?.id;
     showLoading('loading', '处理中…')
     let result = await (editVisible === '新增' ? addMemo : updateMemo)(body);
@@ -385,6 +394,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     okText = loop.loopText ?? ''
     imgArr = loop.imgArr
     await Dialog.confirm({
+      style: {zIndex: 1004},
       content:
         <div id="编辑循环备忘子项框">
           <div style={{marginTop: 9}}>备注：</div>
@@ -427,6 +437,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
    */
   const delLoopMemoItem = async (memoId, id) => {
     await Dialog.confirm({
+      style: {zIndex: 1004},
       content:
         <div style={{textAlign: 'center'}}>
           <ExclamationCircleFilled style={{color: 'red'}}/>
@@ -599,7 +610,13 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         visible={!!visible}
         closeOnSwipe /* 组件内向下滑动关闭 */
         onMaskClick={() => setVisible(undefined)}
-        bodyStyle={{height: '62vh', width: '95vw', padding: 10, overflow: 'scroll', borderRadius: '15px 15px 0 0'}}
+        bodyStyle={{
+          height: '62vh',
+          width: '95vw',
+          padding: 10,
+          overflow: 'scroll',
+          borderRadius: '15px 15px 0 0'
+        }}
       >
         {/*可左右滑动*/}
         <div style={{display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 5}}>
@@ -785,6 +802,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         visible={!!loopTime}
         onMaskClick={() => setLoopTime(undefined)}
         bodyStyle={{height: '55vh', overflow: 'scroll'}}
+        style={{zIndex:1001}}
       >
         {loopTime?.length > 0 &&
           <>
@@ -793,17 +811,22 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                 <List.Item key={item.id} onClick={() => setLoopItemVisible(item)}>
                   <div style={{display: 'flex', gap: 10}}>
                     {index + 1}：{fDate(item.memoDate)}
-                    {item.imgArr && item.imgArr.split(',').map((url,i) =>
-                     <img
-                       alt="图片"
-                       key={url ?? i}
-                       src={thumbUrl(url)}
-                       style={{width: 25, height: 25, borderRadius: 3}}
-                       onClick={(e) => {
-                         e.stopPropagation()
-                         ImageViewer.Multi.show({images: item.imgArr.split(','), defaultIndex: i})
-                       }}
-                     />
+                    {item.imgArr && item.imgArr.split(',').map((url, i) =>
+                        <Image
+                          src={thumbUrl(url)}
+                          width={25}
+                          height={25}
+                          fit='fill'
+                          style={{borderRadius: 5}}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            ImageViewer.Multi.show({
+                              images: item.imgArr.split(','),
+                              defaultIndex: i,
+                              classNames: {mask: styles.imgListViewer},
+                            })
+                          }}
+                        />
                     )}
                   </div>
                   {item.loopText && <div className={styles.loopText}>{item.loopText}</div>}
@@ -818,7 +841,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       <Popup      /* 循环项操作的弹出层 *********/
         visible={Boolean(loopItemVisible)}
         onMaskClick={() => setLoopItemVisible(null)}
-        bodyStyle={{height: '28vh'}}
+        bodyStyle={{height: Boolean(loopItemVisible?.loopText) ? 240 : 140}}
+        style={{zIndex: 1002}}
       >
         {Boolean(loopItemVisible) &&
           <div style={{padding: 10, display: 'flex', flexWrap: 'wrap', gap: 10}}>
@@ -830,7 +854,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             {loopItemVisible?.loopText &&
               <Button
                 block
-                onClick={() => onAction({key: 'addOne', id: loopItemVisible.memoId}, loopItemVisible?.loopText)}
+                onClick={() => onAction({
+                  key: 'addOne',
+                  id: loopItemVisible.memoId
+                }, loopItemVisible?.loopText)}
               >
                 +1 并按当前备注编辑
               </Button>
@@ -838,7 +865,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             <Button block onClick={() => editLoopMemoItem(loopItemVisible)}>
               编辑备注
             </Button>
-            <Button block color="danger" onClick={() => delLoopMemoItem(loopItemVisible.memoId, loopItemVisible.id)}>
+            <Button
+              block
+              color="danger"
+              onClick={() => delLoopMemoItem(loopItemVisible.memoId, loopItemVisible.id)}
+            >
               删除此项
             </Button>
             <div>创建时间:{loopItemVisible.createTime}</div>
