@@ -64,3 +64,12 @@
 .imgListViewer{
   z-index: 2000!important;
 }
+
+[class="adm-image-viewer-content"] {
+  --z-index: var(--adm-mask-z-index);
+  z-index: var(--z-index);
+}
+
+:root {
+  --adm-mask-z-index: 1004;
+}

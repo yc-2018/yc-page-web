@@ -854,10 +854,13 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             {loopItemVisible?.loopText &&
               <Button
                 block
-                onClick={() => onAction({
-                  key: 'addOne',
-                  id: loopItemVisible.memoId
-                }, loopItemVisible?.loopText)}
+                onClick={() => {
+                  onAction({
+                    key: 'addOne',
+                    id: loopItemVisible.memoId
+                  }, loopItemVisible?.loopText)
+                  setLoopItemVisible(null)
+                }}
               >
                 +1 并按当前备注编辑
               </Button>
