@@ -143,10 +143,11 @@ function Home() {
                     icon={<CloudDownloadOutlined/>}
                     tooltip={{title: '从服务器获取背景', placement: 'left'}}
                     className='buttonOpacity'
-                    onClick={async () => {
-                      const {backgroundUrl} = await getBg()
-                      if (backgroundUrl) setBgImage(backgroundUrl, '获取背景成功')   // 设置背景
-                      else msg.error('您还没有上传过背景到服务器哦');
+                    onClick={() => {
+                      getBg().then(info => {
+                        if (info.data?.backgroundUrl) setBgImage(info.data.backgroundUrl);
+                        else msg.error('您还没有上传过背景到服务器哦');
+                      })
                     }}
                   />
 
