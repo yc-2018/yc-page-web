@@ -4,7 +4,7 @@ import CommonStore from "@/store/CommonStore";
 import bingWallpaperList from "@/store/bingWallpaper";
 import myAxios, {myDelete, myGet, myPost, myPut} from "./myAxios";
 import IBookmark from "@/interface/IBookmark";
-import ISearchEngines from "@/interface/ISearchEngines";
+import ISearchEngines, {ILinkType} from "@/interface/ISearchEngines";
 import IUserConfig from "@/interface/IUserConfig";
 import IUser from "@/interface/IUser";
 
@@ -74,7 +74,7 @@ export const getNameAndAvatar = () => myGet<IUser>('/users/getNameAndAvatar')
 
 
 /** 搜索引擎列表 */
-export const getSearchEngines = (isLowUsage: boolean) => myGet<ISearchEngines[]>(`/searchEngines?isLowUsage=${isLowUsage}`)
+export const getSearchEngines = (linkType: ILinkType) => myGet<ISearchEngines[]>(`/searchEngines?linkType=${linkType}`)
 
 /** 增加搜索引擎 */
 export const addSearchEngines = (searchEngines: ISearchEngines) => myPost<ISearchEngines>('/searchEngines', searchEngines)
@@ -86,7 +86,7 @@ export const updateSearchEngines = (searchEngines: ISearchEngines) => myPut<ISea
 export const deleteSearchEngine = (id: number) => myDelete<boolean>(`/searchEngines/${id}`)
 
 /** 排序搜索引擎 */
-export const sortSearchEngine = (sort: string, isLowUsage: boolean) => myPost<boolean>(`/searchEngines/sort?sort=${sort}&isLowUsage=${isLowUsage}`)
+export const sortSearchEngine = (sort: string, type: ILinkType) => myPost<boolean>(`/searchEngines/sort?sort=${sort}&linkType=${type}`)
 
 
 /**

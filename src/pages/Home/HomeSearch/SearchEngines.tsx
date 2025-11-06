@@ -95,9 +95,8 @@ const SearchEngineList: FC<ISearchEngineList> = (
       setIsDrag(false)
     }
 
-    const lowUsage = !!searchItems[0].lowUsage;
     CommonStore.setLoading(true, '正在排序...')
-    sortSearchEngine(son, lowUsage).then(res => {
+    sortSearchEngine(son, searchItems[0].type).then(res => {
       if (res.success) {
         setSearchList([...searchItems])
         msg.success('排序成功')

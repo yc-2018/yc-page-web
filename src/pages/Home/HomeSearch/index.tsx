@@ -9,7 +9,7 @@ import {
 import {Alert, App, AutoComplete, Button, Checkbox, Divider, Form, Input, Modal} from "antd";
 import SearchEngines from "@/pages/Home/HomeSearch/SearchEngines";
 import {_getDefaultEngine, _getSearchEngines, _setSearchEngines} from "@/utils/localStorageUtils";
-import ISearchEngines from "@/interface/ISearchEngines";
+import ISearchEngines, {LOW_SEARCH, SEARCH} from "@/interface/ISearchEngines";
 import JWTUtils from "@/utils/JWTUtils";
 import UserStore from "@/store/UserStore";
 import CommonStore from "@/store/CommonStore";
@@ -46,7 +46,7 @@ const SearchBox = () => {
   useEffect(() => {
     // 获取搜索引擎列表
     if (!JWTUtils.isExpired()) {
-      getSearchEngines(false).then(response => {
+      getSearchEngines(SEARCH).then(response => {
         if (response.success) setSearchList(response.data)
       });
       getDefaultEngine && setNowSearch(getDefaultEngine)  // 获取默认搜索引擎(登录时)
@@ -65,7 +65,7 @@ const SearchBox = () => {
     if (searchLowList?.length) return; // 存在列表就不用请求了
 
     setLowLoading(true)
-    getSearchEngines(true).then(response => {
+    getSearchEngines(LOW_SEARCH).then(response => {
       if (response.success) setSearchLowList(response.data ?? [])
     }).finally(() => setLowLoading(false));
   }
@@ -119,15 +119,15 @@ const SearchBox = () => {
 
   /** 设置为[常用/不常用](换) */
   const changeLowUsage = (search: ISearchEngines) => {
-    const lowTo = search.lowUsage === 0 ? '不常用' : '常用'
+    const lowTo = search.type === SEARCH ? '不常用' : '常用'
     modal.confirm({
       title: `确定把【${search.name}】切换到 ${lowTo}吗?`,
       content: `放到【${lowTo}】列表的最后`,
       maskClosable: true,
       async onOk() {
-        const setXxxSearchList = search.lowUsage === 0 ? setSearchList : setSearchLowList
-        if (search?.lowUsage === 0) search.lowUsage = 1
-        else search.lowUsage = 0
+        const setXxxSearchList = search.type === SEARCH ? setSearchList : setSearchLowList
+        if (search?.type === SEARCH) search.type = LOW_SEARCH
+        else search.type = SEARCH
         updateSearchEngines(search).then(res => {
           if (res.success) {
             // 本身列表中移除
@@ -149,8 +149,8 @@ const SearchBox = () => {
 
   /** 新增或编辑弹窗的确定处理 */
   const modalOnOk = () => {
-    form.validateFields().then((values:ISearchEngines) => {
-      values.lowUsage = values.lowUsage ? 1 : 0
+    form.validateFields().then((values: ISearchEngines & { lowUsage: boolean }) => {
+      values.type = values.lowUsage ? LOW_SEARCH : SEARCH
       const editSearch = editOrAddData.edit;
       if (editSearch?.id) {
         // ———————————— 修改 ————————————
@@ -158,9 +158,9 @@ const SearchBox = () => {
         updateSearchEngines({...editSearch, ...values}).then(result => {
           if (result.success && result.data) {
             const updateData = result.data;
-            const setXxxSearchList = editSearch.lowUsage === 0 ? setSearchList : setSearchLowList;
+            const setXxxSearchList = editSearch.type === SEARCH ? setSearchList : setSearchLowList;
             // 数据回显 ( 考虑 常用和不常用列表的转换
-            if (updateData.lowUsage === editSearch!.lowUsage) {
+            if (updateData.type === editSearch!.type) {
               setXxxSearchList(items =>
                   items?.map(item => item.id === updateData.id ? updateData : item));
             } else {  // ——数据换列表——
@@ -179,7 +179,7 @@ const SearchBox = () => {
         // ———————————— 新增 ————————————
         addSearchEngines(values).then(result => {
           if (result.success) {
-            const setXxxSearchList = values.lowUsage === 0 ? setSearchList : setSearchLowList;
+            const setXxxSearchList = values.type === SEARCH ? setSearchList : setSearchLowList;
             setXxxSearchList(v => v ? [...v, result.data!] : undefined)
             setEditOrAddData({open: false})
           }

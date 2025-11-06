@@ -13,6 +13,11 @@ export const getLocal = (key: string) => {
   return localStorage.getItem(`${key}_${JWTUtils.getId()}`)
 }
 
+export const getLocalObj = (key: string, defaultValue: any = undefined) => {
+  const objStr = getLocal(key);
+  return objStr ? JSON.parse(objStr) : defaultValue
+}
+
 /**
  * 记录默认搜索引擎
  *
@@ -28,20 +33,17 @@ export const _getDefaultEngine = () => {
   return {id: 0, engineUrl: "https://www.baidu.com/s?wd=@@@", name: "百度"}
 }
 
+
 /** 背景图片url */
 export const _setBackgroundUrl = (url: string) => saveLocal('backgroundUrl', url)
 export const _getBackgroundUrl = () => getLocal('backgroundUrl')
 
+
 /** 头像url */
 export const _setNameAndAvatar = (user: IUser) => saveLocal('nameAndAvatar', user)
-export const _getNameAndAvatar = (): IUser => {
-  const nameAndAvatar = getLocal('nameAndAvatar');
-  return nameAndAvatar ? JSON.parse(nameAndAvatar) : {name: '-'}
-}
+export const _getNameAndAvatar = (): IUser => getLocalObj('nameAndAvatar', {name: '-'})
+
 
 /** 搜索引擎普通列表 */
 export const _setSearchEngines = (searchEngines: ISearchEngines[]) => saveLocal('searchEngines', searchEngines)
-export const _getSearchEngines = (): ISearchEngines[] | undefined => {
-  const searchEngines = getLocal('searchEngines');
-  return searchEngines ? JSON.parse(searchEngines) : undefined
-}
+export const _getSearchEngines = (): ISearchEngines[] | undefined => getLocalObj('searchEngines')
