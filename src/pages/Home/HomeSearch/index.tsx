@@ -114,7 +114,7 @@ const SearchBox = () => {
   const openModal = (edit?: ISearchEngines) => {
     setEditOrAddData({open: true, edit})
     form.resetFields()
-    form.setFieldsValue(edit)
+    form.setFieldsValue({...edit, lowUsage: Boolean(edit?.type)})
   }
 
   /** 设置为[常用/不常用](换) */
