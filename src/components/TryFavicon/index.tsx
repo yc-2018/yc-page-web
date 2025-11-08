@@ -14,6 +14,12 @@ interface Props {
   initElm?: 'loading' | 'skeleton';       // 初始化时加载图标样式
 }
 
+/**
+ * 尝试(从多个渠道)获取网站图标,并显示
+ *
+ * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
+ * @since 2025/11/8
+ */
 const TryFavicon: FC<Props> = ({
                                  iconUrl,
                                  url,
@@ -36,14 +42,11 @@ const TryFavicon: FC<Props> = ({
     setCurrentSrc(null);
 
     // 按优先级构建图标源数组：
-    // 1. 直接提供的iconUrl（最高优先级）
-    // 2. 通过tryGetFavicon从URL获取
-    // 3. 通过tryGetFavicon1从URL获取（最低优先级）
     const sources = [
-      iconUrl,
-      url ? tryGetFavicon(url) : null,
-      url ? tryGetFavicon1(url) : null,
-    ].filter(Boolean) as string[]; // 过滤掉null/undefined值
+      iconUrl,                                // 1. 直接提供的iconUrl（最高优先级）
+      url ? tryGetFavicon(url) : null,        // 2. 通过tryGetFavicon从URL获取
+      url ? tryGetFavicon1(url) : null,       // 3. 通过tryGetFavicon1从URL获取（最低优先级）
+    ].filter(Boolean) as string[];            // 过滤掉null/undefined值
 
     // 如果没有可用的图标源，直接显示错误状态
     if (sources.length === 0) {
