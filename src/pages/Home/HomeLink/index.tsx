@@ -199,7 +199,7 @@ const LinkBox = () => {
                 {linkList.map(item =>
                   <IsMyDndItem linkItem={item} key={item.id}>
                     <div key={item.id} className={s.item} onClick={() => window.open(item.engineUrl, '_blank')}>
-                      <TryFavicon iconUrl={item.iconUrl} url={item.engineUrl} size={50} errSize={40}/>
+                      <TryFavicon iconUrl={item.iconUrl} url={item.engineUrl} size={50} errSize={40} initElm="loading"/>
                       <div>{item.name}</div>
                     </div>
                   </IsMyDndItem>

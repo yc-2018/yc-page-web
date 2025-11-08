@@ -119,9 +119,8 @@ function Home() {
           {/*搜索框*/}
           <HomeSearch/>
 
-
+          {/* 大图标书签 */}
           <HomeLink/>
-
 
           {/*显示备忘录***********************************************************/}
           <FloatButton
@@ -321,7 +320,7 @@ function Home() {
 
           {/* 侧边半透明的边 移动到上面显示抽屉 */}
           <div
-            // onMouseEnter={() => showOrNot.setMemoDrawerShow(true)}
+            onMouseEnter={() => showOrNot.setMemoDrawerShow(true)}
             style={{
               width: 5,
               position: 'fixed',
