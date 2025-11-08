@@ -1,7 +1,7 @@
 import {CSSProperties, Dispatch, FC, ReactNode, SetStateAction} from "react";
 import {DndContext, closestCenter, PointerSensor, useSensor} from '@dnd-kit/core';
 import {arrayMove, SortableContext} from '@dnd-kit/sortable';
-import MyDndItem from "./MyDndItem";
+import MyDndItem, {IMyDndItem} from "./MyDndItem";
 import {DragEndEvent} from "@dnd-kit/core/dist/types";
 
 // 定义接口
@@ -20,7 +20,7 @@ interface MyDndProps {
 }
 
 interface ComComponent extends FC<MyDndProps> {
-  Item: FC<any>;                                      // 可用自带子组件
+  Item: FC<IMyDndItem>;                                      // 可用自带子组件
 }
 
 /**

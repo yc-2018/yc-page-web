@@ -50,6 +50,7 @@ export default ({bookmarkItems, setModal, groupId, setGroup}) => {
             key={item.id}
             id={item.id}
             className={styles.dndItem}
+            styles={{display: 'flex', alignItems: 'center'}}
             drag={<TryFavicon iconUrl={item.icon} url={item.url} size={18} errSize={14}/>}
           >
             <ContextMenu tag={item} lambdaObj={lambdaObj}>
