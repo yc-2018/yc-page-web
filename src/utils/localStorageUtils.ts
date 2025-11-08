@@ -47,3 +47,8 @@ export const _getNameAndAvatar = (): IUser => getLocalObj('nameAndAvatar', {name
 /** 搜索引擎普通列表 */
 export const _setSearchEngines = (searchEngines: ISearchEngines[]) => saveLocal('searchEngines', searchEngines)
 export const _getSearchEngines = (): ISearchEngines[] | undefined => getLocalObj('searchEngines')
+
+
+/** 首页链接列表 */
+export const _setHomeLinks = (searchEngines: ISearchEngines[]) => saveLocal('homeLinks', searchEngines)
+export const _getHomeLinks = (): ISearchEngines[] => getLocalObj('homeLinks', [])

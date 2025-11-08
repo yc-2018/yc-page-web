@@ -34,9 +34,9 @@ const buildSearchData = () => {
   for (let i = 0; i < searchDatas.length; i += 3) {
     searchData.push({
       id: i,
-      isQuickSearch: Number(searchDatas[i]),
+      type: searchDatas[i] === 0 ? 0 : 1,
       name: `${searchDatas[i + 1]}`,
-      engineUrl: 'https://' + searchDatas[i + 2],
+      engineUrl: 'https://' + searchDatas[i + 2]
     })
   }
   return searchData

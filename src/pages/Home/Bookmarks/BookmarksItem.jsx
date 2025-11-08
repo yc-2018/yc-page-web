@@ -1,11 +1,11 @@
 import {useState} from "react";
-import {Button, Image} from "antd";
+import {Button} from "antd";
 
 import {dragSort} from "@/request/homeApi";
 import MyDnd from "@/components/MyDnd";
 import ContextMenu from "@/components/ContextMenu";
-import {getBaseUrl, tryGetFavicon1} from "@/utils/urlUtils";
 import CommonStore from "@/store/CommonStore";
+import TryFavicon from "@/components/TryFavicon";
 import action from "./action";
 import styles from "./bookmark.module.css"
 
@@ -40,27 +40,18 @@ export default ({bookmarkItems, setModal, groupId, setGroup}) => {
     else setItems(oldList)
   }
 
-  /**
-   * 获取书签图标
-   * @param URLs 正则匹配后的URLs是个列表  [0]:带http..  [1]:不带http..
-   */
-  const getLogo = URLs =>
-    <Image
-      width={18}
-      height={18}
-      preview={false}
-      src={URLs[0] + '/favicon.ico'}
-      fallback={tryGetFavicon1(URLs[1])}
-    />
-
-
   /**右键菜单点击后的功能*/
   const lambdaObj = action(setItems, setModal, () => setGroup(groupId, setItems))
 
   return (items.length > 0 ?
       <MyDnd dndIds={items} setItems={setItems} style={{}} dragEndFunc={dragSortReq}>
         {items.map(item =>
-          <MyDnd.Item key={item.id} id={item.id} drag={getLogo(getBaseUrl(item.url))} className={styles.dndItem}>
+          <MyDnd.Item
+            key={item.id}
+            id={item.id}
+            className={styles.dndItem}
+            drag={<TryFavicon iconUrl={item.icon} url={item.url} size={18} errSize={14}/>}
+          >
             <ContextMenu tag={item} lambdaObj={lambdaObj}>
               <Button type="link" href={item.url} className={styles.dndContent} target="_blank">
                 {item.name}

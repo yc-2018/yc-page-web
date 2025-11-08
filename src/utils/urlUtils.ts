@@ -52,7 +52,8 @@ export function extractDomain(url: string) {
   return getBaseUrl(url)?.[1] ?? '';
 }
 
-export function tryGetFavicon(url: string) {
+export function tryGetFavicon(url?: string) {
+  if (!url) return
   return `${extractBaseUrl(url)}/favicon.ico`
 }
 
@@ -63,7 +64,8 @@ export function tryGetFavicon(url: string) {
  * @author Yc
  * @since 2025/7/14 0:39
  */
-export function tryGetFavicon1(url: string) {
+export function tryGetFavicon1(url?: string) {
+  if (!url) return
   if (url.startsWith('http')) url = extractDomain(url)
   return `https://api.qqsuu.cn/api/dm-get?url=${url}`
 }

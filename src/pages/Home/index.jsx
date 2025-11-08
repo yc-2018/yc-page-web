@@ -23,11 +23,12 @@ import showOrNot from '@/store/ShowOrNot';
 import UserStore from "@/store/UserStore";
 import CommonStore from "@/store/CommonStore";
 import {reImagesUrl, updateUserConfig, getBg, getNameAndAvatar} from "@/request/homeApi";
-import Bookmarks from "@/pages/Home/Bookmarks/index";
+import Bookmarks from "@/pages/Home/Bookmarks";
 import {getToolsList, toolsBaseURL} from "@/request/toolsRequest";
-import HomeSearch from "./HomeSearch";
-import "@/pages/Home/Home.css"
+import HomeSearch from "@/pages/Home/HomeSearch";
+import HomeLink from "@/pages/Home/HomeLink";
 import {_getBackgroundUrl, _setNameAndAvatar, _setBackgroundUrl} from "@/utils/localStorageUtils";
+import "@/pages/Home/Home.css"
 
 
 function Home() {
@@ -117,6 +118,9 @@ function Home() {
           <br/>
           {/*搜索框*/}
           <HomeSearch/>
+
+
+          <HomeLink/>
 
 
           {/*显示备忘录***********************************************************/}
@@ -317,7 +321,7 @@ function Home() {
 
           {/* 侧边半透明的边 移动到上面显示抽屉 */}
           <div
-            onMouseEnter={() => showOrNot.setMemoDrawerShow(true)}
+            // onMouseEnter={() => showOrNot.setMemoDrawerShow(true)}
             style={{
               width: 5,
               position: 'fixed',

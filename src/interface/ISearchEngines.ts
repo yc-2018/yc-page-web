@@ -1,8 +1,8 @@
 
 export const SEARCH = 0
 export const LOW_SEARCH = 1
-export const HOME_BOOK = 2
-export type ILinkType = 0 | 'SEARCH' | 1 | 'LOW_SEARCH' | 2 | 'HOME_BOOK'
+export const HOME_LINK = 2
+export type ILinkType = 0 | 'SEARCH' | 1 | 'LOW_SEARCH' | 2 | 'HOME_LINK'
 
 /**
  * (search_engines)实体类
@@ -11,9 +11,9 @@ export type ILinkType = 0 | 'SEARCH' | 1 | 'LOW_SEARCH' | 2 | 'HOME_BOOK'
  * @since 2023-12-03 22:31:22
  */
 export default interface ISearchEngines {
-  /** 搜索引擎ID  */
+  /** ID  */
   id: number
-  /** 搜索引擎URL  */
+  /** URL  */
   engineUrl: string
   /** 不常用 1是 0否  */
   type: ILinkType

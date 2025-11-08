@@ -1,9 +1,7 @@
 import {CSSProperties, Dispatch, FC, ReactNode, SetStateAction, useEffect, useState} from "react";
 import {deleteSearchEngine, sortSearchEngine} from "@/request/homeApi";
 import {searchData} from "@/store/NoLoginData";
-import {App, Avatar, Button, Dropdown, Flex} from "antd";
-import {tryGetFavicon, tryGetFavicon1} from "@/utils/urlUtils";
-import {QuestionCircleTwoTone} from "@ant-design/icons";
+import {App, Button, Dropdown, Flex} from "antd";
 import CommonStore from "@/store/CommonStore";
 import {MenuInfo} from "rc-menu/lib/interface";
 import ISearchEngines from "@/interface/ISearchEngines";
@@ -11,6 +9,7 @@ import {_setDefaultEngine} from "@/utils/localStorageUtils";
 import JWTUtils from "@/utils/JWTUtils";
 import MyDnd from "@/components/MyDnd";
 import styles from './SearchEngines.module.css'
+import TryFavicon from "@/components/TryFavicon";
 
 interface ISearchEngineList {
   id?: string,  // 元素ID
@@ -82,7 +81,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
   /** 取消拖拽 */
   const cancelDrag = () => {
     setIsDrag(false)
-    setSearchList(v => v ? [...v] : undefined)
+    setSearchList(v => [...v!])
   }
 
   /** 确认排序 */
@@ -91,8 +90,8 @@ const SearchEngineList: FC<ISearchEngineList> = (
     const main = searchList?.map(v => v.id).join('/');
 
     if (son === main) {
-      msg.warning('没变...')
       setIsDrag(false)
+      return msg.warning('没变...')
     }
 
     CommonStore.setLoading(true, '正在排序...')
@@ -194,22 +193,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
                 key={searchItem.id}
                 onClick={() => onSearch(searchItem.engineUrl)}
                 style={{cursor: isDrag ? "move" : "pointer", ...btnStyle}}
-                icon={
-                  <Avatar
-                    size={20}
-                    icon={
-                      <Avatar
-                        size={20}
-                        shape="square"  // 方形
-                        src={tryGetFavicon1(searchItem.engineUrl)}
-                        icon={<QuestionCircleTwoTone style={{color: '#888', fontSize: 16}}/>}
-                        style={{backgroundColor: 'unset'}}
-                      />}
-                    shape="square"
-                    style={{backgroundColor: 'unset'}}
-                    src={searchItem.iconUrl || tryGetFavicon(searchItem.engineUrl)}
-                  />
-                }
+                icon={<TryFavicon iconUrl={searchItem.iconUrl} url={searchItem.engineUrl} size={20} errSize={16}/>}
               >
                 {searchItem.name}
               </Button>
