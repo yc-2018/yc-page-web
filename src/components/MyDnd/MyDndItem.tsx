@@ -3,7 +3,7 @@ import {useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 
 export interface IMyDndItem {
-  id: string;
+  id: string | number;
   drag?: React.ReactNode;
   children: React.ReactNode;
   styles?: React.CSSProperties;
