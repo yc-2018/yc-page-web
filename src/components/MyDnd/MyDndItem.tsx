@@ -1,12 +1,12 @@
-import React, {FC} from 'react';
+import {CSSProperties, FC, ReactNode} from 'react';
 import {useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 
 export interface IMyDndItem {
-  id: string;
-  drag?: React.ReactNode;
-  children: React.ReactNode;
-  styles?: React.CSSProperties;
+  id: string | number;
+  drag?: ReactNode;
+  children: ReactNode;
+  styles?: CSSProperties;
   className?: string;
 }
 
@@ -14,9 +14,9 @@ export interface IMyDndItem {
  * 配置拖动元素
  * @component
  * @param id                            【必须】必须带id 而且要对应在SortableContext组件的 items属性数组中
- * @param drag {React.ReactNode}        是否单独拖动组件 就是前面拖动组件 后面正常组件 为空就是完全拖动
- * @param {React.ReactNode} children    子组件
- * @param styles {Object}               拖动元素 额外样式
+ * @param drag {ReactNode}              是否单独拖动组件 就是前面拖动组件 后面正常组件 为空就是完全拖动
+ * @param children {ReactNode}          子组件
+ * @param styles {CSSProperties}        拖动元素 额外样式
  * @param className {string}           最外层元素的class
  * @type {{Item: (props: object) => JSX.Element}}
  * */
@@ -38,10 +38,17 @@ const MyDndItem: FC<IMyDndItem> = ({id, drag, children, styles = {}, className =
 
   return drag ?
     <div ref={setNodeRef} style={style} {...attributes} className={className}>
-      <span {...listeners} className={'mouseMove'}>{drag}</span><span className={'pointer'}>{children}</span>
+      <span {...listeners} className="mouseMove">{drag}</span>
+      <span className="pointer">{children}</span>
     </div>
     :
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`mouseMove ${className}`}>
+    <div
+      style={style}
+      {...listeners}
+      {...attributes}
+      ref={setNodeRef}
+      className={`mouseMove ${className}`}
+    >
       {children}
     </div>
 }

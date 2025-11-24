@@ -6,7 +6,7 @@ import {DragEndEvent} from "@dnd-kit/core/dist/types";
 
 // 定义接口
 interface IBaseEntity {
-  id: number; // 必须属性
+  id: number | string; // 必须属性
   [key: string]: any; // 允许任意其他属性
 }
 
