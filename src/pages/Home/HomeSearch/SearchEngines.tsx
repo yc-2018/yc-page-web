@@ -6,11 +6,11 @@ import CommonStore from "@/store/CommonStore";
 import {MenuInfo} from "rc-menu/lib/interface";
 import ISearchEngines from "@/interface/ISearchEngines";
 import {_setDefaultEngine} from "@/utils/localStorageUtils";
+import {searchValue} from "@/pages/Home/HomeSearch/SearchInput";
+import TryFavicon from "@/components/TryFavicon";
 import JWTUtils from "@/utils/JWTUtils";
 import MyDnd from "@/components/MyDnd";
 import styles from './SearchEngines.module.css'
-import TryFavicon from "@/components/TryFavicon";
-import {searchValue} from "@/pages/Home/HomeSearch/index";
 
 interface ISearchEngineList {
   id?: string,  // 元素ID

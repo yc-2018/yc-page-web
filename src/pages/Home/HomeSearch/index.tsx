@@ -1,28 +1,22 @@
 import {useEffect, useState} from "react";
-import {DownCircleOutlined, PlusOutlined, SendOutlined} from "@ant-design/icons";
-import {
-  addSearchEngines,
-  getSearchEngines,
-  getThinkList,
-  updateSearchEngines
-} from "@/request/homeApi";
-import {Alert, App, AutoComplete, Button, Checkbox, Divider, Form, Input, Modal} from "antd";
+import {DownCircleOutlined, PlusOutlined} from "@ant-design/icons";
+import {addSearchEngines, getSearchEngines, updateSearchEngines} from "@/request/homeApi";
+import {Alert, App, Button, Checkbox, Divider, Form, Input, Modal} from "antd";
 import SearchEngines from "@/pages/Home/HomeSearch/SearchEngines";
 import {_getDefaultEngine, _getSearchEngines, _setSearchEngines} from "@/utils/localStorageUtils";
 import ISearchEngines, {LOW_SEARCH, SEARCH} from "@/interface/ISearchEngines";
 import JWTUtils from "@/utils/JWTUtils";
 import UserStore from "@/store/UserStore";
 import CommonStore from "@/store/CommonStore";
+import SearchInput from "@/pages/Home/HomeSearch/SearchInput";
 import './index.css'
 
-let timer: number;
 const {msg} = CommonStore
+
 interface IEditOrAdd {
   open: boolean;
   edit?: ISearchEngines;
 }
-
-export let searchValue: string | undefined = undefined;
 
 /**
  * 首页搜索框组件
@@ -35,7 +29,6 @@ const SearchBox = () => {
   const [searchList, setSearchList] = useState<ISearchEngines[] | undefined>(_getSearchEngines())
   const [searchLowList, setSearchLowList] = useState<ISearchEngines[]>();
   const [showLows, setShowLows] = useState(false);
-  const [anotherOptions, setAnotherOptions] = useState<{ value: any }[]>([]);
   const [nowSearch, setNowSearch] = useState<ISearchEngines>(getDefaultEngine)
   const [editOrAddData, setEditOrAddData] = useState<IEditOrAdd>({open: false})
   const [modalLoading, setModalLoading] = useState(false)
@@ -70,46 +63,6 @@ const SearchBox = () => {
     }).finally(() => setLowLoading(false));
   }
 
-  /**
-   * 搜索【新页面打开】
-   *
-   * @author Yc
-   * @since 2025/7/16 1:57
-   */
-  const onSearch = () => window.open(nowSearch.engineUrl.replace('@@@', searchValue ?? ''), '_blank');
-
-  /**
-   * 生成联想项
-   *
-   * @author Yc
-   * @since 2025/7/16 1:40
-   */
-  const getOption = (item: { value: string }) =>
-    <div
-      key={item.value}
-      style={{display: 'flex', justifyContent: 'space-between'}}
-      onClick={() => setKeyword(item.value)}
-    >
-      <span>{item.value}</span>
-      <div className="searchGo" onClick={() => setTimeout(onSearch, 50)}>
-        <SendOutlined/>
-      </div>
-    </div>;
-
-  /**
-   * 自动通过接口联想
-   *
-   * @author Yc
-   * @since 2025/7/16 1:41
-   */
-  const autoThink = (text: string) => {
-    window.clearTimeout(timer)
-    timer = window.setTimeout(async () => {
-      const list: { value: string }[] = await getThinkList(text);
-      setAnotherOptions(list?.map(item => ({value: item.value, label: getOption(item)})) ?? [])
-    }, 50)
-  }
-
   /** 打开编辑或新增弹窗 */
   const openModal = (edit?: ISearchEngines) => {
     setEditOrAddData({open: true, edit})
@@ -141,9 +94,6 @@ const SearchBox = () => {
     })
   }
 
-  /** 设置关键字 */
-  const setKeyword = (v: string) => searchValue = v
-
   /** 新增或编辑弹窗的确定处理 */
   const modalOnOk = () => {
     form.validateFields().then((values: ISearchEngines & { lowUsage: boolean }) => {
@@ -159,7 +109,7 @@ const SearchBox = () => {
             // 数据回显 ( 考虑 常用和不常用列表的转换
             if (updateData.type === editSearch!.type) {
               setXxxSearchList(items =>
-                  items?.map(item => item.id === updateData.id ? updateData : item));
+                items?.map(item => item.id === updateData.id ? updateData : item));
             } else {  // ——数据换列表——
               // 移除原列表那个数据
               setXxxSearchList(items => items?.filter(item => item.id !== updateData.id));
@@ -239,30 +189,16 @@ const SearchBox = () => {
         />
       }
 
-      <AutoComplete
-        onSearch={autoThink}                          // 输入框值改变时联想列表的回调
-        options={anotherOptions}                      // 联想列表
-        // value={searchValue.current}                // 输入框的值
-        // open                                       // 测试用 一直展开联想列表
-        onChange={setKeyword}                         // 输入框的值改变的回调
-        classNames={{popup: {root: 'thinkList'}}}
-        style={{width: 500, height: 40, margin: '5px 0 15px 0'}}
-      >
-        <Input.Search
-          size="large"
-          onSearch={() => setTimeout(onSearch, 50)}                   // 点击搜索按钮的回调
-          placeholder="求知若渴，解惑在斯。"
-          enterButton={[nowSearch.name, <SendOutlined key="搜索按钮"/>]}      // 搜索按钮
-        />
-      </AutoComplete>
+      {/* 搜索输入框 */}
+      <SearchInput nowSearch={nowSearch}/>
 
       {/*————————————————————————————————————新增或编辑弹窗————————————————————————————————————*/}
       <Modal
-          title={editOrAddData.edit?.id ? '修改搜索引擎' : '添加搜索引擎'}
-          open={editOrAddData.open}
-          onOk={modalOnOk}
-          confirmLoading={modalLoading}
-          onCancel={() => setEditOrAddData({open: false})}
+        title={editOrAddData.edit?.id ? '修改搜索引擎' : '添加搜索引擎'}
+        open={editOrAddData.open}
+        onOk={modalOnOk}
+        confirmLoading={modalLoading}
+        onCancel={() => setEditOrAddData({open: false})}
       >
         {!editOrAddData.edit && // 新增时提示
           <Alert
@@ -277,10 +213,10 @@ const SearchBox = () => {
 
         <br/>
         <Form<ISearchEngines>
-            form={form}
-            labelCol={{span: 6}}
-            wrapperCol={{span: 16}}
-            style={{maxWidth: 600}}
+          form={form}
+          labelCol={{span: 6}}
+          wrapperCol={{span: 16}}
+          style={{maxWidth: 600}}
         >
           <Form.Item
             label="引擎名称" name="name"
@@ -307,14 +243,14 @@ const SearchBox = () => {
           </Form.Item>
 
           <Form.Item
-              label="图标" name="iconUrl"
-              rules={[
-                {max: 255, message: '引擎URL不能超过255个字符'},
-                {
-                  pattern: /^(http|https):\/\//,
-                  message: 'URL必须以 http:// 或 https:// 开头'
-                }
-              ]}
+            label="图标" name="iconUrl"
+            rules={[
+              {max: 255, message: '引擎URL不能超过255个字符'},
+              {
+                pattern: /^(http|https):\/\//,
+                message: 'URL必须以 http:// 或 https:// 开头'
+              }
+            ]}
           >
             <Input/>
           </Form.Item>
