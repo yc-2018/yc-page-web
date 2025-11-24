@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react";
 import {QuestionCircleTwoTone} from "@ant-design/icons";
-import {tryGetFavicon, tryGetFavicon1} from "@/utils/urlUtils";
+import {tryGetFavicon, tryGetFavicon1, tryGetFavicon2} from "@/utils/urlUtils";
 import {FC} from "react";
 import {Skeleton} from "antd";
 
@@ -45,7 +45,8 @@ const TryFavicon: FC<Props> = ({
     const sources = [
       iconUrl,                                // 1. 直接提供的iconUrl（最高优先级）
       url ? tryGetFavicon(url) : null,        // 2. 通过tryGetFavicon从URL获取
-      url ? tryGetFavicon1(url) : null,       // 3. 通过tryGetFavicon1从URL获取（最低优先级）
+      url ? tryGetFavicon1(url) : null,       // 3. 通过tryGetFavicon1从URL获取
+      url ? tryGetFavicon2(url) : null,       // 4. 通过tryGetFavicon2从URL获取
     ].filter(Boolean) as string[];            // 过滤掉null/undefined值
 
     // 如果没有可用的图标源，直接显示错误状态

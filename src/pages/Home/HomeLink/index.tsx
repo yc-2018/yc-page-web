@@ -190,29 +190,27 @@ const LinkBox = () => {
     </Dropdown>
 
   return (
-    <div style={{display: 'flex', justifyContent: 'center'}}>
-      <div style={{width: '80vw', padding: 5, position: 'relative', top: '20vh'}}>
-        <div id="首页链接组件">
-          {!JWTUtils.isExpired() &&
-            <IsMyDnd>
-              <div className={s.grid10}>
-                {linkList.map(item =>
-                  <IsMyDndItem linkItem={item} key={item.id}>
-                    <div key={item.id} className={s.item} onClick={() => window.open(item.engineUrl, '_blank')}>
-                      <TryFavicon iconUrl={item.iconUrl} url={item.engineUrl} size={50} errSize={40} initElm="loading"/>
-                      <div>{item.name}</div>
-                    </div>
-                  </IsMyDndItem>
-                )}
-                {linkList.length < 20 &&
-                  <div onClick={() => openModal()} className={s.item}>
-                    <PlusOutlined style={{fontSize: 30, color: '#888'}}/>
+    <div>
+      <div id="首页链接组件"  className={s.center}>
+        {!JWTUtils.isExpired() &&
+          <IsMyDnd>
+            <div className={s.grid10}>
+              {linkList.map(item =>
+                <IsMyDndItem linkItem={item} key={item.id}>
+                  <div key={item.id} className={s.item} onClick={() => window.open(item.engineUrl, '_blank')}>
+                    <TryFavicon iconUrl={item.iconUrl} url={item.engineUrl} size={50} errSize={40} initElm="loading"/>
+                    <div>{item.name}</div>
                   </div>
-                }
-              </div>
-            </IsMyDnd>
-          }
-        </div>
+                </IsMyDndItem>
+              )}
+              {linkList.length < 20 &&
+                <div onClick={() => openModal()} className={s.item}>
+                  <PlusOutlined style={{fontSize: 30, color: '#888'}}/>
+                </div>
+              }
+            </div>
+          </IsMyDnd>
+        }
       </div>
 
       {/*————————————————————————————————————新增或编辑弹窗————————————————————————————————————*/}
