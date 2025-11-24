@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 import {DownCircleOutlined, PlusOutlined, SendOutlined} from "@ant-design/icons";
 import {
   addSearchEngines,
@@ -22,6 +22,8 @@ interface IEditOrAdd {
   edit?: ISearchEngines;
 }
 
+export let searchValue: string | undefined = undefined;
+
 /**
  * 首页搜索框组件
  *
@@ -38,8 +40,6 @@ const SearchBox = () => {
   const [editOrAddData, setEditOrAddData] = useState<IEditOrAdd>({open: false})
   const [modalLoading, setModalLoading] = useState(false)
   const [lowLoading, setLowLoading] = useState(false)
-  const [q, setQ] = useState<string>(); // 搜索框的值,当前组件用不上,子组件传useRef有问题，就用这个
-  const searchValue = useRef<string>();
   const [form] = Form.useForm(); // 创建一个表单域
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
 
@@ -76,7 +76,7 @@ const SearchBox = () => {
    * @author Yc
    * @since 2025/7/16 1:57
    */
-  const onSearch = () => window.open(nowSearch.engineUrl.replace('@@@', searchValue.current ?? ''), '_blank');
+  const onSearch = () => window.open(nowSearch.engineUrl.replace('@@@', searchValue ?? ''), '_blank');
 
   /**
    * 生成联想项
@@ -142,10 +142,7 @@ const SearchBox = () => {
   }
 
   /** 设置关键字 */
-  const setKeyword = (v: string) => {
-    setQ(v)
-    searchValue.current = v
-  }
+  const setKeyword = (v: string) => searchValue = v
 
   /** 新增或编辑弹窗的确定处理 */
   const modalOnOk = () => {
@@ -194,7 +191,6 @@ const SearchBox = () => {
 
       <SearchEngines
         id="搜索引擎列表"
-        q={q}
         setEngine={setNowSearch}
         searchList={searchList}
         setSearchList={setSearchList}
@@ -226,7 +222,6 @@ const SearchBox = () => {
         <SearchEngines
           id="不常用搜索引擎列表"
           changeLowName="设为常用"
-          q={q}
           setEngine={setNowSearch}
           searchList={searchLowList}
           setSearchList={setSearchLowList}

@@ -10,10 +10,10 @@ import JWTUtils from "@/utils/JWTUtils";
 import MyDnd from "@/components/MyDnd";
 import styles from './SearchEngines.module.css'
 import TryFavicon from "@/components/TryFavicon";
+import {searchValue} from "@/pages/Home/HomeSearch/index";
 
 interface ISearchEngineList {
   id?: string,  // 元素ID
-  q?: string,   // 搜索关键字
   searchList?: ISearchEngines[],  // 搜索引擎列表
   setSearchList: Dispatch<SetStateAction<ISearchEngines[] | undefined>> // 设置搜索引擎列表
   setEngine: Dispatch<SetStateAction<ISearchEngines>>                   // 设置默认搜索引擎
@@ -40,7 +40,6 @@ const LOW_USE = '4'
 const SearchEngineList: FC<ISearchEngineList> = (
   {
     id = "搜索引擎列表",
-    q,
     setEngine,
     searchList,
     setSearchList,
@@ -74,8 +73,8 @@ const SearchEngineList: FC<ISearchEngineList> = (
    * @since 2025/8/4 0:47
    */
   const onSearch = (engineUrl: string) => {
-    if (!q) return msg.warning('请输入搜索内容')
-    window.open(engineUrl.replace('@@@', q ?? ''), '_blank');
+    if (!searchValue) return msg.warning('请输入搜索内容')
+    window.open(engineUrl.replace('@@@', searchValue ?? ''), '_blank');
   }
 
   /** 取消拖拽 */
