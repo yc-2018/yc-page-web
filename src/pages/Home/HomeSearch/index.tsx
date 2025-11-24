@@ -173,7 +173,7 @@ const SearchBox = () => {
           id="不常用搜索引擎列表"
           changeLowName="设为常用"
           setEngine={setNowSearch}
-          searchList={searchLowList}
+          searchList={searchLowList ?? []}
           setSearchList={setSearchLowList}
           openModal={openModal}
           changeLowUsage={changeLowUsage}

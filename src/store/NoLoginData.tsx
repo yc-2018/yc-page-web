@@ -2,12 +2,6 @@ import ISearchEngines from "@/interface/ISearchEngines";
 
 /** 搜索引擎数据 */
 const searchDatas = [
-  0, '百度', 'www.baidu.com/s?wd=@@@',
-  0, 'Bing', 'www.bing.com/search?q=@@@',
-  0, '谷歌', 'www.google.com/search?q=@@@',
-  0, '360', 'www.so.com/s?q=@@@',
-  0, '搜狗', 'www.sogou.com/web?query=@@@',
-
   1, '百度', 'www.baidu.com/s?wd=@@@',
   1, 'Bing', 'www.bing.com/search?q=@@@',
   1, '谷歌', 'www.google.com/search?q=@@@',
@@ -24,6 +18,7 @@ const searchDatas = [
   1, '天猫', 's.taobao.com/search?fromTmallRedirect=true&q=@@@&tab=mall',
   1, '微博', 's.weibo.com/weibo?q=@@@',
 ]
+
 /**
  * 构建搜索引擎数据结构
  * @author ChenGuangLong
@@ -42,7 +37,6 @@ const buildSearchData = () => {
   return searchData
 }
 export const searchData: ISearchEngines[] = buildSearchData()
-
 
 /** 头部导航数据 */
 const linkToolsUrl = 'https://htmltools.pages.dev/';
