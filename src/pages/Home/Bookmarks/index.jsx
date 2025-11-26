@@ -85,7 +85,9 @@ export default function Bookmarks() {
   const addBookmark = async (formData) => {
     const bookmark = {...formData, type: ModalType, sort};
     const id = await addBookmarks(bookmark)
-    if (id && ModalType === 1) setBookmarkGroupList(bookmarkGroups => [...bookmarkGroups, {...bookmark, id}])
+    if (id && ModalType === 1) {
+      setBookmarkGroupList(bookmarkGroups => [...bookmarkGroups, {...bookmark, id}])
+    }
     else if (id && ModalType === 2) setCurrentGroupItems(Items => [...Items, {...bookmark, id}])
     else return '操作失败'
   }

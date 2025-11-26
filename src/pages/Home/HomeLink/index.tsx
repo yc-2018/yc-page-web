@@ -22,6 +22,11 @@ interface IEditOrAdd {
   edit?: ISearchEngines;
 }
 
+interface IIsMyDndItem {
+  children: ReactNode,
+  linkItem: ISearchEngines
+}
+
 const {msg} = CommonStore
 const EDIT = '0'
 const DELETE = '1'
@@ -32,6 +37,8 @@ const menuItems = [
   {label: '删 除', key: DELETE},
   {label: '排 序', key: SORT},
 ];
+
+const openUrl = (url: string) => window.open(url, '_blank');
 
 
 /**
@@ -71,7 +78,6 @@ const LinkBox = () => {
     form.resetFields()
     form.setFieldsValue(edit)
   }
-
 
   /** 新增或编辑弹窗的确定处理 */
   const modalOnOk = () => {
@@ -163,7 +169,7 @@ const LinkBox = () => {
       dndIds={linkList}
       setItems={setLinkList}
       dragEndFunc={setLinkList}
-      style={{zIndex: 99999, position: 'relative'}}
+      style={{position: 'relative'}}
     >
       {children}
     </MyDnd>
@@ -176,7 +182,7 @@ const LinkBox = () => {
    * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
    * @since 2025/8/11 2:53
    */
-  const IsMyDndItem = ({children, linkItem}: { children: ReactNode, linkItem: ISearchEngines }) => isDrag ?
+  const IsMyDndItem = ({children, linkItem}: IIsMyDndItem) => isDrag ?
     <MyDnd.Item id={linkItem.id} key={linkItem.id}>
       {children}
     </MyDnd.Item>
@@ -191,14 +197,20 @@ const LinkBox = () => {
 
   return (
     <div>
-      <div id="首页链接组件"  className={s.center}>
+      <div id="首页链接组件" className={s.center} style={{zIndex: isDrag ? 10000 : 'unset'}}>
         {!JWTUtils.isExpired() &&
           <IsMyDnd>
             <div className={s.grid10}>
               {linkList.map(item =>
                 <IsMyDndItem linkItem={item} key={item.id}>
-                  <div key={item.id} className={s.item} onClick={() => window.open(item.engineUrl, '_blank')}>
-                    <TryFavicon iconUrl={item.iconUrl} url={item.engineUrl} size={50} errSize={40} initElm="loading"/>
+                  <div key={item.id} className={s.item} onClick={() => openUrl(item.engineUrl)}>
+                    <TryFavicon
+                      size={50}
+                      errSize={40}
+                      initElm="loading"
+                      url={item.engineUrl}
+                      iconUrl={item.iconUrl}
+                    />
                     <div>{item.name}</div>
                   </div>
                 </IsMyDndItem>
