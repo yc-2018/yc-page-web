@@ -203,8 +203,9 @@ function Home() {
                   }
                   <div onClick={xzTp}><DownloadOutlined/> 下载背景图片</div>
                   <div className="bottomMenuItemButton">
+                    <b style={{textAlign: 'center', display: 'block'}}>换背景</b>
                     <div onClick={() => reImages("bing")}><SyncOutlined/> bing随机壁纸</div>
-                    <div onClick={() => reImages("风景")}><SyncOutlined/> (慢)风景背景</div>
+                    <div onClick={() => reImages("风景")}><SyncOutlined/> 风景背景(慢)</div>
                     <div onClick={() => reImages("漫画")}><SyncOutlined/> 漫画背景</div>
                     <TextArea
                       rows={4}
