@@ -16,12 +16,13 @@ export async function getThinkList(text: string) {
   if (result.ok) return (await result.json()).g?.map((item: { q: string }) => ({value: item.q}))
 }
 
+export type IBzType = 'bing' | '漫画' | '风景';
 
 /**
  * 获取首页背景图（搞多几个做备份）
  * @return 随机壁纸URL
  */
-export async function reImagesUrl(bzType: 'bing' | '漫画' | '风景') {
+export async function reImagesUrl(bzType: IBzType) {
   CommonStore.setLoading(true);
   try {
     CommonStore.setLoading(true);

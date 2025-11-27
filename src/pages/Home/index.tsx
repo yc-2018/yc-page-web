@@ -1,19 +1,13 @@
-import React, {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import axios from "axios";
 import {observer} from 'mobx-react-lite'
 import TextArea from "antd/es/input/TextArea";
 import {Avatar, Button, Popover, Tooltip} from "antd";
 import {
-  PictureTwoTone,
-  SnippetsTwoTone,
-  UserOutlined,
-  SyncOutlined,
-  DownloadOutlined,
-  PoweroffOutlined,
-  CloudUploadOutlined,
-  CloudDownloadOutlined,
-  QuestionCircleTwoTone,
-  EditOutlined, LayoutTwoTone,
+  PictureTwoTone, SnippetsTwoTone, UserOutlined,
+  SyncOutlined, DownloadOutlined, PoweroffOutlined,
+  CloudUploadOutlined, CloudDownloadOutlined,
+  QuestionCircleTwoTone, EditOutlined, LayoutTwoTone,
   ReadOutlined, ProductOutlined, LinkOutlined,
 } from "@ant-design/icons";
 import {useNavigate} from 'react-router-dom'
@@ -23,18 +17,19 @@ import Filing from "@/components/Filing";
 import showOrNot from '@/store/ShowOrNot';
 import UserStore from "@/store/UserStore";
 import CommonStore from "@/store/CommonStore";
-import {reImagesUrl, updateUserConfig, getBg, getNameAndAvatar} from "@/request/homeApi";
+import {reImagesUrl, updateUserConfig, getBg, getNameAndAvatar, IBzType} from "@/request/homeApi";
 import Bookmarks from "@/pages/Home/Bookmarks";
 import {getToolsList, toolsBaseURL} from "@/request/toolsRequest";
 import HomeSearch from "@/pages/Home/HomeSearch";
 import HomeLink from "@/pages/Home/HomeLink";
 import {_getBackgroundUrl, _setNameAndAvatar, _setBackgroundUrl} from "@/utils/localStorageUtils";
+import IUser from "@/interface/IUser";
 import "@/pages/Home/Home.css"
 
 
 function Home() {
   const [bgImg, setBgImg] = useState('/Default-wallpaper.jpg');// 背景背景
-  const [info, setInfo] = useState({});
+  const [info, setInfo] = useState<IUser>({});
   const [tools, setTools] = useState([]);
 
   const {msg} = CommonStore;
@@ -71,14 +66,14 @@ function Home() {
   /**
    * 获取背景请求
    */
-  const reImages = async (bzType) => {
+  const reImages = async (bzType: IBzType) => {
     const imgUrl = await reImagesUrl(bzType);
     if (imgUrl) setBgImage(imgUrl, '获取背景成功，喜欢的话请手动点击上传到云端☁');
     else msg.error('获取背景出错');
   }
 
   /** 保存背景URL到本地 */
-  const setBgImage = (backgroundUrl, msg = null) => {
+  const setBgImage = (backgroundUrl: string, msg: string | null = null) => {
     _setBackgroundUrl(backgroundUrl);
     setBgImg(backgroundUrl);
     return msg && CommonStore.msg.info(msg);
@@ -211,7 +206,7 @@ function Home() {
                       rows={4}
                       allowClear
                       placeholder="自定义背景链接，回车加载"
-                      onPressEnter={event => {
+                      onPressEnter={(event: any) => {
                         if (/^(http|https):\/\/.+/.test(event.target.value))
                           setBgImage(event.target.value, '正在设置中...') // 设置背景
                         else msg.error('请输入正确的链接');
@@ -297,7 +292,7 @@ function Home() {
               content={
                 <div style={{display: 'flex', flexDirection: 'column', gap: 5}}>
                   <Button block onClick={() => navigate('/utils-specialChar')}>特殊字母|数字</Button>
-                  {tools.map(([name, uri]) =>
+                  {tools.map(([name, uri]: [string, string]) =>
                     <Button key={name} block onClick={() => window.open(toolsBaseURL + uri, '_blank')}>
                       <LinkOutlined/>{name}
                     </Button>
@@ -310,7 +305,7 @@ function Home() {
                 shape="circle"
                 className="buttonOpacity"
                 onClick={() => window.open(toolsBaseURL, '_blank')}
-                onContextMenu={e => e.preventDefault() || navigate('/seeTime')}
+                onContextMenu={(e: any) => e.preventDefault() || navigate('/seeTime')}
                 icon={<ProductOutlined style={{color: '#1677ff', fontSize: 20}}/>}
               />
             </Popover>
