@@ -2,8 +2,8 @@
     text-align: center;
     z-index: 1000;
   }
-  
-  
+
+
   .App-link {
     color: #61dafb;
   }
@@ -53,4 +53,35 @@
 }
 .filing a:hover{
     opacity: 1;
+}
+
+.bottomMenu{
+  position: absolute;
+  bottom: 48px;
+  right: 25px;
+  height: 40px;
+  z-index: 0;
+  display: flex;
+  gap: 15px;
+  flex-direction: row-reverse;
+}
+
+.bottomMenuItemButton > div{
+    cursor: pointer;
+    padding: 5px;
+    margin: 5px;
+    border: #999 1px solid;
+    border-radius: 5px;
+    background: #00000000;
+    transition: all 0.5s;
+    user-select: none
+}
+
+.bottomMenuItemButton > div:not(:last-child):hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.bottomMenuItemButton > div:not(:last-child):active {
+    background: rgba(0, 0, 0, 0.2);
+    transform: scale(.8);
 }

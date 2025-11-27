@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import axios from "axios";
 import {observer} from 'mobx-react-lite'
-import {Avatar, Button, FloatButton, Input, Popover} from "antd";
+import TextArea from "antd/es/input/TextArea";
+import {Avatar, Button, Popover, Tooltip} from "antd";
 import {
   PictureTwoTone,
   SnippetsTwoTone,
@@ -83,10 +84,41 @@ function Home() {
     return msg && CommonStore.msg.info(msg);
   }
 
+  /** 获取背景图片 */
+  const getBgImg = () => {
+    getBg().then(info => {
+      if (info.data?.backgroundUrl) setBgImage(info.data.backgroundUrl);
+      else msg.error('您还没有上传过背景到服务器哦');
+    })
+  }
+
+  /** 下载背景图片 */
+  const xzTp = async () => {
+    CommonStore.setLoading(true, '开始缓存该背景...');
+    try {
+      const response = await axios.get(bgImg, {
+        responseType: 'blob', // 重要：这会告诉 Axios 返回一个 Blob 对象
+      });
+
+      // 创建一个指向下载对象的 URL
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', '仰晨背景.jpg'); // 或者任何你想要的文件名
+      document.body.appendChild(link);
+      link.click();
+
+      // 清理并重置 URL
+      window.URL.revokeObjectURL(url);
+      link.remove();
+      CommonStore.setLoading(false, '缓存完成,请保存');
+    } catch (error) {
+      CommonStore.setLoading(false, '该图片无法直接下载,请在新标签页中保存')
+      window.open(bgImg, '_blank'); // 在新标签页中打开图片
+    }
+  }
 
   return (
-
-
     <div
       style={{
         height: '100vh',
@@ -122,201 +154,167 @@ function Home() {
           {/* 大图标书签 */}
           <HomeLink/>
 
-          {/*显示备忘录***********************************************************/}
-          <FloatButton
-            onClick={() => showOrNot.setMemoDrawerShow(true)}
-            icon={<SnippetsTwoTone/>}
-            tooltip="点击弹出备忘录"
-            className='buttonOpacity'
-          />
-
-          {/*背景***********************************************************/}
-          <FloatButton.Group
-            style={{insetInlineEnd: 24 + 56}}
-            trigger="hover"
-            tooltip={{title: '背景图', placement: 'bottom'}}
-            icon={<PictureTwoTone/>}
-            className='buttonOpacity'
-          >
-            {jwt &&
-              (
-                <>
-                  {/*获取服务器背景 */}
-                  <FloatButton
-                    icon={<CloudDownloadOutlined/>}
-                    tooltip={{title: '从服务器获取背景', placement: 'left'}}
-                    className='buttonOpacity'
-                    onClick={() => {
-                      getBg().then(info => {
-                        if (info.data?.backgroundUrl) setBgImage(info.data.backgroundUrl);
-                        else msg.error('您还没有上传过背景到服务器哦');
-                      })
-                    }}
-                  />
-
-                  {/* 上传背景到服务器 */}
-                  <FloatButton
-                    icon={<CloudUploadOutlined/>}
-                    tooltip={{title: '上传背景到服务器', placement: 'left'}}
-                    className='buttonOpacity'
-                    onClick={() => updateUserConfig({backgroundUrl: bgImg})}
-                  />
-                </>
-              )
-            }
-
-            {/* 下载背景 */}
-            <FloatButton
-              icon={<DownloadOutlined/>}
-              tooltip={{title: '下载背景图片', placement: 'left'}}
-              className='buttonOpacity'
-              onClick={async () => {
-                CommonStore.setLoading(true, '开始缓存该背景...');
-                try {
-                  const response = await axios.get(bgImg, {
-                    responseType: 'blob', // 重要：这会告诉 Axios 返回一个 Blob 对象
-                  });
-
-                  // 创建一个指向下载对象的 URL
-                  const url = window.URL.createObjectURL(new Blob([response.data]));
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.setAttribute('download', '仰晨背景.jpg'); // 或者任何你想要的文件名
-                  document.body.appendChild(link);
-                  link.click();
-
-                  // 清理并重置 URL
-                  window.URL.revokeObjectURL(url);
-                  link.remove();
-                  CommonStore.setLoading(false, '缓存完成,请保存');
-                } catch (error) {
-                  CommonStore.setLoading(false, '该图片无法直接下载,请在新标签页中保存')
-                  window.open(bgImg, '_blank'); // 在新标签页中打开图片
-                }
-              }}
-            />
-            {/*换背景*/}
-            <FloatButton
-              onClick={() => reImages("bing")}
-              icon={<SyncOutlined/>}
-              tooltip={{
-                placement: 'left',
-                title:
-                  <div style={{textAlign: 'center'}} onClick={event => event.stopPropagation()}>
-                    <div>默认bing随机壁纸当背景</div>
-                    <Button onClick={() => reImages("风景")}>(慢)风景背景</Button>
-                    <Button onClick={() => reImages("漫画")}>漫画背景</Button>
-                    <Input placeholder="自定义背景链接，回车加载" onPressEnter={event => {
-                      if (/^(http|https):\/\/.+/.test(event.target.value))
-                        setBgImage(event.target.value, '正在设置中...') // 设置背景
-                      else msg.error('请输入正确的链接');
-                    }}/>
-                  </div>,
-              }}
-              className='buttonOpacity'
-            />
-          </FloatButton.Group>
-
-          {jwt ?
-            (
-              /*用户登录后选项***********************************************************/
-              <FloatButton.Group
-                trigger="hover"
-                icon={  // 头像
-                  <Avatar size={30}
-                          style={{backgroundColor: '#FFFFFF72', position: 'relative', left: '-5px'}}
-                          src={info.avatar}
-                          icon={<UserOutlined style={{color: 'blue'}}/>}
-                  />
-                }
-                tooltip={{title: "用户:" + info.username, placement: 'bottom'}}
-                style={{insetInlineEnd: 24 + 56 + 56, opacity: .5}}
-                className='buttonOpacity'
-              >
-                <FloatButton
-                  icon={<PoweroffOutlined/>}
-                  tooltip={{title: '退出登录', placement: 'left'}}
-                  className='buttonOpacity'
-                  onClick={() => {
-                    UserStore.clearJwt()
-                    window.location.reload();
-                  }}
-                />
-                <FloatButton
-                  icon={<EditOutlined/>}
-                  tooltip={{title: '修改信息', placement: 'left'}}
-                  className='buttonOpacity'
-                  onClick={() => UserStore.setInfoModal(true)}
-                />
-              </FloatButton.Group>
-            )
-            :
-            (
-              /*用户登录按钮***********************************************************/
-              <FloatButton
-                icon={<UserOutlined/>}
-                tooltip="用户登录"
-                style={{insetInlineEnd: 24 + 56 + 56}}
-                className='buttonOpacity'
-                onClick={() => {
-                  UserStore.setOpenModal(true);
-                }}
+          <div className="bottomMenu">
+            {/*显示备忘录***********************************************************/}
+            <Tooltip title="点击弹出备忘录">
+              <Button
+                size="large"
+                shape="circle"
+                className="buttonOpacity"
+                icon={<SnippetsTwoTone/>}
+                onClick={() => showOrNot.setMemoDrawerShow(true)}
               />
-            )
-          }
+            </Tooltip>
 
-          {/*页面设置***********************************************************/}
-          <FloatButton
-            trigger="hover"
-            icon={<LayoutTwoTone/>}
-            tooltip={{title: '页面设置'}}
-            style={{insetInlineEnd: 24 + 56 + 56 + 56, opacity: .5}}
-            className='buttonOpacity'
-            onClick={() => msg.info('没什么好设置的')}
-          >
+            {/*页面设置***********************************************************/}
+            <Tooltip title="页面设置">
+              <Button
+                size="large"
+                shape="circle"
+                className="buttonOpacity"
+                icon={<LayoutTwoTone/>}
+                onClick={() => msg.info('没什么好设置的')}
+              />
+            </Tooltip>
 
-          </FloatButton>
+            {/*跳转到帮助***********************************************************/}
+            <Tooltip title="帮助">
+              <Button
+                size="large"
+                shape="circle"
+                className="buttonOpacity"
+                icon={<QuestionCircleTwoTone/>}
+                onClick={() => navigate('/help')}
+              />
+            </Tooltip>
 
-          {/*跳转到帮助***********************************************************/}
-          <FloatButton
-            onClick={() => navigate('/help')}
-            icon={<QuestionCircleTwoTone/>}
-            tooltip="帮助"
-            style={{insetInlineEnd: 24 + 56 + 56 + 56 + 56}}
-            className='buttonOpacity'
-          />
+            {/*背景***********************************************************/}
+            <Popover
+              title={<div style={{textAlign: 'center', fontWeight: 'bold'}}>背景图</div>}
+              content={
+                <div className="bottomMenuItemButton">
+                  {jwt &&
+                    <>
+                      <div onClick={getBgImg}><CloudDownloadOutlined/> 从服务器获取背景</div>
+                      <div onClick={() => updateUserConfig({backgroundUrl: bgImg})}>
+                        <CloudUploadOutlined/> 上传背景到服务器
+                      </div>
+                    </>
+                  }
+                  <div onClick={xzTp}><DownloadOutlined/> 下载背景图片</div>
+                  <div className="bottomMenuItemButton">
+                    <div onClick={() => reImages("bing")}><SyncOutlined/> bing随机壁纸</div>
+                    <div onClick={() => reImages("风景")}><SyncOutlined/> (慢)风景背景</div>
+                    <div onClick={() => reImages("漫画")}><SyncOutlined/> 漫画背景</div>
+                    <TextArea
+                      rows={4}
+                      allowClear
+                      placeholder="自定义背景链接，回车加载"
+                      onPressEnter={event => {
+                        if (/^(http|https):\/\/.+/.test(event.target.value))
+                          setBgImage(event.target.value, '正在设置中...') // 设置背景
+                        else msg.error('请输入正确的链接');
+                      }}
+                    />
+                  </div>
+                </div>
+              }
+            >
+              <Button
+                size="large"
+                shape="circle"
+                className="buttonOpacity"
+                icon={<PictureTwoTone/>}
+              />
+            </Popover>
 
-          {/*跳转到博客***********************************************************/}
-          <FloatButton
-            onClick={() => navigate('/blog')}
-            icon={<ReadOutlined style={{color: '#1677ff', fontSize: 20}}/>}
-            tooltip="博客"
-            style={{insetInlineEnd: 24 + 56 + 56 + 56 + 56 + 56}}
-            className='buttonOpacity'
-          />
-
-          {/*打开工具***********************************************************/}
-          <Popover
-            title={<div style={{textAlign: 'center'}}>仰晨工具箱</div>}
-            content={
-              <div style={{display: 'flex', flexDirection: 'column', gap: 5}}>
-                <Button block onClick={() => navigate('/utils-specialChar')}>特殊字母|数字</Button>
-                {tools.map(([name, uri]) =>
-                  <Button key={name} block onClick={() => window.open(toolsBaseURL + uri, '_blank')}>
-                    <LinkOutlined/>{name}
-                  </Button>
-                )}
-              </div>
+            {jwt ?
+              <Popover  // 用户信息***********************************************************/
+                title={<div style={{textAlign: 'center', fontWeight: 'bold'}}>{"用户:" + info.username}</div>}
+                content={
+                  <div style={{display: 'flex', gap: 8, flexDirection: 'column'}}>
+                    <Button
+                      block
+                      icon={<EditOutlined/>}
+                      onClick={() => UserStore.setInfoModal(true)}
+                    >
+                      修改信息
+                    </Button>
+                    <Button
+                      block
+                      icon={<PoweroffOutlined/>}
+                      onClick={() => {
+                        UserStore.clearJwt()
+                        window.location.reload();
+                      }}
+                    >
+                      退出登录
+                    </Button>
+                  </div>
+                }
+              >
+                <Button
+                  size="large"
+                  shape="circle"
+                  className="buttonOpacity"
+                  icon={
+                    <Avatar
+                      size={30}
+                      style={{backgroundColor: '#FFFFFF72', position: 'relative'}}
+                      src={info.avatar}
+                      icon={<UserOutlined style={{color: 'blue'}}/>}
+                    />}
+                />
+              </Popover>
+              :
+              // 用户登录***********************************************************
+              <Tooltip title="用户登录">
+                <Button
+                  size="large"
+                  shape="circle"
+                  className="buttonOpacity"
+                  icon={<UserOutlined/>}
+                  onClick={() => UserStore.setOpenModal(true)}
+                />
+              </Tooltip>
             }
-          >
-            <FloatButton
-              onClick={() => window.open(toolsBaseURL, '_blank')}
-              onContextMenu={e => e.preventDefault() || navigate('/seeTime')}
-              icon={<ProductOutlined style={{color: '#1677ff', fontSize: 20}}/>}
-              style={{insetInlineEnd: 24 + 56 + 56 + 56 + 56 + 56 + 56}}
-              className='buttonOpacity'
-            />
-          </Popover>
+
+            {/*跳转到博客***********************************************************/}
+            <Tooltip title="跳转到博客">
+              <Button
+                size="large"
+                shape="circle"
+                className="buttonOpacity"
+                icon={<ReadOutlined style={{color: '#1677ff', fontSize: 20}}/>}
+                onClick={() => navigate('/blog')}
+              />
+            </Tooltip>
+
+            {/*打开工具***********************************************************/}
+            <Popover
+              title={<div style={{textAlign: 'center'}}>仰晨工具箱</div>}
+              content={
+                <div style={{display: 'flex', flexDirection: 'column', gap: 5}}>
+                  <Button block onClick={() => navigate('/utils-specialChar')}>特殊字母|数字</Button>
+                  {tools.map(([name, uri]) =>
+                    <Button key={name} block onClick={() => window.open(toolsBaseURL + uri, '_blank')}>
+                      <LinkOutlined/>{name}
+                    </Button>
+                  )}
+                </div>
+              }
+            >
+              <Button
+                size="large"
+                shape="circle"
+                className="buttonOpacity"
+                onClick={() => window.open(toolsBaseURL, '_blank')}
+                onContextMenu={e => e.preventDefault() || navigate('/seeTime')}
+                icon={<ProductOutlined style={{color: '#1677ff', fontSize: 20}}/>}
+              />
+            </Popover>
+
+          </div>
 
           {/* 侧边半透明的边 移动到上面显示抽屉 */}
           <div
@@ -325,8 +323,8 @@ function Home() {
               width: 5,
               position: 'fixed',
               right: 0,
-              top: "20%",
-              height: '60%',
+              top: "35%",
+              height: '50%',
               backgroundColor: 'aliceblue',
               opacity: '15%'
             }}
@@ -336,9 +334,7 @@ function Home() {
       </div>
       {/*备案号显示*/}
       <Filing/>
-
     </div>
-
   );
 }
 
