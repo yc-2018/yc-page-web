@@ -215,7 +215,7 @@ const LinkBox = () => {
                   </div>
                 </IsMyDndItem>
               )}
-              {linkList.length < 20 &&
+              {linkList.length < 20 && !isDrag &&
                 <div onClick={() => openModal()} className={s.item}>
                   <PlusOutlined style={{fontSize: 30, color: '#888'}}/>
                 </div>
