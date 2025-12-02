@@ -1,4 +1,4 @@
-import {ReactNode, useEffect, useRef, useState} from "react";
+import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from "react";
 import {
   addSearchEngines, deleteSearchEngine,
   getSearchEngines, sortSearchEngine,
@@ -22,9 +22,18 @@ interface IEditOrAdd {
   edit?: ISearchEngines;
 }
 
+interface IIsMyDnd {
+  children: ReactNode,
+  linkList: ISearchEngines[],
+  setLinkList: Dispatch<SetStateAction<ISearchEngines[]>>,
+  isDrag: boolean
+}
+
 interface IIsMyDndItem {
   children: ReactNode,
-  linkItem: ISearchEngines
+  linkItem: ISearchEngines,
+  isDrag: boolean
+  menuOnClick: (e: MenuInfo, linkItem: ISearchEngines) => void
 }
 
 const {msg} = CommonStore
@@ -158,51 +167,14 @@ const LinkBox = () => {
     }).finally(() => CommonStore.setLoading(false))
   }
 
-  /**
-   * 是否拖拽组件
-   *
-   * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
-   * @since 2025/8/11 2:54
-   */
-  const IsMyDnd = ({children}: { children: ReactNode }) => isDrag ?
-    <MyDnd
-      dndIds={linkList}
-      setItems={setLinkList}
-      dragEndFunc={setLinkList}
-      style={{position: 'relative'}}
-    >
-      {children}
-    </MyDnd>
-    :
-    <>{children}</>
-
-  /**
-   * 是否拖拽子组件
-   *
-   * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
-   * @since 2025/8/11 2:53
-   */
-  const IsMyDndItem = ({children, linkItem}: IIsMyDndItem) => isDrag ?
-    <MyDnd.Item id={linkItem.id} key={linkItem.id}>
-      {children}
-    </MyDnd.Item>
-    :
-    <Dropdown
-      key={linkItem.id}
-      menu={{items: menuItems, onClick: (e) => menuOnClick(e, linkItem)}}
-      trigger={['contextMenu']}
-    >
-      {children}
-    </Dropdown>
-
   return (
     <div>
       <div id="首页链接组件" className={s.center} style={{zIndex: isDrag ? 10000 : 'unset'}}>
         {!JWTUtils.isExpired() &&
-          <IsMyDnd>
+          <IsMyDnd isDrag={isDrag} linkList={linkList} setLinkList={setLinkList}>
             <div className={s.grid10}>
               {linkList.map(item =>
-                <IsMyDndItem linkItem={item} key={item.id}>
+                <IsMyDndItem linkItem={item} key={item.id} isDrag={isDrag} menuOnClick={menuOnClick}>
                   <div key={item.id} className={s.item} onClick={() => openUrl(item.engineUrl)}>
                     <TryFavicon
                       size={50}
@@ -287,3 +259,43 @@ const LinkBox = () => {
 }
 
 export default LinkBox;
+
+// —————————————————————————— 组件 ———————————————————————————— 之前每次组件刷新都会抖动，原来是因为放在了组件的内部，难怪会出现这种情况，所以要放在组件的外面，这样就不会抖动了
+
+/**
+ * 是否拖拽组件
+ *
+ * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
+ * @since 2025/8/11 2:54
+ */
+const IsMyDnd = ({children, linkList, setLinkList, isDrag}: IIsMyDnd) => isDrag ?
+  <MyDnd
+    dndIds={linkList}
+    setItems={setLinkList}
+    dragEndFunc={setLinkList}
+    style={{position: 'relative'}}
+  >
+    {children}
+  </MyDnd>
+  :
+  <>{children}</>
+
+
+/**
+ * 是否拖拽子组件
+ *
+ * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
+ * @since 2025/8/11 2:53
+ */
+const IsMyDndItem = ({children, linkItem, isDrag, menuOnClick}: IIsMyDndItem) => isDrag ?
+  <MyDnd.Item id={linkItem.id} key={linkItem.id}>
+    {children}
+  </MyDnd.Item>
+  :
+  <Dropdown
+    key={linkItem.id}
+    menu={{items: menuItems, onClick: (e) => menuOnClick(e, linkItem)}}
+    trigger={['contextMenu']}
+  >
+    {children}
+  </Dropdown>
