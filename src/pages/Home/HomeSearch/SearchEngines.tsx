@@ -24,6 +24,21 @@ interface ISearchEngineList {
   btnStyle?: CSSProperties                                              // 按钮样式
 }
 
+interface IIsMyDnd {
+  children: ReactNode,
+  isDrag: boolean,
+  searchItems: ISearchEngines[],
+  setSearchItems: Dispatch<SetStateAction<ISearchEngines[]>>
+}
+
+interface IIsMyDndItem {
+  children: ReactNode,
+  searchItem: ISearchEngines,
+  items: any[],
+  isDrag: boolean,
+  menuOnClick: (e: MenuInfo, searchItem: ISearchEngines) => void
+}
+
 const {msg} = CommonStore
 const EDIT = '0'
 const DELETE = '1'
@@ -135,43 +150,6 @@ const SearchEngineList: FC<ISearchEngineList> = (
     }
   }
 
-  /**
-   * 是否拖拽组件
-   *
-   * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
-   * @since 2025/8/11 2:54
-   */
-  const IsMyDnd = ({children}: { children: ReactNode }) => isDrag ?
-    <MyDnd
-      dndIds={searchItems}
-      setItems={setSearchItems}
-      dragEndFunc={setSearchItems}
-      style={{display: "flex", flexWrap: "wrap", gap: 5, zIndex: 9999}}
-    >
-      {children}
-    </MyDnd>
-    :
-    <>{children}</>
-
-  /**
-   * 是否拖拽子组件
-   *
-   * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
-   * @since 2025/8/11 2:53
-   */
-  const IsMyDndItem = ({children, searchItem}: { children: ReactNode, searchItem: ISearchEngines }) => isDrag ?
-    <MyDnd.Item id={searchItem.id} key={searchItem.id}>
-      {children}
-    </MyDnd.Item>
-    :
-    <Dropdown
-      key={searchItem.id}
-      menu={{items, onClick: (e) => menuOnClick(e, searchItem)}}
-      trigger={['contextMenu']}
-    >
-      {children}
-    </Dropdown>
-
   return (
     <div id={id}>
 
@@ -185,9 +163,15 @@ const SearchEngineList: FC<ISearchEngineList> = (
       }
 
       <Flex gap="small" wrap="wrap" justify='center' style={{margin: "5px 80px"}}>
-        <IsMyDnd>
+        <IsMyDnd isDrag={isDrag} searchItems={searchItems} setSearchItems={setSearchItems}>
           {searchItems.map(searchItem =>
-            <IsMyDndItem searchItem={searchItem} key={searchItem.id}>
+            <IsMyDndItem
+              items={items}
+              isDrag={isDrag}
+              key={searchItem.id}
+              searchItem={searchItem}
+              menuOnClick={menuOnClick}
+            >
               <Button
                 key={searchItem.id}
                 onClick={() => onSearch(searchItem.engineUrl)}
@@ -206,3 +190,42 @@ const SearchEngineList: FC<ISearchEngineList> = (
 }
 
 export default SearchEngineList
+
+// —————————————————————————— 组件 ———————————————————————————— 之前每次组件刷新都会抖动，原来是因为放在了组件的内部，难怪会出现这种情况，所以要放在组件的外面，这样就不会抖动了
+
+/**
+ * 是否拖拽组件
+ *
+ * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
+ * @since 2025/8/11 2:54
+ */
+const IsMyDnd = ({children, isDrag, searchItems, setSearchItems}: IIsMyDnd) => isDrag ?
+  <MyDnd
+    dndIds={searchItems}
+    setItems={setSearchItems}
+    dragEndFunc={setSearchItems}
+    style={{display: "flex", flexWrap: "wrap", gap: 5, zIndex: 9999}}
+  >
+    {children}
+  </MyDnd>
+  :
+  <>{children}</>
+
+/**
+ * 是否拖拽子组件
+ *
+ * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
+ * @since 2025/8/11 2:53
+ */
+const IsMyDndItem = ({children, searchItem, items, isDrag, menuOnClick}: IIsMyDndItem) => isDrag ?
+  <MyDnd.Item id={searchItem.id} key={searchItem.id}>
+    {children}
+  </MyDnd.Item>
+  :
+  <Dropdown
+    key={searchItem.id}
+    menu={{items, onClick: (e) => menuOnClick(e, searchItem)}}
+    trigger={['contextMenu']}
+  >
+    {children}
+  </Dropdown>
