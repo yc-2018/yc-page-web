@@ -46,7 +46,6 @@ let i = 0;                   // 页面刷新次数
 let total = -1;              // 初始化待办总数
 let orderBy = 1;             // 《表单》默认排序方式
 let isQueryOnClick = false; // 防止点太快了
-let openMemoText = 0;       //  控制全部展开备忘录内容 1展开 非1收缩
 let dates = [];              // 未处理的筛选日期
 let filterDate = '';         // 筛选日期 格式： 开始时间戳/结束时间戳/0：修改时间 1：创建时间
 let filterDateType = 1;     // 筛选日期类型 0：修改时间 1：创建时间
@@ -524,10 +523,16 @@ const MemoDrawer = () => {
 
   /**
    * 设置是否展开备忘录内容
+   * @param {boolean} b 是否展开
    * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
    * @since 2024/7/6 16:52
    */
-  const setOpenMemoText = v => sxYm(openMemoText = v);
+  const setOpenMemoText = b => {
+    let label = b ? "展开" : "收起"
+    document.querySelectorAll(`[aria-label="${label}"]`).forEach(item => {
+      item.click()
+    })
+  };
 
   /**
    * 筛选日期
@@ -632,7 +637,7 @@ const MemoDrawer = () => {
                   size="small"
                   shape="circle"
                   icon={<ColumnHeightOutlined/>}
-                  onClick={() => setOpenMemoText(1)}
+                  onClick={() => setOpenMemoText(true)}
                 />
                 {' '}
               </Tooltip>
@@ -643,7 +648,7 @@ const MemoDrawer = () => {
                   size="small"
                   shape="circle"
                   icon={<VerticalAlignMiddleOutlined/>}
-                  onClick={() => setOpenMemoText(-1)}
+                  onClick={() => setOpenMemoText(false)}
                 />
               </Tooltip>
 
