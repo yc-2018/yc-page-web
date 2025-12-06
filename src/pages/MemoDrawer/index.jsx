@@ -10,7 +10,7 @@ import {
   Drawer, List, Skeleton, Button, Tag,
   Spin, Tooltip, Select, Divider,
   Badge, Space, Dropdown, App, DatePicker,
-  Switch, Popover, Input, TimePicker, Image
+  Switch, Popover, Input, TimePicker, Image,Typography
 } from "antd";
 
 import showOrNot from "@/store/ShowOrNot";
@@ -703,26 +703,12 @@ const MemoDrawer = () => {
                           className={(itemType === 3 && !completed && 'gradientText') || null}
                         >
                           {!searchEmpty && <HighlightKeyword content={content} keyword={keyword}/>}
-                          {searchEmpty && content?.slice(0, 100)}
-                          {searchEmpty && content?.length > 100 &&
-                            <span>
-                              <span>{openMemoText === 1 && content.slice(100)}</span> {/*用来展开或收起的文字变化*/}
-                              <span
-                                className='expand-button'
-                                onClick={event => {
-                                  if (event.target.innerText === '...展开') {
-                                    event.target.parentElement.childNodes[0].innerText = content.slice(100)
-                                    event.target.innerText = '收起'
-                                  } else {
-                                    event.target.parentElement.childNodes[0].innerText = ''
-                                    event.target.innerText = '...展开'
-                                  }
-                                }}
-                              >
-                                {openMemoText === 1 ? '收起' : '...展开'}
-                              </span>
-                            </span>
-                          }
+                          <Typography.Paragraph
+                            style={{color:'#999'}}
+                            ellipsis={{rows: 3, expandable: 'collapsible', symbol: b => b ? <b>收起</b> : <b>展开</b>}}
+                          >
+                            {content}
+                          </Typography.Paragraph>
                         </div>
 
                         {Boolean(completed) && okText && <div className="ok-text"><b>完成备注：</b>{okText}</div>}
