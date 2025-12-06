@@ -70,6 +70,16 @@
   z-index: var(--z-index);
 }
 
+.loopCount {
+  position: absolute;
+  top: -18px;
+  right: -10px;
+  width: 50px;
+  height: 50px;
+  text-align: right;
+  /*background: black;*/
+}
+
 :root {
   --adm-mask-z-index: 1004;
 }

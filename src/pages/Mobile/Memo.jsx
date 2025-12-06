@@ -392,7 +392,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
    */
   const editLoopMemoItem = async (loop) => {
     okText = loop.loopText ?? ''
-    imgArr = loop.imgArr
+    imgArr = loop.imgArr;
+    window.setTimeout(() => {
+      const textarea = document.getElementById('editAddOneText');
+      if (textarea) textarea.selectionStart = textarea.selectionEnd = 9999;
+    }, 100)
     await Dialog.confirm({
       style: {zIndex: 1004},
       content:
@@ -401,6 +405,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           <TextArea
             rows={4}
             autoFocus
+            id="editAddOneText"
             defaultValue={okText}
             placeholder="请输入循环备注,空为不修改"
             onChange={v => okText = v}
@@ -574,13 +579,14 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                 <div style={{width: '100%', position: 'relative'}}>
                   {/*循环待办显示次数*/}
                   <div
-                    style={{position: "absolute", top: -18, right: -10}}
+                    className={styles.loopCount}
                     onClick={e => showLoopMemoItemList(e, item)}
+                    style={{display: type === 1 && item.numberOfRecurrences ? 'block' : 'none'}}
                   >
                     <Badge
                       color="#987ee7"
                       style={{padding: 3}}
-                      content={type === 1 && item.numberOfRecurrences}
+                      content={item.numberOfRecurrences}
                     />
                   </div>
 
