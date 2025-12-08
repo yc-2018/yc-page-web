@@ -310,10 +310,11 @@ const MemoDrawer = () => {
     setLoopTimeWebLoading(true)
     const resp = await selectLoopMemoItemList(id, loopTimePage);
     setLoopTimeWebLoading(false)
-    if (resp?.records?.length > 0) {
-      setLoopTimeList(item => ([...item, ...resp.records]))
+    const result = resp.data
+    if (resp.success && result?.records?.length > 0) {
+      setLoopTimeList(item => ([...item, ...result.records]))
       setLoopTimePage(v => v + 1)     // 页码增加
-      setLoopTimeTotal(resp.total)
+      setLoopTimeTotal(result.total)
     }
   }
 

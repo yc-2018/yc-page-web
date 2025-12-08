@@ -375,12 +375,13 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     const resp = await selectLoopMemoItemList(v['循环备忘主键'], v['循环时间页数']);
     loading.current?.close()    // 关闭加载蒙版
 
-    if (resp?.records?.length > 0) {
+    const result = resp.data
+    if (resp.success && result?.records?.length > 0) {
       v['循环时间页数']++
-      setLoopTime(list => [...list ?? [], ...resp.records])
+      setLoopTime(list => [...list ?? [], ...result.records])
     } else Toast.show({icon: 'fail', content: '获取失败'})
 
-    v['循环次数继续加载'] = resp?.current < resp?.pages
+    v['循环次数继续加载'] = result?.current < result?.pages
     v['翻页加载中'] = false
   }
 

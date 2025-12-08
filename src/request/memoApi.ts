@@ -77,14 +77,12 @@ export async function deleteMemo(id: number) {
  *
  * @param page {number}      第几页
  * @param id {number}        待办id
+ * @param q                  搜索关键字
  *  param pageSize           页面大小 = 20
- * @return {object}          待办时间对象或空
  * @author 𝐶𝒽𝑒𝑛𝐺𝑢𝑎𝑛𝑔𝐿𝑜𝑛𝑔
  */
-export async function selectLoopMemoItemList(id: number, page: number = 1) {
-  const response = await myGet<IPage<ILoopMemoItem>>(`/loopMemoItem/${id}?page=${page}`);
-  return response.data;
-}
+export const selectLoopMemoItemList = (id: number, page: number = 1, q?: string) =>
+    myGet<IPage<ILoopMemoItem>>(`/loopMemoItem/${id}?page=${page}&q=${q}`)
 
 /**
  * 添加循环备忘录时间
