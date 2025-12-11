@@ -82,7 +82,7 @@ export async function deleteMemo(id: number) {
  * @author 𝐶𝒽𝑒𝑛𝐺𝑢𝑎𝑛𝑔𝐿𝑜𝑛𝑔
  */
 export const selectLoopMemoItemList = (id: number, page: number = 1, q?: string) =>
-    myGet<IPage<ILoopMemoItem>>(`/loopMemoItem/${id}?page=${page}&q=${q}`)
+  myGet<IPage<ILoopMemoItem>>(`/loopMemoItem/${id}?page=${page}&q=${q ?? ''}`)
 
 /**
  * 添加循环备忘录时间
