@@ -3,7 +3,7 @@ import {
   InfiniteScroll, List, Popup, SwipeAction, Toast,
   Button, Tag, Radio, TextArea, Dialog, PullToRefresh,
   SearchBar, Badge, Ellipsis, CalendarPicker, Dropdown,
-  Space, Modal, ImageViewer, Picker, ImageUploader, Image
+  Space, Modal, ImageViewer, Picker, ImageUploader, Image, Input
 } from 'antd-mobile'
 import dayjs from "dayjs";
 import {
@@ -33,6 +33,7 @@ let v = {      // 循环装中文变量
   '循环备忘主键': null,
   '循环次数继续加载': false,
   '翻页加载中': false,
+  '循环关键字': null,
 }
 
 /**
@@ -60,6 +61,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
   const [content, setContent] = useState('')                   // 表单内容
   const [itemType, setItemType] = useState(0)                 // 表单类型
+
+  const [showQ, setShowQ] = useState();
 
   // 新增或修改类型是当前类型 说明要在当前列表有变化
   useEffect(() => {
@@ -372,7 +375,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const showLoopTime = async () => {
     if (v['翻页加载中'] || !v['循环次数继续加载']) return
     v['翻页加载中'] = true
-    const resp = await selectLoopMemoItemList(v['循环备忘主键'], v['循环时间页数']);
+    const resp = await selectLoopMemoItemList(v['循环备忘主键'], v['循环时间页数'], v['循环关键字']);
     loading.current?.close()    // 关闭加载蒙版
 
     const result = resp.data
@@ -807,10 +810,109 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
       <Popup      /* 循环时间的弹出层 *******************************************************************/
         visible={!!loopTime}
-        onMaskClick={() => setLoopTime(undefined)}
+        style={{zIndex: 1001}}
         bodyStyle={{height: '55vh', overflow: 'scroll'}}
-        style={{zIndex:1001}}
+        onMaskClick={() => {
+          setLoopTime(undefined);
+          setShowQ(undefined);
+          v['循环关键字'] = null;
+        }}
       >
+        {showQ?.length >= 0 ?
+          <div
+            style={{display: 'grid', gridTemplateColumns: '1fr 3rem', padding: 3, alignItems: 'center'}}
+          >
+            <Input
+              style={{zIndex: 2}}
+              clearable
+              id="loopQ"
+              value={showQ}
+              placeholder='请输入内容'
+              onChange={v => setShowQ(v)}
+              onEnterPress={() => {
+                v['循环关键字'] = showQ;
+                showLoopMemoItemList(null, {id: v['循环备忘主键']});
+                setShowQ(null);
+              }}
+            />
+            <div
+              style={{
+                zIndex: 2,
+                width: '100%',
+                height: '100%',
+                lineHeight: '25px',
+                textAlign: 'center',
+                background: '#cbf3fa',
+                border: '1px solid #ccc',
+                borderRadius: 5
+              }}
+              onClick={() => {
+                v['循环关键字'] = showQ;
+                showLoopMemoItemList(null, {id: v['循环备忘主键']});
+                setShowQ(null);
+              }}
+            >
+              搜索
+            </div>
+            <div
+              onClick={() => setShowQ(null)}
+              style={{
+                opacity: 0.7,
+                zIndex: 1,
+                background: '#eee',
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                width: '100vw',
+                height: '100vh'
+              }}
+            />
+          </div>
+          :
+          <div>
+            {v['循环关键字'] ?
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 2rem', alignItems: 'center', padding: 5}}>
+                <div
+                  onClick={() => {
+                    setShowQ(v['循环关键字']);
+                    window.setTimeout(() => {
+                      document.querySelector('#loopQ').focus()
+                    }, 200)
+                  }}
+                >
+                  {v['循环关键字']}
+                </div>
+                <div
+                  style={{
+                    background: '#f8e0e0',
+                    padding: 2,
+                    borderRadius: 5,
+                    border: '1px solid red',
+                    textAlign: 'center'
+                  }}
+                  onClick={() => {
+                    v['循环关键字'] = null;
+                    showLoopMemoItemList(null, {id: v['循环备忘主键']});
+                  }}
+                >
+                  X
+                </div>
+              </div>
+              :
+              <div
+                style={{color: '#a09af6', padding: 5}}
+                onClick={() => {
+                  setShowQ('');
+                  window.setTimeout(() => {
+                    document.querySelector('#loopQ').focus()
+                  }, 200)
+                }}
+              >
+                搜索循环项备注
+              </div>
+            }
+          </div>
+        }
         {loopTime?.length > 0 &&
           <>
             <List>
@@ -819,21 +921,21 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                   <div style={{display: 'flex', gap: 10}}>
                     {index + 1}：{fDate(item.memoDate)}
                     {item.imgArr && item.imgArr.split(',').map((url, i) =>
-                        <Image
-                          src={thumbUrl(url)}
-                          width={25}
-                          height={25}
-                          fit='fill'
-                          style={{borderRadius: 5}}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            ImageViewer.Multi.show({
-                              images: item.imgArr.split(','),
-                              defaultIndex: i,
-                              classNames: {mask: styles.imgListViewer},
-                            })
-                          }}
-                        />
+                      <Image
+                        src={thumbUrl(url)}
+                        width={25}
+                        height={25}
+                        fit='fill'
+                        style={{borderRadius: 5}}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          ImageViewer.Multi.show({
+                            images: item.imgArr.split(','),
+                            defaultIndex: i,
+                            classNames: {mask: styles.imgListViewer},
+                          })
+                        }}
+                      />
                     )}
                   </div>
                   {item.loopText && <div className={styles.loopText}>{item.loopText}</div>}
