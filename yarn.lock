@@ -2024,10 +2024,10 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-markdown-to-jsx@^7.4.4:
-  version "7.7.3"
-  resolved "https://registry.npmmirror.com/markdown-to-jsx/-/markdown-to-jsx-7.7.3.tgz#c75927252592696e9e8b2a9557628749d8ab023e"
-  integrity sha512-o35IhJDFP6Fv60zPy+hbvZSQMmgvSGdK5j8NRZ7FeZMY+Bgqw+dSg7SC1ZEzC26++CiOUCqkbq96/c3j/FfTEQ==
+markdown-to-jsx@9.6.1:
+  version "9.6.1"
+  resolved "https://registry.npmmirror.com/markdown-to-jsx/-/markdown-to-jsx-9.6.1.tgz#01ca46153fad10aa6e27a0450ca3372cc9a852b5"
+  integrity sha512-FLZPygHQzEGNUwIJ3Egdf3Lzm5M4ebswji8aMfM5tAq1vxkSw31a7OBmYXA3tg264PPyJw5UMDHw1fU+wFaQ9Q==
 
 math-intrinsics@^1.1.0:
   version "1.1.0"
