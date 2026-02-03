@@ -149,13 +149,16 @@ const SearchBox = () => {
         extraElement={UserStore.jwt &&
           <>
             {!showLows &&
-              <Button
-                loading={lowLoading}
-                title="展开不常用搜索引擎"
-                icon={<DownCircleOutlined/>}
-                className="opacity30to100"
-                onClick={() => getSearchLowList()}
-              />
+              <div style={{width: 0, marginLeft: -8}}>
+                <Button
+                  style={{marginLeft: 8}} // 控制不单独换行 样式又一致
+                  loading={lowLoading}
+                  title="展开不常用搜索引擎"
+                  icon={<DownCircleOutlined/>}
+                  className="opacity30to100"
+                  onClick={() => getSearchLowList()}
+                />
+              </div>
             }
             <div style={{width: 0, marginLeft: -8}}>
               <Button
