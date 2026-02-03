@@ -157,8 +157,9 @@ const SearchBox = () => {
                 onClick={() => getSearchLowList()}
               />
             }
-            <div style={{width: 0}}>
+            <div style={{width: 0, marginLeft: -8}}>
               <Button
+                style={{marginLeft: 8}} // 控制不单独换行 样式又一致
                 title="添加新的搜索引擎"
                 icon={<PlusOutlined/>}
                 className="opacity30to100"
@@ -180,8 +181,9 @@ const SearchBox = () => {
           changeLowUsage={changeLowUsage}
           btnStyle={{borderColor: '#fff', background: '#555050', color: 'white'}}
           extraElement={
-            <div style={{width: 0}}>
+            <div style={{width: 0, marginLeft: -8}}>
               <Button
+                style={{marginLeft: 8}} // 控制不单独换行 样式又一致
                 title="隐藏不常用搜索引擎"
                 className="opacity30to100"
                 onClick={() => setShowLows(false)}
