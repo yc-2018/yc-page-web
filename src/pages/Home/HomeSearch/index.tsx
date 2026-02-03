@@ -147,29 +147,25 @@ const SearchBox = () => {
         openModal={openModal}
         changeLowUsage={changeLowUsage}
         extraElement={UserStore.jwt &&
-          <>
+          <div style={{width: 0, marginLeft: -8, whiteSpace: 'nowrap'}}>
             {!showLows &&
-              <div style={{width: 0, marginLeft: -8}}>
-                <Button
-                  style={{marginLeft: 8}} // 控制不单独换行 样式又一致
-                  loading={lowLoading}
-                  title="展开不常用搜索引擎"
-                  icon={<DownCircleOutlined/>}
-                  className="opacity30to100"
-                  onClick={() => getSearchLowList()}
-                />
-              </div>
-            }
-            <div style={{width: 0, marginLeft: -8}}>
               <Button
                 style={{marginLeft: 8}} // 控制不单独换行 样式又一致
-                title="添加新的搜索引擎"
-                icon={<PlusOutlined/>}
+                loading={lowLoading}
+                title="展开不常用搜索引擎"
+                icon={<DownCircleOutlined/>}
                 className="opacity30to100"
-                onClick={() => openModal()}
+                onClick={() => getSearchLowList()}
               />
-            </div>
-          </>
+            }
+            <Button
+              style={{marginLeft: 8}} // 控制不单独换行 样式又一致
+              title="添加新的搜索引擎"
+              icon={<PlusOutlined/>}
+              className="opacity30to100"
+              onClick={() => openModal()}
+            />
+          </div>
         }
       />
 
