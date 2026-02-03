@@ -157,13 +157,14 @@ const SearchBox = () => {
                 onClick={() => getSearchLowList()}
               />
             }
-            <Button
-              style={{position: 'absolute', right: 6}}
-              title="添加新的搜索引擎"
-              icon={<PlusOutlined/>}
-              className="opacity30to100"
-              onClick={() => openModal()}
-            />
+            <div style={{width: 0}}>
+              <Button
+                title="添加新的搜索引擎"
+                icon={<PlusOutlined/>}
+                className="opacity30to100"
+                onClick={() => openModal()}
+              />
+            </div>
           </>
         }
       />
@@ -179,12 +180,14 @@ const SearchBox = () => {
           changeLowUsage={changeLowUsage}
           btnStyle={{borderColor: '#fff', background: '#555050', color: 'white'}}
           extraElement={
-            <Button
-              title="隐藏不常用搜索引擎"
-              className="opacity30to100"
-              onClick={() => setShowLows(false)}
-              icon={<DownCircleOutlined style={{transform: 'rotate(180deg)'}}/>}
-            />
+            <div style={{width: 0}}>
+              <Button
+                title="隐藏不常用搜索引擎"
+                className="opacity30to100"
+                onClick={() => setShowLows(false)}
+                icon={<DownCircleOutlined style={{transform: 'rotate(180deg)'}}/>}
+              />
+            </div>
           }
         />
       }
