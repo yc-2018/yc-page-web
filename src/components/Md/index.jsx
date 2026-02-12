@@ -11,36 +11,38 @@ import CommonStore from "../../store/CommonStore";
 
 /** 内联代码片 和 代码块 */
 const CodeBlock = ({children, className}) => {
-    // 是 内联代码片 (单行代码)直接返回。  感觉还是有点问题的 但问题不大！
-    if (!/\n/.test(children) && !className) return <code className={styles.inlineCode}>{children}</code>;
+  // 是 内联代码片 (单行代码)直接返回。  感觉还是有点问题的 但问题不大！
+  if (!/\n/.test(children) && !className) {
+    return <code className={styles.inlineCode}>{children}</code>;
+  }
 
-    // 这个md可能是有bug 三反单引号后面的语言名 有时会被当成第一行 然后代码语言类就消失了
-    const lines = children.split('\n');
-    const isIn = mdCodeLanguageList.includes(lines[0])
-    if (isIn) {
-        className = lines[0]
-        children = lines.slice(1).join('\n')
-    }
+  // 这个md可能是有bug 三反单引号后面的语言名 有时会被当成第一行 然后代码语言类就消失了
+  const lines = children.split('\n');
+  const isIn = mdCodeLanguageList.includes(lines[0])
+  if (isIn) {
+    className = lines[0]
+    children = lines.slice(1).join('\n')
+  }
 
-    return (
-        <div className={styles.codeBlockWrapper}>
-            <div className={styles.codeLangHead}>
-                {className?.replace(/lang-/, '')}
-                <CopyToClipboard text={children} onCopy={() => CommonStore.msg.success('复制成功')}>
-                    <button className={styles.copyButton}>复制代码</button>
-                </CopyToClipboard>
-            </div>
-            <SyntaxHighlighter
-                className={styles.scrollbar}
-                customStyle={{ borderRadius: '0 0 8px 8px', marginTop: 0}}            // pre标签上的顶级样式组合的属性，这里的样式将覆盖以前的样式。
-                showLineNumbers={lines.length > 2}           // 大于2行才显示行号（本来想1的 但是可能受上面说的bug影响 有的1行也会显示)
-                language={className?.replace(/lang-/, '')}
-                style={a11yDark}
-            >
-                {children}
-            </SyntaxHighlighter>
-        </div>
-    );
+  return (
+    <div className={styles.codeBlockWrapper}>
+      <div className={styles.codeLangHead}>
+        {className?.split('-').at(-1)}
+        <CopyToClipboard text={children} onCopy={() => CommonStore.msg.success('复制成功')}>
+          <button className={styles.copyButton}>复制代码</button>
+        </CopyToClipboard>
+      </div>
+      <SyntaxHighlighter
+        className={styles.scrollbar}
+        customStyle={{borderRadius: '0 0 8px 8px', marginTop: 0}}  // pre标签上的顶级样式组合的属性，这里的样式将覆盖以前的样式。
+        showLineNumbers={lines.length > 2}           // 大于2行才显示行号（本来想1的 但是可能受上面说的bug影响 有的1行也会显示)
+        language={className?.replace(/lang-/, '')}
+        style={a11yDark}
+      >
+        {children}
+      </SyntaxHighlighter>
+    </div>
+  );
 };
 
 /** markdown解析组件，及自定义样式<br/>
@@ -53,47 +55,47 @@ const CodeBlock = ({children, className}) => {
  * <a href="https://github.com/remarkjs/react-markdown">react-markdown GitHub</a><br/>
  * */
 export default ({children}) => {
-    const options = {
-        overrides: {
-            code: {component: CodeBlock},
-            blockquote: {   // 引用块
-                component: props =>
-                    <blockquote className={styles.blockquote}>
-                        {props.children}
-                    </blockquote>
-            },
-            table: {
-                component: props =>
-                    <table style={{borderCollapse: 'collapse', width: '100%'}}>
-                        {props.children}
-                    </table>
-            },
-            th: {
-                component: props =>
-                    <th style={{border: '1px solid #ddd', padding: '8px', textAlign: 'left'}}>
-                        {props.children}
-                    </th>
-            },
-            tr: {
-                component: props => <tr className={styles.tr}>{props.children}</tr>
-            },
-            td: {
-                component: props =>
-                    <td style={{border: '1px solid #ddd', padding: '8px'}}>
-                        {props.children}
-                    </td>
-            },
-            a: ({href, children}) => <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>,
-            kbd: {
-                component: props =>
-                    <kbd className={styles.kbd}>
-                        {props.children}
-                    </kbd>
-            },
-            hr: () => <hr className={styles.hr}/>,
-        },
+  const options = {
+    overrides: {
+      code: {component: CodeBlock},
+      blockquote: {   // 引用块
+        component: props =>
+          <blockquote className={styles.blockquote}>
+            {props.children}
+          </blockquote>
+      },
+      table: {
+        component: props =>
+          <table style={{borderCollapse: 'collapse', width: '100%'}}>
+            {props.children}
+          </table>
+      },
+      th: {
+        component: props =>
+          <th style={{border: '1px solid #ddd', padding: '8px', textAlign: 'left'}}>
+            {props.children}
+          </th>
+      },
+      tr: {
+        component: props => <tr className={styles.tr}>{props.children}</tr>
+      },
+      td: {
+        component: props =>
+          <td style={{border: '1px solid #ddd', padding: '8px'}}>
+            {props.children}
+          </td>
+      },
+      a: ({href, children}) => <a href={href} target="_blank" rel="noreferrer">{children}</a>,
+      kbd: {
+        component: props =>
+          <kbd className={styles.kbd}>
+            {props.children}
+          </kbd>
+      },
+      hr: () => <hr className={styles.hr}/>,
+    },
 
-    }
+  }
 
-    return <Markdown options={options}>{children}</Markdown>
+  return <Markdown options={options}>{children}</Markdown>
 }
