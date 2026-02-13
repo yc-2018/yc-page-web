@@ -12,7 +12,7 @@
   - Translation             : 翻译
   - CharAutoReplace         : 符号替换
   - Rainbow Brackets Lite   : 括号高亮
-- node: >=18.20.4
+- node: >=20.18.3
 - yarn: >=1.22.22
 
 
