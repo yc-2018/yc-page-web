@@ -1,0 +1,1 @@
+import{i as o}from"./index-DLCjuoeY.js";import{r as u}from"./index-A5yLZ6sE.js";function s(r,n,t){if(r&&typeof MutationObserver<"u"){let e=new MutationObserver(()=>{t()});return e.observe(r,n),()=>{e&&(e.disconnect(),e=null)}}return()=>{}}function a(r,n,t){const e=o(r);u.useEffect(()=>s(n.current,t,e),[n])}export{s as o,a as u};
