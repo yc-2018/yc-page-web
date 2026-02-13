@@ -8,6 +8,18 @@ import {mdCodeLanguageList} from "@/store/NoLoginData";
 import {CopyToClipboard} from "react-copy-to-clipboard/src";
 import CommonStore from "../../store/CommonStore";
 
+/** 有些默认对应不上的，就手动映射一下 */
+const languageMapper = {
+  "js": "javascript",
+  "ts": "typescript",
+  "javaScript": "javascript",
+  "html": "htmlbars",
+  "txt": "plaintext",
+  "text": "plaintext",
+  "py": "python",
+  "sh": "shell",
+  "cmd": "dos",
+}
 
 /** 内联代码片 和 代码块 */
 const CodeBlock = ({children, className}) => {
@@ -15,7 +27,6 @@ const CodeBlock = ({children, className}) => {
   if (!/\n/.test(children) && !className) {
     return <code className={styles.inlineCode}>{children}</code>;
   }
-
   // 这个md可能是有bug 三反单引号后面的语言名 有时会被当成第一行 然后代码语言类就消失了
   const lines = children.split('\n');
   const isIn = mdCodeLanguageList.includes(lines[0])
@@ -23,11 +34,12 @@ const CodeBlock = ({children, className}) => {
     className = lines[0]
     children = lines.slice(1).join('\n')
   }
-
+  console.log("███████className>>>>🔴", className,"🔴<<<<██████");
+  const language = className?.split(/[\s-]+/).at(-1); // 获取代码语言 不管前面是空格还是减号 都切割拿最后一个单词
   return (
     <div className={styles.codeBlockWrapper}>
       <div className={styles.codeLangHead}>
-        {className?.split('-').at(-1)}
+        {language}
         <CopyToClipboard text={children} onCopy={() => CommonStore.msg.success('复制成功')}>
           <button className={styles.copyButton}>复制代码</button>
         </CopyToClipboard>
@@ -36,7 +48,7 @@ const CodeBlock = ({children, className}) => {
         className={styles.scrollbar}
         customStyle={{borderRadius: '0 0 8px 8px', marginTop: 0}}  // pre标签上的顶级样式组合的属性，这里的样式将覆盖以前的样式。
         showLineNumbers={lines.length > 2}           // 大于2行才显示行号（本来想1的 但是可能受上面说的bug影响 有的1行也会显示)
-        language={className?.replace(/lang-/, '')}
+        language={languageMapper[language] ?? language}
         style={a11yDark}
       >
         {children}
