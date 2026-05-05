@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {observer} from 'mobx-react-lite'
 import {
   BookOutlined,
@@ -73,6 +73,9 @@ const MemoDrawer = () => {
   const [keyword, setKeyword] = useState('');                   // 搜索关键字
   const [searchEmpty, setSearchEmpty] = useState(true);       // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
 
+  const loadMoreRef = useRef(null);                // 自动翻页触底监听元素
+  const itemLoadingRef = useRef(false);            // 自动翻页请求锁
+  const autoLoadFailedRef = useRef(false);         // 自动翻页失败暂停标记
   const {notification, modal} = App.useApp();
 
   const sxYm = () => setRefresh(++i)        // 刷新页面
@@ -85,6 +88,7 @@ const MemoDrawer = () => {
       setUnFinishCounts(null) // 待办未完成计数重置
       setList([]);            // 待办列表重置
       setPage(1)              // 待办翻页重置
+      autoLoadFailedRef.current = false; // 自动翻页失败状态重置
       total = -1;                   // 待办总数重置
       // 使用 axios 发起请求 获取又一次初始化待办列表
       const resp = await getMemos({type, page: 1, completed, orderBy, keyword, dateRange: filterDate});
@@ -129,10 +133,29 @@ const MemoDrawer = () => {
 
   }, [UserStore.jwt, type, completed, refreshTrigger]);
 
+  /** 触底自动加载下一页 */
+  useEffect(() => {
+    const loadMoreElement = loadMoreRef.current;  // 底部触发器元素
+    if (!loadMoreElement || initLoading || itemLoading || JWTUtils.isExpired() || !showOrNot.memoDrawerShow) return;
+    if (autoLoadFailedRef.current) return;
+    if (list.length >= total) return;
+
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) onLoadMore();
+    }, {rootMargin: '120px'});
+
+    observer.observe(loadMoreElement);
+    return () => observer.disconnect();
+  }, [initLoading, itemLoading, list.length, showOrNot.memoDrawerShow, UserStore.jwt])
+
 
   /** 点击加载更多数据触发 */
   const onLoadMore = async () => {
+    if (itemLoadingRef.current) return;
+    if (list.length >= total) return;
+    itemLoadingRef.current = true
     setItemItemLoading(true);
+    const oldData = data; // 请求失败时恢复原列表
     setList(
       data.concat(
         [...new Array(2)].map(() => ({
@@ -143,31 +166,42 @@ const MemoDrawer = () => {
       ),
     );
 
-    // 使用 axios 发起请求
-    const {data: respData} = await getMemos({
-      type,
-      page: page + 1,
-      completed,
-      orderBy,
-      keyword,
-      dateRange: filterDate
-    });
-    if (!respData) return;      // 保持代码的健壮性
-    // 结合旧数据和新数据
-    const newData = data.concat(respData.records);
-    setData(newData);
-    setList(newData);
-    setItemItemLoading(false);
-    setPage(page + 1);      // 异步放前面也没用
+    try {
+      // 使用 axios 发起请求
+      const {data: respData} = await getMemos({
+        type,
+        page: page + 1,
+        completed,
+        orderBy,
+        keyword,
+        dateRange: filterDate
+      });
+      if (!respData) {      // 保持代码的健壮性
+        autoLoadFailedRef.current = true
+        setList(oldData)
+        return;
+      }
+      autoLoadFailedRef.current = false
+      // 结合旧数据和新数据
+      const newData = data.concat(respData.records);
+      setData(newData);
+      setList(newData);
+      setPage(page + 1);      // 异步放前面也没用
+    } finally {
+      itemLoadingRef.current = false
+      setItemItemLoading(false);
+    }
 
   };
 
 
   /** 判断 显示《加载更多》《到底了》还是什么都不显示 */
   const loadMore =
-    !initLoading && !itemLoading && list.length < total ? (
-      <div className="loadMore">
-        <Button block onClick={onLoadMore}>加载更多</Button>
+    !initLoading && !itemLoading && autoLoadFailedRef.current ? (
+      <div className="loadMore">加载失败，点击刷新后重试</div>
+    ) : !initLoading && !itemLoading && list.length < total ? (
+      <div className="loadMore" ref={loadMoreRef}>
+        下滑自动加载更多...
       </div>
     ) : !itemLoading && list.length && <Divider className='loadMore' plain>🥺到底啦🐾</Divider>;
 

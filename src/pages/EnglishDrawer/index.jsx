@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {App, Button, Divider, Drawer, Input, Skeleton, Space, Spin, Tag} from "antd";
 import {
     CheckOutlined, CloseOutlined, DashboardOutlined, DeleteOutlined, DeleteTwoTone, EditOutlined,
@@ -11,7 +11,6 @@ import UserStore from "@/store/UserStore";
 import CommonStore from "@/store/CommonStore";
 import {englishSortingOptions, tagList} from "@/store/NoLoginData";
 import MyEmpty from "@/components/common/MyEmpty";
-import MyButton from "@/components/MyButton";
 import SortSelect from "@/components/SortSelect";
 import LoaderWhite from "@/components/common/LoaderWhite";
 import {addMemo, deleteMemo, getMemos, updateMemo} from "@/request/memoApi";
@@ -38,6 +37,9 @@ function EnglishDrawer() {
     const [word,setWord] = useState(null)                              // 《表单》关键词
     const [shouldFocus, setShouldFocus] = useState(false);    // 是否获取焦点（感觉ref有点消耗性能)
 
+    const loadMoreRef = useRef(null)                  // 自动翻页触底监听元素
+    const webLoadingRef = useRef(false)               // 自动翻页请求锁
+    const autoLoadFailedRef = useRef(false)           // 自动翻页失败暂停标记
     const {msg} = CommonStore
     const {  modal } = App.useApp();
 
@@ -49,15 +51,39 @@ function EnglishDrawer() {
         }
     }, [showOrNot.englishDrawerShow, UserStore.jwt])
 
+    /** 触底自动加载下一页 */
+    useEffect(() => {
+        const loadMoreElement = loadMoreRef.current;  // 底部触发器元素
+        if (!loadMoreElement || webLoading || JWTUtils.isExpired() || !showOrNot.englishDrawerShow) return;
+        if (autoLoadFailedRef.current) return;
+        if (total <= listData?.length) return;
+
+        const observer = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) getListData();
+        }, {rootMargin: '120px'});
+
+        observer.observe(loadMoreElement);
+        return () => observer.disconnect();
+    }, [webLoading, editId, showOrNot.englishDrawerShow, UserStore.jwt])
+
     /** 获取列表数据 */
     const getListData = async () => {
+        if (webLoadingRef.current) return;
+        webLoadingRef.current = true
         setWebLoading(true)     // 网络加载
-        const resp = await getMemos({type:4, page,orderBy, firstLetter, keyword})
-        setWebLoading(false)    // 网络加载
-        if (resp.code === 1) {
-            listData = ([...listData, ...resp.data.records])
-            total = resp.data.total;
-            page++
+        try {
+            const resp = await getMemos({type:4, page,orderBy, firstLetter, keyword})
+            if (resp.code === 1) {
+                autoLoadFailedRef.current = false
+                listData = ([...listData, ...resp.data.records])
+                total = resp.data.total;
+                page++
+            } else {
+                autoLoadFailedRef.current = true
+            }
+        } finally {
+            webLoadingRef.current = false
+            setWebLoading(false)    // 网络加载
         }
     }
 
@@ -75,6 +101,7 @@ function EnglishDrawer() {
 
     /** 不重置条件获取列表数据 */
     const reset = () => {
+        autoLoadFailedRef.current = false
         listData = []
         page = 1
         getListData()
@@ -163,9 +190,12 @@ function EnglishDrawer() {
     const getTail = () =>
         webLoading ? <><Skeleton active/><Skeleton active/><Skeleton active/></>    // 加载中占位组件
             :
+            autoLoadFailedRef.current ?
+                <div className="loadMore">加载失败，点击刷新后重试</div>
+                :
             total > listData?.length ?
-                <div className="loadMore">
-                    <MyButton onClick={() => getListData()}>加载更多</MyButton>
+                <div className="loadMore" ref={loadMoreRef}>
+                    下滑自动加载更多...
                 </div>
                 :
                 total ? <Divider className='loadMore' plain>🥺到底啦🐾</Divider>
