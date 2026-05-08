@@ -141,7 +141,12 @@ export default function Bookmarks() {
       updateBookmark={updateBookmarks}
     />
     {!JWTUtils.isExpired() && bookmarkGroupList.length > 0 &&
-      <MyDnd dndIds={bookmarkGroupList} setItems={setBookmarkGroupList} dragEndFunc={dragSortReq}>
+      <MyDnd
+        dragEndFunc={dragSortReq}
+        dndIds={bookmarkGroupList}
+        setItems={setBookmarkGroupList}
+        style={{display: 'flex', flexWrap: 'wrap', gap: 8, padding: 5}}
+      >
         {bookmarkGroupList.map(group =>
           <MyDnd.Item key={group.id} id={group.id} styles={{padding: '1px 0'}}
                       drag={<span style={{color: '#00000030'}}>☰</span>}>

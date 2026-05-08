@@ -1,6 +1,6 @@
 import {CSSProperties, FC, ReactNode} from 'react';
 import {useSortable} from '@dnd-kit/sortable';
-import {CSS} from '@dnd-kit/utilities';
+import {CSS, type Transform} from '@dnd-kit/utilities';
 
 export interface IMyDndItem {
   id: string | number;
@@ -30,10 +30,13 @@ const MyDndItem: FC<IMyDndItem> = ({id, drag, children, styles = {}, className =
   } = useSortable({id});
 
 
+  const toNoScaleTransform = (transform: Transform | null) => CSS.Translate.toString(transform);
+
   const style = {
-    transform: CSS.Transform.toString(transform),
     transition,
-    ...styles
+    ...styles,
+    flex: '0 0 auto',
+    transform: toNoScaleTransform(transform),
   };
 
   return drag ?
