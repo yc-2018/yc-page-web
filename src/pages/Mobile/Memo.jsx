@@ -117,10 +117,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
    * @since 2025/7/18 2:33
    */
   const uploadToJD = async (file) => {
-    if (file.size > 1024 * 1024 * 20) Toast.show({content: '图片超20M,自动压缩中...'})
+    if (file.size > 1024 * 1024 * 15) Toast.show({content: '图片超15M,自动压缩中...'})
     const result = await uploadImgByJD(file);
     if (!result.success || !result.data?.url) {
-      Toast.show({icon: 'fail', content: result.message ?? '上传成功'})
+      Toast.show({icon: 'fail', content: result.message ?? '上传失败'})
       throw new Error('上传失败')
     }
     return {url: result.data.url}
