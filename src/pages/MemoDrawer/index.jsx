@@ -10,7 +10,7 @@ import {
   Drawer, List, Skeleton, Button, Tag,
   Spin, Tooltip, Select, Divider,
   Badge, Space, Dropdown, App, DatePicker,
-  Switch, Popover, Input, TimePicker, Image,Typography
+  Switch, Popover, Input, TimePicker, Image, Typography, Upload
 } from "antd";
 
 import showOrNot from "@/store/ShowOrNot";
@@ -36,6 +36,7 @@ import CommonStore from "@/store/CommonStore";
 import {fDate} from "@/utils/DateUtils";
 import dayjs from "dayjs";
 import {thumbUrl} from "@/utils/urlUtils.js";
+import {uploadImgByJD} from "@/request/toolsRequest";
 
 /** 用于完成或+1时是否主动选择日期 */
 window.ikunSelectDate = undefined
@@ -50,6 +51,9 @@ let dates = [];              // 未处理的筛选日期
 let filterDate = '';         // 筛选日期 格式： 开始时间戳/结束时间戳/0：修改时间 1：创建时间
 let filterDateType = 1;     // 筛选日期类型 0：修改时间 1：创建时间
 let editLoopMemoText = '';   // 循环备忘项备注修改
+let editLoopMemoImgArr = ''; // 循环备忘项图片修改(逗号分隔)
+let ikunLoopMemoImgArr = ''; // 循环备忘加一图片(逗号分隔)
+let loopMemoUploadingCount = 0; // 循环备忘图片上传中数量
 const {msg} = CommonStore
 
 const MemoDrawer = () => {
@@ -80,6 +84,51 @@ const MemoDrawer = () => {
 
   const sxYm = () => setRefresh(++i)        // 刷新页面
   const sxSj = () => setRefreshTrigger(++i) // 刷新数据列表
+
+  /** 上传图片按钮 */
+  const uploadButton = (
+    <button type="button" style={{border: 0, background: 'none', cursor: 'pointer'}}>
+      <PlusOutlined/>
+      <div style={{marginTop: 8}}>上传</div>
+    </button>
+  );
+
+  /**
+   * 上传图片到图床（桌面端）
+   * @author Codex
+   * @since 2026/5/9
+   */
+  const uploadToJD = async (file) => {
+    if (file.size > 1024 * 1024 * 6) msg.info('图片超6M,自动压缩中...')
+    const result = await uploadImgByJD(file);
+    if (!result.success || !result.data?.url) {
+      msg.error(result.message ?? '上传失败')
+      throw new Error('上传失败')
+    }
+    return result.data.url
+  }
+
+  /** 预览上传图片（避免浏览器打开空白窗口） */
+  const previewUploadImage = (file) => {
+    const previewUrl = file.url || file.response?.url || file.thumbUrl;
+    if (!previewUrl) return msg.info('图片上传中，暂时无法预览');
+    modal.info({
+      title: '图片预览',
+      icon: null,
+      width: '70vw',
+      centered: true,
+      maskClosable: true,
+      okText: '关闭',
+      content:
+        <div style={{textAlign: 'center'}}>
+          <Image
+            src={previewUrl}
+            preview={false}
+            style={{maxWidth: '100%', maxHeight: '60vh', objectFit: 'contain'}}
+          />
+        </div>
+    })
+  }
 
   useEffect(() => {
     if (!JWTUtils.isExpired()) (async () => {
@@ -252,6 +301,8 @@ const MemoDrawer = () => {
 
   const updateLoopMemo = (memoId, id, loopText, imgArr) => {
     editLoopMemoText = loopText
+    editLoopMemoImgArr = imgArr ?? ''
+    loopMemoUploadingCount = 0
     modal.confirm({
       title: '修改循环备忘子项备注',
       icon: <ExclamationCircleOutlined/>,
@@ -262,11 +313,58 @@ const MemoDrawer = () => {
             defaultValue={editLoopMemoText}
             onChange={e => editLoopMemoText = e.target.value}
           />
-          <div>todo 上传图片</div>
+          <Upload
+            listType="picture-card"
+            multiple
+            maxCount={3}
+            defaultFileList={editLoopMemoImgArr ? editLoopMemoImgArr.split(',').map((url, index) => ({
+              uid: `${id}-${index}`,
+              name: `image-${index}.webp`,
+              status: 'done',
+              url
+            })) : []}
+            customRequest={async ({file, onSuccess, onError}) => {
+              loopMemoUploadingCount++
+              try {
+                const url = await uploadToJD(file);
+                onSuccess({url});
+              } catch (error) {
+                onError(error);
+              } finally {
+                loopMemoUploadingCount--
+              }
+            }}
+            onChange={({fileList}) => {
+              editLoopMemoImgArr = fileList
+                .map(fileItem => fileItem.response?.url || fileItem.url)
+                .filter(Boolean)
+                .join(',')
+            }}
+            onPreview={previewUploadImage}
+          >
+            {uploadButton}
+          </Upload>
         </div>,
       onOk: async () => {
-        const resp = await updateLoopMemoItem({memoId, id, loopText: editLoopMemoText})
-        if (resp.success) msg.success("修改成功")
+        if (loopMemoUploadingCount > 0) {
+          msg.warning('图片还在上传中，请稍等')
+          throw new Error('图片上传中')
+        }
+        const resp = await updateLoopMemoItem({
+          memoId,
+          id,
+          loopText: editLoopMemoText,
+          imgArr: editLoopMemoImgArr || undefined
+        })
+        if (resp.success) {
+          msg.success("修改成功")
+          setLoopTimeList(list => list.map(item => item.id === id ? {
+            ...item,
+            loopText: editLoopMemoText,
+            imgArr: editLoopMemoImgArr,
+            updateTime: new Date().toLocaleString()
+          } : item))
+        }
         else msg.error("修改失败")
       }
     })
@@ -402,6 +500,36 @@ const MemoDrawer = () => {
             onChange={e => window.ikunOkText = e.target.value}
           />
         </div>
+        {text === '加一' &&
+          <div id="加一上传图片区" style={{marginBottom: 12}}>
+            上传图片：
+            <Upload
+              listType="picture-card"
+              multiple
+              maxCount={3}
+              customRequest={async ({file, onSuccess, onError}) => {
+                loopMemoUploadingCount++
+                try {
+                  const url = await uploadToJD(file);
+                  onSuccess({url});
+                } catch (error) {
+                  onError(error);
+                } finally {
+                  loopMemoUploadingCount--
+                }
+              }}
+              onChange={({fileList}) => {
+                ikunLoopMemoImgArr = fileList
+                  .map(fileItem => fileItem.response?.url || fileItem.url)
+                  .filter(Boolean)
+                  .join(',')
+              }}
+              onPreview={previewUploadImage}
+            >
+              {uploadButton}
+            </Upload>
+          </div>
+        }
       </div>
     )
   }
@@ -536,16 +664,23 @@ const MemoDrawer = () => {
       addOne: () => {
         window.ikunSelectDate = undefined
         window.ikunOkText = undefined
+        ikunLoopMemoImgArr = ''
+        loopMemoUploadingCount = 0
         return modal.confirm({
           title: `确定加一吗?`,
           icon: <QuestionCircleFilled/>,
           content: selectDate('加一', itemObj.content),
           maskClosable: true,         // 点遮罩可以关闭
           onOk: async () => {
+            if (loopMemoUploadingCount > 0) {
+              msg.warning('图片还在上传中，请稍等')
+              throw new Error('图片上传中')
+            }
             const result = await addLoopMemoItem({
               memoId: id,
               memoDate: window.ikunSelectDate,
               loopText: window.ikunOkText,
+              imgArr: ikunLoopMemoImgArr || undefined
             });
             if (result.success) msg.success('成功+1')
             sxSj()
