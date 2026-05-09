@@ -9,7 +9,7 @@ const blogAxios = axios.create({
     timeout: 10000 // 设置超时时间为 10000 毫秒（10秒）
 });
 
-const UPLOAD_IMAGE_MAX_MB = 15; // 上传图片最大体积(MB)
+const UPLOAD_IMAGE_MAX_MB = 6; // 上传图片最大体积(MB)
 
 /** 获取常用工具列表json */
 export async function getToolsList() {
@@ -19,7 +19,7 @@ export async function getToolsList() {
 
 /**
  * 上传图片到京东图床
- * return{"errno": 1,"message": "文件大小不能超过15MB","data": null}
+ * return{"errno": 1,"message": "文件大小不能超过6MB","data": null}
  * return{"errno": 0,"message": "上传成功","data": {"url": "https://xx/x.png","fileName": "xxx.png"}}
  *
  * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
