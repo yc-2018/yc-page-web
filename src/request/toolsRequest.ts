@@ -38,6 +38,5 @@ export const uploadImgByJD = async (file: File) => {
   data.append('file', file, file.name);
   const u = [102, 115, 100, 122, 45, 117, 115, 101, 114, 46, 106, 100, 46, 99, 111, 109, 47, 97, 112, 105, 47, 118, 49, 47, 99, 111, 109, 109, 111, 110, 47, 117, 112, 108, 111, 97, 100]
   const result = await axios.post(`https://${u.map(v => String.fromCharCode(v)).join('')}`, data);
-  // const result = await axios.post('https://api.xinyew.cn/api/jdtc', data);
   return result.data
 };

@@ -83,6 +83,7 @@ yarn preview
 - 新的共享状态优先考虑现有 MobX Store；局部 UI 状态用 React Hooks。
 - 路径导入优先使用 `@/` 别名。
 - TypeScript/TSX 遵循 ESLint：单引号、JSX 属性双引号、React Hooks 推荐规则。
+- 后续新增源码文件尽量使用 `ts` 或 `tsx`，除非需要贴合已有 JS/JSX 模块或第三方限制。
 - JS/JSX 文件已有较多历史风格，新增代码要贴近当前文件写法。
 - 请求失败要通过 `CommonStore.msg`、`Toast` 或当前页面已有提示方式反馈。
 - 不要无故改动 `dist`、`node_modules`、锁文件或构建产物。
