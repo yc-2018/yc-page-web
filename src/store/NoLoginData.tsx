@@ -39,80 +39,14 @@ const buildSearchData = () => {
 export const searchData: ISearchEngines[] = buildSearchData()
 
 /** 头部导航数据 */
-const linkToolsUrl = 'https://htmltools.pages.dev/';
 export const items = [
   {
     label: '博客',
     key: 'blog',
   },
   {
-    label: '站内工具',
-    key: 'tool',
-    children: [
-      {
-        label: '转特殊字母|数字',
-        key: 'utils-specialChar',
-      },
-      {
-        label: 'gg比价器',
-        key: 'utils-ggComparator',
-      },
-    ],
-  },
-  {
     label: '工具',
     key: 'util',
-    children: [
-      {
-        key: '文本差异对比',
-        label:
-          <a href={linkToolsUrl + '文本差异对比/'} target="_blank" rel="noopener noreferrer">
-            文本差异对比
-          </a>
-      },
-      {
-        key: 'CSS网格布局生成器',
-        label:
-          <a href={linkToolsUrl + 'css网格布局/'} target="_blank" rel="noopener noreferrer">
-            CSS网格布局生成器
-          </a>
-      },
-      {
-        key: '2FA验证码获取',
-        label:
-          <a href={linkToolsUrl + '2fa/'} target="_blank" rel="noopener noreferrer">
-            2FA验证码获取
-          </a>
-      },
-      {
-        key: 'nginx可视化配置',
-        label:
-          <a href={linkToolsUrl + 'nginx可视化配置/?global.app.lang=zhCN'} target="_blank" rel="noopener noreferrer">
-            nginx可视化配置
-          </a>
-      },
-      {
-        key: '开发速查表',
-        label:
-          <a href={linkToolsUrl + '开发速查表/'} target="_blank" rel="noopener noreferrer">
-            开发速查表
-          </a>
-      },
-      {
-        key: '七天年化收益率计算器',
-        label:
-          <a href={linkToolsUrl + '七天年化收益率计算器/'} target="_blank" rel="noopener noreferrer">
-            七天年化收益率计算器
-          </a>
-      },
-      {
-        key: '拳皇二稿版',
-        label:
-          <a href={linkToolsUrl + '拳皇二稿版/'} target="_blank" rel="noopener noreferrer">
-            拳皇二稿版
-          </a>
-      },
-    ],
   },
   {
     label: '帮助',

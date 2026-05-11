@@ -291,7 +291,6 @@ function Home() {
               title={<div style={{textAlign: 'center'}}>仰晨工具箱</div>}
               content={
                 <div style={{display: 'flex', flexDirection: 'column', gap: 5}}>
-                  <Button block onClick={() => navigate('/utils-specialChar')}>特殊字母|数字</Button>
                   {tools.map(([name, uri]: [string, string]) =>
                     <Button key={name} block onClick={() => window.open(toolsBaseURL + uri, '_blank')}>
                       <LinkOutlined/>{name}

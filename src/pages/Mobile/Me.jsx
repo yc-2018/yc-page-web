@@ -1,11 +1,10 @@
 import React, {useEffect, useRef, useState} from "react";
-import {Button, Avatar, List, Dialog, Toast, Grid, Collapse} from 'antd-mobile'
+import {Button, Avatar, List, Dialog, Toast, Grid} from 'antd-mobile'
 
 import UserStore from "@/store/UserStore";
 import JWTUtils from "@/utils/JWTUtils";
 import {Input} from "antd";
 import {updateNameOrAvatar} from "@/request/commonRequest";
-import GgComparator from "./Tools/GgComparator";
 import {_getNameAndAvatar, _setNameAndAvatar} from "@/utils/localStorageUtils";
 import {getNameAndAvatar} from "@/request/homeApi";
 
@@ -19,7 +18,6 @@ let avatar = ''
 export default ({setBarItem}) => {
   const avatarRef = useRef()        // 头像ref 因为弹窗是静态的 用不了state 所以用ref
   const [info, setInfo] = useState(_getNameAndAvatar());
-  const ggVisible = useState(false) // gg工具弹窗
 
   let {jwt} = UserStore;
 
@@ -118,12 +116,6 @@ export default ({setBarItem}) => {
         </List.Item>
       </List>
 
-      <Collapse accordion>
-        <Collapse.Panel title={<div style={{textAlign: 'center'}}>————工具————</div>} key={1}>
-          <div onClick={() => ggVisible[1](true)}>gg比价器</div>
-        </Collapse.Panel>
-      </Collapse>
-
       {/*退出登录*/}
       <Button block color='danger'
               onClick={() => {
@@ -133,7 +125,6 @@ export default ({setBarItem}) => {
       >
         退出登录
       </Button>
-      <GgComparator v={ggVisible}/>
     </div>)
 }
 

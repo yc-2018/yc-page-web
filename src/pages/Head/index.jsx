@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Header} from "antd/es/layout/layout";
 import {UserOutlined} from "@ant-design/icons";
 import {Avatar, Col, Dropdown, Layout, Menu, Row} from "antd";
@@ -10,18 +10,42 @@ import JWTUtils from "../../utils/JWTUtils";
 import UserStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
 import CommonStore from "../../store/CommonStore";
+import {getToolsList, toolsBaseURL} from "@/request/toolsRequest";
 import css from './head.module.css'
+
+
+/** 构建头部工具菜单 */
+const buildToolChildren = (tools) =>
+    tools.map(([name, uri]) => ({
+        key: `tool-${name}`,
+        label: <a href={toolsBaseURL + uri} target="_blank" rel="noopener noreferrer">{name}</a>,
+    }))
 
 
 export default observer(() => {
     const navigate = useNavigate()   // 路由跳转
     const location = useLocation()          // 获取当前路径就靠它
+    const [tools, setTools] = useState([])  // 工具列表
 
     /** 头部页面跳转 */
     const toPage = e => {
-        if (e.domEvent.target.localName === 'a') return   // 点击a标签跳转 不需要改变路径
+        const target = e.domEvent.target
+        if (target.closest?.('a') || e.key === 'util' || e.keyPath?.includes('util')) return   // 点击工具链接不改变路径
         navigate(e.key)
     }
+
+    /** 获取工具列表 */
+    useEffect(() => {
+        getToolsList().then(dataList => setTools(dataList)).catch(() => {
+            CommonStore.msg.error('获取工具列表失败');
+        })
+    }, [])
+
+    const toolChildren = buildToolChildren(tools) // 工具菜单子项
+    const menuItems = items.map(item => {
+        if (item.key !== 'util') return item
+        return toolChildren.length ? {...item, children: toolChildren} : item
+    }) // 头部菜单数据
 
     return (
         <Layout>
@@ -42,7 +66,7 @@ export default observer(() => {
 
                     <Col span={22}>
                         <Menu mode="horizontal"
-                              items={items}
+                              items={menuItems}
                               style={{background: '#ffffff00'}}
                               selectedKeys={[location.pathname.split('/')[1]]}
                               onClick={toPage}
