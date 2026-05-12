@@ -2,6 +2,7 @@ import {useState} from 'react'
 import {Badge, Tabs} from 'antd-mobile'
 import Memo from './Memo'
 import EnglishMemo from './EnglishMemo'
+import DeviceUsageLogs from './DeviceUsageLogs'
 
 type MemoType = 0 | 1 | 2 | 3 | 5 | 6 | 7
 
@@ -49,6 +50,10 @@ const Memos = () => {
 
       <Tabs.Tab title="英语" key="英语">
         <EnglishMemo/>
+      </Tabs.Tab>
+
+      <Tabs.Tab title="设备" key="设备">
+        <DeviceUsageLogs/>
       </Tabs.Tab>
     </Tabs>
   )

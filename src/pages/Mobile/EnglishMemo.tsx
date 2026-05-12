@@ -237,7 +237,10 @@ const EnglishMemo = () => {
 
   return (
     <>
-      <div style={{display: 'grid', gridTemplateColumns: '1fr auto', gap: 8, alignItems: 'center'}}>
+      <div style={{display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: 8, alignItems: 'center'}}>
+        <div style={{color: '#999', whiteSpace: 'nowrap'}}>
+          总数:{total}
+        </div>
         <Dropdown ref={dropdownRef} style={{minWidth: 0}}>
           <Dropdown.Item key="orderBy" title={`排序:${getEnglishOrderName(orderBy)}`}>
             <div style={{padding: 12}}>
@@ -353,9 +356,6 @@ const EnglishMemo = () => {
         </List>
         {!hasMore && data.length === 0 && <div className="loadMore">暂无英语备忘</div>}
         <InfiniteScroll loadMore={loadMore} hasMore={hasMore}/>
-        <div style={{textAlign: 'center', color: '#999', padding: '8px 0 16px'}}>
-          总数:{total}
-        </div>
       </PullToRefresh>
 
       <Popup
