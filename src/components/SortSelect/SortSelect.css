@@ -1,0 +1,20 @@
+/*---整个框---*/
+.sParent{
+    border-radius: 6px;
+    border: rgba(49, 46, 46, 0.09) 1px solid;
+}
+
+.sParent:hover{
+    border: rgba(23, 70, 12, 0.31) 1px solid;
+}
+
+/*---图标---*/
+.select-icon{
+    transition: all 0.5s ;
+    color: #6e6363;
+    position: relative;
+    left: 5px;
+}
+.sParent:hover > .select-icon{
+    color: #6ed3f3;
+}

@@ -1,0 +1,182 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  monospace;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+/*————————————————————————————————————————————————————————————————————*/
+
+/* 上下5边距 */
+.topBottMargin5 {margin: 5px 0;}
+
+/* 右边圆角6 */
+.rightRadius6 {border-radius: 0 6px 6px 0 !important;}
+
+/* 鼠标变小手 */
+.pointer{
+  cursor: pointer;
+  user-select: none;
+}
+
+/* 边框发光 */
+.borderLight {
+  border-radius: 6px;
+  box-shadow: 0 0 5px 1px #00800038;
+}
+
+/* 渐变文字 */
+.gradientText {
+  background: -webkit-linear-gradient(61deg, #f12c32, rgb(153 0 255));  /* 背景渐变 */
+  -webkit-background-clip: text;                                        /* 背景剪辑:文字 */
+  -webkit-text-fill-color: transparent;                                 /* 文字颜色透明 */
+}
+
+/*备忘录的当前标签 加个环*/
+.currentTag:before{
+  content: "";
+  border: 2px solid green;
+  border-radius: 6px;
+  width: 62px;
+  height: 30px;
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  animation: colorRotate 5s linear infinite; /* 应用动画 */
+}
+@keyframes colorRotate {
+  0% {border-color: #f55252}
+  10% {border-color: #f59652}
+  20% {border-color: #c4c141}
+  30% {border-color: #8ef552}
+  40% {border-color: #52f593}
+  50% {border-color: #52e2f5}
+  60% {border-color: #529ef5}
+  70% {border-color: #7b52f5}
+  80% {border-color: #cc52f5}
+  90% {border-color: #f552c1}
+  100% {border-color: #f55252}
+}
+/*英语备忘录的当前标签 加个环*/
+.eCurrentTag:before{
+  content: "";
+  border: 1px solid green;
+  border-radius: 6px;
+  width: 28px;
+  height: 26px;
+  position: absolute;
+  top: -3px;
+  left: -4px;
+  animation: colorRotate 5s linear infinite; /* 应用动画 */
+}
+
+/*下拉菜单自定义样式*/
+.dropdown-menu{
+  width: 200px;
+  max-height: 300px;
+  overflow: auto;
+  color: #a7a7a7;
+  /*text-align: center;*/
+}
+
+
+.gun::-webkit-scrollbar-thumb{	/*定义滚动条颜色*/
+  background-color: #ffffff;
+  border-radius: 10px;
+}
+.gun::-webkit-scrollbar{		/*定义滚动条宽度*/
+  width: 10px;
+}
+
+.gun::-webkit-scrollbar-track  /*定义滚动条轨道 内阴影+圆角*/
+{
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .07);
+  border-radius: 10px;
+  background-color: #000000ea;
+}
+
+/*左右居中 网格版 想要flex就直接改成把grid改成flex即可*/
+.lrCenter{
+  display: grid;
+  justify-content: center;
+}
+
+.opacity30to100 {
+  opacity: .3;
+}
+
+.opacity30to100:hover {
+  opacity: 1;
+}
+
+.rootSpin{
+  z-index: 99999;
+}

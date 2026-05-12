@@ -1,0 +1,31 @@
+/* 按钮透明度的改变 */
+.inputOpacity {
+    opacity: 0.8;
+    transition: all 0.5s;
+}
+
+.inputOpacity:hover {
+    opacity: 1;
+}
+
+.searchGo {
+    background-color: rgba(95, 239, 227, 0.5);
+    border-radius: 5px;
+    transition: all 0.5s;
+    width: 50px;
+    text-align: center;
+}
+
+.searchGo:hover {
+    background-color: rgba(132, 161, 225, 0.7);
+}
+
+.thinkList [class="rc-virtual-list-holder"] {
+    max-height: 555px !important;
+}
+.thinkList [class="rc-virtual-list-holder-inner"] {
+    transform: translateY(0px)!important;
+}
+.thinkList [class="rc-virtual-list-scrollbar-thumb"] {
+    display: none!important;
+}

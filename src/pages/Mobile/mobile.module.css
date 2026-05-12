@@ -1,0 +1,85 @@
+/*匹配手机的样式*/
+.mobile {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  font-size: 28pt;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+}
+
+.qrCode {
+  width: 80%;
+  border-radius: 10px;
+  box-shadow: 4px -2px 12px #857d7d;
+}
+
+
+/*底部导航栏*/
+.tabBar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: white;
+  z-index: 1;
+}
+
+.okText {
+  background: #fff;
+  border: 1px dashed #d2caca;
+  border-radius: 5px;
+  color: #0014ff;
+  font-size: 12px;
+  margin-top: 5px;
+  padding: 1px 5px;
+}
+
+.okText b {
+  color: #000;
+}
+
+.loopText {
+  font-size: 14px;
+  color: #999;
+}
+
+.tipContent{
+  color: #999;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  box-shadow: inset 0 0 6px #a9a9a9;
+  padding: 4px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  opacity: .6;
+}
+
+.memoPopupTag{
+  font-size: 14px;
+  padding: 4px;
+  --border-radius: 6px;
+}
+
+.imgListViewer{
+  z-index: 2000!important;
+}
+
+[class="adm-image-viewer-content"] {
+  --z-index: var(--adm-mask-z-index);
+  z-index: var(--z-index);
+}
+
+.loopCount {
+  position: absolute;
+  top: -18px;
+  right: -10px;
+  width: 50px;
+  height: 50px;
+  text-align: right;
+  /*background: black;*/
+}
+
+:root {
+  --adm-mask-z-index: 1004;
+}

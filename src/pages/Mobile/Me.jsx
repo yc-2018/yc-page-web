@@ -1,0 +1,146 @@
+import React, {useEffect, useRef, useState} from "react";
+import {Button, Avatar, List, Dialog, Toast, Grid} from 'antd-mobile'
+
+import UserStore from "@/store/UserStore";
+import JWTUtils from "@/utils/JWTUtils";
+import {Input} from "antd";
+import {updateNameOrAvatar} from "@/request/commonRequest";
+import {_getNameAndAvatar, _setNameAndAvatar} from "@/utils/localStorageUtils";
+import {getNameAndAvatar} from "@/request/homeApi";
+
+
+let username = ''
+let avatar = ''
+
+/**
+ * @param setBarItem {function} 设置当前页面:用来退出后登录设置会到待办页面，不然重新登录进来会有bug
+ * */
+export default ({setBarItem}) => {
+  const avatarRef = useRef()        // 头像ref 因为弹窗是静态的 用不了state 所以用ref
+  const [info, setInfo] = useState(_getNameAndAvatar());
+
+  let {jwt} = UserStore;
+
+  /** 初始化背景 和头像 */
+  useEffect(() => {
+    // 头像 昵称
+    if (!JWTUtils.isExpired()) {
+      getNameAndAvatar().then(info => {
+        if (info.data?.avatar) {
+          setInfo(info.data ?? {});
+          _setNameAndAvatar(info.data);
+        }
+      })
+    }
+  }, [jwt])
+
+  return (
+    <div style={{padding: '10px'}}>
+      <List>
+        <List.Item
+          prefix={<Avatar src={info.avatar}/>}
+          description={`${getGreeting()},${info.username}`}
+          onClick={() => {
+            username = info.username
+            avatar = info.avatar
+            Dialog.confirm({
+              content: <>
+                <span>昵称：</span>
+                <Input
+                  defaultValue={info.username}
+                  placeholder='请输入用户名'
+                  onChange={v => username = v.target.value}
+                />
+                <br/>
+
+                <div>头像：</div>
+                <img
+                  width={100}
+                  src={info.avatar}
+                  style={{display: 'inline-block'}}
+                  ref={avatarRef}
+                  alt={'头像'}
+                />
+
+                <Grid columns={5} gap={2}>
+                  {[...Array(100).keys()].map(i =>
+                    <Avatar key={i}
+                            size={40}
+                            src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${i + 1}`}
+                            onClick={()=> {
+                                avatar = `https://api.dicebear.com/7.x/miniavs/svg?seed=${i + 1}`
+                                avatarRef.current.src = avatar
+                            }}
+                    />
+                  )}
+                </Grid>
+              </>,
+              closeOnMaskClick: true,
+              onConfirm: async () => {
+                if (!username) return Toast.show({icon: 'fail', content: '请输入昵称'})
+                const funcResult = await updateNameOrAvatar({username, avatar})
+                Toast.show({
+                  icon: funcResult === 1 ? 'success' : 'fail',
+                  content: funcResult === 1 ? '提交成功' : '提交失败'
+                })
+              },
+            })
+          }}
+        >
+          {info.username}
+        </List.Item>
+
+        {/*意见反馈*/}
+        <List.Item
+          onClick={() => {
+            Dialog.alert({
+              content: '直接发到公众号但是查看不及时,也可以通过邮箱:cgl556@foxmail.com进行反馈。',
+              closeOnMaskClick: true,
+            })
+          }}
+        >
+          意见反馈
+        </List.Item>
+
+        {/*打赏*/}
+        <List.Item
+          onClick={() => {
+            Dialog.alert({
+              image: 'https://z.wiki/autoupload/20240420/4aC5.3735X1280-jz_%281%29.jpg',   // 微信+支付宝收款码图片
+              title: '感谢你的支持!',
+              confirmText: '关闭',
+            })
+          }}
+        >
+            打赏
+        </List.Item>
+      </List>
+
+      {/*退出登录*/}
+      <Button block color='danger'
+              onClick={() => {
+                setBarItem('Memos')
+                UserStore.clearJwt()
+              }}
+      >
+        退出登录
+      </Button>
+    </div>)
+}
+
+
+/** 获取问候语 */
+const getGreeting = () => {
+  let date = new Date();  // 创建一个新的 Date 对象
+  let hour = date.getHours(); // 获取当前的小时数（24小时制）
+
+  // 根据小时数返回不同的问候语
+  if (hour >= 0 && hour < 6) return '夜深了早点休息吧';
+  if (hour >= 6 && hour < 9) return '早上好';
+  if (hour >= 9 && hour < 12) return '上午好';
+  if (hour >= 12 && hour < 14) return '中午好';
+  if (hour >= 14 && hour < 18) return '下午好';
+  if (hour >= 18 && hour < 22) return '晚上好';
+
+  return '你好';
+}
