@@ -43,8 +43,6 @@ let v = {      // 循环装中文变量
  * @param setChangeType       如果新增或修改的类型不是目前待办的列表类型，就改变这个值为那个待办类型的值
  * */
 const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
-  let total;  // 总条数 给父组件显示
-
   const [data, setData] = useState([])
   const [hasMore, setHasMore] = useState(true)                // 是否自动翻页
   const [page, setPage] = useState(1);                        // 待办翻页
@@ -90,20 +88,29 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const loadMore = async () => {
     const append = await getMemos({type, page, completed, orderBy, keyword});
     if (!append) return showLoading('fail', '获取数据失败') || setHasMore(false)
-    setData(val => [...val, ...append.data?.records])
-    setHasMore(data.length < append.data.total)
+    const records = append.data?.records ?? []
+    setData(val => [...val, ...records])
+    setHasMore(data.length + records.length < append.data.total)
     setPage(val => val + 1)
 
-    total = append.data.total
+    const total = append.data.total  // 总条数 给父组件显示
     // 给父组件传值：未完成总数s
     setIncompleteCounts(v => ({...v, ...append?.map.groupMemosCounts, [type]: total}))
   }
 
-  /** 改变总数 给父组件传值：未完成总数s */
-  const changeTotal = (add = '++') => {
-    if (add === '++') ++total
-    else --total
-    setIncompleteCounts(v => ({...v, [type]: total}))
+  /** 从云端刷新当前列表 */
+  const refreshListFromCloud = async () => {
+    setPage(1)
+    setData([])
+    setHasMore(false)
+    const append = await getMemos({type, page: 1, completed, orderBy, keyword});
+    if (!append) return showLoading('fail', '获取数据失败')
+    const records = append.data?.records ?? []
+    const total = append.data?.total ?? 0  // 总条数 给父组件显示
+    setData(records)
+    setHasMore(records.length < total)
+    setPage(2)
+    setIncompleteCounts(v => ({...v, ...append?.map?.groupMemosCounts, [type]: total}))
   }
 
   /** 显示加载动画 */
@@ -174,19 +181,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             })
             if (finishResp) {
               Toast.show({icon: 'success', content: '成功'})
-              /*全部的还是要显示在列表上*/
-              completed === -1 && setData(val => val.map(item => item.id === id ? {
-                ...item,
-                completed: text === '完成' ? 1 : 0,
-                okText: text === '完成' ? okText : '',
-                okTime: okTime || new Date().toLocaleString()
-              } : item))
-              /* 类型变了不属于显示范畴了 */
-              completed !== -1 && setData(val => val.filter(item => item.id !== id))
-
               setVisible(undefined)
-
-              changeTotal(text === '完成' ? '--' : '++')// █给父组件传值：未完成总数s
+              await refreshListFromCloud()
             } else Toast.show({icon: 'fail', content: '失败'})
           }
         })
@@ -251,16 +247,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             })
             if (addOneResp) {
               Toast.show({icon: 'success', content: '成功'})
-              setData(val => val.map(item => item.id === id ? {
-                ...item,
-                numberOfRecurrences: item.numberOfRecurrences + 1,
-                okTime: okTime || new Date().toLocaleString()
-              } : item))
-
               // 刷新列表
               if (loopTime) showLoopMemoItemList(null, {id})
 
               setVisible(undefined);
+              await refreshListFromCloud()
             } else Toast.show({icon: 'fail', content: '失败'})
           }
         });
@@ -293,9 +284,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             if (deleteResponse) {
               Toast.show({icon: 'success', content: '删除成功'})
               // 刷新列表
-              setData(val => val.filter(item => item.id !== id))
               setVisible(undefined)
-              action.completed === 0 && changeTotal('--')// █给父组件传值：未完成总数s
+              await refreshListFromCloud()
             } else Toast.show({icon: 'fail', content: '删除失败'})
           },
         })
@@ -311,6 +301,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     if (addOneResp.success) {
       setLoopItemVisible(null);
       if (loopTime) showLoopMemoItemList(null, {id: memoId});   // 刷新列表
+      await refreshListFromCloud()
       Toast.show({icon: 'success', content: '成功'});                     // 显示成功
     }
   }
@@ -345,27 +336,12 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
       if (editVisible === '新增') {
         if (type !== body.itemType) return setChangeType(body.itemType);  /* 新增的待办不是当前类型，那个重置的数据 */
-        // 新增的待办是当前类型，那么更新本地数据
-        setData(data => [{
-          ...body,
-          id: result,
-          createTime: new Date().toLocaleString(),
-          okTime: new Date().toLocaleString(),
-          numberOfRecurrences: 0,
-          completed: 0
-        }, ...data])
-        changeTotal('++')/* █给父组件传值：未完成总数s */
-        // 修改 而且修改的待办是当前类型，那么更新本地数据
-      } else if (body.itemType === null)
-        setData(data => data.map(item => item.id === editVisible?.id ? {
-          ...item,
-          itemType: body.itemType || item.itemType,
-          content: body.content || item.content,
-          okTime: new Date().toLocaleString()
-        } : item))
-      else {  // 把类型修改到别的地方去了 就不要它了
-        setData(data => data.filter(item => item.id !== body.id))
+        await refreshListFromCloud()
+        // 修改 而且修改的待办是当前类型，那么刷新当前列表
+      } else if (body.itemType === null) await refreshListFromCloud()
+      else {  // 把类型修改到别的地方去了 就刷新两边列表
         setChangeType(body.itemType)
+        await refreshListFromCloud()
       }
     } else showLoading('fail', '失败')
   }
@@ -379,9 +355,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     loading.current?.close()    // 关闭加载蒙版
 
     const result = resp.data
-    if (resp.success && result?.records?.length > 0) {
-      v['循环时间页数']++
-      setLoopTime(list => [...list ?? [], ...result.records])
+    if (resp.success) {
+      if (result?.records?.length > 0) {
+        v['循环时间页数']++
+        setLoopTime(list => [...list ?? [], ...result.records])
+      }
     } else Toast.show({icon: 'fail', content: '获取失败'})
 
     v['循环次数继续加载'] = result?.current < result?.pages
@@ -428,12 +406,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         setLoopItemVisible(null)
         if (resp.success) {
           Toast.show({icon: 'success', content: '成功'})
-          setLoopTime(val => val.map(item => item.id === loop.id ? {
-            ...item,
-            loopText: okText,
-            imgArr: imgArr,
-            updateTime: new Date().toLocaleString()
-          } : item))
+          showLoopMemoItemList(null, {id: loop.memoId})
+          await refreshListFromCloud()
         } else Toast.show({icon: 'fail', content: '失败'})
       }
     })
@@ -457,8 +431,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         if (result.success) {
           Toast.show({icon: 'success', content: '删除成功'})
           // 刷新列表
-          setLoopTime(val => val.filter(item => item.id !== id))
           setLoopItemVisible(null)
+          showLoopMemoItemList(null, {id: memoId})
+          await refreshListFromCloud()
         } else Toast.show({icon: 'fail', content: '删除失败'})
       },
     })
@@ -629,13 +604,23 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         }}
       >
         {/*可左右滑动*/}
-        <div style={{display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 5}}>
+        <div
+          style={{
+            display: 'flex',
+            gap: 10,
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            paddingBottom: 5,
+            flexWrap: 'nowrap',
+            WebkitOverflowScrolling: 'touch'
+          }}
+        >
           {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
             <Tag
               color='warning'
               fill='outline'
               onClick={showLoopMemoItemList}
-              style={{'--background-color': '#fcecd8'}}
+              style={{'--background-color': '#fcecd8', flex: '0 0 auto'}}
               className={styles.memoPopupTag}
             >
               {`循环次数: ${visible.numberOfRecurrences}▼`}
@@ -644,7 +629,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
           {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
             <Tag color='success' fill='outline' className={styles.memoPopupTag}
-                 style={{'--background-color': '#c8f7c5'}}>
+                 style={{'--background-color': '#c8f7c5', flex: '0 0 auto'}}>
               {visible?.completed ?
                 <span onClick={() => Toast.show({content: `修改:${visible.updateTime}`})}>
                   完成:{fDate(visible.okTime)}
@@ -656,7 +641,12 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           }
 
           {/*显示创建时间*/}
-          <Tag color='primary' fill='outline' className={styles.memoPopupTag} style={{'--background-color': '#c5f1f7'}}>
+          <Tag
+            color='primary'
+            fill='outline'
+            className={styles.memoPopupTag}
+            style={{'--background-color': '#c5f1f7', flex: '0 0 auto'}}
+          >
             创建:{fDate(visible?.createTime)}
           </Tag>
         </div>
