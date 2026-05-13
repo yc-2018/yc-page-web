@@ -27,7 +27,7 @@
 - 构建工具：Vite 7
 - UI 框架：React 18、React Router 6
 - 语言：TypeScript、TSX、JavaScript、JSX 混用
-- UI 组件：Ant Design 5、Ant Design Mobile 5
+- UI 组件：Ant Design 6、Ant Design Mobile 5
 - 状态管理：MobX、mobx-react-lite
 - 请求：axios、fetch-jsonp
 - 拖拽：`@dnd-kit/core`、`@dnd-kit/sortable`

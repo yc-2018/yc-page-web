@@ -1,8 +1,7 @@
 import {useState, useEffect} from 'react';
 import axios from "axios";
 import {observer} from 'mobx-react-lite'
-import TextArea from "antd/es/input/TextArea";
-import {Avatar, Button, Popover, Tooltip} from "antd";
+import {Avatar, Button, Input, Popover, Tooltip} from "antd";
 import {
   PictureTwoTone, SnippetsTwoTone, UserOutlined,
   SyncOutlined, DownloadOutlined, PoweroffOutlined,
@@ -26,6 +25,7 @@ import {_getBackgroundUrl, _setNameAndAvatar, _setBackgroundUrl} from "@/utils/l
 import IUser from "@/interface/IUser";
 import "@/pages/Home/Home.css"
 
+const {TextArea} = Input;
 
 function Home() {
   const [bgImg, setBgImg] = useState('/Default-wallpaper.jpg');// 背景背景

@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx'
-import {MessageInstance} from "antd/es/message/interface";
+import type {MessageInstance} from '@/interface/IAntd'
 
 class CommonStore {
     loading = false     // 壁纸加载都用这个

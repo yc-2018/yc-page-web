@@ -169,7 +169,7 @@ function EnglishDrawer() {
                 title: '确定删除吗?',
                 icon: <ExclamationCircleFilled />,
                 content: '删除了就会消失了',
-                maskClosable: true,  // 点遮罩可以关闭
+                mask: {closable: true},  // 点遮罩可以关闭
                 onOk () {
                     return new Promise(async (resolve, reject)=>{
                         const delResp = await deleteMemo(id)
@@ -202,12 +202,12 @@ function EnglishDrawer() {
                     : <MyEmpty/>   // 没有数据
 
     /** 标签生成器 */
-    const buildTag=(value, color="processing",icon, onClick, bordered=false)=>
+    const buildTag=(value, color="processing",icon, onClick, outlined=false)=>
         <Tag key={value}
              icon={icon}
              color={color}
              onClick={onClick}
-             bordered={bordered}
+             variant={outlined ? 'outlined' : 'filled'}
              className={`pointer ${firstLetter===value? 'eCurrentTag': ''}`}
         >
             {value}

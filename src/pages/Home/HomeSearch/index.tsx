@@ -76,7 +76,7 @@ const SearchBox = () => {
     modal.confirm({
       title: `确定把【${search.name}】切换到 ${lowTo}吗?`,
       content: `放到【${lowTo}】列表的最后`,
-      maskClosable: true,
+      mask: {closable: true},
       async onOk() {
         const setXxxSearchList = search.type === SEARCH ? setSearchList : setSearchLowList
         if (search?.type === SEARCH) search.type = LOW_SEARCH

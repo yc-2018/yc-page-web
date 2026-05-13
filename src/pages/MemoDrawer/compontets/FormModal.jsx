@@ -142,7 +142,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}) => {
       wrapClassName:modalStyle.externalImgModel,
       width: '100vh',
       okText: '关闭',
-      maskClosable: true,
+      mask: {closable: true},
       content:
         <iframe
           src={src}

@@ -3,8 +3,8 @@ import {deleteSearchEngine, sortSearchEngine} from "@/request/homeApi";
 import {searchData} from "@/store/NoLoginData";
 import {App, Button, Dropdown, Flex} from "antd";
 import CommonStore from "@/store/CommonStore";
-import {MenuInfo} from "rc-menu/lib/interface";
 import ISearchEngines from "@/interface/ISearchEngines";
+import type {MenuClickInfo} from "@/interface/IAntd";
 import {_setDefaultEngine} from "@/utils/localStorageUtils";
 import {searchValue} from "@/pages/Home/HomeSearch/SearchInput";
 import TryFavicon from "@/components/TryFavicon";
@@ -36,7 +36,7 @@ interface IIsMyDndItem {
   searchItem: ISearchEngines,
   items: any[],
   isDrag: boolean,
-  menuOnClick: (e: MenuInfo, searchItem: ISearchEngines) => void
+  menuOnClick: (e: MenuClickInfo, searchItem: ISearchEngines) => void
 }
 
 const {msg} = CommonStore
@@ -119,7 +119,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
   }
 
   /** 右键菜单逻辑 */
-  const menuOnClick = (e: MenuInfo, searchItem: ISearchEngines) => {
+  const menuOnClick = (e: MenuClickInfo, searchItem: ISearchEngines) => {
     if (e.key === EDIT) {
       openModal(searchItem)
     }
@@ -130,7 +130,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
       modal.confirm({
         title: `确定删除 ${searchItem.name} 吗?`,
         content: '删除了就不能撤回了哟...',
-        maskClosable: true,
+        mask: {closable: true},
         async onOk() {
           const result = await deleteSearchEngine(searchItem.id);
           if (result.success) {

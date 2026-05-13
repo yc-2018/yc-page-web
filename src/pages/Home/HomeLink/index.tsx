@@ -5,9 +5,9 @@ import {
   updateSearchEngines
 } from "@/request/homeApi";
 import {App, Button, Dropdown, Form, Input, Modal} from "antd";
-import {MenuInfo} from "rc-menu/lib/interface";
 import {_getHomeLinks, _setHomeLinks} from "@/utils/localStorageUtils";
 import ISearchEngines, {HOME_LINK} from "@/interface/ISearchEngines";
+import type {MenuClickInfo} from "@/interface/IAntd";
 import JWTUtils from "@/utils/JWTUtils";
 import UserStore from "@/store/UserStore";
 import CommonStore from "@/store/CommonStore";
@@ -33,7 +33,7 @@ interface IIsMyDndItem {
   children: ReactNode,
   linkItem: ISearchEngines,
   isDrag: boolean
-  menuOnClick: (e: MenuInfo, linkItem: ISearchEngines) => void
+  menuOnClick: (e: MenuClickInfo, linkItem: ISearchEngines) => void
 }
 
 const {msg} = CommonStore
@@ -117,7 +117,7 @@ const LinkBox = () => {
   }
 
   /** 右键菜单逻辑 */
-  const menuOnClick = (e: MenuInfo, linkItem: ISearchEngines) => {
+  const menuOnClick = (e: MenuClickInfo, linkItem: ISearchEngines) => {
     if (e.key === EDIT) openModal(linkItem);
     if (e.key === SORT) {
       linkListBak.current = [...linkList];
@@ -127,7 +127,7 @@ const LinkBox = () => {
       modal.confirm({
         title: `确定删除 ${linkItem.name} 吗?`,
         content: '删除了就不能撤回了哟...',
-        maskClosable: true,
+        mask: {closable: true},
         async onOk() {
           const result = await deleteSearchEngine(linkItem.id);
           if (result.success) {

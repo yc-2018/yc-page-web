@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {Header} from "antd/es/layout/layout";
 import {UserOutlined} from "@ant-design/icons";
 import {Avatar, Col, Dropdown, Layout, Menu, Row} from "antd";
 import {useLocation, useNavigate} from "react-router-dom";
@@ -13,6 +12,7 @@ import CommonStore from "../../store/CommonStore";
 import {getToolsList, toolsBaseURL} from "@/request/toolsRequest";
 import css from './head.module.css'
 
+const {Header} = Layout
 
 /** 构建头部工具菜单 */
 const buildToolChildren = (tools) =>

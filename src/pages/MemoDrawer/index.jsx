@@ -117,7 +117,7 @@ const MemoDrawer = () => {
       icon: null,
       width: '70vw',
       centered: true,
-      maskClosable: true,
+      mask: {closable: true},
       okText: '关闭',
       content:
         <div style={{textAlign: 'center'}}>
@@ -370,6 +370,26 @@ const MemoDrawer = () => {
     })
   }
 
+  /** 渲染循环备忘子项图片缩略图，并让预览从被点击的原图开始 */
+  const renderLoopMemoImages = (imgArr) => {
+    const imageUrls = imgArr.split(',').filter(Boolean); // 循环备忘图片原图地址列表
+    if (!imageUrls.length) return null;
+
+    return (
+      <Image.PreviewGroup items={imageUrls}>
+        {imageUrls.map(url =>
+          <Image
+            width={40}
+            height={40}
+            src={thumbUrl(url)}
+            preview={{src: url}}
+            key={url}
+          />
+        )}
+      </Image.PreviewGroup>
+    )
+  }
+
 
   /** 获取循环备忘录时间列表 */
   const getLoopMemoTimeList = (id) =>
@@ -416,9 +436,7 @@ const MemoDrawer = () => {
                   onClick={event => event.stopPropagation()}
                 >
                   {imgArr &&
-                    <Image.PreviewGroup items={imgArr.split(',')}>
-                      {imgArr.split(',').map((item) => <Image width={40} height={40} src={thumbUrl(item)} key={item}/>)}
-                    </Image.PreviewGroup>
+                    renderLoopMemoImages(imgArr)
                   }
                 </div>
               </div>
@@ -557,7 +575,7 @@ const MemoDrawer = () => {
         if (event.type === 'dblclick') {
           const seeModel = modal.confirm({
             title: '查看备忘',
-            maskClosable: true,
+            mask: {closable: true},
             closable: true,
             width: '80vw',
             style: {top: '5vh'},
@@ -625,7 +643,7 @@ const MemoDrawer = () => {
         window.ikunSelectDate = undefined
         window.ikunOkText = undefined
         return modal.confirm({
-          maskClosable: true,         // 点遮罩可以关闭
+          mask: {closable: true},     // 点遮罩可以关闭
           title: `确定${itemObj.completed ? '取消' : ''}完成?`,
           icon: <QuestionCircleFilled/>,
           content: itemObj.completed ? '' : selectDate('完成', itemObj.content),
@@ -670,7 +688,7 @@ const MemoDrawer = () => {
           title: `确定加一吗?`,
           icon: <QuestionCircleFilled/>,
           content: selectDate('加一', itemObj.content),
-          maskClosable: true,         // 点遮罩可以关闭
+          mask: {closable: true},     // 点遮罩可以关闭
           onOk: async () => {
             if (loopMemoUploadingCount > 0) {
               msg.warning('图片还在上传中，请稍等')
