@@ -2,7 +2,7 @@ import {Badge, Skeleton, Typography} from 'antd';
 import ActionBtn from '@/pages/MemoDrawer/compontets/ActionBtn';
 import HighlightKeyword from '@/utils/HighlightKeyword';
 import {fDate} from '@/utils/DateUtils';
-import type {MemoDrawerListItem, RenderLoopMemoDropdown} from '@/pages/MemoDrawer/types';
+import type {MemoDrawerListItem, RenderLoopMemoDrawer} from '@/pages/MemoDrawer/types';
 
 interface MemoListItemProps {
   /** 备忘数据 */
@@ -11,8 +11,8 @@ interface MemoListItemProps {
   keyword: string
   /** 搜索框是否为空 */
   searchEmpty: boolean
-  /** 渲染循环子项下拉 */
-  renderLoopMemoDropdown: RenderLoopMemoDropdown
+  /** 渲染循环子项二层抽屉 */
+  renderLoopMemoDrawer: RenderLoopMemoDrawer
 }
 
 /**
@@ -21,9 +21,9 @@ interface MemoListItemProps {
  * @param {object} memo 备忘数据
  * @param {string} keyword 搜索关键字
  * @param {boolean} searchEmpty 搜索框是否为空
- * @param {function} renderLoopMemoDropdown 渲染循环子项下拉
+ * @param {function} renderLoopMemoDrawer 渲染循环子项二层抽屉
  */
-const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDropdown}: MemoListItemProps) => {
+const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer}: MemoListItemProps) => {
   const {
     id,
     loading,
@@ -76,7 +76,7 @@ const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDropdown}: Memo
 
             <div style={{fontSize: 11, height: 22, lineHeight: '25px', marginLeft: 10, color: '#999'}}>
               {createTime !== updateTime && itemType === 1 &&
-                renderLoopMemoDropdown(id)
+                renderLoopMemoDrawer(memo)
               }
               &nbsp;&nbsp;
               创建:{fDate(createTime)}

@@ -14,21 +14,16 @@ export type MemoCompletedFilter = -1 | 0 | 1;
 export type MemoCountMap = Record<string, number>;
 
 /** 循环备忘子项加载函数 */
-export type LoadLoopMemoItems = (memoId: number) => Promise<void>;
+export type LoadLoopMemoItems = (memoId: number, page?: number, replace?: boolean) => Promise<void>;
 
 /** 循环备忘子项修改函数 */
-export type UpdateLoopMemoItemHandler = (
-  memoId: number,
-  id: number,
-  loopText?: string,
-  imgArr?: string,
-) => void;
+export type UpdateLoopMemoItemHandler = (loopMemo: MemoLoopItem) => void;
 
 /** 循环备忘子项删除函数 */
 export type DeleteLoopMemoItemHandler = (memoId: number, id: number) => void;
 
-/** 循环备忘下拉渲染函数 */
-export type RenderLoopMemoDropdown = (memoId?: number) => ReactNode;
+/** 循环备忘二层抽屉渲染函数 */
+export type RenderLoopMemoDrawer = (memo?: MemoDrawerListItem) => ReactNode;
 
 /** 循环备忘子项数据 */
 export type MemoLoopItem = ILoopMemoItem;

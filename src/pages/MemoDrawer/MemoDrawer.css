@@ -133,18 +133,97 @@
   background-color: #69ca8b;
 }
 
-/*循环时间里面*/
-.memoLoopListItem {
-    margin: 2px;
-    border: 1px #d2caca dashed;
-    border-radius: 5px;
-    padding: 5px;
+.loop-drawer-trigger {
+  height: 22px;
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+.loop-memo-drawer .ant-drawer-body {
+  padding: 14px;
+}
+
+.loop-memo-main-record {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid rgba(5, 5, 5, 0.08);
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.loop-memo-main-content {
+  margin-bottom: 0 !important;
+  white-space: pre-wrap;
+}
+
+.loop-memo-record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 循环记录项 */
+.loop-memo-record {
+  border: 1px solid rgba(5, 5, 5, 0.08);
+  border-radius: 6px;
+  padding: 10px;
+  background: #fff;
+}
+
+.loop-memo-record-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.loop-memo-date {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
 }
 
 .loop-text {
     border-top: 1px #d2caca dashed;
     font-size: 12px;
     color: #009688;
+}
+
+.loop-memo-text {
+  margin-top: 8px;
+  padding-top: 8px;
+  white-space: pre-wrap;
+}
+
+.loop-memo-img-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.loop-memo-img-list .ant-image-img {
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.loop-memo-footer {
+  text-align: center;
+  color: #999;
+  padding: 10px 0;
+}
+
+.loop-memo-edit-meta {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  background: #f6f8fa;
+  color: #777;
+  font-size: 12px;
+  line-height: 1.8;
 }
 
 .memoCompleteOrAdd1Text {

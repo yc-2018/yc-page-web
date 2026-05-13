@@ -13,7 +13,7 @@ import LoaderWhite from "@/components/common/LoaderWhite";
 const Head = lazy(() => import('./pages/Head'));
 const LoginModal = lazy(() => import('@/components/LoginModal'));
 const InfoModal = lazy(() => import('@/components/InfoModal'));
-const MemoDrawer = lazy(() => import('./pages/MemoDrawer'));
+const MemoDrawer = lazy(() => import('./pages/MemoDrawer/index'));
 const EnglishDrawer = lazy(() => import('./pages/EnglishDrawer'));
 
 export default observer(() => {

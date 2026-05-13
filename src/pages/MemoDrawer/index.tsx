@@ -34,7 +34,8 @@ import CommonStore from '@/store/CommonStore';
 import dayjs from 'dayjs';
 import type {Dayjs} from 'dayjs';
 import {uploadImgByJD} from '@/request/toolsRequest';
-import LoopMemoDropdown from '@/pages/MemoDrawer/compontets/LoopMemoDropdown';
+import LoopMemoDrawer from '@/pages/MemoDrawer/compontets/LoopMemoDrawer';
+import LoopMemoEditContent from '@/pages/MemoDrawer/compontets/LoopMemoEditContent';
 import MemoListItem from '@/pages/MemoDrawer/compontets/MemoListItem';
 import MemoPreviewContent from '@/pages/MemoDrawer/compontets/MemoPreviewContent';
 import type IMemo from '@/interface/IMemo';
@@ -43,7 +44,7 @@ import type {
   MemoCompletedFilter,
   MemoCountMap,
   MemoDrawerListItem,
-  RenderLoopMemoDropdown,
+  RenderLoopMemoDrawer,
 } from '@/pages/MemoDrawer/types';
 
 declare global {
@@ -364,59 +365,42 @@ const MemoDrawer = () => {
           : memo
         );
         setList(memos);
+        setLoopTimeList(list => list.filter(item => item.id !== id))
+        setLoopTimeTotal(total => Math.max(0, total - 1))
       }
     })
 
-  const updateLoopMemo = (memoId: number, id: number, loopText?: string, imgArr?: string) => {
-    editLoopMemoText = loopText ?? ''
-    editLoopMemoImgArr = imgArr ?? ''
+  const updateLoopMemo = (loopMemo: ILoopMemoItem) => {
+    editLoopMemoText = loopMemo.loopText ?? ''
+    editLoopMemoImgArr = loopMemo.imgArr ?? ''
     loopMemoUploadingCount = 0
     modal.confirm({
       title: '修改循环备忘子项备注',
       icon: <ExclamationCircleOutlined/>,
-      content:
-        <div>
-          <Input
-            placeholder="请输入备注"
-            defaultValue={editLoopMemoText}
-            onChange={e => editLoopMemoText = e.target.value}
-          />
-          <Upload
-            listType="picture-card"
-            multiple
-            maxCount={3}
-            defaultFileList={editLoopMemoImgArr ? editLoopMemoImgArr.split(',').map((url, index) => ({
-              uid: `${id}-${index}`,
-              name: `image-${index}.webp`,
-              status: 'done',
-              url
-            })) : []}
-            customRequest={uploadLoopMemoImage}
-            onChange={({fileList}) => {
-              editLoopMemoImgArr = fileList
-                .map(fileItem => getUploadImageUrl(fileItem))
-                .filter(Boolean)
-                .join(',')
-            }}
-            onPreview={previewUploadImage}
-          >
-            {uploadButton}
-          </Upload>
-        </div>,
+      content: (
+        <LoopMemoEditContent
+          loopMemo={loopMemo}
+          uploadButton={uploadButton}
+          uploadLoopMemoImage={uploadLoopMemoImage}
+          previewUploadImage={previewUploadImage}
+          onTextChange={text => editLoopMemoText = text}
+          onImgArrChange={imgArr => editLoopMemoImgArr = imgArr}
+        />
+      ),
       onOk: async () => {
         if (loopMemoUploadingCount > 0) {
           msg.warning('图片还在上传中，请稍等')
           throw new Error('图片上传中')
         }
         const resp = await updateLoopMemoItem({
-          memoId,
-          id,
+          memoId: loopMemo.memoId,
+          id: loopMemo.id,
           loopText: editLoopMemoText,
           imgArr: editLoopMemoImgArr || undefined
         })
         if (resp.success) {
           msg.success('修改成功')
-          setLoopTimeList(list => list.map(item => item.id === id ? {
+          setLoopTimeList(list => list.map(item => item.id === loopMemo.id ? {
             ...item,
             loopText: editLoopMemoText,
             imgArr: editLoopMemoImgArr,
@@ -436,10 +420,10 @@ const MemoDrawer = () => {
     setLoopTimeWebLoading(false)
   }
 
-  /** 渲染循环备忘录时间下拉列表 */
-  const renderLoopMemoDropdown: RenderLoopMemoDropdown = id => id &&
-    <LoopMemoDropdown
-      memoId={id}
+  /** 渲染循环备忘录时间二层抽屉 */
+  const renderLoopMemoDrawer: RenderLoopMemoDrawer = memo => memo?.id &&
+    <LoopMemoDrawer
+      memo={memo}
       loopTimeList={loopTimeList}
       loopTimeTotal={loopTimeTotal}
       loopTimeWebLoading={loopTimeWebLoading}
@@ -450,15 +434,15 @@ const MemoDrawer = () => {
     />
 
   // 获取循环备忘录时间列表
-  const getLoopMemoTimeData = async (id: number) => {
+  const getLoopMemoTimeData = async (id: number, nextPage = loopTimePage, replace = false) => {
     setLoopTimeWebLoading(true)
-    const resp = await selectLoopMemoItemList(id, loopTimePage);
+    const resp = await selectLoopMemoItemList(id, nextPage);
     setLoopTimeWebLoading(false)
     const result = resp.data
     const records = result?.records ?? []; // 新加载的循环子项
     if (resp.success && records.length > 0) {
-      setLoopTimeList(item => ([...item, ...records]))
-      setLoopTimePage(v => v + 1)     // 页码增加
+      setLoopTimeList(item => replace ? records : [...item, ...records])
+      setLoopTimePage(nextPage + 1)     // 页码增加
       setLoopTimeTotal(result?.total ?? records.length)
     }
   }
@@ -839,7 +823,7 @@ const MemoDrawer = () => {
                 memo={memo}
                 keyword={keyword}
                 searchEmpty={searchEmpty}
-                renderLoopMemoDropdown={renderLoopMemoDropdown}
+                renderLoopMemoDrawer={renderLoopMemoDrawer}
               />
             )}
             {loadMore || null}
