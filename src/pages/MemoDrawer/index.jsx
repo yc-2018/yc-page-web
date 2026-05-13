@@ -7,7 +7,7 @@ import {
   SyncOutlined, VerticalAlignMiddleOutlined
 } from "@ant-design/icons";
 import {
-  Drawer, List, Skeleton, Button, Tag,
+  Drawer, Skeleton, Button, Tag,
   Spin, Tooltip, Select, Divider,
   Badge, Space, Dropdown, App, DatePicker,
   Switch, Popover, Input, TimePicker, Image, Typography, Upload
@@ -866,83 +866,78 @@ const MemoDrawer = () => {
     >
       <Spin spinning={webLoading} tip={'正在加载' + tagNameMapper[type] + '待办'}>
         {UserStore.jwt ?
-          <List
+          <div
             onClick={listHandleAction} // 在这里设置事件监听器
             onDoubleClick={listHandleAction} // 在这里设置事件监听器
-            className="demo-loadmore-list"
-            itemLayout="horizontal"
-            loadMore={loadMore}
-            dataSource={list}
-            renderItem={({
-                           id,
-                           loading,
-                           content,
-                           itemType,
-                           completed,
-                           updateTime,
-                           createTime,
-                           numberOfRecurrences,
-                           okTime,
-                           okText,
-                         }) => (
-              <List.Item key={id} className={completed && 'finish'}>
+            className="demo-loadmore-list memo-list"
+          >
+            {list.map(({
+                         id,
+                         loading,
+                         content,
+                         itemType,
+                         completed,
+                         updateTime,
+                         createTime,
+                         numberOfRecurrences,
+                         okTime,
+                         okText,
+                       }) => (
+              <div key={id} className={`memo-list-item ${completed ? 'finish' : ''}`}>
                 <Skeleton avatar title={false} loading={loading} active>
-                  <List.Item.Meta
-                    description={
-                      <div data-id={id}>
-                        <div
-                          data-action="see"
-                          style={{userSelect: 'auto'}}
-                          className={(itemType === 3 && !completed && 'gradientText') || null}
+                  <div data-id={id}>
+                    <div
+                      data-action="see"
+                      style={{userSelect: 'auto'}}
+                      className={(itemType === 3 && !completed && 'gradientText') || null}
+                    >
+                      {!searchEmpty && <HighlightKeyword content={content} keyword={keyword}/>}
+                      <Typography.Paragraph
+                        style={{color:'#999'}}
+                        ellipsis={{rows: 3, expandable: 'collapsible', symbol: b => b ? <b>收起</b> : <b>展开</b>}}
+                      >
+                        {content}
+                      </Typography.Paragraph>
+                    </div>
+
+                    {Boolean(completed) && okText && <div className="ok-text"><b>完成备注：</b>{okText}</div>}
+
+                    {/*————————————————备忘项 的功能按钮和 创建修改时间显示————————————————*/}
+                    <div style={{display: 'flex', marginTop: 10}}>
+                      {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
+                        <Badge
+                          size="small"
+                          offset={[-13, -1]}
+                          count={numberOfRecurrences}
+                          overflowCount={9999}
+                          style={{backgroundColor: '#52c41a'}}
                         >
-                          {!searchEmpty && <HighlightKeyword content={content} keyword={keyword}/>}
-                          <Typography.Paragraph
-                            style={{color:'#999'}}
-                            ellipsis={{rows: 3, expandable: 'collapsible', symbol: b => b ? <b>收起</b> : <b>展开</b>}}
-                          >
-                            {content}
-                          </Typography.Paragraph>
-                        </div>
+                          <ActionBtn actionName="addOne">循环+1</ActionBtn>
+                        </Badge>
+                      }
+                      <ActionBtn actionName="finish">{!!completed && '取消'}完成</ActionBtn>
+                      <ActionBtn actionName="edit" show={!completed}>编辑</ActionBtn> {/*完成了就不要显示编辑了*/}
+                      <ActionBtn actionName="delete">删除</ActionBtn>
 
-                        {Boolean(completed) && okText && <div className="ok-text"><b>完成备注：</b>{okText}</div>}
-
-                        {/*————————————————备忘项 的功能按钮和 创建修改时间显示————————————————*/}
-                        <div style={{display: 'flex', marginTop: 10}}>
-                          {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
-                            <Badge
-                              size="small"
-                              offset={[-13, -1]}
-                              count={numberOfRecurrences}
-                              overflowCount={9999}
-                              style={{backgroundColor: '#52c41a'}}
-                            >
-                              <ActionBtn actionName="addOne">循环+1</ActionBtn>
-                            </Badge>
-                          }
-                          <ActionBtn actionName="finish">{!!completed && '取消'}完成</ActionBtn>
-                          <ActionBtn actionName="edit" show={!completed}>编辑</ActionBtn> {/*完成了就不要显示编辑了*/}
-                          <ActionBtn actionName="delete">删除</ActionBtn>
-
-                          <div style={{fontSize: 10, height: 22, lineHeight: '25px', marginLeft: 10}}>
-                            {createTime !== updateTime && itemType === 1 &&
-                              getLoopMemoTimeList(id, fDate(updateTime))
-                            }
-                            &nbsp;&nbsp;
-                            创建:{fDate(createTime)}
-                            &nbsp;&nbsp;
-                            {createTime !== updateTime &&
-                              ` ${completed ? `完成:${fDate(okTime)}` : `修改:${fDate(updateTime)}`}`
-                            }
-                          </div>
-                        </div>
-
+                      <div style={{fontSize: 11, height: 22, lineHeight: '25px', marginLeft: 10, color: '#999'}}>
+                        {createTime !== updateTime && itemType === 1 &&
+                          getLoopMemoTimeList(id, fDate(updateTime))
+                        }
+                        &nbsp;&nbsp;
+                        创建:{fDate(createTime)}
+                        &nbsp;&nbsp;
+                        {createTime !== updateTime &&
+                          ` ${completed ? `完成:${fDate(okTime)}` : `修改:${fDate(updateTime)}`}`
+                        }
                       </div>
-                    }
-                  />
+                    </div>
+
+                  </div>
                 </Skeleton>
-              </List.Item>
-            )}
-          />
+              </div>
+            ))}
+            {loadMore || null}
+          </div>
           :
           <div className='loadMore' onClick={() => UserStore.setOpenModal(true)}>
             <Divider plain>🥺<Button type="link">请先登录</Button>🐾</Divider>
