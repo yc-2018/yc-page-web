@@ -34,7 +34,6 @@ const CodeBlock = ({children, className}) => {
     className = lines[0]
     children = lines.slice(1).join('\n')
   }
-  console.log("███████className>>>>🔴", className,"🔴<<<<██████");
   const language = className?.split(/[\s-]+/).at(-1); // 获取代码语言 不管前面是空格还是减号 都切割拿最后一个单词
   return (
     <div className={styles.codeBlockWrapper}>
@@ -57,6 +56,12 @@ const CodeBlock = ({children, className}) => {
   );
 };
 
+/** 整页 HTML 标签在 Markdown 中不能按真实 DOM 渲染，这里只保留正文内容 */
+const HtmlDocumentTag = ({children}) => <>{children}</>;
+
+/** 忽略整页 HTML 中不适合插入当前 React 根节点的标签 */
+const IgnoreHtmlDocumentTag = () => null;
+
 /** markdown解析组件，及自定义样式<br/>
  * <a href="https://react-syntax-highlighter.github.io/react-syntax-highlighter/demo/">高亮库官方demo</a>
  * <a href="https://github.com/react-syntax-highlighter/react-syntax-highlighter/blob/master/AVAILABLE_LANGUAGES_HLJS.MD">可用语言列表</a>
@@ -70,6 +75,15 @@ export default ({children}) => {
   const options = {
     overrides: {
       code: {component: CodeBlock},
+      html: {component: HtmlDocumentTag},
+      body: {component: HtmlDocumentTag},
+      head: {component: IgnoreHtmlDocumentTag},
+      meta: {component: IgnoreHtmlDocumentTag},
+      title: {component: IgnoreHtmlDocumentTag},
+      style: {component: IgnoreHtmlDocumentTag},
+      script: {component: IgnoreHtmlDocumentTag},
+      link: {component: IgnoreHtmlDocumentTag},
+      base: {component: IgnoreHtmlDocumentTag},
       blockquote: {   // 引用块
         component: props =>
           <blockquote className={styles.blockquote}>

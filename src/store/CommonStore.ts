@@ -7,7 +7,7 @@ class CommonStore {
 
     //构造函数
     constructor() {
-        makeAutoObservable(this)  //自动化数据管理
+        makeAutoObservable(this, {msg: false})  //自动化数据管理，消息实例只作为命令式 API 保存
     }
 
 
