@@ -19,7 +19,7 @@ import {sortingOptions} from "@/store/NoLoginData";
 import HighlightKeyword from "@/utils/HighlightKeyword";
 import {ExclamationCircleFilled} from "@ant-design/icons";
 import LinkifyContent from "@/components/LinkifyContent/index";
-import {symbols} from "@/pages/MemoDrawer/compontets/FormModal";
+import {symbols} from "@/pages/MemoDrawer/constants";
 import styles from '@/pages/Mobile/mobile.module.css'
 import {fDate} from "@/utils/DateUtils";
 import {uploadImgByJD} from "@/request/toolsRequest";

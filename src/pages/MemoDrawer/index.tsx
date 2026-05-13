@@ -1,42 +1,91 @@
-import React, {useEffect, useRef, useState} from "react";
+import {useEffect, useRef, useState} from 'react';
+import type {ComponentType, Dispatch, MouseEvent, ReactNode, SetStateAction} from 'react';
 import {observer} from 'mobx-react-lite'
 import {
   BookOutlined,
-  CaretDownOutlined, ColumnHeightOutlined, ExclamationCircleOutlined,
+  ColumnHeightOutlined, ExclamationCircleOutlined,
   PlusOutlined, QuestionCircleFilled, QuestionCircleOutlined,
   SyncOutlined, VerticalAlignMiddleOutlined
-} from "@ant-design/icons";
+} from '@ant-design/icons';
 import {
   Drawer, Skeleton, Button, Tag,
   Spin, Tooltip, Select, Divider,
-  Badge, Space, Dropdown, App, DatePicker,
-  Switch, Popover, Input, TimePicker, Image, Typography, Upload
-} from "antd";
+  Badge, Space, App, DatePicker,
+  Switch, Input, TimePicker, Image, Upload
+} from 'antd';
+import type {UploadFile, UploadProps} from 'antd';
 
-import showOrNot from "@/store/ShowOrNot";
-import UserStore from "@/store/UserStore";
-import FormModal from "@/pages/MemoDrawer/compontets/FormModal";
-import ShowOrNot from "@/store/ShowOrNot";
-import {sortingOptions, tagNameMapper} from "@/store/NoLoginData";
-import SortSelect from "@/components/SortSelect";
-import SearchBox from "@/components/common/SearchBox";
-import LinkifyContent from "@/components/LinkifyContent/index";
+import showOrNot from '@/store/ShowOrNot';
+import UserStore from '@/store/UserStore';
+import FormModal from '@/pages/MemoDrawer/compontets/FormModal';
+import {sortingOptions, tagNameMapper} from '@/store/NoLoginData';
+import SortSelect from '@/components/SortSelect';
+import SearchBox from '@/components/common/SearchBox';
 import {
   addLoopMemoItem,
   deleteLoopMemoItem,
   deleteMemo,
   getMemos,
   selectLoopMemoItemList, updateLoopMemoItem, updateMemo
-} from "@/request/memoApi"
-import ActionBtn from "@/pages/MemoDrawer/compontets/ActionBtn";
-import JWTUtils from "@/utils/JWTUtils";
-import HighlightKeyword from "@/utils/HighlightKeyword";
+} from '@/request/memoApi'
+import JWTUtils from '@/utils/JWTUtils';
 import '@/pages/MemoDrawer/MemoDrawer.css'
-import CommonStore from "@/store/CommonStore";
-import {fDate} from "@/utils/DateUtils";
-import dayjs from "dayjs";
-import {thumbUrl} from "@/utils/urlUtils.js";
-import {uploadImgByJD} from "@/request/toolsRequest";
+import CommonStore from '@/store/CommonStore';
+import dayjs from 'dayjs';
+import type {Dayjs} from 'dayjs';
+import {uploadImgByJD} from '@/request/toolsRequest';
+import LoopMemoDropdown from '@/pages/MemoDrawer/compontets/LoopMemoDropdown';
+import MemoListItem from '@/pages/MemoDrawer/compontets/MemoListItem';
+import MemoPreviewContent from '@/pages/MemoDrawer/compontets/MemoPreviewContent';
+import type IMemo from '@/interface/IMemo';
+import type ILoopMemoItem from '@/interface/ILoopMemoItem';
+import type {
+  MemoCompletedFilter,
+  MemoCountMap,
+  MemoDrawerListItem,
+  RenderLoopMemoDropdown,
+} from '@/pages/MemoDrawer/types';
+
+declare global {
+  interface Window {
+    /** 用于完成或+1时是否主动选择日期 */
+    ikunSelectDate?: string
+    /** 用于完成或+1时是否主动写备注 */
+    ikunOkText?: string
+  }
+}
+
+interface UploadImageResponse {
+  /** 上传完成后的原图地址 */
+  url?: string
+}
+
+interface SortSelectProps {
+  /** 当前排序值 */
+  value: number
+  /** 排序改变回调 */
+  onChange: (value: number) => void
+  /** 排序选项 */
+  options: {value: number, label: string}[]
+  /** 是否显示加载态 */
+  loading?: boolean
+}
+
+interface SearchBoxProps {
+  /** 搜索关键字 */
+  keyword: string
+  /** 修改搜索关键字 */
+  setKeyword: Dispatch<SetStateAction<string>>
+  /** 刷新列表 */
+  sxSj: () => void
+  /** 搜索框是否为空 */
+  searchEmpty: boolean
+  /** 修改搜索框为空状态 */
+  setSearchEmpty: Dispatch<SetStateAction<boolean>>
+}
+
+const MemoSortSelect = SortSelect as unknown as ComponentType<SortSelectProps>;
+const MemoSearchBox = SearchBox as unknown as ComponentType<SearchBoxProps>;
 
 /** 用于完成或+1时是否主动选择日期 */
 window.ikunSelectDate = undefined
@@ -47,7 +96,7 @@ let i = 0;                   // 页面刷新次数
 let total = -1;              // 初始化待办总数
 let orderBy = 1;             // 《表单》默认排序方式
 let isQueryOnClick = false; // 防止点太快了
-let dates = [];              // 未处理的筛选日期
+let dates: Dayjs[] = [];              // 未处理的筛选日期
 let filterDate = '';         // 筛选日期 格式： 开始时间戳/结束时间戳/0：修改时间 1：创建时间
 let filterDateType = 1;     // 筛选日期类型 0：修改时间 1：创建时间
 let editLoopMemoText = '';   // 循环备忘项备注修改
@@ -62,22 +111,22 @@ const MemoDrawer = () => {
   const [webLoading, setWebLoading] = useState(false);        // 网络加载
   const [refreshTrigger, setRefreshTrigger] = useState(0);    // 刷新触发列表(值无意义，改变即刷新列表数据
   const [, setRefresh] = useState(0);                                 // 刷新触发：单纯驱动非状态变量改变页面
-  const [data, setData] = useState([]);                         // 待办列表数据
-  const [list, setList] = useState([]);                         // 待办展示列表
+  const [data, setData] = useState<MemoDrawerListItem[]>([]);                         // 待办列表数据
+  const [list, setList] = useState<MemoDrawerListItem[]>([]);                         // 待办展示列表
   const [page, setPage] = useState(1);                        // 待办翻页
   const [type, setType] = useState(0);                        // 待办类型
-  const [loopTimeList, setLoopTimeList] = useState([])          // 循环时间列表
+  const [loopTimeList, setLoopTimeList] = useState<ILoopMemoItem[]>([])          // 循环时间列表
   const [loopTimePage, setLoopTimePage] = useState(1);        // 循环时间页数
   const [loopTimeTotal, setLoopTimeTotal] = useState(0);      //循环时间总数
   const [loopTimeWebLoading, setLoopTimeWebLoading] = useState(true); // 循环时间网络加载
-  const [unFinishCounts, setUnFinishCounts] = useState();             // 待办未完成计数
-  const [completed, setCompleted] = useState(0);              // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
+  const [unFinishCounts, setUnFinishCounts] = useState<MemoCountMap | null>(null);             // 待办未完成计数
+  const [completed, setCompleted] = useState<MemoCompletedFilter>(0);              // 查看待办状态（看未完成的：0,看已完成的：1,看全部的：-1）
   const [formModal, setFormModal] = useState(false);          // 是否显示新增或编辑的模态框。
-  const [fModalData, setFModalData] = useState();                     // 设置模态框数据
+  const [fModalData, setFModalData] = useState<IMemo | null | undefined>();                     // 设置模态框数据
   const [keyword, setKeyword] = useState('');                   // 搜索关键字
   const [searchEmpty, setSearchEmpty] = useState(true);       // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
 
-  const loadMoreRef = useRef(null);                // 自动翻页触底监听元素
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);                // 自动翻页触底监听元素
   const itemLoadingRef = useRef(false);            // 自动翻页请求锁
   const autoLoadFailedRef = useRef(false);         // 自动翻页失败暂停标记
   const {notification, modal} = App.useApp();
@@ -98,7 +147,7 @@ const MemoDrawer = () => {
    * @author Codex
    * @since 2026/5/9
    */
-  const uploadToJD = async (file) => {
+  const uploadToJD = async (file: File) => {
     if (file.size > 1024 * 1024 * 6) msg.info('图片超6M,自动压缩中...')
     const result = await uploadImgByJD(file);
     if (!result.success || !result.data?.url) {
@@ -108,8 +157,25 @@ const MemoDrawer = () => {
     return result.data.url
   }
 
+  /** 循环备忘图片上传请求 */
+  const uploadLoopMemoImage: UploadProps<UploadImageResponse>['customRequest'] = async ({file, onSuccess, onError}) => {
+    loopMemoUploadingCount++
+    try {
+      const url = await uploadToJD(file as File);
+      onSuccess?.({url});
+    } catch (error) {
+      onError?.(error as Error);
+    } finally {
+      loopMemoUploadingCount--
+    }
+  }
+
+  /** 读取上传列表中的图片地址 */
+  const getUploadImageUrl = (fileItem: UploadFile<UploadImageResponse>) =>
+    fileItem.response?.url || fileItem.url
+
   /** 预览上传图片（避免浏览器打开空白窗口） */
-  const previewUploadImage = (file) => {
+  const previewUploadImage = (file: UploadFile<UploadImageResponse>) => {
     const previewUrl = file.url || file.response?.url || file.thumbUrl;
     if (!previewUrl) return msg.info('图片上传中，暂时无法预览');
     modal.info({
@@ -146,13 +212,15 @@ const MemoDrawer = () => {
         setWebLoading(false);
         return;
       }
-      const {data, map} = resp;
-      setData(data.records);
-      setList(data.records);
+      const memoPage = resp.data; // 备忘分页数据
+      const groupMemosCounts = resp.map?.groupMemosCounts as MemoCountMap | undefined; // 类型未完成数量
+      const memoRecords = memoPage?.records ?? []; // 当前页备忘列表
+      setData(memoRecords);
+      setList(memoRecords);
 
-      if (completed === 0) setUnFinishCounts(map.groupMemosCounts)
+      if (completed === 0) setUnFinishCounts(groupMemosCounts ?? null)
       // 如果刚打开时有未完成的紧急备忘 而且抽屉没打开 就弹出提醒
-      if (initLoading && !showOrNot.memoDrawerShow && map.groupMemosCounts['3'] > 0 && total === -1) {
+      if (initLoading && !showOrNot.memoDrawerShow && (groupMemosCounts?.['3'] ?? 0) > 0 && total === -1) {
         const key = `open${Date.now()}`;
         notification.info({
           message: '有未完成的紧急备忘',
@@ -166,7 +234,7 @@ const MemoDrawer = () => {
               <Button type="primary" size="small" onClick={() => {
                 notification.destroy(key)
                 setType(3)
-                ShowOrNot.setMemoDrawerShow(true)
+                showOrNot.setMemoDrawerShow(true)
               }}>
                 打开看看
               </Button>
@@ -175,7 +243,7 @@ const MemoDrawer = () => {
         })
 
       }
-      total = data.total;
+      total = memoPage?.total ?? memoRecords.length;
       setInitLoading(false);
       setWebLoading(false);
     })();
@@ -225,7 +293,7 @@ const MemoDrawer = () => {
         keyword,
         dateRange: filterDate
       });
-      if (!respData) {      // 保持代码的健壮性
+      if (!respData?.records) {      // 保持代码的健壮性
         autoLoadFailedRef.current = true
         setList(oldData)
         return;
@@ -245,25 +313,25 @@ const MemoDrawer = () => {
 
 
   /** 判断 显示《加载更多》《到底了》还是什么都不显示 */
-  const loadMore =
+  const loadMore: ReactNode =
     !initLoading && !itemLoading && autoLoadFailedRef.current ? (
       <div className="loadMore">加载失败，点击刷新后重试</div>
     ) : !initLoading && !itemLoading && list.length < total ? (
       <div className="loadMore" ref={loadMoreRef}>
         下滑自动加载更多...
       </div>
-    ) : !itemLoading && list.length && <Divider className='loadMore' plain>🥺到底啦🐾</Divider>;
+    ) : !itemLoading && list.length > 0 ? <Divider className="loadMore" plain>🥺到底啦🐾</Divider> : null;
 
 
   /** 分类标签生成 */
-  const getTag = (TypeNum, typeName, color) =>
+  const getTag = (TypeNum: number, typeName: string, color?: string) =>
     <Badge size="small" offset={[-5, 2]}
-           title={"未完成的条数"}
+           title="未完成的条数"
            overflowCount={9999}    // 展示封顶的数字值
            count={type === TypeNum && total > 0 ? total : unFinishCounts?.[TypeNum]}
     >
       <Tag className={`pointer ${type === TypeNum ? 'currentTag' : ''}`}
-           color={color ?? "processing"}
+           color={color ?? 'processing'}
            onClick={() => {
              setSearchEmpty(true)    // 搜索框为空重置
              setKeyword('')          // 搜索关键字重置
@@ -279,7 +347,7 @@ const MemoDrawer = () => {
    * @author Yc
    * @since 2025/5/18 18:23
    */
-  const deleteLoopMemo = (momoId,id) =>
+  const deleteLoopMemo = (memoId: number, id: number) =>
     modal.confirm({
       title: '确定要删除吗？',
       icon: <ExclamationCircleOutlined/>,
@@ -287,20 +355,20 @@ const MemoDrawer = () => {
       okText: '确定',
       cancelText: '取消',
       onOk: async () => {
-        const resp = await deleteLoopMemoItem(momoId,id)
-        if (!resp.success) return msg.error("删除失败")
-        msg.success("删除成功")
+        const resp = await deleteLoopMemoItem(memoId, id)
+        if (!resp.success) return msg.error('删除失败')
+        msg.success('删除成功')
 
-        const memos = list.map(memo => {
-          if (memo.id === momoId) memo.numberOfRecurrences -= 1
-          return memo
-        });
+        const memos = list.map(memo => memo.id === memoId
+          ? {...memo, numberOfRecurrences: (memo.numberOfRecurrences ?? 1) - 1}
+          : memo
+        );
         setList(memos);
       }
     })
 
-  const updateLoopMemo = (memoId, id, loopText, imgArr) => {
-    editLoopMemoText = loopText
+  const updateLoopMemo = (memoId: number, id: number, loopText?: string, imgArr?: string) => {
+    editLoopMemoText = loopText ?? ''
     editLoopMemoImgArr = imgArr ?? ''
     loopMemoUploadingCount = 0
     modal.confirm({
@@ -323,20 +391,10 @@ const MemoDrawer = () => {
               status: 'done',
               url
             })) : []}
-            customRequest={async ({file, onSuccess, onError}) => {
-              loopMemoUploadingCount++
-              try {
-                const url = await uploadToJD(file);
-                onSuccess({url});
-              } catch (error) {
-                onError(error);
-              } finally {
-                loopMemoUploadingCount--
-              }
-            }}
+            customRequest={uploadLoopMemoImage}
             onChange={({fileList}) => {
               editLoopMemoImgArr = fileList
-                .map(fileItem => fileItem.response?.url || fileItem.url)
+                .map(fileItem => getUploadImageUrl(fileItem))
                 .filter(Boolean)
                 .join(',')
             }}
@@ -357,7 +415,7 @@ const MemoDrawer = () => {
           imgArr: editLoopMemoImgArr || undefined
         })
         if (resp.success) {
-          msg.success("修改成功")
+          msg.success('修改成功')
           setLoopTimeList(list => list.map(item => item.id === id ? {
             ...item,
             loopText: editLoopMemoText,
@@ -365,112 +423,52 @@ const MemoDrawer = () => {
             updateTime: new Date().toLocaleString()
           } : item))
         }
-        else msg.error("修改失败")
+        else msg.error('修改失败')
       }
     })
   }
 
-  /** 渲染循环备忘子项图片缩略图，并让预览从被点击的原图开始 */
-  const renderLoopMemoImages = (imgArr) => {
-    const imageUrls = imgArr.split(',').filter(Boolean); // 循环备忘图片原图地址列表
-    if (!imageUrls.length) return null;
-
-    return (
-      <Image.PreviewGroup items={imageUrls}>
-        {imageUrls.map(url =>
-          <Image
-            width={40}
-            height={40}
-            src={thumbUrl(url)}
-            preview={{src: url}}
-            key={url}
-          />
-        )}
-      </Image.PreviewGroup>
-    )
+  /** 重置循环备忘录时间列表 */
+  const resetLoopMemoTimeData = () => {
+    setLoopTimeTotal(0)
+    setLoopTimeList([])
+    setLoopTimePage(1)
+    setLoopTimeWebLoading(false)
   }
 
-
-  /** 获取循环备忘录时间列表 */
-  const getLoopMemoTimeList = (id) =>
-    <Dropdown
-      trigger={['click']}  // 点击展开
-      onOpenChange={async open => {
-        if (open) {        // 展开时加载数据
-          await getLoopMemoTimeData(id)
-        } else {           // 关闭时清空数据
-          setLoopTimeTotal(0)
-          setLoopTimeList([])
-          setLoopTimePage(1)
-          setLoopTimeWebLoading(false)
-        }
-      }}
-      popupRender={() =>
-        <div className="ant-dropdown-menu dropdown-menu gun">
-          {loopTimeList?.map(({id, memoId, memoDate, loopText, imgArr, createTime, updateTime}, index) =>
-            <Popover
-              content={
-                <div>
-                  <Space>
-                    <Button onClick={() => updateLoopMemo(memoId, id, loopText, imgArr)}>
-                      修改备注
-                    </Button>
-                    <Button onClick={() => deleteLoopMemo(memoId, id)}>
-                      删除此项
-                    </Button>
-                  </Space>
-                  <div style={{color: '#999'}}>
-                    <div>创建时间：{createTime}</div>
-                    {updateTime && <div>更新时间：{updateTime}</div>}
-                  </div>
-                </div>
-              }
-              title="操作"
-              trigger="click"
-            >
-              <div key={id} className="memoLoopListItem" style={{cursor: 'pointer'}}>
-                <div>{index + 1}：{fDate(memoDate)}</div>
-                {loopText && <div className="loop-text">{loopText}</div>}
-                <div
-                  style={{display: 'flex', gap: 5}}
-                  onClick={event => event.stopPropagation()}
-                >
-                  {imgArr &&
-                    renderLoopMemoImages(imgArr)
-                  }
-                </div>
-              </div>
-            </Popover>
-          )}
-          {/* 尾部 */
-            loopTimeWebLoading ? <><SyncOutlined spin/> 正在加载中</> :
-              loopTimeTotal <= loopTimeList.length ? <>到底了</> :
-                <Button block size={'small'} onClick={() => getLoopMemoTimeData(id)}>继续加载</Button>
-          }
-        </div>
-      }
-    >
-        <span className={'pointer'}>
-          &nbsp;&nbsp;&nbsp;<CaretDownOutlined/>循环<CaretDownOutlined/>
-        </span>
-    </Dropdown>
+  /** 渲染循环备忘录时间下拉列表 */
+  const renderLoopMemoDropdown: RenderLoopMemoDropdown = id => id &&
+    <LoopMemoDropdown
+      memoId={id}
+      loopTimeList={loopTimeList}
+      loopTimeTotal={loopTimeTotal}
+      loopTimeWebLoading={loopTimeWebLoading}
+      getLoopMemoTimeData={getLoopMemoTimeData}
+      resetLoopMemoTimeData={resetLoopMemoTimeData}
+      updateLoopMemo={updateLoopMemo}
+      deleteLoopMemo={deleteLoopMemo}
+    />
 
   // 获取循环备忘录时间列表
-  const getLoopMemoTimeData = async id => {
+  const getLoopMemoTimeData = async (id: number) => {
     setLoopTimeWebLoading(true)
     const resp = await selectLoopMemoItemList(id, loopTimePage);
     setLoopTimeWebLoading(false)
     const result = resp.data
-    if (resp.success && result?.records?.length > 0) {
-      setLoopTimeList(item => ([...item, ...result.records]))
+    const records = result?.records ?? []; // 新加载的循环子项
+    if (resp.success && records.length > 0) {
+      setLoopTimeList(item => ([...item, ...records]))
       setLoopTimePage(v => v + 1)     // 页码增加
-      setLoopTimeTotal(result.total)
+      setLoopTimeTotal(result?.total ?? records.length)
     }
   }
 
   /** 完成或加1时 可以选择日期 */
-  const selectDate = (text, content) => {
-    setTimeout(() => document.querySelector('#备注输入框')?.focus(), 100)
+  const selectDate = (text: '完成' | '加一', content?: string) => {
+    setTimeout(() => {
+      const memoRemarkInput = document.querySelector('#备注输入框'); // 完成或加一备注输入框
+      if (memoRemarkInput instanceof HTMLElement) memoRemarkInput.focus()
+    }, 100)
     return (
       <div id="完成或加一弹窗" style={{display: 'flex', flexDirection: 'column', gap: 12}}>
         <div className="memoCompleteOrAdd1Text" id="内容复现框">
@@ -491,18 +489,20 @@ const MemoDrawer = () => {
             minDate={dayjs().subtract(60, 'days')}
             maxDate={dayjs()}
             onChange={(_, dateStr) => {
-              window.ikunSelectDate = dateStr ? dateStr + ' 00:00:00' : undefined
+              const selectedDate = Array.isArray(dateStr) ? dateStr[0] : dateStr; // 指定日期文本
+              window.ikunSelectDate = selectedDate ? selectedDate + ' 00:00:00' : undefined
               const okTimeElement = window.document.querySelector('#okTimePicker');
-              if (okTimeElement) okTimeElement.style.display = dateStr ? 'inline-block' : 'none'
+              if (okTimeElement instanceof HTMLElement) okTimeElement.style.display = dateStr ? 'inline-block' : 'none'
             }}
           />
           <span id="okTimePicker" style={{display: 'none', marginLeft: 5}}>
           <TimePicker
             size="small"
-            onChange={(t, ts) => {
+            onChange={(_time, ts) => {
               if (!window.ikunSelectDate) return CommonStore.msg.error('请选择时间');
-              let dateTimeArr = window.ikunSelectDate.split(' ');
-              dateTimeArr[1] = ts ?? '00:00:00';
+              const selectedTime = Array.isArray(ts) ? ts[0] : ts; // 指定时间文本
+              const dateTimeArr = window.ikunSelectDate.split(' ');
+              dateTimeArr[1] = selectedTime ?? '00:00:00';
               window.ikunSelectDate = dateTimeArr.join(' ');
             }}
           />
@@ -525,20 +525,10 @@ const MemoDrawer = () => {
               listType="picture-card"
               multiple
               maxCount={3}
-              customRequest={async ({file, onSuccess, onError}) => {
-                loopMemoUploadingCount++
-                try {
-                  const url = await uploadToJD(file);
-                  onSuccess({url});
-                } catch (error) {
-                  onError(error);
-                } finally {
-                  loopMemoUploadingCount--
-                }
-              }}
+              customRequest={uploadLoopMemoImage}
               onChange={({fileList}) => {
                 ikunLoopMemoImgArr = fileList
-                  .map(fileItem => fileItem.response?.url || fileItem.url)
+                  .map(fileItem => getUploadImageUrl(fileItem))
                   .filter(Boolean)
                   .join(',')
               }}
@@ -553,15 +543,17 @@ const MemoDrawer = () => {
   }
 
   /** 处理待办列表的操作 */
-  const listHandleAction = async event => {
-
+  const listHandleAction = async (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+
     const action = target.closest('[data-action]')?.getAttribute('data-action');
     const id = target.closest('[data-id]')?.getAttribute('data-id');
-    const itemObj = list.find(item => item.id === parseInt(id));
+    const parsedId = Number(id); // 当前操作的备忘 ID
+    const itemObj = list.find(item => item.id === parsedId);
     const confirmAction = Array.from(target.classList).some(className => className.startsWith('confirm-'))  // 防止快速重复点
 
-    if (!action) return;
+    if (!action || !id || !itemObj) return;
     // 防止点太快了
     if (isQueryOnClick && confirmAction) return // message.warning('哇，你点的好快呀👍');
     if (confirmAction) {
@@ -569,7 +561,30 @@ const MemoDrawer = () => {
       window.setTimeout(() => isQueryOnClick = false, 1000)
     }
 
-    const actionObj = {
+    const finishMemo = (func?: () => void) => {
+      window.ikunSelectDate = undefined
+      window.ikunOkText = undefined
+      return modal.confirm({
+        mask: {closable: true},     // 点遮罩可以关闭
+        title: `确定${itemObj.completed ? '取消' : ''}完成?`,
+        icon: <QuestionCircleFilled/>,
+        content: itemObj.completed ? '' : selectDate('完成', itemObj.content),
+        onOk: async () => {
+          const finishResponse = await updateMemo({
+            id: parsedId,
+            completed: itemObj.completed ? 0 : 1,
+            updateTime: window.ikunSelectDate,
+            okText: itemObj.completed ? '' : window.ikunOkText,
+          })
+          if (finishResponse) {
+            if (func) func()    // 执行传入方法（关闭查看窗口)
+            sxSj()
+          }
+        }
+      })
+    }
+
+    const actionObj: Record<string, () => unknown> = {
       see: () => {
         // 双击查看
         if (event.type === 'dblclick') {
@@ -580,56 +595,18 @@ const MemoDrawer = () => {
             width: '80vw',
             style: {top: '5vh'},
             icon: <BookOutlined/>,
-            content:
-              <div
-                className="gun"
-                style={{height: '70vh', border: '1px solid #ccc', borderRadius: '6px', padding: 9, overflow: 'auto'}}
-              >
-                <pre style={{whiteSpace: 'pre-wrap', fontSize: '14px', margin: 0, fontFamily: 'unset'}}>
-                  <LinkifyContent   // 会识别链接和视频图片的文本内容/备忘录内容/待办内容
-                    linkImg={(link, index)=>
-                      <Popover
-                        content={
-                          <div style={{maxWidth: 400, maxHeight: 400}}>
-                            <img
-                              key={index}
-                              src={link}
-                              alt="备忘录里面识别的图片链接"
-                              referrerPolicy="no-referrer"
-                              style={{width: '100%', maxHeight: 400, display: 'block', margin: '10px 0'}}
-                            />
-                          </div>
-                        }
-                      >
-                        <a key={index} href={link} target="_blank" rel="noopener noreferrer">{link}</a>
-                      </Popover>
-                    }
-                    linkVideo={(link, index)=>
-                      <Popover
-                        content={
-                          <video
-                            key={index}
-                            controls
-                            src={link}
-                            style={{maxWidth: '100%', maxHeight: 600, margin: '10px 0'}}
-                          />
-                        }
-                      >
-                        <a key={index} href={link} target="_blank" rel="noopener noreferrer">{link}</a>
-                      </Popover>
-                    }
-                  >
-                    {itemObj.content}
-                  </LinkifyContent>
-                </pre>
-              </div>,
+            content: <MemoPreviewContent content={itemObj.content ?? ''}/>,
           })
           seeModel.update({ // 添加按钮分开写是因为 seeModel直接写会没初始化完成 导致没发关闭
             footer:
               <div style={{display: 'flex', justifyContent: 'flex-end', gap: 5, position: 'relative', top: 9}}>
                 <Button
-                  onClick={() => actionObj.finish(seeModel.destroy)}>{`${itemObj.completed ? '取消' : ''}完成`}</Button>
-                <Button onClick={() => seeModel.destroy() || setFModalData(itemObj) || setFormModal(true)}>编辑</Button>
+                  onClick={() => finishMemo(seeModel.destroy)}>{`${itemObj.completed ? '取消' : ''}完成`}</Button>
+                <Button onClick={() => {
+                  seeModel.destroy()
+                  setFModalData(itemObj)
+                  setFormModal(true)
+                }}>编辑</Button>
                 <Button type="primary" onClick={seeModel.destroy}>关闭</Button>
               </div>
           })
@@ -639,33 +616,12 @@ const MemoDrawer = () => {
         setFModalData(itemObj)
         setFormModal(true)
       },
-      finish: (func) => {
-        window.ikunSelectDate = undefined
-        window.ikunOkText = undefined
-        return modal.confirm({
-          mask: {closable: true},     // 点遮罩可以关闭
-          title: `确定${itemObj.completed ? '取消' : ''}完成?`,
-          icon: <QuestionCircleFilled/>,
-          content: itemObj.completed ? '' : selectDate('完成', itemObj.content),
-          onOk: async () => {
-            const finishResponse = await updateMemo({
-              id,
-              completed: itemObj.completed ? 0 : 1,
-              updateTime: window.ikunSelectDate,
-              okText: itemObj.completed ? '' : window.ikunOkText,
-            })
-            if (finishResponse) {
-              if (func) func()    // 执行传入方法（关闭查看窗口)
-              sxSj()
-            }
-          }
-        })
-      },
+      finish: () => finishMemo(),
       delete: async () => {
         // 如果按钮已经在删除确认状态
         if (target.classList.contains('confirm-delete')) {
           setWebLoading(true)
-          const deleteResponse = await deleteMemo(id)
+          const deleteResponse = await deleteMemo(parsedId)
           if (deleteResponse) sxSj()
           setWebLoading(false)
         } else {
@@ -685,7 +641,7 @@ const MemoDrawer = () => {
         ikunLoopMemoImgArr = ''
         loopMemoUploadingCount = 0
         return modal.confirm({
-          title: `确定加一吗?`,
+          title: '确定加一吗?',
           icon: <QuestionCircleFilled/>,
           content: selectDate('加一', itemObj.content),
           mask: {closable: true},     // 点遮罩可以关闭
@@ -695,7 +651,7 @@ const MemoDrawer = () => {
               throw new Error('图片上传中')
             }
             const result = await addLoopMemoItem({
-              memoId: id,
+              memoId: parsedId,
               memoDate: window.ikunSelectDate,
               loopText: window.ikunOkText,
               imgArr: ikunLoopMemoImgArr || undefined
@@ -706,7 +662,7 @@ const MemoDrawer = () => {
         })
       },
     }
-    if (actionObj[action]) actionObj[action]()
+    actionObj[action]?.()
   }
 
   /**
@@ -715,10 +671,10 @@ const MemoDrawer = () => {
    * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
    * @since 2024/7/6 16:52
    */
-  const setOpenMemoText = b => {
-    let label = b ? "展开" : "收起"
+  const setOpenMemoText = (b: boolean) => {
+    const label = b ? '展开' : '收起'
     document.querySelectorAll(`[aria-label="${label}"]`).forEach(item => {
-      item.click()
+      if (item instanceof HTMLElement) item.click()
     })
   };
 
@@ -762,13 +718,13 @@ const MemoDrawer = () => {
                 currentMemoType={type}
               />
 
-              <Tooltip title={'刷新当前待办'} mouseEnterDelay={0.6}>
-                <SyncOutlined className='refresh' spin={webLoading} onClick={sxSj}/>
+              <Tooltip title="刷新当前待办" mouseEnterDelay={0.6}>
+                <SyncOutlined className="refresh" spin={webLoading} onClick={sxSj}/>
               </Tooltip>
               备忘录
 
               {/* 添加按钮 */}
-              <Tooltip title={'添加一个待办'} mouseEnterDelay={1}>
+              <Tooltip title="添加一个待办" mouseEnterDelay={1}>
                 <Button
                   size="small"
                   className="addItemButton"
@@ -781,10 +737,10 @@ const MemoDrawer = () => {
               </Tooltip>
 
               <Select                 /*下拉框看《待办状态》*/
-                size='small'
+                size="small"
                 value={completed}
                 style={{width: '6em', marginLeft: 5}}
-                onChange={value => setCompleted(value)}
+                onChange={(value: MemoCompletedFilter) => setCompleted(value)}
                 options={[
                   {label: '未完成', value: 0},
                   {label: '已完成', value: 1},
@@ -792,20 +748,23 @@ const MemoDrawer = () => {
                 ]}
               />
 
-              <SortSelect             /*自己搞的《排序下拉框》*/
+              <MemoSortSelect         /*自己搞的《排序下拉框》*/
                 value={orderBy}
-                onChange={value => sxSj(orderBy = value)/*这不是传参，就是赋值*/}
+                onChange={(value: number) => {
+                  orderBy = value
+                  sxSj()
+                }}
                 options={sortingOptions}
                 loading={webLoading}
               />
 
               {/*————日期筛选————*/}
               <DatePicker.RangePicker
-                size={'small'}
+                size="small"
                 onOpenChange={open => !open && handleFilterDate()}  // 关闭日期选择器时触发
                 onChange={dateArr => {                              // 改变日期触发记录它
-                  dates = (dateArr ?? [])
-                  !dateArr && filterDate && handleFilterDate()      // 清除了日期，但还有筛选条件，就触发筛选列表
+                  dates = (dateArr?.filter(Boolean) ?? []) as Dayjs[]
+                  if (!dateArr && filterDate) handleFilterDate()    // 清除了日期，但还有筛选条件，就触发筛选列表
                 }}
                 renderExtraFooter={() =>
                   <div className="flex-center m5 memo-dateRangeSwitch">
@@ -813,7 +772,10 @@ const MemoDrawer = () => {
                       checkedChildren="创建时间"
                       unCheckedChildren="修改时间"
                       checked={Boolean(filterDateType)}
-                      onClick={checked => sxYm(filterDateType = checked ? 1 : 0)}
+                      onClick={checked => {
+                        filterDateType = checked ? 1 : 0
+                        sxYm()
+                      }}
                     />
                   </div>}
               />
@@ -841,21 +803,21 @@ const MemoDrawer = () => {
               </Tooltip>
 
             </div>
-            <Space size={'large'}>
-              {getTag(0, "普通")}
-              {getTag(6, "工作")}
-              {getTag(3, "紧急", "red")}
-              {getTag(1, "循环", "magenta")}
-              {getTag(2, "长期", "gold")}
-              {getTag(5, "日记", "cyan")}
-              {getTag(7, "其他", "purple")}
+            <Space size="large">
+              {getTag(0, '普通')}
+              {getTag(6, '工作')}
+              {getTag(3, '紧急', 'red')}
+              {getTag(1, '循环', 'magenta')}
+              {getTag(2, '长期', 'gold')}
+              {getTag(5, '日记', 'cyan')}
+              {getTag(7, '其他', 'purple')}
             </Space>
           </Spin>
         </>
       }
       /* 底部搜索框*/
       footer={!JWTUtils.isExpired() &&
-        <SearchBox
+        <MemoSearchBox
           keyword={keyword}
           setKeyword={setKeyword}
           sxSj={sxSj}
@@ -864,82 +826,26 @@ const MemoDrawer = () => {
         />
       }
     >
-      <Spin spinning={webLoading} tip={'正在加载' + tagNameMapper[type] + '待办'}>
+      <Spin spinning={webLoading} description={'正在加载' + (tagNameMapper as Record<number, string>)[type] + '待办'}>
         {UserStore.jwt ?
           <div
             onClick={listHandleAction} // 在这里设置事件监听器
             onDoubleClick={listHandleAction} // 在这里设置事件监听器
             className="demo-loadmore-list memo-list"
           >
-            {list.map(({
-                         id,
-                         loading,
-                         content,
-                         itemType,
-                         completed,
-                         updateTime,
-                         createTime,
-                         numberOfRecurrences,
-                         okTime,
-                         okText,
-                       }) => (
-              <div key={id} className={`memo-list-item ${completed ? 'finish' : ''}`}>
-                <Skeleton avatar title={false} loading={loading} active>
-                  <div data-id={id}>
-                    <div
-                      data-action="see"
-                      style={{userSelect: 'auto'}}
-                      className={(itemType === 3 && !completed && 'gradientText') || null}
-                    >
-                      {!searchEmpty && <HighlightKeyword content={content} keyword={keyword}/>}
-                      <Typography.Paragraph
-                        style={{color:'#999'}}
-                        ellipsis={{rows: 3, expandable: 'collapsible', symbol: b => b ? <b>收起</b> : <b>展开</b>}}
-                      >
-                        {content}
-                      </Typography.Paragraph>
-                    </div>
-
-                    {Boolean(completed) && okText && <div className="ok-text"><b>完成备注：</b>{okText}</div>}
-
-                    {/*————————————————备忘项 的功能按钮和 创建修改时间显示————————————————*/}
-                    <div style={{display: 'flex', marginTop: 10}}>
-                      {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
-                        <Badge
-                          size="small"
-                          offset={[-13, -1]}
-                          count={numberOfRecurrences}
-                          overflowCount={9999}
-                          style={{backgroundColor: '#52c41a'}}
-                        >
-                          <ActionBtn actionName="addOne">循环+1</ActionBtn>
-                        </Badge>
-                      }
-                      <ActionBtn actionName="finish">{!!completed && '取消'}完成</ActionBtn>
-                      <ActionBtn actionName="edit" show={!completed}>编辑</ActionBtn> {/*完成了就不要显示编辑了*/}
-                      <ActionBtn actionName="delete">删除</ActionBtn>
-
-                      <div style={{fontSize: 11, height: 22, lineHeight: '25px', marginLeft: 10, color: '#999'}}>
-                        {createTime !== updateTime && itemType === 1 &&
-                          getLoopMemoTimeList(id, fDate(updateTime))
-                        }
-                        &nbsp;&nbsp;
-                        创建:{fDate(createTime)}
-                        &nbsp;&nbsp;
-                        {createTime !== updateTime &&
-                          ` ${completed ? `完成:${fDate(okTime)}` : `修改:${fDate(updateTime)}`}`
-                        }
-                      </div>
-                    </div>
-
-                  </div>
-                </Skeleton>
-              </div>
-            ))}
+            {list.map((memo, index) =>
+              <MemoListItem
+                key={memo.id ?? `loading-${index}`}
+                memo={memo}
+                keyword={keyword}
+                searchEmpty={searchEmpty}
+                renderLoopMemoDropdown={renderLoopMemoDropdown}
+              />
+            )}
             {loadMore || null}
           </div>
           :
-          <div className='loadMore' onClick={() => UserStore.setOpenModal(true)}>
+          <div className="loadMore" onClick={() => UserStore.setOpenModal(true)}>
             <Divider plain>🥺<Button type="link">请先登录</Button>🐾</Divider>
 
             <Skeleton/>
@@ -953,4 +859,6 @@ const MemoDrawer = () => {
   )
 }
 
-export default observer(MemoDrawer)
+const ObservedMemoDrawer = observer(MemoDrawer);
+
+export default ObservedMemoDrawer
