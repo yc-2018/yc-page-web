@@ -538,15 +538,20 @@ const MemoDrawer = () => {
   /** 处理待办列表的操作 */
   const listHandleAction = async (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
+    if (!(target instanceof Element)) return;
 
-    const action = target.closest('[data-action]')?.getAttribute('data-action');
-    const id = target.closest('[data-id]')?.getAttribute('data-id');
+    const actionEl = target.closest('[data-action]');
+    if (!(actionEl instanceof HTMLElement)) return;
+
+    const action = actionEl.getAttribute('data-action');
+    const actionTrigger = actionEl.getAttribute('data-action-trigger'); // 当前动作指定的触发方式
+    const id = target.closest('[data-id]')?.getAttribute('data-id') ?? actionEl.closest('[data-id]')?.getAttribute('data-id');
     const parsedId = Number(id); // 当前操作的备忘 ID
     const itemObj = list.find(item => item.id === parsedId);
-    const confirmAction = Array.from(target.classList).some(className => className.startsWith('confirm-'))  // 防止快速重复点
+    const confirmAction = Array.from(actionEl.classList).some(className => className.startsWith('confirm-'))  // 防止快速重复点
 
     if (!action || !id || !itemObj) return;
+    if (actionTrigger && actionTrigger !== event.type) return;
     // 防止点太快了
     if (isQueryOnClick && confirmAction) return // message.warning('哇，你点的好快呀👍');
     if (confirmAction) {
@@ -579,8 +584,8 @@ const MemoDrawer = () => {
 
     const actionObj: Record<string, () => unknown> = {
       see: () => {
-        // 双击查看
-        if (event.type === 'dblclick') {
+        // 双击正文或单击查看按钮都可以查看
+        if (event.type === 'dblclick' || actionTrigger === 'click') {
           const seeModel = modal.confirm({
             title: '查看备忘',
             mask: {closable: true},
@@ -611,22 +616,20 @@ const MemoDrawer = () => {
       },
       finish: () => finishMemo(),
       delete: async () => {
-        // 如果按钮已经在删除确认状态
-        if (target.classList.contains('confirm-delete')) {
-          setWebLoading(true)
-          const deleteResponse = await deleteMemo(parsedId)
-          if (deleteResponse) sxSj()
-          setWebLoading(false)
-        } else {
-          target.classList.add('confirm-delete');
-          target.textContent = '确定删除?';
-          setTimeout(() => {
-            if (target?.classList?.contains('confirm-delete')) {
-              target.classList.remove('confirm-delete');
-              target.textContent = '删除';
-            }
-          }, 3000);
-        }
+        return modal.confirm({
+          mask: {closable: true},
+          title: '确定删除?',
+          icon: <QuestionCircleFilled/>,
+          content: itemObj.content,
+          okText: '删除',
+          okButtonProps: {danger: true},
+          onOk: async () => {
+            setWebLoading(true)
+            const deleteResponse = await deleteMemo(parsedId)
+            if (deleteResponse) sxSj()
+            setWebLoading(false)
+          }
+        })
       },
       addOne: () => {
         window.ikunSelectDate = undefined

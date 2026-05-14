@@ -1,4 +1,5 @@
-import {Badge, Skeleton, Typography} from 'antd';
+import {Badge, Dropdown, Skeleton, Typography} from 'antd';
+import {CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, EyeOutlined, MoreOutlined} from '@ant-design/icons';
 import ActionBtn from '@/pages/MemoDrawer/compontets/ActionBtn';
 import HighlightKeyword from '@/utils/HighlightKeyword';
 import {fDate} from '@/utils/DateUtils';
@@ -58,7 +59,7 @@ const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer}: MemoLi
           {Boolean(completed) && okText && <div className="ok-text"><b>完成备注：</b>{okText}</div>}
 
           {/*————————————————备忘项 的功能按钮和 创建修改时间显示————————————————*/}
-            <div style={{display: 'flex', marginTop: 10, gap: 10, alignItems: 'center'}}>
+          <div style={{display: 'flex', marginTop: 10, gap: 10, alignItems: 'center'}}>
             {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
               <Badge
                 size="small"
@@ -70,10 +71,48 @@ const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer}: MemoLi
                 <ActionBtn actionName="addOne">循环+1</ActionBtn>
               </Badge>
             }
-            <ActionBtn actionName="finish">{!!completed && '取消'}完成</ActionBtn>
-            <ActionBtn actionName="edit" show={!completed}>编辑</ActionBtn> {/*完成了就不要显示编辑了*/}
-            <ActionBtn actionName="delete">删除</ActionBtn>
-
+            <ActionBtn actionName="see" actionTrigger="click" iconOnly title="查看">
+              <EyeOutlined/>
+            </ActionBtn>
+            <ActionBtn actionName="edit" show={!completed} iconOnly title="编辑">
+              <EditOutlined/>
+            </ActionBtn> {/*完成了就不要显示编辑了*/}
+            <Dropdown
+              trigger={['click']}
+              placement="bottomRight"
+              getPopupContainer={triggerNode => (triggerNode.closest('[data-id]') as HTMLElement | null) ?? document.body}
+              menu={{
+                items: [
+                  {
+                    key: 'finish',
+                    label: (
+                      <span data-action="finish" className="memo-menu-action">
+                        {completed ? <CloseOutlined/> : <CheckOutlined/>}
+                        <span>{completed ? '取消完成' : '完成'}</span>
+                      </span>
+                    )
+                  },
+                  {
+                    key: 'delete',
+                    danger: true,
+                    label: (
+                      <span data-action="delete" className="memo-menu-action">
+                        <DeleteOutlined/>
+                        <span>删除</span>
+                      </span>
+                    )
+                  }
+                ]
+              }}
+            >
+              <div
+                className="memo-action-more"
+                title="更多操作"
+                aria-label="更多操作"
+              >
+                <MoreOutlined/>
+              </div>
+            </Dropdown>
 
               {createTime !== updateTime && itemType === 1 &&   // 循环待办才显示
                   renderLoopMemoDrawer(memo)
