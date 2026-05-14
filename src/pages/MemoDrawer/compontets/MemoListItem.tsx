@@ -58,7 +58,7 @@ const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer}: MemoLi
           {Boolean(completed) && okText && <div className="ok-text"><b>完成备注：</b>{okText}</div>}
 
           {/*————————————————备忘项 的功能按钮和 创建修改时间显示————————————————*/}
-          <div style={{display: 'flex', marginTop: 10}}>
+            <div style={{display: 'flex', marginTop: 10, gap: 10, alignItems: 'center'}}>
             {/*如果是循环待办显示循环按钮*/ itemType === 1 &&
               <Badge
                 size="small"
@@ -74,17 +74,17 @@ const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer}: MemoLi
             <ActionBtn actionName="edit" show={!completed}>编辑</ActionBtn> {/*完成了就不要显示编辑了*/}
             <ActionBtn actionName="delete">删除</ActionBtn>
 
-            <div style={{fontSize: 11, height: 22, lineHeight: '25px', marginLeft: 10, color: '#999'}}>
-              {createTime !== updateTime && itemType === 1 &&
-                renderLoopMemoDrawer(memo)
+
+              {createTime !== updateTime && itemType === 1 &&   // 循环待办才显示
+                  renderLoopMemoDrawer(memo)
               }
-              &nbsp;&nbsp;
-              创建:{fDate(createTime)}
-              &nbsp;&nbsp;
-              {createTime !== updateTime &&
-                ` ${completed ? `完成:${fDate(okTime)}` : `修改:${fDate(updateTime)}`}`
-              }
-            </div>
+
+              <div style={{fontSize: 10, color: '#999'}}>
+                  <div>创建:{fDate(createTime)}</div>
+                  {createTime !== updateTime &&
+                      <div>{completed ? `完成:${fDate(okTime)}` : `修改:${fDate(updateTime)}`}</div>
+                  }
+              </div>
           </div>
         </div>
       </Skeleton>
