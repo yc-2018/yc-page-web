@@ -126,6 +126,7 @@ const MemoDrawer = () => {
   const [fModalData, setFModalData] = useState<IMemo | null | undefined>();                     // 设置模态框数据
   const [keyword, setKeyword] = useState('');                   // 搜索关键字
   const [searchEmpty, setSearchEmpty] = useState(true);       // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
+  const [lastActionId, setLastActionId] = useState<number>();  // 最后操作的备忘 ID
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);                // 自动翻页触底监听元素
   const keywordRef = useRef(keyword);              // 当前搜索关键字引用
@@ -552,6 +553,7 @@ const MemoDrawer = () => {
 
     if (!action || !id || !itemObj) return;
     if (actionTrigger && actionTrigger !== event.type) return;
+    setLastActionId(parsedId)
     // 防止点太快了
     if (isQueryOnClick && confirmAction) return // message.warning('哇，你点的好快呀👍');
     if (confirmAction) {
@@ -836,6 +838,7 @@ const MemoDrawer = () => {
                 keyword={keyword}
                 searchEmpty={searchEmpty}
                 renderLoopMemoDrawer={renderLoopMemoDrawer}
+                lastAction={memo.id === lastActionId}
               />
             )}
             {loadMore || null}

@@ -14,6 +14,8 @@ interface MemoListItemProps {
   searchEmpty: boolean
   /** 渲染循环子项二层抽屉 */
   renderLoopMemoDrawer: RenderLoopMemoDrawer
+  /** 是否为最后操作的备忘项 */
+  lastAction: boolean
 }
 
 /**
@@ -23,8 +25,9 @@ interface MemoListItemProps {
  * @param {string} keyword 搜索关键字
  * @param {boolean} searchEmpty 搜索框是否为空
  * @param {function} renderLoopMemoDrawer 渲染循环子项二层抽屉
+ * @param {boolean} lastAction 是否为最后操作的备忘项
  */
-const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer}: MemoListItemProps) => {
+const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer, lastAction}: MemoListItemProps) => {
   const {
     id,
     loading,
@@ -39,7 +42,7 @@ const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer}: MemoLi
   } = memo;
 
   return (
-    <div className={`memo-list-item ${completed ? 'finish' : ''}`}>
+    <div className={`memo-list-item ${completed ? 'finish' : ''} ${lastAction ? 'memo-last-action' : ''}`}>
       <Skeleton avatar title={false} loading={loading} active>
         <div data-id={id}>
           <div

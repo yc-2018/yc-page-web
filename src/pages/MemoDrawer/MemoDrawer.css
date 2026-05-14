@@ -3,8 +3,10 @@
 }
 
 .memo-list-item {
+  position: relative;
   padding: 12px 0;
   border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+  transition: background-color 0.25s, box-shadow 0.25s;
 }
 
 .memo-list-item:last-child {
@@ -34,6 +36,27 @@
   box-shadow: 0 0 8px 1px #bbf2c991;
   background-color: #fafff5;
   border-radius: 6px;
+}
+
+/* 最后操作的备忘项轻微高亮 */
+.memo-last-action {
+  background-color: #f0f7ff;
+}
+
+.memo-last-action::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: -8px;
+  width: 3px;
+  border-radius: 3px;
+  background-color: #1677ff;
+}
+
+.memo-list-item.finish.memo-last-action {
+  background-color: #f1fff0;
+  box-shadow: 0 0 8px 1px #bbf2c991;
 }
 
 .ok-text {
