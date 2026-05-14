@@ -9,7 +9,7 @@ class SearchStore {
     }
   
     //设置查询值
-    setSearchEngines(searchEngines:any) {
+    setSearchEngines(searchEngines: string) {
       localStorage.setItem('searchEngines',searchEngines)
       this.searchEngines = searchEngines;
     }

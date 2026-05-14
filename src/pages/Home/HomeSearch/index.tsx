@@ -1,14 +1,14 @@
-import {useEffect, useState} from "react";
-import {DownCircleOutlined, PlusOutlined} from "@ant-design/icons";
-import {addSearchEngines, getSearchEngines, updateSearchEngines} from "@/request/homeApi";
-import {Alert, App, Button, Checkbox, Divider, Form, Input, Modal} from "antd";
-import SearchEngines from "@/pages/Home/HomeSearch/SearchEngines";
-import {_getDefaultEngine, _getSearchEngines, _setSearchEngines} from "@/utils/localStorageUtils";
-import ISearchEngines, {LOW_SEARCH, SEARCH} from "@/interface/ISearchEngines";
-import JWTUtils from "@/utils/JWTUtils";
-import UserStore from "@/store/UserStore";
-import CommonStore from "@/store/CommonStore";
-import SearchInput from "@/pages/Home/HomeSearch/SearchInput";
+import {useEffect, useState} from 'react';
+import {DownCircleOutlined, PlusOutlined} from '@ant-design/icons';
+import {addSearchEngines, getSearchEngines, updateSearchEngines} from '@/request/homeApi';
+import {Alert, App, Button, Checkbox, Divider, Form, Input, Modal} from 'antd';
+import SearchEngines from '@/pages/Home/HomeSearch/SearchEngines';
+import {_getDefaultEngine, _getSearchEngines, _setSearchEngines} from '@/utils/localStorageUtils';
+import ISearchEngines, {LOW_SEARCH, SEARCH} from '@/interface/ISearchEngines';
+import JWTUtils from '@/utils/JWTUtils';
+import UserStore from '@/store/UserStore';
+import CommonStore from '@/store/CommonStore';
+import SearchInput from '@/pages/Home/HomeSearch/SearchInput';
 import './index.css'
 
 const {msg} = CommonStore
@@ -25,16 +25,16 @@ interface IEditOrAdd {
  * @since 2025/7/16 2:01
  */
 const SearchBox = () => {
-  const getDefaultEngine = _getDefaultEngine();
   const [searchList, setSearchList] = useState<ISearchEngines[] | undefined>(_getSearchEngines())
   const [searchLowList, setSearchLowList] = useState<ISearchEngines[]>();
   const [showLows, setShowLows] = useState(false);
-  const [nowSearch, setNowSearch] = useState<ISearchEngines>(getDefaultEngine)
+  const [nowSearch, setNowSearch] = useState<ISearchEngines>(_getDefaultEngine())
   const [editOrAddData, setEditOrAddData] = useState<IEditOrAdd>({open: false})
   const [modalLoading, setModalLoading] = useState(false)
   const [lowLoading, setLowLoading] = useState(false)
   const [form] = Form.useForm(); // 创建一个表单域
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
+  const {jwt} = UserStore;           // 当前登录凭证
 
   useEffect(() => {
     // 获取搜索引擎列表
@@ -42,13 +42,14 @@ const SearchBox = () => {
       getSearchEngines(SEARCH).then(response => {
         if (response.success) setSearchList(response.data)
       });
-      getDefaultEngine && setNowSearch(getDefaultEngine)  // 获取默认搜索引擎(登录时)
+      const defaultEngine = _getDefaultEngine(); // 获取默认搜索引擎(登录时)
+      if (defaultEngine) setNowSearch(defaultEngine)
     }
-  }, [UserStore.jwt])
+  }, [jwt])
 
   /** 索引列表变化就记录 */
   useEffect(() => {
-    !JWTUtils.isExpired() && searchList?.length && _setSearchEngines(searchList)
+    if (!JWTUtils.isExpired() && searchList?.length) _setSearchEngines(searchList)
   }, [searchList])
 
 

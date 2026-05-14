@@ -12,7 +12,7 @@ class CommonStore {
 
 
     //设置网络加载状态（转圈圈） 和 消息提示  全屏用
-    setLoading(statuses: boolean, msg?: string, type: 'info' | 'success' | 'error' = "info") {
+    setLoading(statuses: boolean, msg?: string, type: 'info' | 'success' | 'error' = 'info') {
         this.loading = statuses
         if (msg) this.msg[type](msg)
     }

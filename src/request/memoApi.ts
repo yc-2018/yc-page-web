@@ -1,11 +1,28 @@
-import CommonStore from "@/store/CommonStore";
-import {myDelete, myGet, myPost, myPut} from "./myAxios";
-import ILoopMemoItem from "@/interface/ILoopMemoItem";
-import IPage from "@/interface/Ipage";
-import IMemo from "@/interface/IMemo";
+import CommonStore from '@/store/CommonStore';
+import {myDelete, myGet, myPost, myPut} from './myAxios';
+import ILoopMemoItem from '@/interface/ILoopMemoItem';
+import IPage from '@/interface/Ipage';
+import IMemo from '@/interface/IMemo';
 
 
 const {msg} = CommonStore
+
+interface GetMemosParams {
+  /** 待办类型 */
+  type?: number
+  /** 当前页码 */
+  page?: number
+  /** 完成状态 */
+  completed?: number
+  /** 排序方式 */
+  orderBy?: number
+  /** 首字母筛选 */
+  firstLetter?: string
+  /** 搜索关键词 */
+  keyword?: string
+  /** 日期范围筛选 */
+  dateRange?: string
+}
 
 /** 获取一个类型的待办列表 循环的先默认给个30条其他的还是默认10条
  * @param page      第几页
@@ -17,16 +34,16 @@ const {msg} = CommonStore
  * @param keyword  搜索关键词
  * @param dateRange   日期范围: 开始时间戳/结束时间戳/0：修改时间 1：创建时间
  */
-export async function getMemos({type = 0, page = 1, completed = 0, orderBy, firstLetter, keyword, dateRange}: any) {
+export async function getMemos({type = 0, page = 1, completed = 0, orderBy, firstLetter, keyword, dateRange}: GetMemosParams) {
   let pageSize = type === 1 ? '&pageSize=30' : '';   // 如果是循环待办就默认30条
-  type === 4 && (pageSize = '&pageSize=20');
-  page = `?page=${page}`;
-  completed = `&completed=${completed}`;                   // 完成?
-  orderBy = orderBy ? `&orderBy=${orderBy}` : '';             // 排序
-  firstLetter = firstLetter ? `&firstLetter=${firstLetter}` : '';
-  keyword = keyword ? `&keyword=${encodeURIComponent(keyword)}` : ''; // 关键词不加参数前 搜索包涵‘[’或‘]’就会报 400 错误
-  dateRange = dateRange ? `&dateRange=${dateRange}` : '';
-  return await myGet<IPage<IMemo>>(`/memo/${type + page + completed + pageSize + orderBy + firstLetter + keyword + dateRange}`);
+  if (type === 4) pageSize = '&pageSize=20';
+  const pageParam = `?page=${page}`;                             // 页码参数
+  const completedParam = `&completed=${completed}`;              // 完成状态参数
+  const orderByParam = orderBy ? `&orderBy=${orderBy}` : '';     // 排序参数
+  const firstLetterParam = firstLetter ? `&firstLetter=${firstLetter}` : '';
+  const keywordParam = keyword ? `&keyword=${encodeURIComponent(keyword)}` : ''; // 关键词不加参数前 搜索包涵‘[’或‘]’就会报 400 错误
+  const dateRangeParam = dateRange ? `&dateRange=${dateRange}` : '';
+  return await myGet<IPage<IMemo>>(`/memo/${type + pageParam + completedParam + pageSize + orderByParam + firstLetterParam + keywordParam + dateRangeParam}`);
 
 }
 
@@ -57,7 +74,7 @@ export async function updateMemo(memo: IMemo) {
 export async function deleteMemo(id: number) {
   const response = await myDelete<boolean>(`/memo/${id}`);
   if (response.code === 1) {
-    msg.success("删除成功");
+    msg.success('删除成功');
     return true;
   }
 }

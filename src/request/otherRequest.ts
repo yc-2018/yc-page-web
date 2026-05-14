@@ -1,6 +1,6 @@
-import {myPost} from "./myAxios";
-import CommonStore from "@/store/CommonStore";
-import IDySeeTime, {IDyDateDto} from "@/interface/IDySeeTime";
+import {myPost} from './myAxios';
+import CommonStore from '@/store/CommonStore';
+import IDySeeTime, {IDyDateDto} from '@/interface/IDySeeTime';
 
 /**
  * 保存浏览时间
@@ -11,7 +11,7 @@ import IDySeeTime, {IDyDateDto} from "@/interface/IDySeeTime";
 export async function saveSeeTime(body: IDySeeTime) {
   CommonStore.setLoading(true);
   const result = await myPost('/other/dySeeTime', body);
-  if (result.success) CommonStore.setLoading(false, "记录成功", 'success');
+  if (result.success) CommonStore.setLoading(false, '记录成功', 'success');
   return result.success;
 }
 

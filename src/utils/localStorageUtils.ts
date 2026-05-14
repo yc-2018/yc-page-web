@@ -1,21 +1,21 @@
 // 统一在这些地方进行localStorage的设置和获取
 
-import ISearchEngines from "@/interface/ISearchEngines";
-import JWTUtils from "@/utils/JWTUtils";
-import IUser from "@/interface/IUser";
+import ISearchEngines from '@/interface/ISearchEngines';
+import JWTUtils from '@/utils/JWTUtils';
+import IUser from '@/interface/IUser';
 
-const saveLocal = (key: string, value: any) => {
-  if (typeof value === 'object') value = JSON.stringify(value)
-  localStorage.setItem(`${key}_${JWTUtils.getId()}`, value)
+const saveLocal = (key: string, value: unknown) => {
+  const localValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+  localStorage.setItem(`${key}_${JWTUtils.getId()}`, localValue)
 }
 
 export const getLocal = (key: string) => {
   return localStorage.getItem(`${key}_${JWTUtils.getId()}`)
 }
 
-export const getLocalObj = (key: string, defaultValue: any = undefined) => {
+export const getLocalObj = <T>(key: string, defaultValue: T): T => {
   const objStr = getLocal(key);
-  return objStr ? JSON.parse(objStr) : defaultValue
+  return objStr ? JSON.parse(objStr) as T : defaultValue
 }
 
 /**
@@ -30,7 +30,7 @@ export const _setDefaultEngine = (searchItem: ISearchEngines) => saveLocal('defa
 export const _getDefaultEngine = () => {
   const defaultEngine = getLocal('defaultEngine');
   if (defaultEngine) return JSON.parse(defaultEngine)
-  return {id: 0, engineUrl: "https://www.baidu.com/s?wd=@@@", name: "百度"}
+  return {id: 0, engineUrl: 'https://www.baidu.com/s?wd=@@@', name: '百度'}
 }
 
 
@@ -41,12 +41,12 @@ export const _getBackgroundUrl = () => getLocal('backgroundUrl')
 
 /** 头像url */
 export const _setNameAndAvatar = (user: IUser) => saveLocal('nameAndAvatar', user)
-export const _getNameAndAvatar = (): IUser => getLocalObj('nameAndAvatar', {name: '-'})
+export const _getNameAndAvatar = (): IUser => getLocalObj('nameAndAvatar', {username: '-'})
 
 
 /** 搜索引擎普通列表 */
 export const _setSearchEngines = (searchEngines: ISearchEngines[]) => saveLocal('searchEngines', searchEngines)
-export const _getSearchEngines = (): ISearchEngines[] | undefined => getLocalObj('searchEngines')
+export const _getSearchEngines = (): ISearchEngines[] | undefined => getLocalObj<ISearchEngines[] | undefined>('searchEngines', undefined)
 
 
 /** 首页链接列表 */

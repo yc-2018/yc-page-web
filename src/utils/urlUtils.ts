@@ -6,7 +6,7 @@
  * @since 2025/7/14 上午11:39
 */
 export function getBaseUrl(url: string, hasProtocol = false) {
-  const match = url.match(/^(?:https?:\/\/)?([^\/|^?]+)/);
+  const match = url.match(/^(?:https?:\/\/)?([^/|^?]+)/);
   if (match) {
     return match[hasProtocol ? 0 : 1];
   }

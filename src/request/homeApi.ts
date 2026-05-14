@@ -1,12 +1,12 @@
 import axios from 'axios';
-import fetchJsonp from "fetch-jsonp";
-import CommonStore from "@/store/CommonStore";
-import bingWallpaperList from "@/store/bingWallpaper";
-import myAxios, {myDelete, myGet, myPost, myPut} from "./myAxios";
-import IBookmark from "@/interface/IBookmark";
-import ISearchEngines, {ILinkType} from "@/interface/ISearchEngines";
-import IUserConfig from "@/interface/IUserConfig";
-import IUser from "@/interface/IUser";
+import fetchJsonp from 'fetch-jsonp';
+import CommonStore from '@/store/CommonStore';
+import bingWallpaperList from '@/store/bingWallpaper';
+import myAxios, {myDelete, myGet, myPost, myPut} from './myAxios';
+import IBookmark from '@/interface/IBookmark';
+import ISearchEngines, {ILinkType} from '@/interface/ISearchEngines';
+import IUserConfig from '@/interface/IUserConfig';
+import IUser from '@/interface/IUser';
 
 
 /** jsonp获取百度联想列表 */
@@ -29,8 +29,8 @@ export async function reImagesUrl(bzType: IBzType) {
     const bgUrl = getBgFns[bzType]()
     CommonStore.setLoading(false);
     return bgUrl
-  } catch (error) {
-    CommonStore.setLoading(false, "获取壁纸失败了", 'error')
+  } catch {
+    CommonStore.setLoading(false, '获取壁纸失败了', 'error')
   }
 }
 
@@ -58,9 +58,9 @@ const getBgFns = {
 
 /** 上传页面配置信息到云端 */
 export async function updateUserConfig(info: IUserConfig) {
-  CommonStore.setLoading(true, "处理中...");
+  CommonStore.setLoading(true, '处理中...');
   const result = await myPut<IUserConfig>('/userConfig', info);
-  if (result.success) CommonStore.setLoading(false, "处理成功", 'success');
+  if (result.success) CommonStore.setLoading(false, '处理成功', 'success');
   else CommonStore.setLoading(false);
 }
 
@@ -124,7 +124,7 @@ export async function addBookmarks(bookmark: IBookmark) {
  * @author ChenGuangLong
  * @since 2024/03/5
  */
-export async function updateBookmark(bookmark: any) {
+export async function updateBookmark(bookmark: IBookmark) {
   const result = await myPut<boolean>('/bookmarks', bookmark);
   return result.success
 }
@@ -141,9 +141,9 @@ export async function dragSort(bookmark: { id: number; type: number; sort: strin
 }
 
 /**删除书签*/
-export async function delBookmark(bookmark: any) {
+export async function delBookmark(bookmark: IBookmark) {
   const result = await myDelete('/bookmarks', bookmark);
   const success = result.success;
-  success && CommonStore.msg.success('删除成功')
+  if (success) CommonStore.msg.success('删除成功')
   return success
 }

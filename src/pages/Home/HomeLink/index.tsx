@@ -1,21 +1,21 @@
-import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from "react";
+import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from 'react';
 import {
   addSearchEngines, deleteSearchEngine,
   getSearchEngines, sortSearchEngine,
   updateSearchEngines
-} from "@/request/homeApi";
-import {App, Button, Dropdown, Form, Input, Modal} from "antd";
-import {_getHomeLinks, _setHomeLinks} from "@/utils/localStorageUtils";
-import ISearchEngines, {HOME_LINK} from "@/interface/ISearchEngines";
-import type {MenuClickInfo} from "@/interface/IAntd";
-import JWTUtils from "@/utils/JWTUtils";
-import UserStore from "@/store/UserStore";
-import CommonStore from "@/store/CommonStore";
-import {PlusOutlined} from "@ant-design/icons";
-import MyDnd from "@/components/MyDnd";
-import TryFavicon from "@/components/TryFavicon";
+} from '@/request/homeApi';
+import {App, Button, Dropdown, Form, Input, Modal} from 'antd';
+import {_getHomeLinks, _setHomeLinks} from '@/utils/localStorageUtils';
+import ISearchEngines, {HOME_LINK} from '@/interface/ISearchEngines';
+import type {MenuClickInfo} from '@/interface/IAntd';
+import JWTUtils from '@/utils/JWTUtils';
+import UserStore from '@/store/UserStore';
+import CommonStore from '@/store/CommonStore';
+import {PlusOutlined} from '@ant-design/icons';
+import MyDnd from '@/components/MyDnd';
+import TryFavicon from '@/components/TryFavicon';
 import s from './index.module.css'
-import searchStyles from "@/pages/Home/HomeSearch/SearchEngines.module.css";
+import searchStyles from '@/pages/Home/HomeSearch/SearchEngines.module.css';
 
 interface IEditOrAdd {
   open: boolean;
@@ -65,6 +65,7 @@ const LinkBox = () => {
   const [form] = Form.useForm(); // 创建一个表单域
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
   const linkListBak = useRef<ISearchEngines[]>();
+  const {jwt} = UserStore;           // 当前登录凭证
 
   useEffect(() => {
     // 获取搜索引擎列表
@@ -73,11 +74,11 @@ const LinkBox = () => {
         if (response.success) setLinkList(response.data ?? [])
       });
     }
-  }, [UserStore.jwt])
+  }, [jwt])
 
   /** 索引列表变化就记录 */
   useEffect(() => {
-    !JWTUtils.isExpired() && linkList?.length && _setHomeLinks(linkList)
+    if (!JWTUtils.isExpired() && linkList?.length) _setHomeLinks(linkList)
   }, [linkList])
 
 

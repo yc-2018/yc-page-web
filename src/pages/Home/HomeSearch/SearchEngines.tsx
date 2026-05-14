@@ -1,15 +1,15 @@
-import {CSSProperties, Dispatch, FC, ReactNode, SetStateAction, useEffect, useState} from "react";
-import {deleteSearchEngine, sortSearchEngine} from "@/request/homeApi";
-import {searchData} from "@/store/NoLoginData";
-import {App, Button, Dropdown, Flex} from "antd";
-import CommonStore from "@/store/CommonStore";
-import ISearchEngines from "@/interface/ISearchEngines";
-import type {MenuClickInfo} from "@/interface/IAntd";
-import {_setDefaultEngine} from "@/utils/localStorageUtils";
-import {searchValue} from "@/pages/Home/HomeSearch/SearchInput";
-import TryFavicon from "@/components/TryFavicon";
-import JWTUtils from "@/utils/JWTUtils";
-import MyDnd from "@/components/MyDnd";
+import {CSSProperties, Dispatch, FC, ReactNode, SetStateAction, useEffect, useState} from 'react';
+import {deleteSearchEngine, sortSearchEngine} from '@/request/homeApi';
+import {searchData} from '@/store/NoLoginData';
+import {App, Button, Dropdown, Flex} from 'antd';
+import CommonStore from '@/store/CommonStore';
+import ISearchEngines from '@/interface/ISearchEngines';
+import type {MenuClickInfo} from '@/interface/IAntd';
+import {_setDefaultEngine} from '@/utils/localStorageUtils';
+import {searchValue} from '@/pages/Home/HomeSearch/searchState';
+import TryFavicon from '@/components/TryFavicon';
+import JWTUtils from '@/utils/JWTUtils';
+import MyDnd from '@/components/MyDnd';
 import styles from './SearchEngines.module.css'
 
 interface ISearchEngineList {
@@ -34,7 +34,7 @@ interface IIsMyDnd {
 interface IIsMyDndItem {
   children: ReactNode,
   searchItem: ISearchEngines,
-  items: any[],
+  items: {label: string, key: string, disabled?: boolean}[],
   isDrag: boolean,
   menuOnClick: (e: MenuClickInfo, searchItem: ISearchEngines) => void
 }
@@ -54,7 +54,7 @@ const LOW_USE = '4'
  */
 const SearchEngineList: FC<ISearchEngineList> = (
   {
-    id = "搜索引擎列表",
+    id = '搜索引擎列表',
     setEngine,
     searchList,
     setSearchList,
@@ -78,7 +78,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
 
   /** 父组件数据改变的话，子组件数据也设置改变 */
   useEffect(() => {
-    searchList && setSearchItems(searchList)
+    if (searchList) setSearchItems(searchList)
   }, [searchList])
 
   /**
@@ -162,7 +162,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
         </div>
       }
 
-      <Flex gap="small" wrap="wrap" justify='center' style={{margin: "5px 80px"}}>
+      <Flex gap="small" wrap="wrap" justify="center" style={{margin: '5px 80px'}}>
         <IsMyDnd isDrag={isDrag} searchItems={searchItems} setSearchItems={setSearchItems}>
           {searchItems.map(searchItem =>
             <IsMyDndItem
@@ -175,7 +175,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
               <Button
                 key={searchItem.id}
                 onClick={() => onSearch(searchItem.engineUrl)}
-                style={{cursor: isDrag ? "move" : "pointer", ...btnStyle}}
+                style={{cursor: isDrag ? 'move' : 'pointer', ...btnStyle}}
                 icon={<TryFavicon iconUrl={searchItem.iconUrl} url={searchItem.engineUrl} size={20} errSize={16}/>}
               >
                 {searchItem.name}
@@ -204,7 +204,7 @@ const IsMyDnd = ({children, isDrag, searchItems, setSearchItems}: IIsMyDnd) => i
     dndIds={searchItems}
     setItems={setSearchItems}
     dragEndFunc={setSearchItems}
-    style={{display: "flex", flexWrap: "wrap", gap: 5, zIndex: 9999}}
+    style={{display: 'flex', flexWrap: 'wrap', gap: 5, zIndex: 9999}}
   >
     {children}
   </MyDnd>

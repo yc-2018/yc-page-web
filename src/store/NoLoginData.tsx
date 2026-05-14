@@ -1,4 +1,4 @@
-import ISearchEngines from "@/interface/ISearchEngines";
+import ISearchEngines from '@/interface/ISearchEngines';
 
 /** 搜索引擎数据 */
 const searchDatas = [
@@ -120,13 +120,13 @@ export const englishSortingOptions = [
 
 /** 待办类型映射 */
 export const tagNameMapper = {
-  0: "普通",
-  1: "循环",
-  2: "长期",
-  3: "紧急",
-  5: "日记",
-  6: "工作",
-  7: "其他"
+  0: '普通',
+  1: '循环',
+  2: '长期',
+  3: '紧急',
+  5: '日记',
+  6: '工作',
+  7: '其他'
 }
 
 /** 博客菜单测试数据 */

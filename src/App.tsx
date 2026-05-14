@@ -1,13 +1,13 @@
 import {useRoutes} from 'react-router-dom'
 import {lazy, Suspense, useEffect} from 'react';
-import {App, message, Spin} from "antd";
+import {App, message, Spin} from 'antd';
 
 import './App.css';
-import routes from "./routes";
-import CommonStore from "./store/CommonStore";
-import {observer} from "mobx-react-lite";
-import isMobile from "@/utils/winUtils";
-import LoaderWhite from "@/components/common/LoaderWhite";
+import routes from './routes';
+import CommonStore from './store/CommonStore';
+import {observer} from 'mobx-react-lite';
+import isMobile from '@/utils/winUtils';
+import LoaderWhite from '@/components/common/LoaderWhite';
 
 // 动态导入组件
 const Head = lazy(() => import('./pages/Head'));
@@ -16,7 +16,7 @@ const InfoModal = lazy(() => import('@/components/InfoModal'));
 const MemoDrawer = lazy(() => import('./pages/MemoDrawer/index'));
 const EnglishDrawer = lazy(() => import('./pages/EnglishDrawer'));
 
-export default observer(() => {
+const AppShell = () => {
   const element = useRoutes(routes);   //根据路由表生成对应的路由规则
   const [messageApi, contextMsg] = message.useMessage();   // 使用message组件
 
@@ -46,5 +46,9 @@ export default observer(() => {
       <Spin rootClassName="rootSpin" spinning={CommonStore.loading} fullscreen delay={500}/>{/* 加载动画 延迟500毫秒 */}
     </App>
   )
-})
+}
+
+const ObservedAppShell = observer(AppShell);
+
+export default ObservedAppShell
 

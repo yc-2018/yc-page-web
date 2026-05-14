@@ -1,9 +1,9 @@
 import axios from 'axios';
-import CommonStore from "@/store/CommonStore";
+import CommonStore from '@/store/CommonStore';
 
 import UserStore from '@/store/UserStore';
-import JWTUtils from "@/utils/JWTUtils";
-import R from "@/interface/R";
+import JWTUtils from '@/utils/JWTUtils';
+import R from '@/interface/R';
 
 export const baseURL = 'https://yc556.cn/api'; // 基础URL
 const {msg} = CommonStore
@@ -18,7 +18,7 @@ export const myGet = async <T>(url: string): Promise<R<T>> => {
   }
 };
 
-export const myPost = async <T>(url: string, data?: any): Promise<R<T>> => {
+export const myPost = async <T>(url: string, data?: unknown): Promise<R<T>> => {
   try {
     const axiosResponse = await myAxios.post(url, data);
     return axiosResponse?.data ?? {};
@@ -28,7 +28,7 @@ export const myPost = async <T>(url: string, data?: any): Promise<R<T>> => {
   }
 };
 
-export const myPut = async <T>(url: string, data?: any): Promise<R<T>> => {
+export const myPut = async <T>(url: string, data?: unknown): Promise<R<T>> => {
   try {
     const axiosResponse = await myAxios({url, method: 'put', data});
     return axiosResponse?.data ?? {};
@@ -38,7 +38,7 @@ export const myPut = async <T>(url: string, data?: any): Promise<R<T>> => {
   }
 };
 
-export const myDelete = async <T>(url: string, data?: any): Promise<R<T>> => {
+export const myDelete = async <T>(url: string, data?: unknown): Promise<R<T>> => {
   try {
     const axiosResponse = await myAxios({url, method: 'delete', data});
     return axiosResponse?.data ?? {};

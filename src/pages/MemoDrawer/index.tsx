@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import type {ComponentType, Dispatch, MouseEvent, ReactNode, SetStateAction} from 'react';
 import {observer} from 'mobx-react-lite'
 import {
@@ -128,9 +128,13 @@ const MemoDrawer = () => {
   const [searchEmpty, setSearchEmpty] = useState(true);       // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);                // 自动翻页触底监听元素
+  const keywordRef = useRef(keyword);              // 当前搜索关键字引用
   const itemLoadingRef = useRef(false);            // 自动翻页请求锁
   const autoLoadFailedRef = useRef(false);         // 自动翻页失败暂停标记
+  const initNoticeShownRef = useRef(false);        // 首次紧急备忘提醒是否已展示
   const {notification, modal} = App.useApp();
+  const {jwt} = UserStore;                         // 当前登录凭证
+  const {memoDrawerShow} = showOrNot;              // 备忘抽屉是否显示
 
   const sxYm = () => setRefresh(++i)        // 刷新页面
   const sxSj = () => setRefreshTrigger(++i) // 刷新数据列表
@@ -197,6 +201,11 @@ const MemoDrawer = () => {
     })
   }
 
+  /** 同步当前搜索关键字给请求逻辑使用 */
+  useEffect(() => {
+    keywordRef.current = keyword
+  }, [keyword])
+
   useEffect(() => {
     if (!JWTUtils.isExpired()) (async () => {
       setFModalData(null)     // 模态框数据重置 null和 undefined 来回切换
@@ -207,7 +216,7 @@ const MemoDrawer = () => {
       autoLoadFailedRef.current = false; // 自动翻页失败状态重置
       total = -1;                   // 待办总数重置
       // 使用 axios 发起请求 获取又一次初始化待办列表
-      const resp = await getMemos({type, page: 1, completed, orderBy, keyword, dateRange: filterDate});
+      const resp = await getMemos({type, page: 1, completed, orderBy, keyword: keywordRef.current, dateRange: filterDate});
       if (!(resp?.code === 1)) {
         setInitLoading(false);
         setWebLoading(false);
@@ -221,7 +230,8 @@ const MemoDrawer = () => {
 
       if (completed === 0) setUnFinishCounts(groupMemosCounts ?? null)
       // 如果刚打开时有未完成的紧急备忘 而且抽屉没打开 就弹出提醒
-      if (initLoading && !showOrNot.memoDrawerShow && (groupMemosCounts?.['3'] ?? 0) > 0 && total === -1) {
+      if (!initNoticeShownRef.current && !memoDrawerShow && (groupMemosCounts?.['3'] ?? 0) > 0 && total === -1) {
+        initNoticeShownRef.current = true
         const key = `open${Date.now()}`;
         notification.info({
           message: '有未完成的紧急备忘',
@@ -249,26 +259,10 @@ const MemoDrawer = () => {
       setWebLoading(false);
     })();
 
-  }, [UserStore.jwt, type, completed, refreshTrigger]);
-
-  /** 触底自动加载下一页 */
-  useEffect(() => {
-    const loadMoreElement = loadMoreRef.current;  // 底部触发器元素
-    if (!loadMoreElement || initLoading || itemLoading || JWTUtils.isExpired() || !showOrNot.memoDrawerShow) return;
-    if (autoLoadFailedRef.current) return;
-    if (list.length >= total) return;
-
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) onLoadMore();
-    }, {rootMargin: '120px'});
-
-    observer.observe(loadMoreElement);
-    return () => observer.disconnect();
-  }, [initLoading, itemLoading, list.length, showOrNot.memoDrawerShow, UserStore.jwt])
-
+  }, [jwt, type, completed, refreshTrigger, memoDrawerShow, notification]);
 
   /** 点击加载更多数据触发 */
-  const onLoadMore = async () => {
+  const onLoadMore = useCallback(async () => {
     if (itemLoadingRef.current) return;
     if (list.length >= total) return;
     itemLoadingRef.current = true
@@ -291,7 +285,7 @@ const MemoDrawer = () => {
         page: page + 1,
         completed,
         orderBy,
-        keyword,
+        keyword: keywordRef.current,
         dateRange: filterDate
       });
       if (!respData?.records) {      // 保持代码的健壮性
@@ -310,7 +304,22 @@ const MemoDrawer = () => {
       setItemItemLoading(false);
     }
 
-  };
+  }, [completed, data, list.length, page, type]);
+
+  /** 触底自动加载下一页 */
+  useEffect(() => {
+    const loadMoreElement = loadMoreRef.current;  // 底部触发器元素
+    if (!loadMoreElement || initLoading || itemLoading || JWTUtils.isExpired() || !memoDrawerShow) return;
+    if (autoLoadFailedRef.current) return;
+    if (list.length >= total) return;
+
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) onLoadMore();
+    }, {rootMargin: '120px'});
+
+    observer.observe(loadMoreElement);
+    return () => observer.disconnect();
+  }, [initLoading, itemLoading, list.length, memoDrawerShow, jwt, onLoadMore])
 
 
   /** 判断 显示《加载更多》《到底了》还是什么都不显示 */

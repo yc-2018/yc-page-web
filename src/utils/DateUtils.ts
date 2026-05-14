@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 
 /**
  * 日期工具类
@@ -32,7 +32,7 @@ export default class DateUtils {
    * @since 2024/8/28 0:16
    */
   static timestampToDate(timestamp: string | number): Date {
-    return new Date(typeof timestamp === "string" ? parseInt(timestamp) : timestamp)
+    return new Date(typeof timestamp === 'string' ? parseInt(timestamp) : timestamp)
   }
 
   /**
@@ -44,9 +44,9 @@ export default class DateUtils {
   static millisecondFormat(millisecond: number): string {
     if (!millisecond || millisecond <= 0) return '0秒'
 
-    let hour = Math.floor(millisecond / 3600000)
-    let minute = Math.floor((millisecond - hour * 3600000) / 60000)
-    let second = Math.floor((millisecond - hour * 3600000 - minute * 60000) / 1000)
+    const hour = Math.floor(millisecond / 3600000)
+    const minute = Math.floor((millisecond - hour * 3600000) / 60000)
+    const second = Math.floor((millisecond - hour * 3600000 - minute * 60000) / 1000)
     let result = ''
     if (hour !== 0) result += this.addZero(hour) + '时'
     if (minute !== 0) result += this.addZero(minute) + '分'

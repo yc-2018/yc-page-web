@@ -1,40 +1,43 @@
 import {useState, useEffect} from 'react';
-import axios from "axios";
+import type {KeyboardEvent, MouseEvent} from 'react';
+import axios from 'axios';
 import {observer} from 'mobx-react-lite'
-import {Avatar, Button, Input, Popover, Tooltip} from "antd";
+import {Avatar, Button, Input, Popover, Tooltip} from 'antd';
 import {
   PictureTwoTone, SnippetsTwoTone, UserOutlined,
   SyncOutlined, DownloadOutlined, PoweroffOutlined,
   CloudUploadOutlined, CloudDownloadOutlined,
   QuestionCircleTwoTone, EditOutlined, LayoutTwoTone,
   ReadOutlined, ProductOutlined, LinkOutlined,
-} from "@ant-design/icons";
+} from '@ant-design/icons';
 import {useNavigate} from 'react-router-dom'
 
-import JWTUtils from "@/utils/JWTUtils"
-import Filing from "@/components/Filing";
+import JWTUtils from '@/utils/JWTUtils'
+import Filing from '@/components/Filing';
 import showOrNot from '@/store/ShowOrNot';
-import UserStore from "@/store/UserStore";
-import CommonStore from "@/store/CommonStore";
-import {reImagesUrl, updateUserConfig, getBg, getNameAndAvatar, IBzType} from "@/request/homeApi";
-import Bookmarks from "@/pages/Home/Bookmarks";
-import {getToolsList, toolsBaseURL} from "@/request/toolsRequest";
-import HomeSearch from "@/pages/Home/HomeSearch";
-import HomeLink from "@/pages/Home/HomeLink";
-import {_getBackgroundUrl, _setNameAndAvatar, _setBackgroundUrl} from "@/utils/localStorageUtils";
-import IUser from "@/interface/IUser";
-import "@/pages/Home/Home.css"
+import UserStore from '@/store/UserStore';
+import CommonStore from '@/store/CommonStore';
+import {reImagesUrl, updateUserConfig, getBg, getNameAndAvatar, IBzType} from '@/request/homeApi';
+import Bookmarks from '@/pages/Home/Bookmarks';
+import {getToolsList, toolsBaseURL} from '@/request/toolsRequest';
+import HomeSearch from '@/pages/Home/HomeSearch';
+import HomeLink from '@/pages/Home/HomeLink';
+import {_getBackgroundUrl, _setNameAndAvatar, _setBackgroundUrl} from '@/utils/localStorageUtils';
+import IUser from '@/interface/IUser';
+import '@/pages/Home/Home.css'
 
 const {TextArea} = Input;
+
+type ToolItem = [string, string];
 
 function Home() {
   const [bgImg, setBgImg] = useState('/Default-wallpaper.jpg');// 背景背景
   const [info, setInfo] = useState<IUser>({});
-  const [tools, setTools] = useState([]);
+  const [tools, setTools] = useState<ToolItem[]>([]);
 
   const {msg} = CommonStore;
   const navigate = useNavigate()   // 路由跳转
-  let {jwt} = UserStore;
+  const {jwt} = UserStore;
 
   /** 初始化背景 和头像名称 */
   useEffect(() => {
@@ -107,7 +110,7 @@ function Home() {
       window.URL.revokeObjectURL(url);
       link.remove();
       CommonStore.setLoading(false, '缓存完成,请保存');
-    } catch (error) {
+    } catch {
       CommonStore.setLoading(false, '该图片无法直接下载,请在新标签页中保存')
       window.open(bgImg, '_blank'); // 在新标签页中打开图片
     }
@@ -117,8 +120,8 @@ function Home() {
     <div
       style={{
         height: '100vh',
-        backgroundSize: "cover",
-        backgroundRepeat: "no-repeat",
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
         backgroundImage: `linear-gradient( rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.4)),url(${bgImg})`,
       }}
     >
@@ -199,16 +202,17 @@ function Home() {
                   <div onClick={xzTp}><DownloadOutlined/> 下载背景图片</div>
                   <div className="bottomMenuItemButton">
                     <b style={{textAlign: 'center', display: 'block'}}>换背景</b>
-                    <div onClick={() => reImages("bing")}><SyncOutlined/> bing随机壁纸</div>
-                    <div onClick={() => reImages("风景")}><SyncOutlined/> 风景背景(慢)</div>
-                    <div onClick={() => reImages("漫画")}><SyncOutlined/> 漫画背景</div>
+                    <div onClick={() => reImages('bing')}><SyncOutlined/> bing随机壁纸</div>
+                    <div onClick={() => reImages('风景')}><SyncOutlined/> 风景背景(慢)</div>
+                    <div onClick={() => reImages('漫画')}><SyncOutlined/> 漫画背景</div>
                     <TextArea
                       rows={4}
                       allowClear
                       placeholder="自定义背景链接，回车加载"
-                      onPressEnter={(event: any) => {
-                        if (/^(http|https):\/\/.+/.test(event.target.value))
-                          setBgImage(event.target.value, '正在设置中...') // 设置背景
+                      onPressEnter={(event: KeyboardEvent<HTMLTextAreaElement>) => {
+                        const backgroundUrl = event.currentTarget.value; // 输入的背景链接
+                        if (/^(http|https):\/\/.+/.test(backgroundUrl))
+                          setBgImage(backgroundUrl, '正在设置中...') // 设置背景
                         else msg.error('请输入正确的链接');
                       }}
                     />
@@ -226,7 +230,7 @@ function Home() {
 
             {jwt ?
               <Popover  // 用户信息***********************************************************/
-                title={<div style={{textAlign: 'center', fontWeight: 'bold'}}>{"用户:" + info.username}</div>}
+                title={<div style={{textAlign: 'center', fontWeight: 'bold'}}>{'用户:' + info.username}</div>}
                 content={
                   <div style={{display: 'flex', gap: 8, flexDirection: 'column'}}>
                     <Button
@@ -291,7 +295,7 @@ function Home() {
               title={<div style={{textAlign: 'center'}}>仰晨工具箱</div>}
               content={
                 <div style={{display: 'flex', flexDirection: 'column', gap: 5}}>
-                  {tools.map(([name, uri]: [string, string]) =>
+                  {tools.map(([name, uri]) =>
                     <Button key={name} block onClick={() => window.open(toolsBaseURL + uri, '_blank')}>
                       <LinkOutlined/>{name}
                     </Button>
@@ -304,7 +308,10 @@ function Home() {
                 shape="circle"
                 className="buttonOpacity"
                 onClick={() => window.open(toolsBaseURL, '_blank')}
-                onContextMenu={(e: any) => e.preventDefault() || navigate('/seeTime')}
+                onContextMenu={(e: MouseEvent<HTMLButtonElement>) => {
+                  e.preventDefault();
+                  navigate('/seeTime')
+                }}
                 icon={<ProductOutlined style={{color: '#1677ff', fontSize: 20}}/>}
               />
             </Popover>
@@ -318,7 +325,7 @@ function Home() {
               width: 5,
               position: 'fixed',
               right: 0,
-              top: "35%",
+              top: '35%',
               height: '50%',
               backgroundColor: 'aliceblue',
               opacity: '15%'
@@ -333,4 +340,6 @@ function Home() {
   );
 }
 
-export default observer(Home)
+const ObservedHome = observer(Home);
+
+export default ObservedHome

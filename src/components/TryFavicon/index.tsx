@@ -1,8 +1,8 @@
-import {useState, useEffect} from "react";
-import {QuestionCircleTwoTone} from "@ant-design/icons";
-import {tryGetFavicon, tryGetFavicon1, tryGetFavicon2} from "@/utils/urlUtils";
-import {FC} from "react";
-import {Skeleton} from "antd";
+import {useState, useEffect} from 'react';
+import {QuestionCircleTwoTone} from '@ant-design/icons';
+import {tryGetFavicon, tryGetFavicon1, tryGetFavicon2} from '@/utils/urlUtils';
+import {FC} from 'react';
+import {Skeleton} from 'antd';
 
 interface Props {
   iconUrl?: string;                       // 直接提供的图标URL（最高优先级）
@@ -10,7 +10,7 @@ interface Props {
   size?: number;                          // 图标显示大小
   errSize?: number;                       // 错误状态下图标大小
   backgroundColor?: string;               // 背景颜色
-  shape?: "circle" | "square";            // 形状：圆形或方形
+  shape?: 'circle' | 'square';            // 形状：圆形或方形
   initElm?: 'loading' | 'skeleton';       // 初始化时加载图标样式
 }
 
@@ -25,9 +25,9 @@ const TryFavicon: FC<Props> = ({
                                  url,
                                  size = 20,
                                  errSize = 16,
-                                 backgroundColor = "unset",
-                                 shape = "square",
-                                 initElm = "skeleton"
+                                 backgroundColor = 'unset',
+                                 shape = 'square',
+                                 initElm = 'skeleton'
                                }) => {
   // 状态管理
   const [currentSrc, setCurrentSrc] = useState<string | null>(null); // 当前成功加载的图标URL
@@ -105,15 +105,15 @@ const TryFavicon: FC<Props> = ({
   }, [iconUrl, url]); // 依赖项：当iconUrl或url变化时重新执行
 
   // 计算样式
-  const borderRadius = shape === "circle" ? "50%" : "4px";
+  const borderRadius = shape === 'circle' ? '50%' : '4px';
   const containerStyle = {
     width: size,
     height: size,
     backgroundColor,
     borderRadius,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0, // 防止容器被压缩
   };
 
@@ -129,10 +129,10 @@ const TryFavicon: FC<Props> = ({
           style={{
             width: size * 0.6,  // 加载动画大小为图标的60%
             height: size * 0.6,
-            border: `2px solid #f0f0f0`,        // 外围灰色边框
-            borderTop: `2px solid #1890ff`,     // 顶部蓝色边框形成旋转效果
-            borderRadius: "50%",                // 圆形
-            animation: "spin 1s linear infinite", // 无限旋转动画
+            border: '2px solid #f0f0f0',        // 外围灰色边框
+            borderTop: '2px solid #1890ff',     // 顶部蓝色边框形成旋转效果
+            borderRadius: '50%',                // 圆形
+            animation: 'spin 1s linear infinite', // 无限旋转动画
           }}
         />
         {/* 内联CSS动画定义 */}
@@ -150,7 +150,7 @@ const TryFavicon: FC<Props> = ({
   if (error || !currentSrc) {
     return (
       <div style={containerStyle}>
-        <QuestionCircleTwoTone style={{color: "#888", fontSize: errSize}}/>
+        <QuestionCircleTwoTone style={{color: '#888', fontSize: errSize}}/>
       </div>
     );
   }
@@ -163,9 +163,9 @@ const TryFavicon: FC<Props> = ({
         src={currentSrc}
         alt="" // 空alt，因为这是装饰性图标
         style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "contain", // 保持图标比例完整显示
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain', // 保持图标比例完整显示
           borderRadius,
         }}
         // 防止图片加载后出错（理论上不会发生，但作为保险）

@@ -1,14 +1,12 @@
 // ////////// 搜索输入框 //////////////////文件创建路径：D:\AllCode\yc-web\src\pages\Home\HomeSearch\SearchInput.tsx  由`cgl`创建 时间：2025/11/25 1:08
-import {FC, useState} from "react";
-import {AutoComplete, Input} from "antd";
-import {SendOutlined} from "@ant-design/icons";
-import {getThinkList} from "@/request/homeApi";
-import ISearchEngines from "@/interface/ISearchEngines";
+import {FC, useState} from 'react';
+import {AutoComplete, Input} from 'antd';
+import {SendOutlined} from '@ant-design/icons';
+import {getThinkList} from '@/request/homeApi';
+import ISearchEngines from '@/interface/ISearchEngines';
+import {setSearchValue, searchValue} from '@/pages/Home/HomeSearch/searchState';
 
 let timer: number;
-
-/** 暴露搜索值 */
-export let searchValue: string | undefined = undefined;
 
 /**
  * 搜索输入框
@@ -17,10 +15,16 @@ export let searchValue: string | undefined = undefined;
  * @since 2025/11/25 1:18
  */
 const SearchInput: FC<{ nowSearch: ISearchEngines }> = ({nowSearch}) => {
-  const [anotherOptions, setAnotherOptions] = useState<{ value: any }[]>([]);
+  const [anotherOptions, setAnotherOptions] = useState<{ value: string, label: JSX.Element }[]>([]);
 
   /** 设置关键字 */
-  const setKeyword = (v: string) => searchValue = v
+  const setKeyword = (v: string) => setSearchValue(v)
+
+  /** 输入框值变化时同步关键字并刷新联想列表 */
+  const handleKeywordChange = (value: string) => {
+    setKeyword(value)
+    autoThink(value)
+  }
 
   /**
    * 搜索【新页面打开】
@@ -64,11 +68,10 @@ const SearchInput: FC<{ nowSearch: ISearchEngines }> = ({nowSearch}) => {
 
   return (
     <AutoComplete
-      onSearch={autoThink}                          // 输入框值改变时联想列表的回调
       options={anotherOptions}                      // 联想列表
       // value={searchValue.current}                // 输入框的值
       // open                                       // 测试用 一直展开联想列表
-      onChange={setKeyword}                         // 输入框的值改变的回调
+      onChange={handleKeywordChange}                // 输入框的值改变的回调
       classNames={{popup: {root: 'thinkList'}}}
       style={{width: 500, height: 40, margin: '5px 0 15px 0'}}
     >

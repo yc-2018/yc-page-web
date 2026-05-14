@@ -1,10 +1,10 @@
-import {SeeData} from "./interface";
-import React from "react";
-import {Popover, Space} from "antd";
-import dayjs from "dayjs";
-import {aWeek, typeMapperCn} from "./mapper";
-import MyEmpty from "@/components/common/MyEmpty";
-import DateUtils from "../../utils/DateUtils";
+import {SeeData} from './interface';
+import React from 'react';
+import {Popover, Space} from 'antd';
+import dayjs from 'dayjs';
+import {aWeek, typeMapperCn} from './mapper';
+import MyEmpty from '@/components/common/MyEmpty';
+import DateUtils from '../../utils/DateUtils';
 
 interface MultiDayChartProps {
   seeDataList: SeeData[];
@@ -97,7 +97,7 @@ const MultiDay: React.FC<MultiDayChartProps> = ({seeDataList, seeDataConfig, onC
         const dateStr = dayjs(startDate).add(i, 'month').format('YYYY-MM');
         const findSeeData = seeDataList.find(item => item.date === dateStr);
         if (findSeeData) fillList.push(findSeeData)
-        else fillList.push({startTime: "", totalDuration: 0, date: dateStr, thisTime: 0, count: 0})
+        else fillList.push({startTime: '', totalDuration: 0, date: dateStr, thisTime: 0, count: 0})
       }
       return fillList;
     }
@@ -106,7 +106,7 @@ const MultiDay: React.FC<MultiDayChartProps> = ({seeDataList, seeDataConfig, onC
       const dateStr = dayjs(startDate).add(i, 'day').format('YYYY-MM-DD');
       const findSeeData = seeDataList.find(item => item.date === dateStr);
       if (findSeeData) fillList.push(findSeeData)
-      else fillList.push({startTime: "", totalDuration: 0, date: dateStr, thisTime: 0, count: 0})
+      else fillList.push({startTime: '', totalDuration: 0, date: dateStr, thisTime: 0, count: 0})
     }
     return fillList;
   }
