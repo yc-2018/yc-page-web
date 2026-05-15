@@ -124,11 +124,10 @@ const LoopMemoDrawer = ({
           </Space>
         }
         placement="right"
-        width={520}
+        size={520}
         open={open}
         onClose={closeDrawer}
         mask
-        maskClosable
         className="loop-memo-drawer"
       >
         <div className="loop-memo-main-record">
