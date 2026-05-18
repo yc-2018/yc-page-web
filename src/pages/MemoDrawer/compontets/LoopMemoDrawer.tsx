@@ -1,15 +1,30 @@
 import {useState} from 'react';
-import {Button, Drawer, Empty, Image, Space, Spin, Tag, Typography} from 'antd';
-import {HistoryOutlined, SyncOutlined} from '@ant-design/icons';
+import type {ReactNode} from 'react';
+import {App, Button, Drawer, Empty, Image, Space, Spin, Tag, Typography} from 'antd';
+import type {UploadFile, UploadProps} from 'antd';
+import {CommentOutlined, HistoryOutlined, SyncOutlined} from '@ant-design/icons';
 import {fDate} from '@/utils/DateUtils';
 import {thumbUrl} from '@/utils/urlUtils.js';
+import {
+  addLoopMemoItemComment,
+  deleteLoopMemoItemComment,
+  selectLoopMemoItemCommentList,
+  updateLoopMemoItemComment,
+} from '@/request/memoApi';
+import LoopMemoCommentEditContent from '@/pages/MemoDrawer/compontets/LoopMemoCommentEditContent';
 import type {
   DeleteLoopMemoItemHandler,
   LoadLoopMemoItems,
   MemoDrawerListItem,
   MemoLoopItem,
+  MemoLoopItemComment,
   UpdateLoopMemoItemHandler,
 } from '@/pages/MemoDrawer/types';
+
+interface UploadImageResponse {
+  /** 上传完成后的原图地址 */
+  url?: string
+}
 
 interface LoopMemoDrawerProps {
   /** 循环备忘主项 */
@@ -28,20 +43,20 @@ interface LoopMemoDrawerProps {
   updateLoopMemo: UpdateLoopMemoItemHandler
   /** 删除循环子项 */
   deleteLoopMemo: DeleteLoopMemoItemHandler
+  /** 上传图片按钮 */
+  uploadButton: ReactNode
+  /** 图片上传请求 */
+  uploadLoopMemoImage: UploadProps<UploadImageResponse>['customRequest']
+  /** 图片预览 */
+  previewUploadImage: (file: UploadFile<UploadImageResponse>) => void
+  /** 是否有循环图片正在上传 */
+  hasLoopMemoUploading: () => boolean
 }
 
-/**
- * 循环备忘子项二层抽屉
- *
- * @param memo 循环备忘主项
- * @param loopTimeList 循环子项列表
- * @param loopTimeTotal 循环子项总数
- * @param loopTimeWebLoading 循环子项加载状态
- * @param getLoopMemoTimeData 加载循环子项
- * @param resetLoopMemoTimeData 重置循环子项列表
- * @param updateLoopMemo 修改循环子项
- * @param deleteLoopMemo 删除循环子项
- */
+let editLoopMemoCommentText = ''; // 循环记录评论文本修改
+let editLoopMemoCommentImgArr = ''; // 循环记录评论图片修改
+
+/** 循环备忘子项二层抽屉 */
 const LoopMemoDrawer = ({
   memo,
   loopTimeList,
@@ -51,8 +66,21 @@ const LoopMemoDrawer = ({
   resetLoopMemoTimeData,
   updateLoopMemo,
   deleteLoopMemo,
+  uploadButton,
+  uploadLoopMemoImage,
+  previewUploadImage,
+  hasLoopMemoUploading,
 }: LoopMemoDrawerProps) => {
   const [open, setOpen] = useState(false); // 二层抽屉显示状态
+  const [commentMap, setCommentMap] = useState<Record<number, {
+    loop?: MemoLoopItem
+    records?: MemoLoopItemComment[]
+    page?: number
+    total?: number
+    hasMore?: boolean
+    loading?: boolean
+  }>>({}); // 循环记录评论按循环项id分组
+  const {message, modal} = App.useApp();
   const memoId = memo.id; // 循环备忘主项 ID
 
   /** 打开二层抽屉并从第一页加载循环记录 */
@@ -60,13 +88,77 @@ const LoopMemoDrawer = ({
     if (!memoId) return;
     resetLoopMemoTimeData()
     setOpen(true)
-    await getLoopMemoTimeData(memoId, 1, true)
+    setCommentMap({})
+    const records = await getLoopMemoTimeData(memoId, 1, true)
+    initLoopMemoCommentMap(records)
   }
 
   /** 关闭二层抽屉并清理循环记录 */
   const closeDrawer = () => {
     setOpen(false)
+    setCommentMap({})
     resetLoopMemoTimeData()
+  }
+
+  /** 加载循环记录评论 */
+  const loadLoopMemoComments = async (
+    target: MemoLoopItem,
+    nextPage = commentMap[target.id ?? 0]?.page ?? 1,
+    replace = false
+  ) => {
+    if (!target?.id) return;
+    setCommentMap(map => ({
+      ...map,
+      [target.id!]: {
+        ...(map[target.id!] ?? {}),
+        loop: target,
+        loading: true,
+      }
+    }))
+    const resp = await selectLoopMemoItemCommentList(target.id, nextPage);
+    const result = resp.data
+    const records = result?.records ?? []; // 新加载的评论
+    if (!resp.success) {
+      setCommentMap(map => ({
+        ...map,
+        [target.id!]: {...(map[target.id!] ?? {}), loop: target, loading: false}
+      }))
+      return message.error('获取评论失败')
+    }
+    setCommentMap(map => {
+      const current = map[target.id!] ?? {}; // 当前循环记录的评论状态
+      return {
+        ...map,
+        [target.id!]: {
+          loop: target,
+          records: replace ? records : [...current.records ?? [], ...records],
+          page: nextPage + 1,
+          total: result?.total ?? records.length,
+          hasMore: (result?.current ?? 0) < (result?.pages ?? 0),
+          loading: false,
+        }
+      }
+    })
+  }
+
+  /** 使用循环记录接口自带的评论预览初始化评论状态 */
+  const initLoopMemoCommentMap = (records?: MemoLoopItem[]) => {
+    setCommentMap(map => {
+      const nextMap = {...map}; // 合并本页循环记录自带的评论预览
+      records
+        ?.filter(loopMemo => loopMemo?.id)
+        .forEach(loopMemo => {
+          nextMap[loopMemo.id!] = {
+            loop: loopMemo,
+            records: loopMemo.comments ?? [],
+            page: 2,
+            total: loopMemo.commentTotal ?? loopMemo.comments?.length ?? 0,
+            hasMore: Boolean(loopMemo.commentHasMore),
+            loading: false,
+          }
+        })
+      return nextMap
+    })
   }
 
   /** 渲染循环备忘子项图片缩略图，并让预览从被点击的原图开始 */
@@ -98,11 +190,83 @@ const LoopMemoDrawer = ({
     if (!loopTimeList.length) return null;
     if (loopTimeTotal <= loopTimeList.length) return <div className="loop-memo-footer">到底了</div>;
     return (
-      <Button block size="small" onClick={() => getLoopMemoTimeData(memoId)}>
+      <Button block size="small" onClick={async () => {
+        const records = await getLoopMemoTimeData(memoId);
+        initLoopMemoCommentMap(records)
+      }}>
         继续加载
       </Button>
     );
   }
+
+  /** 编辑或新增循环记录评论 */
+  const editLoopMemoComment = (loopMemo: MemoLoopItem, comment?: MemoLoopItemComment) => {
+    if (!loopMemo?.id || !loopMemo.memoId) return;
+    editLoopMemoCommentText = comment?.commentText ?? ''
+    editLoopMemoCommentImgArr = comment?.imgArr ?? ''
+    modal.confirm({
+      title: comment?.id ? '修改循环记录评论' : '新增循环记录评论',
+      icon: <CommentOutlined/>,
+      content: (
+        <LoopMemoCommentEditContent
+          comment={comment}
+          uploadButton={uploadButton}
+          uploadLoopMemoImage={uploadLoopMemoImage}
+          previewUploadImage={previewUploadImage}
+          onTextChange={text => editLoopMemoCommentText = text}
+          onImgArrChange={imgArr => editLoopMemoCommentImgArr = imgArr}
+        />
+      ),
+      onOk: async () => {
+        if (hasLoopMemoUploading()) {
+          message.warning('图片还在上传中，请稍等')
+          throw new Error('图片上传中')
+        }
+        if (!editLoopMemoCommentText && !editLoopMemoCommentImgArr) {
+          message.warning('评论不能为空')
+          throw new Error('评论不能为空')
+        }
+        const resp = comment?.id
+          ? await updateLoopMemoItemComment({
+            ...comment,
+            commentText: editLoopMemoCommentText,
+            imgArr: editLoopMemoCommentImgArr || undefined,
+          })
+          : await addLoopMemoItemComment({
+            memoId: loopMemo.memoId,
+            loopItemId: loopMemo.id,
+            commentText: editLoopMemoCommentText,
+            imgArr: editLoopMemoCommentImgArr || undefined,
+          })
+        if (!resp.success) {
+          message.error('保存失败')
+          throw new Error('保存失败')
+        }
+        message.success('保存成功')
+        await loadLoopMemoComments(loopMemo, 1, true)
+      }
+    })
+  }
+
+  /** 删除循环记录评论 */
+  const deleteLoopMemoComment = (loopMemo: MemoLoopItem, comment: MemoLoopItemComment) => {
+    if (!comment.memoId || !comment.loopItemId || !comment.id) return;
+    modal.confirm({
+      title: '确定要删除评论吗？',
+      content: '删除后不可恢复',
+      okText: '删除',
+      okButtonProps: {danger: true},
+      onOk: async () => {
+        const resp = await deleteLoopMemoItemComment(comment.memoId!, comment.loopItemId!, comment.id!)
+        if (!resp.success) return message.error('删除失败')
+        message.success('删除成功')
+        await loadLoopMemoComments(loopMemo, 1, true)
+      }
+    })
+  }
+
+  /** 渲染循环记录评论图片 */
+  const renderCommentImages = (imgArr: string) => renderLoopMemoImages(imgArr)
 
   return (
     <>
@@ -144,33 +308,71 @@ const LoopMemoDrawer = ({
             <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无循环记录"/>
             :
             <div className="loop-memo-record-list">
-              {loopTimeList.map((loopMemo, index) =>
-                <div key={loopMemo.id ?? index} className="loop-memo-record">
-                  <div className="loop-memo-record-head">
-                    <div>
-                      <div className="loop-memo-date">{index + 1}：{fDate(loopMemo.memoDate)}</div>
+              {loopTimeList.map((loopMemo, index) => {
+                const commentState = loopMemo.id ? commentMap[loopMemo.id] : undefined; // 当前循环记录评论状态
+                const commentRecords = commentState?.records ?? []; // 当前循环记录评论列表
+                return (
+                  <div key={loopMemo.id ?? index} className="loop-memo-record">
+                    <div className="loop-memo-record-head">
+                      <div>
+                        <div className="loop-memo-date">{index + 1}：{fDate(loopMemo.memoDate)}</div>
+                      </div>
+                      <Space>
+                        <Button
+                          size="small"
+                          icon={<CommentOutlined/>}
+                          onClick={() => editLoopMemoComment(loopMemo)}
+                        >
+                          评论
+                        </Button>
+                        <Button
+                          size="small"
+                          onClick={() => loopMemo.id && loopMemo.memoId && updateLoopMemo(loopMemo)}
+                        >
+                          修改
+                        </Button>
+                        <Button
+                          size="small"
+                          danger
+                          onClick={() => loopMemo.id && loopMemo.memoId && deleteLoopMemo(loopMemo.memoId, loopMemo.id)}
+                        >
+                          删除
+                        </Button>
+                      </Space>
                     </div>
-                    <Space>
-                      <Button
-                        size="small"
-                        onClick={() => loopMemo.id && loopMemo.memoId && updateLoopMemo(loopMemo)}
-                      >
-                        修改
-                      </Button>
-                      <Button
-                        size="small"
-                        danger
-                        onClick={() => loopMemo.id && loopMemo.memoId && deleteLoopMemo(loopMemo.memoId, loopMemo.id)}
-                      >
-                        删除
-                      </Button>
-                    </Space>
-                  </div>
 
-                  {loopMemo.loopText && <div className="loop-text loop-memo-text">{loopMemo.loopText}</div>}
-                  {loopMemo.imgArr && renderLoopMemoImages(loopMemo.imgArr)}
-                </div>
-              )}
+                    {loopMemo.loopText && <div className="loop-text loop-memo-text">{loopMemo.loopText}</div>}
+                    {loopMemo.imgArr && renderLoopMemoImages(loopMemo.imgArr)}
+                    {commentRecords.length > 0 &&
+                      <div className="loop-memo-comment-list">
+                        {commentRecords.map(comment =>
+                          <div key={comment.id} className="loop-memo-comment-item">
+                            <div className="loop-memo-record-head">
+                              <div className="loop-memo-comment-date">{fDate(comment.commentDate)}</div>
+                              <Space>
+                                <Button size="small" onClick={() => editLoopMemoComment(loopMemo, comment)}>修改</Button>
+                                <Button size="small" danger onClick={() => deleteLoopMemoComment(loopMemo, comment)}>删除</Button>
+                              </Space>
+                            </div>
+                            {comment.commentText && <div className="loop-text loop-memo-text">{comment.commentText}</div>}
+                            {comment.imgArr && renderCommentImages(comment.imgArr)}
+                          </div>
+                        )}
+                      </div>
+                    }
+                    {commentState?.hasMore &&
+                      <Button
+                        block
+                        size="small"
+                        className="loop-memo-comment-more"
+                        onClick={() => loadLoopMemoComments(loopMemo)}
+                      >
+                        {commentState.loading ? <><SyncOutlined spin/> 加载中</> : '加载更多评论'}
+                      </Button>
+                    }
+                  </div>
+                )
+              })}
               {renderListFooter()}
             </div>
           }

@@ -43,6 +43,34 @@
   color: #999;
 }
 
+.loopCommentList {
+  margin: 8px 0 0 12px;
+  padding-left: 10px;
+  border-left: 2px solid #eceff5;
+}
+
+.loopCommentItem {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #f7f8fa;
+  color: #555;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+.loopCommentMeta {
+  margin-bottom: 2px;
+  color: #999;
+  font-size: 11px;
+}
+
+.loopCommentMore {
+  margin: 6px 0 0 24px;
+  color: #1677ff;
+  font-size: 12px;
+}
+
 .tipContent{
   color: #999;
   white-space: nowrap;

@@ -8,6 +8,8 @@ export default interface IPage<T> {
 
   current?: number
 
+  pages?: number
+
   orders?: unknown[]
 
   optimizeCountSql?: boolean

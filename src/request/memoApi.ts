@@ -1,6 +1,7 @@
 import CommonStore from '@/store/CommonStore';
 import {myDelete, myGet, myPost, myPut} from './myAxios';
 import ILoopMemoItem from '@/interface/ILoopMemoItem';
+import ILoopMemoItemComment from '@/interface/ILoopMemoItemComment';
 import IPage from '@/interface/Ipage';
 import IMemo from '@/interface/IMemo';
 
@@ -126,4 +127,40 @@ export const updateLoopMemoItem = async (loopMemoItem: ILoopMemoItem) =>
  */
 export const deleteLoopMemoItem = (memoId: number, loopId: number) =>
   myDelete<boolean>(`/loopMemoItem/${memoId}/${loopId}`);
+
+/**
+ * 获取循环备忘记录评论列表
+ *
+ * @param loopItemId 循环记录id
+ * @param page 第几页
+ * @param pageSize 每页多少条
+ */
+export const selectLoopMemoItemCommentList = (loopItemId: number, page: number = 1, pageSize: number = 5) =>
+  myGet<IPage<ILoopMemoItemComment>>(`/loopMemoItemComment/${loopItemId}?page=${page}&pageSize=${pageSize}`)
+
+/**
+ * 添加循环备忘记录评论
+ *
+ * @param comment 循环备忘记录评论
+ */
+export const addLoopMemoItemComment = async (comment: ILoopMemoItemComment) =>
+  myPost<ILoopMemoItemComment>('/loopMemoItemComment', comment)
+
+/**
+ * 更新循环备忘记录评论
+ *
+ * @param comment 循环备忘记录评论
+ */
+export const updateLoopMemoItemComment = async (comment: ILoopMemoItemComment) =>
+  myPut<ILoopMemoItemComment>('/loopMemoItemComment', comment)
+
+/**
+ * 删除循环备忘记录评论
+ *
+ * @param memoId 备忘录id
+ * @param loopItemId 循环记录id
+ * @param commentId 评论id
+ */
+export const deleteLoopMemoItemComment = (memoId: number, loopItemId: number, commentId: number) =>
+  myDelete<boolean>(`/loopMemoItemComment/${memoId}/${loopItemId}/${commentId}`);
 

@@ -292,3 +292,25 @@
   border-radius: 5px;
   opacity: .6;
 }
+
+.loop-memo-comment-list {
+  margin: 10px 0 0 14px;
+  padding-left: 12px;
+  border-left: 2px solid #edf0f5;
+}
+
+.loop-memo-comment-item {
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  background: #f7f8fa;
+}
+
+.loop-memo-comment-date {
+  color: #888;
+  font-size: 12px;
+}
+
+.loop-memo-comment-more {
+  margin-top: 8px;
+}

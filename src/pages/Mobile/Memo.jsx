@@ -8,10 +8,14 @@ import {
 import dayjs from "dayjs";
 import {
   addLoopMemoItem, addMemo,
+  addLoopMemoItemComment,
+  deleteLoopMemoItemComment,
   deleteLoopMemoItem,
   deleteMemo,
   getMemos,
+  selectLoopMemoItemCommentList,
   selectLoopMemoItemList,
+  updateLoopMemoItemComment,
   updateLoopMemoItem, updateMemo
 } from "@/request/memoApi";
 import {finishName, columns, leftActions, rightActions, orderByName} from "@/pages/Mobile/data";
@@ -28,6 +32,9 @@ import {thumbUrl} from "@/utils/urlUtils.js";
 let imgArr;     // 多张图片字符串，用,分割
 let okTime;     // 待办更新时间
 let okText;         // 待办完成或循环时可添加的文字
+let commentText;    // 循环记录评论文本
+let commentImgArr;  // 循环记录评论图片
+const COMMENT_PAGE_SIZE = 5; // 第三层评论默认加载数量
 let v = {      // 循环装中文变量
   '循环时间页数': 1,
   '循环备忘主键': null,
@@ -55,6 +62,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [loopTime, setLoopTime] = useState(undefined)                 // 循环时间弹窗的显示和隐藏(用数据来控制)
   const [hhMmVisible, setHhMmVisible] = useState(false);     // 时分弹窗的显示和隐藏
   const [loopItemVisible, setLoopItemVisible] = useState(null);       // 备忘循环项 弹窗的显示和隐藏 有对象就是显示然有没有好有
+  const [loopCommentMap, setLoopCommentMap] = useState({});           // 循环记录评论按循环项id分组
   const [editDateVisible, setEditDateVisible] = useState(false);     // 编辑框日期弹窗的显示和隐藏
 
   const [content, setContent] = useState('')                   // 表单内容
@@ -359,11 +367,69 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       if (result?.records?.length > 0) {
         v['循环时间页数']++
         setLoopTime(list => [...list ?? [], ...result.records])
+        initLoopCommentMap(result.records)
       }
     } else Toast.show({icon: 'fail', content: '获取失败'})
 
     v['循环次数继续加载'] = result?.current < result?.pages
     v['翻页加载中'] = false
+  }
+
+  /** 加载单条循环记录的评论 */
+  const loadLoopCommentPage = async (loop, page = 1, replace = false) => {
+    if (!loop?.id) return
+    setLoopCommentMap(map => ({
+      ...map,
+      [loop.id]: {
+        ...(map[loop.id] ?? {}),
+        loading: true,
+        loop,
+      }
+    }))
+    const resp = await selectLoopMemoItemCommentList(loop.id, page, COMMENT_PAGE_SIZE);
+    const result = resp.data
+    if (!resp.success) {
+      setLoopCommentMap(map => ({
+        ...map,
+        [loop.id]: {...(map[loop.id] ?? {}), loading: false, loop}
+      }))
+      return Toast.show({icon: 'fail', content: '评论获取失败'})
+    }
+    const records = result?.records ?? []
+    setLoopCommentMap(map => {
+      const current = map[loop.id] ?? {}; // 当前循环记录的评论状态
+      return {
+        ...map,
+        [loop.id]: {
+          loop,
+          records: replace ? records : [...current.records ?? [], ...records],
+          page: page + 1,
+          total: result?.total ?? records.length,
+          hasMore: result?.current < result?.pages,
+          loading: false,
+        }
+      }
+    })
+  }
+
+  /** 批量预加载循环记录评论 */
+  const initLoopCommentMap = (records) => {
+    setLoopCommentMap(map => {
+      const nextMap = {...map}; // 合并本页循环记录自带的评论预览
+      records
+        ?.filter(loop => loop?.id)
+        .forEach(loop => {
+          nextMap[loop.id] = {
+            loop,
+            records: loop.comments ?? [],
+            page: 2,
+            total: loop.commentTotal ?? loop.comments?.length ?? 0,
+            hasMore: Boolean(loop.commentHasMore),
+            loading: false,
+          }
+        })
+      return nextMap
+    })
   }
 
   /**
@@ -449,6 +515,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     e?.stopPropagation()
     visibleObj = visibleObj ?? visible
     setLoopTime([]);
+    setLoopCommentMap({})
     v['循环次数继续加载'] = visibleObj.id
     v['循环时间页数'] = 1
     v['循环备忘主键'] = visibleObj.id
@@ -458,6 +525,75 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       icon: 'loading',
       content: '加载中…',
       duration: 0,
+    })
+  }
+
+  /** 编辑循环记录评论 */
+  const editLoopMemoComment = async (loop, comment) => {
+    setLoopItemVisible(null)
+    commentText = comment?.commentText ?? ''
+    commentImgArr = comment?.imgArr
+    window.setTimeout(() => {
+      const textarea = document.getElementById('editLoopCommentText');
+      if (textarea) textarea.selectionStart = textarea.selectionEnd = 9999;
+    }, 100)
+    await Dialog.confirm({
+      style: {zIndex: 1005},
+      content:
+        <div id="编辑循环记录评论框">
+          <div style={{marginTop: 9}}>评论：</div>
+          <TextArea
+            rows={4}
+            autoFocus
+            id="editLoopCommentText"
+            defaultValue={commentText}
+            placeholder="请输入评论"
+            onChange={v => commentText = v}
+          />
+          <ImageUploader
+            defaultValue={commentImgArr ? commentImgArr.split(',').map(url => ({url})) : undefined}
+            maxCount={3}
+            showFailed={false}
+            upload={uploadToJD}
+            onChange={(items) => commentImgArr = items.map(item => item.url).join(',')}
+          />
+        </div>
+      ,
+      onConfirm: async () => {
+        if (!commentText && !commentImgArr) return Toast.show({icon: 'fail', content: '评论不能为空'})
+        const request = comment?.id
+          ? updateLoopMemoItemComment({...comment, commentText, imgArr: commentImgArr})
+          : addLoopMemoItemComment({
+            memoId: loop.memoId,
+            loopItemId: loop.id,
+            commentText,
+            imgArr: commentImgArr
+          })
+        const resp = await request
+        if (resp.success) {
+          Toast.show({icon: 'success', content: '成功'})
+          loadLoopCommentPage(loop, 1, true)
+        } else Toast.show({icon: 'fail', content: '失败'})
+      }
+    })
+  }
+
+  /** 删除循环记录评论 */
+  const delLoopMemoComment = async (loop, comment) => {
+    await Dialog.confirm({
+      style: {zIndex: 1005},
+      content:
+        <div style={{textAlign: 'center'}}>
+          <ExclamationCircleFilled style={{color: 'red'}}/>
+          确定删除该条评论吗
+        </div>,
+      onConfirm: async () => {
+        const result = await deleteLoopMemoItemComment(comment.memoId, comment.loopItemId, comment.id)
+        if (result.success) {
+          Toast.show({icon: 'success', content: '删除成功'})
+          loadLoopCommentPage(loop, 1, true)
+        } else Toast.show({icon: 'fail', content: '删除失败'})
+      },
     })
   }
 
@@ -929,6 +1065,84 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                     )}
                   </div>
                   {item.loopText && <div className={styles.loopText}>{item.loopText}</div>}
+                  {loopCommentMap[item.id]?.records?.length > 0 &&
+                    <div className={styles.loopCommentList}>
+                      {loopCommentMap[item.id].records.map(comment =>
+                        <div
+                          key={comment.id}
+                          className={styles.loopCommentItem}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setLoopItemVisible(null)
+                            const handler = Dialog.show({
+                              style: {zIndex: 1004},
+                              content: '请选择评论操作',
+                              closeOnMaskClick: true,
+                              actions: [
+                                [{
+                                  key: 'edit',
+                                  text: '编辑',
+                                  onClick: () => {
+                                    handler.close()
+                                    editLoopMemoComment(item, comment)
+                                  }
+                                }],
+                                [{
+                                  key: 'delete',
+                                  text: '删除',
+                                  danger: true,
+                                  onClick: () => {
+                                    handler.close()
+                                    delLoopMemoComment(item, comment)
+                                  }
+                                }],
+                                [{
+                                  key: 'cancel',
+                                  text: '取消',
+                                  onClick: () => handler.close()
+                                }]
+                              ]
+                            })
+                          }}
+                        >
+                          <div className={styles.loopCommentMeta}>{fDate(comment.commentDate)}</div>
+                          {comment.commentText && <div>{comment.commentText}</div>}
+                          {comment.imgArr && <div style={{display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4}}>
+                            {comment.imgArr.split(',').filter(Boolean).map((url, i) =>
+                              <Image
+                                key={url}
+                                src={thumbUrl(url)}
+                                width={30}
+                                height={30}
+                                fit='fill'
+                                style={{borderRadius: 5}}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  ImageViewer.Multi.show({
+                                    images: comment.imgArr.split(',').filter(Boolean),
+                                    defaultIndex: i,
+                                    classNames: {mask: styles.imgListViewer},
+                                  })
+                                }}
+                              />
+                            )}
+                          </div>}
+                        </div>
+                      )}
+                    </div>
+                  }
+                  {loopCommentMap[item.id]?.hasMore &&
+                    <div
+                      className={styles.loopCommentMore}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        const commentState = loopCommentMap[item.id]; // 当前评论分页状态
+                        if (!commentState?.loading) loadLoopCommentPage(item, commentState?.page ?? 1)
+                      }}
+                    >
+                      {loopCommentMap[item.id]?.loading ? '加载中…' : '加载更多评论'}
+                    </div>
+                  }
                 </List.Item>
               )}
             </List>
@@ -940,7 +1154,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       <Popup      /* 循环项操作的弹出层 *********/
         visible={Boolean(loopItemVisible)}
         onMaskClick={() => setLoopItemVisible(null)}
-        bodyStyle={{height: Boolean(loopItemVisible?.loopText) ? 240 : 140}}
+        bodyStyle={{height: Boolean(loopItemVisible?.loopText) ? 290 : 190}}
         style={{zIndex: 1002}}
       >
         {Boolean(loopItemVisible) &&
@@ -966,6 +1180,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             }
             <Button block onClick={() => editLoopMemoItem(loopItemVisible)}>
               编辑备注
+            </Button>
+            <Button block color="primary" onClick={() => editLoopMemoComment(loopItemVisible, null)}>
+              添加评论
             </Button>
             <Button
               block

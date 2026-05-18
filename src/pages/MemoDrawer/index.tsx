@@ -441,6 +441,10 @@ const MemoDrawer = () => {
       resetLoopMemoTimeData={resetLoopMemoTimeData}
       updateLoopMemo={updateLoopMemo}
       deleteLoopMemo={deleteLoopMemo}
+      uploadButton={uploadButton}
+      uploadLoopMemoImage={uploadLoopMemoImage}
+      previewUploadImage={previewUploadImage}
+      hasLoopMemoUploading={() => loopMemoUploadingCount > 0}
     />
 
   // 获取循环备忘录时间列表
@@ -455,6 +459,7 @@ const MemoDrawer = () => {
       setLoopTimePage(nextPage + 1)     // 页码增加
       setLoopTimeTotal(result?.total ?? records.length)
     }
+    return resp.success ? records : []
   }
 
   /** 完成或加1时 可以选择日期 */

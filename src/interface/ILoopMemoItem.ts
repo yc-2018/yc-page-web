@@ -1,3 +1,5 @@
+import ILoopMemoItemComment from '@/interface/ILoopMemoItemComment';
+
 /**
  * 循环备忘记录项
  *
@@ -12,4 +14,7 @@ export default interface ILoopMemoItem {
   updateTime?: string
   loopText?: string
   imgArr?: string
+  comments?: ILoopMemoItemComment[]
+  commentTotal?: number
+  commentHasMore?: boolean
 }
