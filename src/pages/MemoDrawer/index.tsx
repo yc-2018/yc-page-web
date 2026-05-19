@@ -441,6 +441,8 @@ const MemoDrawer = () => {
       resetLoopMemoTimeData={resetLoopMemoTimeData}
       updateLoopMemo={updateLoopMemo}
       deleteLoopMemo={deleteLoopMemo}
+      copyAddLoopMemo={copyAddLoopMemo}
+      copyEditLoopMemo={copyEditLoopMemo}
       uploadButton={uploadButton}
       uploadLoopMemoImage={uploadLoopMemoImage}
       previewUploadImage={previewUploadImage}
@@ -462,11 +464,32 @@ const MemoDrawer = () => {
     return resp.success ? records : []
   }
 
+  /** 刷新当前循环备忘录时间列表 */
+  const refreshLoopMemoTimeData = async (memoId: number) => {
+    resetLoopMemoTimeData()
+    await getLoopMemoTimeData(memoId, 1, true)
+  }
+
+  /** 本地增加循环次数，避免刷新第一层列表导致二层抽屉关闭 */
+  const increaseLoopMemoCount = (memoId: number) => {
+    const addCount = (memos: MemoDrawerListItem[]) => memos.map(memo => memo.id === memoId
+      ? {...memo, numberOfRecurrences: (memo.numberOfRecurrences ?? 0) + 1}
+      : memo
+    ); // 循环次数本地更新函数
+    setData(addCount)
+    setList(addCount)
+  }
+
   /** 完成或加1时 可以选择日期 */
-  const selectDate = (text: '完成' | '加一', content?: string) => {
+  const selectDate = (text: '完成' | '加一', content?: string, defaultText = '') => {
     setTimeout(() => {
       const memoRemarkInput = document.querySelector('#备注输入框'); // 完成或加一备注输入框
-      if (memoRemarkInput instanceof HTMLElement) memoRemarkInput.focus()
+      if (memoRemarkInput instanceof HTMLTextAreaElement) {
+        memoRemarkInput.focus()
+        memoRemarkInput.selectionStart = memoRemarkInput.value.length
+        memoRemarkInput.selectionEnd = memoRemarkInput.value.length
+      }
+      else if (memoRemarkInput instanceof HTMLElement) memoRemarkInput.focus()
     }, 100)
     return (
       <div id="完成或加一弹窗" style={{display: 'flex', flexDirection: 'column', gap: 12}}>
@@ -514,6 +537,7 @@ const MemoDrawer = () => {
             id="备注输入框"
             allowClear
             count={{show: true, max: 99}}
+            defaultValue={defaultText}
             onChange={e => window.ikunOkText = e.target.value}
           />
         </div>
@@ -538,6 +562,71 @@ const MemoDrawer = () => {
           </div>
         }
       </div>
+    )
+  }
+
+  /** 打开循环备忘加一弹窗 */
+  const openAddLoopMemoModal = (
+    memoId: number,
+    content?: string,
+    defaultLoopText = '',
+    onSuccess?: () => void | Promise<void>,
+    refreshMemoList = true
+  ) => {
+    window.ikunSelectDate = undefined
+    window.ikunOkText = defaultLoopText || undefined
+    ikunLoopMemoImgArr = ''
+    loopMemoUploadingCount = 0
+    return modal.confirm({
+      title: '确定加一吗?',
+      icon: <QuestionCircleFilled/>,
+      content: selectDate('加一', content, defaultLoopText),
+      mask: {closable: true},     // 点遮罩可以关闭
+      onOk: async () => {
+        if (loopMemoUploadingCount > 0) {
+          msg.warning('图片还在上传中，请稍等')
+          throw new Error('图片上传中')
+        }
+        const result = await addLoopMemoItem({
+          memoId,
+          memoDate: window.ikunSelectDate,
+          loopText: window.ikunOkText,
+          imgArr: ikunLoopMemoImgArr || undefined
+        });
+        if (!result.success) return msg.error('加一失败')
+        msg.success('成功+1')
+        if (refreshMemoList) sxSj()
+        else increaseLoopMemoCount(memoId)
+        await onSuccess?.()
+      }
+    })
+  }
+
+  /** 复制循环子项备注并直接 +1 */
+  const copyAddLoopMemo = async (loopMemo: ILoopMemoItem) => {
+    if (!loopMemo.memoId) return;
+    setLastActionId(loopMemo.memoId)
+    const result = await addLoopMemoItem({
+      memoId: loopMemo.memoId,
+      loopText: loopMemo.loopText || undefined
+    });
+    if (!result.success) return msg.error('加一失败')
+    msg.success('成功+1')
+    increaseLoopMemoCount(loopMemo.memoId)
+    await refreshLoopMemoTimeData(loopMemo.memoId)
+  }
+
+  /** 复制循环子项备注后打开编辑加一弹窗 */
+  const copyEditLoopMemo = (loopMemo: ILoopMemoItem) => {
+    if (!loopMemo.memoId) return;
+    setLastActionId(loopMemo.memoId)
+    const memoObj = list.find(item => item.id === loopMemo.memoId); // 当前循环备忘主项
+    return openAddLoopMemoModal(
+      loopMemo.memoId,
+      memoObj?.content,
+      loopMemo.loopText ?? '',
+      () => refreshLoopMemoTimeData(loopMemo.memoId!),
+      false
     )
   }
 
@@ -641,30 +730,7 @@ const MemoDrawer = () => {
         })
       },
       addOne: () => {
-        window.ikunSelectDate = undefined
-        window.ikunOkText = undefined
-        ikunLoopMemoImgArr = ''
-        loopMemoUploadingCount = 0
-        return modal.confirm({
-          title: '确定加一吗?',
-          icon: <QuestionCircleFilled/>,
-          content: selectDate('加一', itemObj.content),
-          mask: {closable: true},     // 点遮罩可以关闭
-          onOk: async () => {
-            if (loopMemoUploadingCount > 0) {
-              msg.warning('图片还在上传中，请稍等')
-              throw new Error('图片上传中')
-            }
-            const result = await addLoopMemoItem({
-              memoId: parsedId,
-              memoDate: window.ikunSelectDate,
-              loopText: window.ikunOkText,
-              imgArr: ikunLoopMemoImgArr || undefined
-            });
-            if (result.success) msg.success('成功+1')
-            sxSj()
-          }
-        })
+        return openAddLoopMemoModal(parsedId, itemObj.content)
       },
     }
     actionObj[action]?.()

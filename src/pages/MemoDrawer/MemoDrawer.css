@@ -197,6 +197,7 @@
 
 .loop-memo-drawer .ant-drawer-body {
   padding: 14px;
+  background: #eef1f5;
 }
 
 .loop-memo-main-record {
@@ -205,9 +206,9 @@
   z-index: 2;
   margin-bottom: 12px;
   padding: 10px;
-  box-shadow: inset 3px 3px 6px #c5c5c5, inset -41px -20px 60px #ffffff, 0 10px 0 0 #ffffff, 0 -15px 0 0 #ffffff;
+  box-shadow: inset 3px 3px 6px #d8dce2, inset -41px -20px 60px #ffffff, 0 10px 0 0 #eef1f5, 0 -15px 0 0 #eef1f5;
   border-radius: 6px;
-  background: #fafafa;
+  background: #fff;
 }
 
 .loop-memo-main-content {
@@ -218,15 +219,16 @@
 .loop-memo-record-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 /* 循环记录项 */
 .loop-memo-record {
-  border: 1px solid rgba(5, 5, 5, 0.08);
+  border: none;
   border-radius: 6px;
-  padding: 10px;
+  padding: 12px 10px;
   background: #fff;
+  box-shadow: 0 1px 3px rgba(5, 5, 5, 0.06);
 }
 
 .loop-memo-record-head {

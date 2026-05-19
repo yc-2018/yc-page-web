@@ -2,7 +2,7 @@ import {useState} from 'react';
 import type {ReactNode} from 'react';
 import {App, Button, Drawer, Empty, Image, Space, Spin, Tag, Typography} from 'antd';
 import type {UploadFile, UploadProps} from 'antd';
-import {CommentOutlined, HistoryOutlined, SyncOutlined} from '@ant-design/icons';
+import {CommentOutlined, DeleteOutlined, EditOutlined, HistoryOutlined, SyncOutlined} from '@ant-design/icons';
 import {fDate} from '@/utils/DateUtils';
 import {thumbUrl} from '@/utils/urlUtils.js';
 import {
@@ -13,6 +13,7 @@ import {
 } from '@/request/memoApi';
 import LoopMemoCommentEditContent from '@/pages/MemoDrawer/compontets/LoopMemoCommentEditContent';
 import type {
+  CopyLoopMemoItemHandler,
   DeleteLoopMemoItemHandler,
   LoadLoopMemoItems,
   MemoDrawerListItem,
@@ -43,6 +44,10 @@ interface LoopMemoDrawerProps {
   updateLoopMemo: UpdateLoopMemoItemHandler
   /** 删除循环子项 */
   deleteLoopMemo: DeleteLoopMemoItemHandler
+  /** 复制循环子项备注并直接加一 */
+  copyAddLoopMemo: CopyLoopMemoItemHandler
+  /** 复制循环子项备注后编辑加一 */
+  copyEditLoopMemo: CopyLoopMemoItemHandler
   /** 上传图片按钮 */
   uploadButton: ReactNode
   /** 图片上传请求 */
@@ -66,6 +71,8 @@ const LoopMemoDrawer = ({
   resetLoopMemoTimeData,
   updateLoopMemo,
   deleteLoopMemo,
+  copyAddLoopMemo,
+  copyEditLoopMemo,
   uploadButton,
   uploadLoopMemoImage,
   previewUploadImage,
@@ -325,19 +332,39 @@ const LoopMemoDrawer = ({
                         >
                           评论
                         </Button>
+                        {loopMemo.loopText &&
+                          <Button
+                            size="small"
+                            onClick={() => copyAddLoopMemo(loopMemo)}
+                          >
+                            复制+1
+                          </Button>
+                        }
+                        {loopMemo.loopText &&
+                          <Button
+                            size="small"
+                            onClick={() => copyEditLoopMemo(loopMemo)}
+                          >
+                            复制编辑
+                          </Button>
+                        }
                         <Button
                           size="small"
+                          shape="circle"
+                          icon={<EditOutlined/>}
+                          title="修改"
+                          aria-label="修改"
                           onClick={() => loopMemo.id && loopMemo.memoId && updateLoopMemo(loopMemo)}
-                        >
-                          修改
-                        </Button>
+                        />
                         <Button
                           size="small"
+                          shape="circle"
+                          icon={<DeleteOutlined/>}
+                          title="删除"
+                          aria-label="删除"
                           danger
                           onClick={() => loopMemo.id && loopMemo.memoId && deleteLoopMemo(loopMemo.memoId, loopMemo.id)}
-                        >
-                          删除
-                        </Button>
+                        />
                       </Space>
                     </div>
 
@@ -350,8 +377,23 @@ const LoopMemoDrawer = ({
                             <div className="loop-memo-record-head">
                               <div className="loop-memo-comment-date">{fDate(comment.commentDate)}</div>
                               <Space>
-                                <Button size="small" onClick={() => editLoopMemoComment(loopMemo, comment)}>修改</Button>
-                                <Button size="small" danger onClick={() => deleteLoopMemoComment(loopMemo, comment)}>删除</Button>
+                                <Button
+                                  size="small"
+                                  shape="circle"
+                                  icon={<EditOutlined/>}
+                                  title="修改"
+                                  aria-label="修改"
+                                  onClick={() => editLoopMemoComment(loopMemo, comment)}
+                                />
+                                <Button
+                                  size="small"
+                                  shape="circle"
+                                  icon={<DeleteOutlined/>}
+                                  title="删除"
+                                  aria-label="删除"
+                                  danger
+                                  onClick={() => deleteLoopMemoComment(loopMemo, comment)}
+                                />
                               </Space>
                             </div>
                             {comment.commentText && <div className="loop-text loop-memo-text">{comment.commentText}</div>}

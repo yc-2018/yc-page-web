@@ -23,6 +23,9 @@ export type UpdateLoopMemoItemHandler = (loopMemo: MemoLoopItem) => void;
 /** 循环备忘子项删除函数 */
 export type DeleteLoopMemoItemHandler = (memoId: number, id: number) => void;
 
+/** 复制循环备忘子项并加一 */
+export type CopyLoopMemoItemHandler = (loopMemo: MemoLoopItem) => void | Promise<void>;
+
 /** 循环备忘二层抽屉渲染函数 */
 export type RenderLoopMemoDrawer = (memo?: MemoDrawerListItem) => ReactNode;
 
