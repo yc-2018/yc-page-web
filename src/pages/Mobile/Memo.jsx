@@ -64,6 +64,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [loopItemVisible, setLoopItemVisible] = useState(null);       // 备忘循环项 弹窗的显示和隐藏 有对象就是显示然有没有好有
   const [loopCommentMap, setLoopCommentMap] = useState({});           // 循环记录评论按循环项id分组
   const [editDateVisible, setEditDateVisible] = useState(false);     // 编辑框日期弹窗的显示和隐藏
+  const [lastActionId, setLastActionId] = useState();                  // 最后操作的备忘 ID
 
   const [content, setContent] = useState('')                   // 表单内容
   const [itemType, setItemType] = useState(0)                 // 表单类型
@@ -144,6 +145,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   /** 执行动作 */
   const onAction = async (action, addText) => {
     const {id, text} = action;
+    if (id) setLastActionId(id)
 
     const showContent = () => {
       const obj = data.find(item => item.id === id);
@@ -514,6 +516,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const showLoopMemoItemList = (e, visibleObj) => {
     e?.stopPropagation()
     visibleObj = visibleObj ?? visible
+    if (visibleObj?.id) setLastActionId(visibleObj.id)
     setLoopTime([]);
     setLoopCommentMap({})
     v['循环次数继续加载'] = visibleObj.id
@@ -682,12 +685,22 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               key={item.id}
               leftActions={leftActions(item)}
               rightActions={rightActions(item)}
+              onActionsReveal={() => setLastActionId(item.id)}
               onAction={(a, _e) => onAction(a)}
             >
               <List.Item
                 key={item.id}
-                style={{background: item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'}}
-                onClick={() => setVisible(item)}
+                className={item.id === lastActionId ? styles.memoLastAction : ''}
+                style={{
+                  background: item.id === lastActionId ?
+                    item.completed ? 'linear-gradient(270deg, #f1fff0, #f0f7ff)' : '#f0f7ff'
+                    :
+                    item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'
+                }}
+                onClick={() => {
+                  setLastActionId(item.id)
+                  setVisible(item)
+                }}
                 clickable={false}
               >
 

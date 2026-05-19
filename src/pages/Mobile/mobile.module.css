@@ -93,6 +93,11 @@
   z-index: 2000!important;
 }
 
+.memoLastAction {
+  position: relative;
+  box-shadow: inset 3px 0 0 #1677ff;
+}
+
 [class="adm-image-viewer-content"] {
   --z-index: var(--adm-mask-z-index);
   z-index: var(--z-index);

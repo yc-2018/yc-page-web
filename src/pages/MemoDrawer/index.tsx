@@ -546,19 +546,21 @@ const MemoDrawer = () => {
     const target = event.target;
     if (!(target instanceof Element)) return;
 
+    const itemEl = target.closest('[data-id]'); // 当前点击命中的备忘项
     const actionEl = target.closest('[data-action]');
+    const id = itemEl?.getAttribute('data-id') ?? actionEl?.closest('[data-id]')?.getAttribute('data-id');
+    const parsedId = Number(id); // 当前操作的备忘 ID
+    const itemObj = list.find(item => item.id === parsedId);
+
+    if (id && itemObj) setLastActionId(parsedId)
     if (!(actionEl instanceof HTMLElement)) return;
 
     const action = actionEl.getAttribute('data-action');
     const actionTrigger = actionEl.getAttribute('data-action-trigger'); // 当前动作指定的触发方式
-    const id = target.closest('[data-id]')?.getAttribute('data-id') ?? actionEl.closest('[data-id]')?.getAttribute('data-id');
-    const parsedId = Number(id); // 当前操作的备忘 ID
-    const itemObj = list.find(item => item.id === parsedId);
     const confirmAction = Array.from(actionEl.classList).some(className => className.startsWith('confirm-'))  // 防止快速重复点
 
     if (!action || !id || !itemObj) return;
     if (actionTrigger && actionTrigger !== event.type) return;
-    setLastActionId(parsedId)
     // 防止点太快了
     if (isQueryOnClick && confirmAction) return // message.warning('哇，你点的好快呀👍');
     if (confirmAction) {
