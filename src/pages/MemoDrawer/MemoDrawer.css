@@ -200,7 +200,7 @@
   background: #eef1f5;
 }
 
-.loop-memo-main-record {
+.loop-memo-sticky-head {
   position: sticky;
   top: 0;
   z-index: 2;
@@ -214,6 +214,10 @@
 .loop-memo-main-content {
   margin-bottom: 0 !important;
   white-space: pre-wrap;
+}
+
+.loop-memo-search {
+  margin-top: 10px;
 }
 
 .loop-memo-record-list {

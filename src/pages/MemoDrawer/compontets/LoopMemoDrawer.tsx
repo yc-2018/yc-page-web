@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import type {ReactNode} from 'react';
-import {App, Button, Drawer, Empty, Image, Space, Spin, Tag, Typography} from 'antd';
+import {App, Button, Drawer, Empty, Image, Input, Space, Spin, Tag, Typography} from 'antd';
 import type {UploadFile, UploadProps} from 'antd';
 import {CommentOutlined, DeleteOutlined, EditOutlined, HistoryOutlined, SyncOutlined} from '@ant-design/icons';
 import {fDate} from '@/utils/DateUtils';
@@ -79,6 +79,8 @@ const LoopMemoDrawer = ({
   hasLoopMemoUploading,
 }: LoopMemoDrawerProps) => {
   const [open, setOpen] = useState(false); // 二层抽屉显示状态
+  const [loopKeyword, setLoopKeyword] = useState(''); // 循环记录搜索输入值
+  const [activeLoopKeyword, setActiveLoopKeyword] = useState(''); // 当前生效的循环记录关键字
   const [commentMap, setCommentMap] = useState<Record<number, {
     loop?: MemoLoopItem
     records?: MemoLoopItemComment[]
@@ -95,6 +97,8 @@ const LoopMemoDrawer = ({
     if (!memoId) return;
     resetLoopMemoTimeData()
     setOpen(true)
+    setLoopKeyword('')
+    setActiveLoopKeyword('')
     setCommentMap({})
     const records = await getLoopMemoTimeData(memoId, 1, true)
     initLoopMemoCommentMap(records)
@@ -103,8 +107,28 @@ const LoopMemoDrawer = ({
   /** 关闭二层抽屉并清理循环记录 */
   const closeDrawer = () => {
     setOpen(false)
+    setLoopKeyword('')
+    setActiveLoopKeyword('')
     setCommentMap({})
     resetLoopMemoTimeData()
+  }
+
+  /** 按关键字搜索循环记录 */
+  const searchLoopMemos = async (keyword = loopKeyword) => {
+    if (!memoId) return;
+    const nextKeyword = keyword.trim(); // 本次生效的循环记录搜索关键字
+    setLoopKeyword(nextKeyword)
+    setActiveLoopKeyword(nextKeyword)
+    resetLoopMemoTimeData()
+    setCommentMap({})
+    const records = await getLoopMemoTimeData(memoId, 1, true, nextKeyword)
+    initLoopMemoCommentMap(records)
+  }
+
+  /** 清空循环记录搜索 */
+  const clearLoopMemoSearch = () => {
+    if (!activeLoopKeyword && !loopKeyword) return;
+    void searchLoopMemos('')
   }
 
   /** 加载循环记录评论 */
@@ -198,7 +222,7 @@ const LoopMemoDrawer = ({
     if (loopTimeTotal <= loopTimeList.length) return <div className="loop-memo-footer">到底了</div>;
     return (
       <Button block size="small" onClick={async () => {
-        const records = await getLoopMemoTimeData(memoId);
+        const records = await getLoopMemoTimeData(memoId, undefined, false, activeLoopKeyword);
         initLoopMemoCommentMap(records)
       }}>
         继续加载
@@ -301,18 +325,32 @@ const LoopMemoDrawer = ({
         mask
         className="loop-memo-drawer"
       >
-        <div className="loop-memo-main-record">
+        <div className="loop-memo-sticky-head">
           <Typography.Paragraph
             className="loop-memo-main-content"
             ellipsis={{rows: 4, expandable: 'collapsible', symbol: expanded => expanded ? '收起' : '展开'}}
           >
             {memo.content}
           </Typography.Paragraph>
+          <Input.Search
+            allowClear
+            className="loop-memo-search"
+            placeholder="搜索循环记录备注"
+            value={loopKeyword}
+            onChange={event => {
+              setLoopKeyword(event.target.value)
+              if (!event.target.value) clearLoopMemoSearch()
+            }}
+            onSearch={value => searchLoopMemos(value)}
+          />
         </div>
 
         <Spin spinning={loopTimeWebLoading && !loopTimeList.length}>
           {!loopTimeWebLoading && !loopTimeList.length ?
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无循环记录"/>
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={activeLoopKeyword ? '暂无匹配循环记录' : '暂无循环记录'}
+            />
             :
             <div className="loop-memo-record-list">
               {loopTimeList.map((loopMemo, index) => {
@@ -335,7 +373,7 @@ const LoopMemoDrawer = ({
                         {loopMemo.loopText &&
                           <Button
                             size="small"
-                            onClick={() => copyAddLoopMemo(loopMemo)}
+                            onClick={() => copyAddLoopMemo(loopMemo, activeLoopKeyword)}
                           >
                             复制+1
                           </Button>
@@ -343,7 +381,7 @@ const LoopMemoDrawer = ({
                         {loopMemo.loopText &&
                           <Button
                             size="small"
-                            onClick={() => copyEditLoopMemo(loopMemo)}
+                            onClick={() => copyEditLoopMemo(loopMemo, activeLoopKeyword)}
                           >
                             复制编辑
                           </Button>

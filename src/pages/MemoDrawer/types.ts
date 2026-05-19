@@ -15,7 +15,7 @@ export type MemoCompletedFilter = -1 | 0 | 1;
 export type MemoCountMap = Record<string, number>;
 
 /** 循环备忘子项加载函数 */
-export type LoadLoopMemoItems = (memoId: number, page?: number, replace?: boolean) => Promise<MemoLoopItem[]>;
+export type LoadLoopMemoItems = (memoId: number, page?: number, replace?: boolean, keyword?: string) => Promise<MemoLoopItem[]>;
 
 /** 循环备忘子项修改函数 */
 export type UpdateLoopMemoItemHandler = (loopMemo: MemoLoopItem) => void;
@@ -24,7 +24,7 @@ export type UpdateLoopMemoItemHandler = (loopMemo: MemoLoopItem) => void;
 export type DeleteLoopMemoItemHandler = (memoId: number, id: number) => void;
 
 /** 复制循环备忘子项并加一 */
-export type CopyLoopMemoItemHandler = (loopMemo: MemoLoopItem) => void | Promise<void>;
+export type CopyLoopMemoItemHandler = (loopMemo: MemoLoopItem, keyword?: string) => void | Promise<void>;
 
 /** 循环备忘二层抽屉渲染函数 */
 export type RenderLoopMemoDrawer = (memo?: MemoDrawerListItem) => ReactNode;

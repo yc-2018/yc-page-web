@@ -450,13 +450,13 @@ const MemoDrawer = () => {
     />
 
   // 获取循环备忘录时间列表
-  const getLoopMemoTimeData = async (id: number, nextPage = loopTimePage, replace = false) => {
+  const getLoopMemoTimeData = async (id: number, nextPage = loopTimePage, replace = false, loopKeyword = '') => {
     setLoopTimeWebLoading(true)
-    const resp = await selectLoopMemoItemList(id, nextPage);
+    const resp = await selectLoopMemoItemList(id, nextPage, loopKeyword);
     setLoopTimeWebLoading(false)
     const result = resp.data
     const records = result?.records ?? []; // 新加载的循环子项
-    if (resp.success && records.length > 0) {
+    if (resp.success) {
       setLoopTimeList(item => replace ? records : [...item, ...records])
       setLoopTimePage(nextPage + 1)     // 页码增加
       setLoopTimeTotal(result?.total ?? records.length)
@@ -465,9 +465,9 @@ const MemoDrawer = () => {
   }
 
   /** 刷新当前循环备忘录时间列表 */
-  const refreshLoopMemoTimeData = async (memoId: number) => {
+  const refreshLoopMemoTimeData = async (memoId: number, loopKeyword = '') => {
     resetLoopMemoTimeData()
-    await getLoopMemoTimeData(memoId, 1, true)
+    await getLoopMemoTimeData(memoId, 1, true, loopKeyword)
   }
 
   /** 本地增加循环次数，避免刷新第一层列表导致二层抽屉关闭 */
@@ -593,7 +593,10 @@ const MemoDrawer = () => {
           loopText: window.ikunOkText,
           imgArr: ikunLoopMemoImgArr || undefined
         });
-        if (!result.success) return msg.error('加一失败')
+        if (!result.success) {
+          msg.error('加一失败')
+          return
+        }
         msg.success('成功+1')
         if (refreshMemoList) sxSj()
         else increaseLoopMemoCount(memoId)
@@ -603,29 +606,32 @@ const MemoDrawer = () => {
   }
 
   /** 复制循环子项备注并直接 +1 */
-  const copyAddLoopMemo = async (loopMemo: ILoopMemoItem) => {
+  const copyAddLoopMemo = async (loopMemo: ILoopMemoItem, loopKeyword = '') => {
     if (!loopMemo.memoId) return;
     setLastActionId(loopMemo.memoId)
     const result = await addLoopMemoItem({
       memoId: loopMemo.memoId,
       loopText: loopMemo.loopText || undefined
     });
-    if (!result.success) return msg.error('加一失败')
+    if (!result.success) {
+      msg.error('加一失败')
+      return
+    }
     msg.success('成功+1')
     increaseLoopMemoCount(loopMemo.memoId)
-    await refreshLoopMemoTimeData(loopMemo.memoId)
+    await refreshLoopMemoTimeData(loopMemo.memoId, loopKeyword)
   }
 
   /** 复制循环子项备注后打开编辑加一弹窗 */
-  const copyEditLoopMemo = (loopMemo: ILoopMemoItem) => {
+  const copyEditLoopMemo = (loopMemo: ILoopMemoItem, loopKeyword = '') => {
     if (!loopMemo.memoId) return;
     setLastActionId(loopMemo.memoId)
     const memoObj = list.find(item => item.id === loopMemo.memoId); // 当前循环备忘主项
-    return openAddLoopMemoModal(
+    openAddLoopMemoModal(
       loopMemo.memoId,
       memoObj?.content,
       loopMemo.loopText ?? '',
-      () => refreshLoopMemoTimeData(loopMemo.memoId!),
+      () => refreshLoopMemoTimeData(loopMemo.memoId!, loopKeyword),
       false
     )
   }
