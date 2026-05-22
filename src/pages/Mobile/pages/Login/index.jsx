@@ -1,8 +1,8 @@
 import React, { useRef } from 'react'
 import {Form, Input, Button, Toast, Selector} from 'antd-mobile'
 import {login} from "@/request/commonRequest";
-import styles from './mobile.module.css'
-import {getWelcomePic, loginTime} from "./data";
+import styles from '../../styles/mobile.module.css'
+import {getWelcomePic, loginTime} from "../../shared/data";
 import Filing from "@/components/Filing";
 
 export default () => {
@@ -43,7 +43,7 @@ export default () => {
                 </Form.Item>
             </Form>
 
-          <div style={{position: 'absolute', bottom: 15,display: 'flex',justifyContent: 'center',width: '100%'}}>
+          <div style={{position: 'absolute', bottom: 80,display: 'flex',justifyContent: 'center',width: '100%'}}>
             <Filing/>
           </div>
 

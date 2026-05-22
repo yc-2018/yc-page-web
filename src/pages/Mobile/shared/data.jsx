@@ -85,16 +85,19 @@ export const tabs = [
     {
         key: 'Memos',
         title: '待办',
+        path: '/',
         icon: <UnorderedListOutlined />,
     },
     {
         key: 'Blog',
         title: '博客',
+        path: '/blog',
         icon: <BookOutlined />,
     },
     {
         key:'Me',
         title: '我的',
+        path: '/me',
         icon: <UserOutlined />,
     },
 ]

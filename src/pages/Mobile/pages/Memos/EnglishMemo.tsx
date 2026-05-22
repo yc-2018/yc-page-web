@@ -78,7 +78,7 @@ const EnglishMemo = () => {
   const [total, setTotal] = useState(0)                            // 英语备忘总数
   const [orderBy, setOrderBy] = useState(5)                        // 英语排序方式
   const [firstLetter, setFirstLetter] = useState<string>()         // 首字母筛选
-  const [keyword, setKeyword] = useState<string | null>(null)      // 已提交搜索关键字
+  const [keyword, setKeyword] = useState<string>()                 // 已提交搜索关键字
   const [searchValue, setSearchValue] = useState('')               // 搜索框内容
   const [editVisible, setEditVisible] = useState<EnglishEditVisible>(false) // 编辑弹层显示状态
   const [editEnglish, setEditEnglish] = useState('')               // 编辑英文
@@ -137,7 +137,7 @@ const EnglishMemo = () => {
   const refreshEnglish = () => {
     setOrderBy(5)
     setFirstLetter(undefined)
-    setKeyword(null)
+    setKeyword(undefined)
     setSearchValue('')
     resetEnglishList()
   }
@@ -231,7 +231,7 @@ const EnglishMemo = () => {
 
   /** 提交搜索 */
   const searchEnglish = (value: string) => {
-    setKeyword(value.trim() || null)
+    setKeyword(value.trim() || undefined)
     resetEnglishList()
   }
 

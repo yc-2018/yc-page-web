@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Button, Avatar, List, Dialog, Toast, Grid} from 'antd-mobile'
+import {useNavigate} from 'react-router-dom';
 
 import UserStore from "@/store/UserStore";
 import JWTUtils from "@/utils/JWTUtils";
@@ -12,10 +13,8 @@ import {getNameAndAvatar} from "@/request/homeApi";
 let username = ''
 let avatar = ''
 
-/**
- * @param setBarItem {function} 设置当前页面:用来退出后登录设置会到待办页面，不然重新登录进来会有bug
- * */
-export default ({setBarItem}) => {
+export default () => {
+  const navigate = useNavigate()    // 退出登录后回到待办首页
   const avatarRef = useRef()        // 头像ref 因为弹窗是静态的 用不了state 所以用ref
   const [info, setInfo] = useState(_getNameAndAvatar());
 
@@ -119,8 +118,8 @@ export default ({setBarItem}) => {
       {/*退出登录*/}
       <Button block color='danger'
               onClick={() => {
-                setBarItem('Memos')
                 UserStore.clearJwt()
+                navigate('/')
               }}
       >
         退出登录

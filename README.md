@@ -117,7 +117,7 @@ yarn preview
 
 `src/App.tsx` 通过 `useRoutes(routes)` 渲染路由，并根据路由标题更新 `document.title`。桌面端会懒加载头部导航、登录弹窗、个人信息弹窗、备忘抽屉和英语抽屉；移动端不显示这些桌面公共组件。
 
-`src/routes/index.tsx` 使用 `isMobile()` 判断路由表。当前移动端判断逻辑是 `window.innerHeight > window.innerWidth`，移动端所有路径都会进入 `Mobile`；桌面端包含首页、帮助、博客、观看时间和 404。
+`src/routes/index.tsx` 使用 `isMobile()` 判断路由表。当前移动端判断逻辑是 `window.innerHeight > window.innerWidth`，移动端使用 `Mobile` 作为底部导航布局，并拆成 `/` 待办、`/blog` 博客、`/me` 个人中心等子路由；桌面端包含首页、帮助、博客、观看时间和 404。
 
 ## 5. 请求与数据来源
 
@@ -180,7 +180,7 @@ yarn preview
 
 ### 7.4 博客
 
-博客页从 `https://bk.yc556.cn` 拉取菜单、图标映射和 Markdown 内容。桌面端是左侧菜单加右侧 Markdown 渲染，移动端是折叠面板懒加载文章内容。
+博客页从 `https://bk.yc556.cn` 拉取菜单、图标映射和 Markdown 内容。桌面端是左侧菜单加右侧 Markdown 渲染，移动端博客无需登录，可通过 `/blog?item=...` 打开并定位到与桌面端一致的文章。
 
 Markdown 渲染组件 `src/components/Md` 使用 `markdown-to-jsx`，为代码块添加语法高亮、语言标题和复制按钮，同时覆盖表格、引用、键盘键、链接等基础样式。
 

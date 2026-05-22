@@ -1,9 +1,9 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {
   InfiniteScroll, List, Popup, SwipeAction, Toast,
-  Button, Tag, Radio, TextArea, Dialog, PullToRefresh,
-  SearchBar, Badge, Ellipsis, CalendarPicker, Dropdown,
-  Space, Modal, ImageViewer, Picker, ImageUploader, Image, Input
+  Button, TextArea, Dialog, PullToRefresh,
+  SearchBar, Badge, Ellipsis, Dropdown,
+  Space, ImageViewer, ImageUploader, Image, Input
 } from 'antd-mobile'
 import dayjs from "dayjs";
 import {
@@ -18,16 +18,18 @@ import {
   updateLoopMemoItemComment,
   updateLoopMemoItem, updateMemo
 } from "@/request/memoApi";
-import {finishName, columns, leftActions, rightActions, orderByName} from "@/pages/Mobile/data";
+import {finishName, columns, leftActions, rightActions, orderByName} from "@/pages/Mobile/shared/data";
 import {sortingOptions} from "@/store/NoLoginData";
 import HighlightKeyword from "@/utils/HighlightKeyword";
 import {ExclamationCircleFilled} from "@ant-design/icons";
-import LinkifyContent from "@/components/LinkifyContent/index";
-import {symbols} from "@/pages/MemoDrawer/constants";
-import styles from '@/pages/Mobile/mobile.module.css'
+import styles from '@/pages/Mobile/styles/mobile.module.css'
 import {fDate} from "@/utils/DateUtils";
 import {uploadImgByJD} from "@/request/toolsRequest";
 import {thumbUrl} from "@/utils/urlUtils.js";
+import MemoDetailPopup from './components/MemoDetailPopup'
+import MemoEditPopup from './components/MemoEditPopup'
+import MemoDatePickers from './components/MemoDatePickers'
+import LoopMemoActionPopup from './components/LoopMemoActionPopup'
 
 let imgArr;     // 多张图片字符串，用,分割
 let okTime;     // 待办更新时间
@@ -740,211 +742,25 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       </PullToRefresh>
 
 
-      <Popup    /* 查看详细弹出层***************************************************/
-        visible={!!visible}
-        closeOnSwipe /* 组件内向下滑动关闭 */
-        onMaskClick={() => setVisible(undefined)}
-        bodyStyle={{
-          height: '62vh',
-          width: '95vw',
-          padding: 10,
-          overflow: 'scroll',
-          borderRadius: '15px 15px 0 0'
-        }}
-      >
-        {/*可左右滑动*/}
-        <div
-          style={{
-            display: 'flex',
-            gap: 10,
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            paddingBottom: 5,
-            flexWrap: 'nowrap',
-            WebkitOverflowScrolling: 'touch'
-          }}
-        >
-          {/*显示循环的次数*/ visible?.numberOfRecurrences > 0 && visible?.itemType === 1 &&
-            <Tag
-              color='warning'
-              fill='outline'
-              onClick={showLoopMemoItemList}
-              style={{'--background-color': '#fcecd8', flex: '0 0 auto'}}
-              className={styles.memoPopupTag}
-            >
-              {`循环次数: ${visible.numberOfRecurrences}▼`}
-            </Tag>
-          }
+      <MemoDetailPopup
+        visibleMemo={visible}
+        onClose={() => setVisible(undefined)}
+        onShowLoopItems={showLoopMemoItemList}
+        onAction={onAction}
+      />
 
-          {/*显示完成或修改时间*/ visible?.createTime !== visible?.updateTime &&
-            <Tag color='success' fill='outline' className={styles.memoPopupTag}
-                 style={{'--background-color': '#c8f7c5', flex: '0 0 auto'}}>
-              {visible?.completed ?
-                <span onClick={() => Toast.show({content: `修改:${visible.updateTime}`})}>
-                  完成:{fDate(visible.okTime)}
-                </span>
-                :
-                <span>修改:{fDate(visible.updateTime)}</span>
-              }
-            </Tag>
-          }
-
-          {/*显示创建时间*/}
-          <Tag
-            color='primary'
-            fill='outline'
-            className={styles.memoPopupTag}
-            style={{'--background-color': '#c5f1f7', flex: '0 0 auto'}}
-          >
-            创建:{fDate(visible?.createTime)}
-          </Tag>
-        </div>
-
-        <div style={{height: '42vh', overflowY: 'scroll', border: '1px solid #ccc', borderRadius: 10, marginTop: 5}}>
-          {visible?.okText && <div className={styles.okText}><b>完成备注：</b>{visible.okText}</div>}
-          <pre
-            style={{
-              whiteSpace: 'pre-wrap',
-              wordWrap: 'break-word',
-              fontSize: 14,
-              fontFamily: 'unset',
-              padding: 8,
-              margin: 0
-            }}
-          >
-            <LinkifyContent
-              linkImg={link => <a key={link} onClick={() => ImageViewer.show({image: link})}>{link}</a>}
-            >
-              {visible?.content}
-            </LinkifyContent>
-          </pre>
-        </div>
-
-        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10}}>
-          {/* 未完成的显示修改按钮 */ visible?.completed === 0 &&
-            <Button
-              block
-              color='primary'
-              onClick={() => onAction({key: 'edit', id: visible.id})}
-            >
-              修改
-            </Button>
-          }
-          {/*未完成的显示完成按钮 */ visible?.completed === 0 &&
-            <Button
-              block
-              color='success'
-              onClick={() => onAction({key: 'success', text: '完成', id: visible?.id})}
-            >
-              完成
-            </Button>
-          }
-
-          {/*完成的显示取消完成按钮 */ visible?.completed === 1 &&
-            <Button
-              block
-              style={{background: '#f6b234', border: 'none', color: '#fff'}}
-              onClick={() => onAction({key: 'success', text: '取消完成', id: visible.id})}
-            >
-              取消完成
-            </Button>
-          }
-
-          {/*显示删除按钮*/
-            <Button
-              block
-              color='danger'
-              onClick={() => onAction({key: 'delete', id: visible?.id})}
-            >
-              删除
-            </Button>
-          }
-
-          {/*循环的显示 +1 按钮*/visible?.itemType === 1 &&
-            <Button
-              block
-              style={{background: '#a934f6', border: 'none', color: '#fff'}}
-              onClick={() => onAction({key: 'addOne', id: visible.id})}
-            >
-              +1
-            </Button>
-          }
-        </div>
-      </Popup>
-
-
-      <Popup      /* 编辑弹出层 **********************************************************/
-        visible={!!editVisible}
-        onMaskClick={async () => {
-          if (!content || content === editVisible?.content) return setEditVisible(false)
-          const result = await Dialog.confirm({
-            content: '检测到内容已修改，直接返回已编辑的内容会丢失哦,确定退出吗？',
-            closeOnMaskClick: true,     // 点击遮罩层关闭提示
-          })
-          if (result) setEditVisible(false)
-        }}
-        // onClose={() => {setEditVisible(false)}}
-        position='top'
-        bodyStyle={{height: '450px'}}
-      >
-
-        <div style={{padding: '10px'}}>
-
-          <div style={{textAlign: 'center'}}>
-            <Radio.Group value={itemType} onChange={value => setItemType(() => value)}>
-              <Radio value={0} className={'█Radio'}>普通</Radio>
-              <Radio value={1} className={'█Radio'}>循环</Radio>
-              <Radio value={2} className={'█Radio'}>长期</Radio>
-              <Radio value={3} className={'█Radio'}>紧急</Radio>
-              <Radio value={5} className={'█Radio'}>日记</Radio>
-              <Radio value={6} className={'█Radio'}>工作</Radio>
-              <Radio value={7} className={'█Radio'}>其他</Radio>
-            </Radio.Group>
-          </div>
-
-          <TextArea
-            rows={13}
-            showCount
-            ref={textRef}
-            value={content}
-            className="contentText"
-            style={{height: '300px'}}
-            placeholder="请输入备忘内容"
-            maxLength={itemType === 5 ? 4000 : 2000}
-            onChange={value => setContent(value)}
-          />
-          <div style={{margin: '10px 0'}}>
-            <Button size="small" onClick={() => setEditDateVisible(true)}>插入日期</Button>
-            &nbsp;
-            <Button
-              size="small"
-              onClick={() => {
-                const handler = Modal.show({
-                  content:
-                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 2}}>
-                      {symbols.map((item) =>
-                        <div
-                          key={item}
-                          style={{padding: 5, border: '1px solid #ccc', textAlign: 'center'}}
-                          onClick={() => insertAtCursor(item) || handler.close()}
-                        >
-                          {item}
-                        </div>
-                      )}
-                    </div>,
-                  closeOnMaskClick: true,
-                  closeOnAction: true,
-                  actions: [{key: 'close', text: '关闭'}]
-                })
-              }}
-            >
-              插入符号
-            </Button>
-          </div>
-
-          <Button block onClick={submit}> 提交 </Button>
-        </div>
-      </Popup>
+      <MemoEditPopup
+        editVisible={editVisible}
+        content={content}
+        itemType={itemType}
+        textRef={textRef}
+        onClose={() => setEditVisible(false)}
+        onContentChange={setContent}
+        onItemTypeChange={setItemType}
+        onOpenDatePicker={() => setEditDateVisible(true)}
+        onInsertAtCursor={insertAtCursor}
+        onSubmit={submit}
+      />
 
 
       <Popup      /* 循环时间的弹出层 *******************************************************************/
@@ -1164,117 +980,34 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         }
       </Popup>
 
-      <Popup      /* 循环项操作的弹出层 *********/
-        visible={Boolean(loopItemVisible)}
-        onMaskClick={() => setLoopItemVisible(null)}
-        bodyStyle={{height: Boolean(loopItemVisible?.loopText) ? 290 : 190}}
-        style={{zIndex: 1002}}
-      >
-        {Boolean(loopItemVisible) &&
-          <div style={{padding: 10, display: 'flex', flexWrap: 'wrap', gap: 10}}>
-            {loopItemVisible?.loopText &&
-              <Button block onClick={() => directAddOne(loopItemVisible)}>
-                按当前备注直接 +1
-              </Button>
-            }
-            {loopItemVisible?.loopText &&
-              <Button
-                block
-                onClick={() => {
-                  onAction({
-                    key: 'addOne',
-                    id: loopItemVisible.memoId
-                  }, loopItemVisible?.loopText)
-                  setLoopItemVisible(null)
-                }}
-              >
-                +1 并按当前备注编辑
-              </Button>
-            }
-            <Button block onClick={() => editLoopMemoItem(loopItemVisible)}>
-              编辑备注
-            </Button>
-            <Button block color="primary" onClick={() => editLoopMemoComment(loopItemVisible, null)}>
-              添加评论
-            </Button>
-            <Button
-              block
-              color="danger"
-              onClick={() => delLoopMemoItem(loopItemVisible.memoId, loopItemVisible.id)}
-            >
-              删除此项
-            </Button>
-            <div>创建时间:{loopItemVisible.createTime}</div>
-            {loopItemVisible.updateTime && <div>更新时间:{loopItemVisible.updateTime}</div>}
-          </div>
-        }
-      </Popup>
-
-
-      {/*日期选择器（antd实验性组件）完成或+1 用 */}
-      <CalendarPicker
-        popupStyle={{zIndex: 99999}}
-        min={new Date(Date.now() - 59 * 24 * 60 * 60 * 1000)}    // 前59天
-        max={new Date()}                                              // 今天
-        visible={dateVisible}
-        selectionMode='single'
-        onClose={() => setDateVisible(false)}
-        onMaskClick={() => setDateVisible(false)}
-        onConfirm={date => {
-          if (!date) return;
-          const dayStr = dayjs(date).format('YYYY-MM-DD');
-          if (okTime) {
-            okTime = `${dayStr} ${okTime.split(' ')[1]}`
-          } else okTime = `${dayStr} 00:00:00`;
-          dateRef.current.innerHTML = dayStr
-          const element = window.document.querySelector('#timing');
-          if (element) element.style.display = 'inline-block'
-
+      <LoopMemoActionPopup
+        loopItemVisible={loopItemVisible}
+        onClose={() => setLoopItemVisible(null)}
+        onDirectAddOne={directAddOne}
+        onAddOneWithText={loopItem => {
+          onAction({
+            key: 'addOne',
+            id: loopItem.memoId
+          }, loopItem?.loopText)
+          setLoopItemVisible(null)
         }}
+        onEditLoopItem={editLoopMemoItem}
+        onEditLoopComment={loopItem => editLoopMemoComment(loopItem, null)}
+        onDeleteLoopItem={delLoopMemoItem}
       />
 
-      {/*日期选择器（antd实验性组件）编辑插入用*/}
-      <CalendarPicker
-        popupStyle={{zIndex: 99999}}
-        visible={editDateVisible}
-        selectionMode='range'
-        onClose={() => setEditDateVisible(false)}
-        onMaskClick={() => setEditDateVisible(false)}
-        onConfirm={date => {
-          if (!date) return;
-          const startDate = dayjs(date[0]).format('YYYY-MM-DD')
-          let endDate = dayjs(date[1]).format('YYYY-MM-DD')
-          endDate = startDate === endDate ? '' : `~${endDate} `
-          const textToInsert = `${startDate}${endDate}`
-          insertAtCursor(textToInsert)
-        }}
-      />
 
-      {/* 时分选择器 */}
-      <Picker
-        popupStyle={{zIndex: 99999}}
-        defaultValue={[dayjs().format('HH'), dayjs().format('mm')]}
-        columns={[
-          // 小时列（0-23）
-          Array.from({length: 24}, (_, i) => ({
-            label: i.toString().padStart(2, '0'),
-            value: i.toString().padStart(2, '0'),
-          })),
-          // 分钟列（0-59）
-          Array.from({length: 60}, (_, i) => ({
-            label: i.toString().padStart(2, '0'),
-            value: i.toString().padStart(2, '0'),
-          }))
-        ]}
-        visible={hhMmVisible}
-        onClose={() => setHhMmVisible(false)}
-        onConfirm={v => {
-          setHhMmVisible(false)
-          if (!okTime) return Toast.show({icon: 'fail', content: '未选择日期'});
-          const time = ` ${v[0]}:${v[1]}:00`
-          okTime = okTime.split(' ')[0] + time
-          window.document.querySelector('#timing').innerText = `${v[0]}:${v[1]}`
-        }}
+      <MemoDatePickers
+        dateVisible={dateVisible}
+        editDateVisible={editDateVisible}
+        hhMmVisible={hhMmVisible}
+        dateRef={dateRef}
+        getOkTime={() => okTime}
+        setOkTime={value => { okTime = value }}
+        onCloseDate={() => setDateVisible(false)}
+        onCloseEditDate={() => setEditDateVisible(false)}
+        onCloseHhMm={() => setHhMmVisible(false)}
+        onInsertAtCursor={insertAtCursor}
       />
     </>
   )

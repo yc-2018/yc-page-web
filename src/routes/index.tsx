@@ -6,14 +6,46 @@ const Home = lazy(() => import('../pages/Home'));
 const Help = lazy(() => import('../pages/Help'));
 const Blog = lazy(() => import('../pages/Blog'));
 const SeeTime = lazy(() => import('../pages/SeeTime'));
-const Mobile = lazy(() => import('../pages/Mobile'));
+const MobileLayout = lazy(() => import('../pages/Mobile'));
+const MobileAuth = lazy(() => import('../pages/Mobile/layout/Auth'));
+const MobileFallback = lazy(() => import('../pages/Mobile/layout/Fallback'));
+const MobileMemos = lazy(() => import('../pages/Mobile/pages/Memos'));
+const MobileBlog = lazy(() => import('../pages/Mobile/pages/Blog'));
+const MobileMe = lazy(() => import('../pages/Mobile/pages/Me'));
 
 export default isMobile() ?
   [
       {
-          path: '/*',
-          element: <Mobile />,
+          path: '/',
+          element: <MobileLayout />,
           title: '仰晨备忘',
+          children: [
+              {
+                  element: <MobileAuth />,
+                  children: [
+                      {
+                          index: true,
+                          element: <MobileMemos />,
+                          title: '仰晨备忘',
+                      },
+                      {
+                          path: 'me',
+                          element: <MobileMe />,
+                          title: '个人中心',
+                      },
+                  ],
+              },
+              {
+                  path: 'blog',
+                  element: <MobileBlog />,
+                  title: '仰晨-博客',
+              },
+              {
+                  path: '*',
+                  element: <MobileFallback />,
+                  title: '未知页面',
+              },
+          ],
       },
   ]
   :
