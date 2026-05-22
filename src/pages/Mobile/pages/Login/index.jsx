@@ -16,13 +16,14 @@ export default () => {
     }
 
     return (
-        <>
-            <span style={{ textAlign: 'center', display: 'block', margin: '0 auto' }}>
-                <p style={{ fontSize: 20 }}>欢迎来到Open备忘第一页</p>
-                <p style={{ color: '#fa5555' }}>请关注<strong>仰晨</strong>，并回复“<strong>登录</strong>” 获取验证码进行登录</p>
+        <div className={styles.loginPage}>
+            <span className={styles.loginHero}>
+                <p className={styles.loginTitle}>欢迎来到Open备忘第一页</p>
+                <p className={styles.loginTip}>请关注<strong>仰晨</strong>，并回复“<strong>登录</strong>” 获取验证码进行登录</p>
                 <img src={getWelcomePic()}  alt="仰晨欢迎你" className={styles.qrCode}/>
             </span>
             <Form ref={formRef}
+                  className={styles.loginForm}
                   footer={
                       <Button block type="submit" color="primary" size="large" onClick={handleSubmit} loading={loginLoading}>
                           登录
@@ -43,10 +44,10 @@ export default () => {
                 </Form.Item>
             </Form>
 
-          <div style={{position: 'absolute', bottom: 80,display: 'flex',justifyContent: 'center',width: '100%'}}>
+          <div className={styles.loginFiling}>
             <Filing/>
           </div>
 
-        </>
+        </div>
     )
 }
