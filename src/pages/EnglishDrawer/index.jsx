@@ -246,7 +246,7 @@ function EnglishDrawer() {
 
     return (
         <Drawer placement="left"
-                width={450}
+                size={450}
                 closeIcon={false}
                 style={{opacity: 0.8}}
                 open={showOrNot.englishDrawerShow}

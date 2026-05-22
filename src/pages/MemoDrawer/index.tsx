@@ -235,10 +235,10 @@ const MemoDrawer = () => {
         initNoticeShownRef.current = true
         const key = `open${Date.now()}`;
         notification.info({
-          message: '有未完成的紧急备忘',
+          title: '有未完成的紧急备忘',
           description: '是否要打开查看',
           key,
-          btn: (
+          actions: (
             <Space>
               <Button type="link" size="small" onClick={() => notification.destroy(key)}>
                 不看了
@@ -780,7 +780,7 @@ const MemoDrawer = () => {
       onClose={() => showOrNot.setMemoDrawerShow(false)}
       open={showOrNot.memoDrawerShow}
       style={{opacity: 0.8}}
-      width={700}
+      size={700}
       closeIcon={false}
       title={JWTUtils.isExpired() ? '备忘录' :
         <>
