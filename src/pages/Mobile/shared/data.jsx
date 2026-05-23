@@ -103,25 +103,3 @@ export const tabs = [
 ]
 
 
-export const loginTime = [
-    {
-        label: '半天',
-        value: 'bt',
-    },
-    {
-        label: '一天',
-        value: 'yt',
-    },
-    {
-        label: '一周',
-        value: 'yz',
-    },
-    {
-        label: '一月',
-        value: 'yy',
-    },
-    {
-        label: '一年',
-        value: 'yn',
-    },
-]

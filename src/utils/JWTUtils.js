@@ -29,6 +29,12 @@ export default class JWTUtils {
         return isExp;
     }
 
+    // 获取 JWT 剩余有效时间(毫秒)
+    static getRemainingTime(payload = this.parseJWT()) {
+        if (!payload?.exp) return 0;
+        return payload.exp * 1000 - Date.now();
+    }
+
     // 从 JWT 中获取 name
     static getName() {
         const payload = this.parseJWT();

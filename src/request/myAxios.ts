@@ -5,8 +5,11 @@ import UserStore from '@/store/UserStore';
 import JWTUtils from '@/utils/JWTUtils';
 import R from '@/interface/R';
 
-export const baseURL = 'https://yc556.cn/api'; // 基础URL
+// export const baseURL = 'https://yc556.cn/api'; // 基础URL
+export const baseURL = '/api'; // 本地测试基础URL
 const {msg} = CommonStore
+const refreshTokenThreshold = 2 * 24 * 60 * 60 * 1000; // 静默续签阈值：2天
+let refreshTokenPromise: Promise<void> | null = null; // 当前静默续签任务
 
 export const myGet = async <T>(url: string): Promise<R<T>> => {
   try {
@@ -53,13 +56,31 @@ const myAxios = axios.create({
     timeout: 10000 // 设置超时时间为 10000 毫秒（10秒）
 });
 
+/** 在 JWT 临近过期时后台静默续签 */
+const refreshTokenIfNeeded = (token: string) => {
+    if (JWTUtils.getRemainingTime() >= refreshTokenThreshold) return;
+    if (refreshTokenPromise) return;
+
+    refreshTokenPromise = axios.post<R<string>>(`${baseURL}/users/refreshToken`, undefined, {
+        headers: {Authorization: `Bearer ${token}`},
+    }).then(response => {
+        const {code, data} = response.data;
+        if (code === 1 && data && UserStore.jwt === token) UserStore.jwt = data; // 保存后端返回的新 JWT
+    }).catch(error => {
+        console.log('%c静默续签失败:', 'color: red;font-size: 20px;', error);
+    }).finally(() => {
+        refreshTokenPromise = null;
+    });
+};
+
 /** 添加myAxios《请求》拦截器 */
 myAxios.interceptors.request.use(
     config => {
         // 在发送请求之前做些什么
         const token = UserStore.jwt; // 从仓库中获取 JWT
-        if (!JWTUtils.isExpired()) {
+        if (token && !JWTUtils.isExpired()) {
             config.headers.Authorization = `Bearer ${token}`; // 如果存在 JWT，则添加到请求头
+            refreshTokenIfNeeded(token);
             return config; // 返回配置，这样请求就会带上这些设置
         }
         return Promise.reject(new Error('Token expired'));

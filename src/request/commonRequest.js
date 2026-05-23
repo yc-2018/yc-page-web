@@ -6,10 +6,10 @@ import myAxios, {baseURL} from "./myAxios";
 
 
 /** 用户登录 */
-export async function login(loginCode, expireTime = 'bt', loading) {
+export async function login(loginCode, loading) {
   try {
     loading && loading(true)
-    const response = await axios.post(`${baseURL}/users/login?key=${loginCode}&expireTime=${expireTime}`);
+    const response = await axios.post(`${baseURL}/users/login?key=${loginCode}`);
     loading && loading(false)
     const {code, msg, data} = response.data;
 

@@ -1,8 +1,8 @@
 import React, { useRef } from 'react'
-import {Form, Input, Button, Toast, Selector} from 'antd-mobile'
+import {Form, Input, Button, Toast} from 'antd-mobile'
 import {login} from "@/request/commonRequest";
 import styles from '../../styles/mobile.module.css'
-import {getWelcomePic, loginTime} from "../../shared/data";
+import {getWelcomePic} from "../../shared/data";
 import Filing from "@/components/Filing";
 
 export default () => {
@@ -11,7 +11,7 @@ export default () => {
 
     const handleSubmit = () => {
         formRef.current.validateFields()
-            .then(values => {login(values.code, values.duration, setLoginLoading);})    // 获取表单数据去登录
+            .then(values => {login(values.code, setLoginLoading);})    // 获取表单数据去登录
             .catch(_ => {Toast.show({icon: 'fail', content: '请输入按提示输入表单'})})
     }
 
@@ -34,13 +34,6 @@ export default () => {
                            label="登录验证码"
                            rules={[{ required: true, len: 6, message: '请输入6位数字' }]}>
                     <Input type="number" placeholder="请输入6位数字" />
-                </Form.Item>
-
-                <Form.Item name="duration"
-                           label="登录有效期"
-                           initialValue="yt"
-                           rules={[{ required: true, message: '请选择登录时间' }]}>
-                    <Selector options={loginTime}/>
                 </Form.Item>
             </Form>
 
