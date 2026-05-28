@@ -6,10 +6,10 @@ import CommonStore from '@/store/CommonStore';
 import ISearchEngines from '@/interface/ISearchEngines';
 import type {MenuClickInfo} from '@/interface/IAntd';
 import {_setDefaultEngine} from '@/utils/localStorageUtils';
-import {searchValue} from '@/pages/Home/HomeSearch/searchState';
 import TryFavicon from '@/components/TryFavicon';
 import JWTUtils from '@/utils/JWTUtils';
 import MyDnd from '@/components/MyDnd';
+import {openDirectUrl, openSearchEngine} from '@/pages/Home/HomeSearch/searchAction';
 import styles from './SearchEngines.module.css'
 
 interface ISearchEngineList {
@@ -45,6 +45,7 @@ const DELETE = '1'
 const SET_SEARCH = '2'
 const SORT = '3'
 const LOW_USE = '4'
+const DIRECT_OPEN = '5'
 
 /**
  * 搜索引擎列表
@@ -68,29 +69,23 @@ const SearchEngineList: FC<ISearchEngineList> = (
   const [isDrag, setIsDrag] = useState(false)
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
 
-  const items = [
+  /** 生成右键菜单，有直达URL时才显示直接访问 */
+  const getMenuItems = (searchItem: ISearchEngines) => [
+    ...(searchItem.directUrl?.trim() ? [{
+      label: '直接访问',
+      key: DIRECT_OPEN
+    }] : []),
     {label: '设为主搜索', key: SET_SEARCH},
     {label: changeLowName, key: LOW_USE, disabled: JWTUtils.isExpired()},
     {label: '编 辑', key: EDIT, disabled: JWTUtils.isExpired()},
-    {label: '删 除', key: DELETE, disabled: JWTUtils.isExpired()},
     {label: '排 序', key: SORT, disabled: JWTUtils.isExpired()},
+    {label: '删 除', key: DELETE, disabled: JWTUtils.isExpired()},
   ];
 
   /** 父组件数据改变的话，子组件数据也设置改变 */
   useEffect(() => {
     if (searchList) setSearchItems(searchList)
   }, [searchList])
-
-  /**
-   * 触发搜索
-   *
-   * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
-   * @since 2025/8/4 0:47
-   */
-  const onSearch = (engineUrl: string) => {
-    if (!searchValue) return msg.warning('请输入搜索内容')
-    window.open(engineUrl.replace('@@@', searchValue ?? ''), '_blank');
-  }
 
   /** 取消拖拽 */
   const cancelDrag = () => {
@@ -148,6 +143,9 @@ const SearchEngineList: FC<ISearchEngineList> = (
     if (e.key === SORT) {
       setIsDrag(true)
     }
+    if (e.key === DIRECT_OPEN) {
+      openDirectUrl(searchItem)
+    }
   }
 
   return (
@@ -166,7 +164,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
         <IsMyDnd isDrag={isDrag} searchItems={searchItems} setSearchItems={setSearchItems}>
           {searchItems.map(searchItem =>
             <IsMyDndItem
-              items={items}
+              items={getMenuItems(searchItem)}
               isDrag={isDrag}
               key={searchItem.id}
               searchItem={searchItem}
@@ -174,7 +172,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
             >
               <Button
                 key={searchItem.id}
-                onClick={() => onSearch(searchItem.engineUrl)}
+                onClick={() => openSearchEngine(searchItem)}
                 style={{cursor: isDrag ? 'move' : 'pointer', ...btnStyle}}
                 icon={<TryFavicon iconUrl={searchItem.iconUrl} url={searchItem.engineUrl} size={20} errSize={16}/>}
               >

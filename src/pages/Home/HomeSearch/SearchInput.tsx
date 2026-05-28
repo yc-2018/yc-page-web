@@ -5,8 +5,10 @@ import {SendOutlined} from '@ant-design/icons';
 import {getThinkList} from '@/request/homeApi';
 import ISearchEngines from '@/interface/ISearchEngines';
 import {setSearchValue, searchValue} from '@/pages/Home/HomeSearch/searchState';
+import CommonStore from '@/store/CommonStore';
 
 let timer: number;
+const {msg} = CommonStore
 
 /**
  * 搜索输入框
@@ -32,7 +34,11 @@ const SearchInput: FC<{ nowSearch: ISearchEngines }> = ({nowSearch}) => {
    * @author Yc
    * @since 2025/7/16 1:57
    */
-  const onSearch = () => window.open(nowSearch.engineUrl.replace('@@@', searchValue ?? ''), '_blank');
+  const onSearch = () => {
+    const keyword = searchValue?.trim(); // 主搜索只响应实际搜索词
+    if (!keyword) return msg.warning('请输入搜索内容')
+    window.open(nowSearch.engineUrl.replace('@@@', keyword), '_blank');
+  }
 
   /**
    * 自动通过接口联想

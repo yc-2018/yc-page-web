@@ -248,6 +248,19 @@ const SearchBox = () => {
           </Form.Item>
 
           <Form.Item
+            label="直达URL" name="directUrl"
+            rules={[
+              {max: 255, message: '直达URL不能超过255个字符'},
+              {
+                pattern: /^(http|https):\/\//,
+                message: 'URL必须以 http:// 或 https:// 开头'
+              }
+            ]}
+          >
+            <Input placeholder="搜索框为空时直接打开(右键亦可)，可不填"/>
+          </Form.Item>
+
+          <Form.Item
             label="图标" name="iconUrl"
             rules={[
               {max: 255, message: '引擎URL不能超过255个字符'},

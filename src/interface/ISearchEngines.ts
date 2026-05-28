@@ -15,6 +15,8 @@ export default interface ISearchEngines {
   id: number
   /** URL  */
   engineUrl: string
+  /** 直达URL，搜索框为空时直接打开  */
+  directUrl?: string
   /** 不常用 1是 0否  */
   type: ILinkType
   /** 名称  */

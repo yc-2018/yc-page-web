@@ -2,21 +2,21 @@ import ISearchEngines from '@/interface/ISearchEngines';
 
 /** 搜索引擎数据 */
 const searchDatas = [
-  1, '百度', 'www.baidu.com/s?wd=@@@',
-  1, 'Bing', 'www.bing.com/search?q=@@@',
-  1, '谷歌', 'www.google.com/search?q=@@@',
-  1, '360', 'www.so.com/s?q=@@@',
-  1, '搜狗', 'www.sogou.com/web?query=@@@',
-  1, '抖音', 'www.douyin.com/search/@@@',
-  1, '小红书', 'www.xiaohongshu.com/search_result?keyword=@@@&source=web_explore_feed',
-  1, '知乎', 'www.zhihu.com/search?type=content&q=@@@',
-  1, 'B站', 'search.bilibili.com/all?keyword=@@@&search_source=1',
-  1, 'GitHub', 'github.com/search?q=@@@&type=repositories',
-  1, '百度翻译', 'fanyi.baidu.com/#auto/en/@@@',
-  1, 'deepl翻译', 'www.deepl.com/translator#auto/en/@@@',
-  1, '京东', 'search.jd.com/Search?keyword=@@@',
-  1, '天猫', 's.taobao.com/search?fromTmallRedirect=true&q=@@@&tab=mall',
-  1, '微博', 's.weibo.com/weibo?q=@@@',
+  1, '百度', 'www.baidu.com/s?wd=@@@', 'www.baidu.com',
+  1, 'Bing', 'www.bing.com/search?q=@@@', 'www.bing.com',
+  1, '谷歌', 'www.google.com/search?q=@@@', 'www.google.com',
+  1, '360', 'www.so.com/s?q=@@@', 'www.so.com',
+  1, '搜狗', 'www.sogou.com/web?query=@@@', 'www.sogou.com',
+  1, '抖音', 'www.douyin.com/search/@@@', 'www.douyin.com',
+  1, '小红书', 'www.xiaohongshu.com/search_result?keyword=@@@&source=web_explore_feed', 'www.xiaohongshu.com',
+  1, '知乎', 'www.zhihu.com/search?type=content&q=@@@', 'www.zhihu.com',
+  1, 'B站', 'search.bilibili.com/all?keyword=@@@&search_source=1', 'www.bilibili.com',
+  1, 'GitHub', 'github.com/search?q=@@@&type=repositories', 'github.com',
+  1, '百度翻译', 'fanyi.baidu.com/#auto/en/@@@', 'fanyi.baidu.com',
+  1, 'deepl翻译', 'www.deepl.com/translator#auto/en/@@@', 'www.deepl.com/translator',
+  1, '京东', 'search.jd.com/Search?keyword=@@@', 'www.jd.com',
+  1, '天猫', 's.taobao.com/search?fromTmallRedirect=true&q=@@@&tab=mall', 'www.tmall.com',
+  1, '微博', 's.weibo.com/weibo?q=@@@', 'weibo.com',
 ]
 
 /**
@@ -26,12 +26,13 @@ const searchDatas = [
  */
 const buildSearchData = () => {
   const searchData: ISearchEngines[] = []
-  for (let i = 0; i < searchDatas.length; i += 3) {
+  for (let i = 0; i < searchDatas.length; i += 4) {
     searchData.push({
       id: i,
       type: searchDatas[i] === 0 ? 0 : 1,
       name: `${searchDatas[i + 1]}`,
-      engineUrl: 'https://' + searchDatas[i + 2]
+      engineUrl: 'https://' + searchDatas[i + 2],
+      directUrl: 'https://' + searchDatas[i + 3]
     })
   }
   return searchData
