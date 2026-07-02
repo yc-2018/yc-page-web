@@ -28,50 +28,58 @@ const MemoDetailPopup = ({visibleMemo, onClose, onShowLoopItems, onAction}: Memo
   >
     {visibleMemo &&
       <>
-        <div
-          style={{
-            display: 'flex',
-            gap: 10,
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            paddingBottom: 5,
-            flexWrap: 'nowrap',
-            WebkitOverflowScrolling: 'touch'
-          }}
-        >
-          {(visibleMemo.numberOfRecurrences ?? 0) > 0 && visibleMemo.itemType === 1 &&
+        <div className={styles.memoPopupMetaRows}>
+          <div className={styles.memoPopupMetaRow}>
+            {(visibleMemo.numberOfRecurrences ?? 0) > 0 && visibleMemo.itemType === 1 &&
+              <Tag
+                color="warning"
+                fill="outline"
+                onClick={onShowLoopItems}
+                style={{'--background-color': '#fcecd8', flex: '0 0 auto'}}
+                className={styles.memoPopupTag}
+              >
+                {`循环次数: ${visibleMemo.numberOfRecurrences}▼`}
+              </Tag>
+            }
+
+            {visibleMemo.createTime !== visibleMemo.updateTime &&
+              <Tag color="success" fill="outline" className={styles.memoPopupTag}
+                   style={{'--background-color': '#c8f7c5', flex: '0 0 auto'}}>
+                {visibleMemo.completed ?
+                  <span onClick={() => Toast.show({content: `修改:${visibleMemo.updateTime}`})}>
+                    完成:{fDate(visibleMemo.okTime)}
+                  </span>
+                  :
+                  <span>修改:{fDate(visibleMemo.updateTime)}</span>
+                }
+              </Tag>
+            }
+
             <Tag
-              color="warning"
+              color="primary"
               fill="outline"
-              onClick={onShowLoopItems}
-              style={{'--background-color': '#fcecd8', flex: '0 0 auto'}}
               className={styles.memoPopupTag}
+              style={{'--background-color': '#c5f1f7', flex: '0 0 auto'}}
             >
-              {`循环次数: ${visibleMemo.numberOfRecurrences}▼`}
+              创建:{fDate(visibleMemo.createTime)}
             </Tag>
-          }
+          </div>
 
-          {visibleMemo.createTime !== visibleMemo.updateTime &&
-            <Tag color="success" fill="outline" className={styles.memoPopupTag}
-                 style={{'--background-color': '#c8f7c5', flex: '0 0 auto'}}>
-              {visibleMemo.completed ?
-                <span onClick={() => Toast.show({content: `修改:${visibleMemo.updateTime}`})}>
-                  完成:{fDate(visibleMemo.okTime)}
-                </span>
-                :
-                <span>修改:{fDate(visibleMemo.updateTime)}</span>
-              }
-            </Tag>
+          {Boolean(visibleMemo.tags?.length) &&
+            <div className={styles.memoPopupTagRow}>
+              {visibleMemo.tags?.map(tag =>
+                <Tag
+                  key={tag.id}
+                  color="primary"
+                  fill="outline"
+                  className={styles.memoPopupTag}
+                  style={{'--background-color': '#eef2ff', flex: '0 0 auto'}}
+                >
+                  {tag.name}
+                </Tag>
+              )}
+            </div>
           }
-
-          <Tag
-            color="primary"
-            fill="outline"
-            className={styles.memoPopupTag}
-            style={{'--background-color': '#c5f1f7', flex: '0 0 auto'}}
-          >
-            创建:{fDate(visibleMemo.createTime)}
-          </Tag>
         </div>
 
         <div style={{height: '42vh', overflowY: 'scroll', border: '1px solid #ccc', borderRadius: 10, marginTop: 5}}>

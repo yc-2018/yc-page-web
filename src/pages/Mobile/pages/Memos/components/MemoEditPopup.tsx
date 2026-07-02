@@ -1,8 +1,9 @@
 import type {RefObject} from 'react'
-import {Button, Dialog, Modal, Popup, Radio, TextArea} from 'antd-mobile'
+import {Button, Dialog, Modal, Popup, Radio, Selector, TextArea} from 'antd-mobile'
 import type {TextAreaRef} from 'antd-mobile/es/components/text-area'
 
 import {symbols} from '@/pages/MemoDrawer/constants'
+import styles from '@/pages/Mobile/styles/mobile.module.css'
 import type {MobileMemoItem} from './types'
 
 type MemoEditPopupProps = {
@@ -13,6 +14,9 @@ type MemoEditPopupProps = {
   onClose: () => void
   onContentChange: (value: string) => void
   onItemTypeChange: (value: number) => void
+  memoTags: {id?: number, name?: string}[]
+  tagIds: number[]
+  onTagIdsChange: (value: number[]) => void
   onOpenDatePicker: () => void
   onInsertAtCursor: (text: string) => void
   onSubmit: () => void
@@ -27,11 +31,15 @@ const MemoEditPopup = ({
   onClose,
   onContentChange,
   onItemTypeChange,
+  memoTags,
+  tagIds,
+  onTagIdsChange,
   onOpenDatePicker,
   onInsertAtCursor,
   onSubmit,
 }: MemoEditPopupProps) => (
   <Popup
+    style={{background: '#bf3434'}}
     visible={!!editVisible}
     onMaskClick={async () => {
       const oldContent = editVisible && editVisible !== '新增' ? editVisible.content : '' // 原备忘内容
@@ -43,9 +51,9 @@ const MemoEditPopup = ({
       if (result) onClose()
     }}
     position="top"
-    bodyStyle={{height: '450px'}}
+    bodyStyle={{minHeight: 450}}
   >
-    <div style={{padding: '10px'}}>
+    <div className={styles.memoEditBody}>
       <div style={{textAlign: 'center'}}>
         <Radio.Group value={itemType} onChange={value => onItemTypeChange(Number(value))}>
           <Radio value={0} className="█Radio">普通</Radio>
@@ -58,13 +66,25 @@ const MemoEditPopup = ({
         </Radio.Group>
       </div>
 
+      {memoTags.length > 0 &&
+        <div className={styles.memoEditTagBox}>
+          <Selector
+            multiple
+            className={styles.memoEditTagSelector}
+            value={tagIds}
+            options={memoTags.map(tag => ({label: tag.name ?? '', value: tag.id ?? 0}))}
+            onChange={arr => onTagIdsChange(arr as number[])}
+          />
+        </div>
+      }
+
       <TextArea
         rows={13}
         showCount
         ref={textRef}
         value={content}
         className="contentText"
-        style={{height: '300px'}}
+        style={{height: memoTags.length > 0 ? '255px' : '300px'}}
         placeholder="请输入备忘内容"
         maxLength={itemType === 5 ? 4000 : 2000}
         onChange={onContentChange}

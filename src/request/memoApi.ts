@@ -4,6 +4,7 @@ import ILoopMemoItem from '@/interface/ILoopMemoItem';
 import ILoopMemoItemComment from '@/interface/ILoopMemoItemComment';
 import IPage from '@/interface/Ipage';
 import IMemo from '@/interface/IMemo';
+import IMemoTag from '@/interface/IMemoTag';
 
 
 const {msg} = CommonStore
@@ -23,6 +24,8 @@ interface GetMemosParams {
   keyword?: string
   /** 日期范围筛选 */
   dateRange?: string
+  /** 标签筛选 */
+  tagId?: number | null
 }
 
 export interface MemoIncompleteCount {
@@ -53,7 +56,7 @@ export const getMemoIncompleteCounts = (currentType: number = 0) =>
  * @param keyword  搜索关键词
  * @param dateRange   日期范围: 开始时间戳/结束时间戳/0：修改时间 1：创建时间
  */
-export async function getMemos({type = 0, page = 1, completed = 0, orderBy, firstLetter, keyword, dateRange}: GetMemosParams) {
+export async function getMemos({type = 0, page = 1, completed = 0, orderBy, firstLetter, keyword, dateRange, tagId}: GetMemosParams) {
   let pageSize = type === 1 ? '&pageSize=30' : '';   // 如果是循环待办就默认30条
   if (type === 4) pageSize = '&pageSize=20';
   const pageParam = `?page=${page}`;                             // 页码参数
@@ -62,8 +65,40 @@ export async function getMemos({type = 0, page = 1, completed = 0, orderBy, firs
   const firstLetterParam = firstLetter ? `&firstLetter=${firstLetter}` : '';
   const keywordParam = keyword ? `&keyword=${encodeURIComponent(keyword)}` : ''; // 关键词不加参数前 搜索包涵‘[’或‘]’就会报 400 错误
   const dateRangeParam = dateRange ? `&dateRange=${dateRange}` : '';
-  return await myGet<IPage<IMemo>>(`/memo/${type + pageParam + completedParam + pageSize + orderByParam + firstLetterParam + keywordParam + dateRangeParam}`);
+  const tagParam = tagId ? `&tagId=${tagId}` : '';
+  return await myGet<IPage<IMemo>>(`/memo/${type + pageParam + completedParam + pageSize + orderByParam + firstLetterParam + keywordParam + dateRangeParam + tagParam}`);
 
+}
+
+/** 获取当前类型的备忘标签 */
+export const getMemoTags = (itemType: number) =>
+  myGet<IMemoTag[]>(`/memoTag/${itemType}`)
+
+/** 新增备忘标签 */
+export const createMemoTag = async (memoTag: IMemoTag) => {
+  const response = await myPost<number>('/memoTag', memoTag);
+  if (response.code === 1) {
+    msg.success('成功');
+    return response.data;
+  }
+}
+
+/** 修改备忘标签 */
+export const updateMemoTag = async (memoTag: IMemoTag) => {
+  const response = await myPut<boolean>('/memoTag', memoTag);
+  if (response.code === 1) {
+    msg.success('成功');
+    return true;
+  }
+}
+
+/** 删除备忘标签 */
+export const deleteMemoTag = async (id: number) => {
+  const response = await myDelete<boolean>(`/memoTag/${id}`);
+  if (response.code === 1) {
+    msg.success('删除成功');
+    return true;
+  }
 }
 
 /**

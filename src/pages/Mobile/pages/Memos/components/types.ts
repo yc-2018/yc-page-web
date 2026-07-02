@@ -8,6 +8,12 @@ export type MobileMemoItem = {
   createTime?: string
   updateTime?: string
   numberOfRecurrences?: number
+  tagIds?: number[]
+  tags?: {
+    id?: number
+    itemType?: number
+    name?: string
+  }[]
 }
 
 export type MemoAction = {

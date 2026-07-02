@@ -182,6 +182,89 @@
   --border-radius: 6px;
 }
 
+.memoPopupMetaRows {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-bottom: 5px;
+}
+
+.memoPopupMetaRow,
+.memoPopupTagRow {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.memoTagFilter {
+  display: flex;
+  gap: 6px;
+  padding: 0 8px 8px;
+  overflow-x: auto;
+  align-items: center;
+}
+
+.memoFilterTag {
+  flex: 0 0 auto;
+  display: inline-flex;
+  --border-radius: 6px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.memoItemTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.memoEditBody {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.memoEditTagBox {
+  flex: 0 0 auto;
+  max-height: 74px;
+  margin: 6px 0 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.memoEditTagSelector {
+  --checked-color: #d6ecff;
+}
+
+.memoEditTagSelector :global(.adm-selector) {
+  gap: 5px;
+}
+
+.memoEditTagSelector :global(.adm-selector-item) {
+  min-width: 0;
+  max-width: 46vw;
+  padding: 5px 10px;
+  font-size: 13px;
+  line-height: 18px;
+  color: #333;
+  border-radius: 4px;
+}
+
+.memoEditTagSelector :global(.adm-selector-item-active) {
+  color: #0958d9;
+  font-weight: 600;
+}
+
 .imgListViewer{
   z-index: 2000!important;
 }

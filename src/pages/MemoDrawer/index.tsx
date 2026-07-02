@@ -4,14 +4,16 @@ import {observer} from 'mobx-react-lite'
 import {
   BookOutlined,
   ColumnHeightOutlined, ExclamationCircleOutlined,
-  PlusOutlined, QuestionCircleFilled, QuestionCircleOutlined,
-  SyncOutlined, VerticalAlignMiddleOutlined
+  FireOutlined, FlagOutlined, FolderOpenOutlined,
+  HistoryOutlined, PlusOutlined, QuestionCircleFilled, QuestionCircleOutlined,
+  ReadOutlined, SyncOutlined, TagsOutlined, ToolOutlined,
+  VerticalAlignMiddleOutlined
 } from '@ant-design/icons';
 import {
   Drawer, Skeleton, Button, Tag,
   Spin, Tooltip, Select, Divider,
   Badge, Space, App, DatePicker,
-  Switch, Input, TimePicker, Image, Upload
+  Switch, Input, TimePicker, Image, Upload, Dropdown
 } from 'antd';
 import type {UploadFile, UploadProps} from 'antd';
 
@@ -23,12 +25,15 @@ import SortSelect from '@/components/SortSelect';
 import SearchBox from '@/components/common/SearchBox';
 import {
   addLoopMemoItem,
+  createMemoTag,
   deleteLoopMemoItem,
   deleteMemo,
+  deleteMemoTag,
   getMemoIncompleteCounts,
+  getMemoTags,
   getMemos,
   memoIncompleteCountsToMap,
-  selectLoopMemoItemList, updateLoopMemoItem, updateMemo
+  selectLoopMemoItemList, updateLoopMemoItem, updateMemo, updateMemoTag
 } from '@/request/memoApi'
 import JWTUtils from '@/utils/JWTUtils';
 import '@/pages/MemoDrawer/MemoDrawer.css'
@@ -41,6 +46,7 @@ import LoopMemoEditContent from '@/pages/MemoDrawer/compontets/LoopMemoEditConte
 import MemoListItem from '@/pages/MemoDrawer/compontets/MemoListItem';
 import MemoPreviewContent from '@/pages/MemoDrawer/compontets/MemoPreviewContent';
 import type IMemo from '@/interface/IMemo';
+import type IMemoTag from '@/interface/IMemoTag';
 import type ILoopMemoItem from '@/interface/ILoopMemoItem';
 import type {
   MemoCompletedFilter,
@@ -129,6 +135,8 @@ const MemoDrawer = () => {
   const [keyword, setKeyword] = useState('');                   // 搜索关键字
   const [searchEmpty, setSearchEmpty] = useState(true);       // 搜索框为空（搜索框有值没点搜索，是就是删除图标变红）
   const [lastActionId, setLastActionId] = useState<number>();  // 最后操作的备忘 ID
+  const [memoTags, setMemoTags] = useState<IMemoTag[]>([]);    // 当前类型标签列表
+  const [activeTagId, setActiveTagId] = useState<number | null>(null); // 当前筛选标签ID
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);                // 自动翻页触底监听元素
   const keywordRef = useRef(keyword);              // 当前搜索关键字引用
@@ -141,6 +149,11 @@ const MemoDrawer = () => {
 
   const sxYm = () => setRefresh(++i)        // 刷新页面
   const sxSj = () => setRefreshTrigger(++i) // 刷新数据列表
+  const refreshMemoTags = useCallback(async () => {
+    if (JWTUtils.isExpired()) return;
+    const resp = await getMemoTags(type);
+    setMemoTags(resp?.data ?? []);
+  }, [type])
 
   /** 上传图片按钮 */
   const uploadButton = (
@@ -220,7 +233,7 @@ const MemoDrawer = () => {
       total = -1;                   // 待办总数重置
       // 使用 axios 发起请求 获取又一次初始化待办列表
       const [resp, countResp] = await Promise.all([
-        getMemos({type, page: 1, completed, orderBy, keyword: keywordRef.current, dateRange: filterDate}),
+        getMemos({type, page: 1, completed, orderBy, keyword: keywordRef.current, dateRange: filterDate, tagId: activeTagId}),
         completed === 0 ? getMemoIncompleteCounts(type) : Promise.resolve(undefined)
       ]);
       if (!(resp?.code === 1)) {
@@ -269,7 +282,12 @@ const MemoDrawer = () => {
       setWebLoading(false);
     })();
 
-  }, [jwt, type, completed, refreshTrigger, memoDrawerShow, notification]);
+  }, [jwt, type, completed, refreshTrigger, memoDrawerShow, notification, activeTagId]);
+
+  /** 类型切换时加载标签 */
+  useEffect(() => {
+    refreshMemoTags();
+  }, [refreshMemoTags])
 
   /** 点击加载更多数据触发 */
   const onLoadMore = useCallback(async () => {
@@ -296,7 +314,8 @@ const MemoDrawer = () => {
         completed,
         orderBy,
         keyword: keywordRef.current,
-        dateRange: filterDate
+        dateRange: filterDate,
+        tagId: activeTagId
       });
       if (!respData?.records) {      // 保持代码的健壮性
         autoLoadFailedRef.current = true
@@ -314,7 +333,7 @@ const MemoDrawer = () => {
       setItemItemLoading(false);
     }
 
-  }, [completed, data, list.length, page, type]);
+  }, [activeTagId, completed, data, list.length, page, type]);
 
   /** 触底自动加载下一页 */
   useEffect(() => {
@@ -343,24 +362,115 @@ const MemoDrawer = () => {
     ) : !itemLoading && list.length > 0 ? <Divider className="loadMore" plain>🥺到底啦🐾</Divider> : null;
 
 
-  /** 分类标签生成 */
-  const getTag = (TypeNum: number, typeName: string, color?: string) =>
+  /** 分类入口生成 */
+  const getCategoryPill = (TypeNum: number, typeName: string, icon: ReactNode, tone = 'blue') =>
     <Badge size="small" offset={[-5, 2]}
            title="未完成的条数"
            overflowCount={9999}    // 展示封顶的数字值
            count={completed === 0 && type === TypeNum && total > 0 ? total : unFinishCounts?.[TypeNum]}
     >
-      <Tag className={`pointer ${type === TypeNum ? 'currentTag' : ''}`}
-           color={color ?? 'processing'}
-           onClick={() => {
-             setSearchEmpty(true)    // 搜索框为空重置
-             setKeyword('')          // 搜索关键字重置
-             setType(TypeNum)
-           }}
+      <button
+        type="button"
+        className={`memo-category-pill memo-category-pill-${tone} ${type === TypeNum ? 'memo-category-pill-active' : ''}`}
+        onClick={() => {
+          setSearchEmpty(true)    // 搜索框为空重置
+          setKeyword('')          // 搜索关键字重置
+          setActiveTagId(null)     // 切换类型时清空标签筛选
+          setType(TypeNum)
+        }}
       >
-        &nbsp;&nbsp;{typeName}&nbsp;&nbsp;
-      </Tag>
+        <span className="memo-category-pill-icon">{icon}</span>
+        {typeName}
+      </button>
     </Badge>
+
+  /** 新增当前类型标签 */
+  const addMemoTag = () => {
+    let tagName = ''; // 新标签名称
+    modal.confirm({
+      title: '新增标签',
+      content: <Input placeholder="请输入标签名称" maxLength={32} onChange={e => tagName = e.target.value}/>,
+      okText: '新增',
+      cancelText: '取消',
+      onOk: async () => {
+        if (!tagName.trim()) {
+          msg.error('标签名称不能为空')
+          throw new Error('标签名称不能为空')
+        }
+        const id = await createMemoTag({itemType: type, name: tagName.trim()})
+        if (id) await refreshMemoTags()
+      }
+    })
+  }
+
+  /** 修改当前类型标签 */
+  const editMemoTag = (memoTag: IMemoTag) => {
+    let tagName = memoTag.name ?? ''; // 修改后的标签名称
+    modal.confirm({
+      title: '编辑标签',
+      content: <Input defaultValue={memoTag.name} maxLength={32} onChange={e => tagName = e.target.value}/>,
+      okText: '保存',
+      cancelText: '取消',
+      onOk: async () => {
+        if (!tagName.trim() || tagName.trim() === memoTag.name) return;
+        const success = await updateMemoTag({id: memoTag.id, name: tagName.trim()})
+        if (success) {
+          await refreshMemoTags()
+          sxSj()
+        }
+      }
+    })
+  }
+
+  /** 删除当前类型标签 */
+  const removeMemoTag = (memoTag: IMemoTag) => {
+    modal.confirm({
+      title: `删除标签「${memoTag.name}」？`,
+      icon: <ExclamationCircleOutlined/>,
+      content: '删除后会从已绑定的备忘中移除该标签，备忘本身不会删除。',
+      okText: '删除',
+      okButtonProps: {danger: true},
+      cancelText: '取消',
+      onOk: async () => {
+        if (!memoTag.id) return;
+        const success = await deleteMemoTag(memoTag.id)
+        if (success) {
+          if (activeTagId === memoTag.id) setActiveTagId(null)
+          await refreshMemoTags()
+          sxSj()
+        }
+      }
+    })
+  }
+
+  /** 当前类型标签筛选行 */
+  const memoTagFilter =
+    <div className="memo-tag-filter">
+      {memoTags.map(memoTag =>
+        <Dropdown
+          key={memoTag.id}
+          trigger={['contextMenu']}
+          menu={{
+            items: [
+              {key: 'edit', label: '编辑标签'},
+              {key: 'delete', label: '删除标签', danger: true},
+            ],
+            onClick: ({key}) => key === 'edit' ? editMemoTag(memoTag) : removeMemoTag(memoTag)
+          }}
+        >
+          <Tag
+            className={`pointer memo-type-tag ${activeTagId === memoTag.id ? 'memo-type-tag-active' : ''}`}
+            color={activeTagId === memoTag.id ? 'green' : 'default'}
+            onClick={() => setActiveTagId(activeTagId === memoTag.id ? null : memoTag.id ?? null)}
+          >
+            {memoTag.name}
+          </Tag>
+        </Dropdown>
+      )}
+      <Tooltip title="新增当前类型标签">
+        <Button size="small" shape="circle" icon={<PlusOutlined/>} onClick={addMemoTag}/>
+      </Tooltip>
+    </div>
 
   /**
    * 删除循环备忘子项
@@ -889,15 +999,16 @@ const MemoDrawer = () => {
               </Tooltip>
 
             </div>
-            <Space size="large">
-              {getTag(0, '普通')}
-              {getTag(6, '工作')}
-              {getTag(3, '紧急', 'red')}
-              {getTag(1, '循环', 'magenta')}
-              {getTag(2, '长期', 'gold')}
-              {getTag(5, '日记', 'cyan')}
-              {getTag(7, '其他', 'purple')}
-            </Space>
+            <div className="memo-category-nav">
+              {getCategoryPill(0, '普通', <FolderOpenOutlined/>, 'blue')}
+              {getCategoryPill(6, '工作', <ToolOutlined/>, 'green')}
+              {getCategoryPill(3, '紧急', <FireOutlined/>, 'red')}
+              {getCategoryPill(1, '循环', <HistoryOutlined/>, 'purple')}
+              {getCategoryPill(2, '长期', <FlagOutlined/>, 'gold')}
+              {getCategoryPill(5, '日记', <ReadOutlined/>, 'cyan')}
+              {getCategoryPill(7, '其他', <TagsOutlined/>, 'gray')}
+            </div>
+            {memoTagFilter}
           </Spin>
         </>
       }

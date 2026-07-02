@@ -4,6 +4,8 @@
  * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
  * @since 2025/7/17 0:27
  */
+import type IMemoTag from '@/interface/IMemoTag';
+
 export default interface IMemo {
   /** 备忘录事项ID */
   id?: number
@@ -34,4 +36,10 @@ export default interface IMemo {
 
   /** 完成时间 */
   okTime?: string
+
+  /** 备忘标签列表 */
+  tags?: IMemoTag[]
+
+  /** 备忘标签ID列表 */
+  tagIds?: number[]
 }

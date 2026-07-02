@@ -180,6 +180,108 @@
   width: 100%;
 }
 
+.memo-category-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.memo-category-pill {
+  --memo-category-color: #1677ff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 46px;
+  height: 28px;
+  padding: 0 18px;
+  border: 1px solid color-mix(in srgb, var(--memo-category-color) 28%, #d9d9d9);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--memo-category-color) 8%, #fff);
+  color: #333;
+  font-size: 13px;
+  line-height: 26px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.memo-category-pill-icon {
+  display: inline-flex;
+  font-size: 13px;
+}
+
+.memo-category-pill:hover {
+  border-color: var(--memo-category-color);
+  color: var(--memo-category-color);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--memo-category-color) 16%, transparent);
+}
+
+.memo-category-pill-active {
+  border-color: var(--memo-category-color);
+  background: var(--memo-category-color);
+  color: #fff;
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--memo-category-color) 24%, transparent);
+}
+
+.memo-category-pill-active:hover {
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.memo-category-pill-blue {
+  --memo-category-color: #1677ff;
+}
+
+.memo-category-pill-green {
+  --memo-category-color: #389e0d;
+}
+
+.memo-category-pill-red {
+  --memo-category-color: #cf1322;
+}
+
+.memo-category-pill-purple {
+  --memo-category-color: #722ed1;
+}
+
+.memo-category-pill-gold {
+  --memo-category-color: #d48806;
+}
+
+.memo-category-pill-cyan {
+  --memo-category-color: #08979c;
+}
+
+.memo-category-pill-gray {
+  --memo-category-color: #595959;
+}
+
+.memo-tag-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.memo-type-tag {
+  position: relative;
+  margin-inline-end: 0;
+}
+
+.memo-type-tag-active {
+  box-shadow: 0 0 0 2px #52c41a;
+}
+
+.memo-list-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
 /*日期选择里面的按创建时间还是按修改时间来筛选的按创建时间来筛选改变一下样式*/
 .memo-dateRangeSwitch [aria-checked="false"] {
   background-color: #439861;

@@ -1,4 +1,4 @@
-import {Badge, Dropdown, Skeleton, Typography} from 'antd';
+import {Badge, Dropdown, Skeleton, Tag, Typography} from 'antd';
 import {CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, EyeOutlined, MoreOutlined} from '@ant-design/icons';
 import ActionBtn from '@/pages/MemoDrawer/compontets/ActionBtn';
 import HighlightKeyword from '@/utils/HighlightKeyword';
@@ -39,6 +39,7 @@ const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer, lastAct
     numberOfRecurrences,
     okTime,
     okText,
+    tags,
   } = memo;
 
   return (
@@ -58,6 +59,12 @@ const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer, lastAct
               {content}
             </Typography.Paragraph>
           </div>
+
+          {Boolean(tags?.length) &&
+            <div className="memo-list-tags">
+              {tags?.map(tag => <Tag key={tag.id} color="default">{tag.name}</Tag>)}
+            </div>
+          }
 
           {Boolean(completed) && okText && <div className="ok-text"><b>完成备注：</b>{okText}</div>}
 

@@ -1,14 +1,15 @@
 import {useEffect, useRef, useState} from 'react';
 import type {Dispatch, SetStateAction} from 'react';
 import {QuestionCircleTwoTone, SmileTwoTone} from '@ant-design/icons';
-import {Modal, Input, Radio, Button, DatePicker, Popover, Row, Col, App} from 'antd';
+import {Modal, Input, Radio, Button, DatePicker, Popover, Row, Col, App, Select} from 'antd';
 import type {Dayjs} from 'dayjs';
 import type {TextAreaRef} from 'antd/es/input/TextArea';
-import {addMemo, updateMemo} from '@/request/memoApi';
+import {addMemo, getMemoTags, updateMemo} from '@/request/memoApi';
 import modalStyle from '@/pages/MemoDrawer/compontets/formModal.module.css'
 import CommonStore from '@/store/CommonStore';
 import {toolsBaseURL} from '@/request/toolsRequest';
 import type IMemo from '@/interface/IMemo';
+import type IMemoTag from '@/interface/IMemoTag';
 import {symbols} from '@/pages/MemoDrawer/constants';
 
 const {TextArea} = Input;
@@ -56,6 +57,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}: FormModalPr
   const [confirmLoading, setConfirmLoading] = useState(false)          // 提交按钮loading
   const [openDate, setOpenDate] = useState(false)                      // 日期选择
   const [openDateRange, setOpenDateRange] = useState(false)            // 日期范围选择
+  const [memoTags, setMemoTags] = useState<IMemoTag[]>([])              // 当前类型标签列表
 
   const textRef = useRef<TextAreaRef>(null)  // 搜索框的ref 让它能自动获得焦点
   const {modal} = App.useApp();              // 关闭时提示框
@@ -66,8 +68,16 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}: FormModalPr
     else setFormData({           // 新增时，初始化数据
       content: null,
       itemType: currentMemoType,
+      tagIds: [],
     })
   }, [data, currentMemoType])
+
+  // 切换类型后加载当前类型标签
+  useEffect(() => {
+    const itemType = formData?.itemType; // 当前表单类型
+    if (itemType === null || itemType === undefined) return setMemoTags([]);
+    getMemoTags(itemType).then(resp => setMemoTags(resp?.data ?? []));
+  }, [formData?.itemType])
 
   // 打开后自动获得焦点
   useEffect(() => {
@@ -104,6 +114,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}: FormModalPr
     const body: MemoFormData = {};
     body.content = formData.content === data?.content ? null : formData.content;
     body.itemType = formData.itemType === data?.itemType ? null : formData.itemType;
+    if (!sameIds(formData.tagIds, data?.tagIds)) body.tagIds = formData.tagIds ?? [];
     body.id = data?.id;
     const result = await (data ? updateMemo : addMemo)(body as IMemo);
     if (result) {
@@ -118,6 +129,13 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}: FormModalPr
     const selectedDate = dateStr ?? ''; // 选择的日期文本
     insertAtCursor(`${selectedDate}${formData?.content ? '' : '\n'}`) // 插入日期 如果本来内容为空 那多加一个换行
     setOpenDate(false)
+  }
+
+  /** 判断标签ID是否一致 */
+  const sameIds = (a?: number[], b?: number[]) => {
+    const left = [...(a ?? [])].sort((x, y) => x - y).join(',');
+    const right = [...(b ?? [])].sort((x, y) => x - y).join(',');
+    return left === right;
   }
 
   /** 插入日期范围 */
@@ -236,7 +254,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}: FormModalPr
     >
       <div className="lrCenter">
         <Radio.Group
-          onChange={(e) => setFormData(formData => ({...(formData ?? {}), itemType: e.target.value}))}
+          onChange={(e) => setFormData(formData => ({...(formData ?? {}), itemType: e.target.value, tagIds: []}))}
           value={formData?.itemType}
           buttonStyle="solid"
           style={{margin: 5}}
@@ -250,6 +268,17 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}: FormModalPr
           <Radio.Button value={7}>其他</Radio.Button>
         </Radio.Group>
       </div>
+      <Select
+        mode="multiple"
+        allowClear
+        size="small"
+        style={{width: '100%', marginBottom: 8}}
+        placeholder={memoTags.length ? '请选择标签' : '当前类型暂无标签，请先在列表上方新增'}
+        disabled={!memoTags.length}
+        value={formData?.tagIds ?? []}
+        options={memoTags.map(tag => ({label: tag.name, value: tag.id}))}
+        onChange={tagIds => setFormData(formData => ({...(formData ?? {}), tagIds}))}
+      />
       <TextArea
         rows={14}
         showCount

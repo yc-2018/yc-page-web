@@ -3,21 +3,25 @@ import {
   InfiniteScroll, List, Popup, SwipeAction, Toast,
   Button, TextArea, Dialog, PullToRefresh,
   SearchBar, Badge, Ellipsis, Dropdown,
-  Space, ImageViewer, ImageUploader, Image, Input, Radio
+  Space, ImageViewer, ImageUploader, Image, Input, Radio, Tag
 } from 'antd-mobile'
 import {
   addLoopMemoItem, addMemo,
   addLoopMemoItemComment,
+  createMemoTag,
   deleteLoopMemoItemComment,
   deleteLoopMemoItem,
   deleteMemo,
+  deleteMemoTag,
   getMemoIncompleteCounts,
+  getMemoTags,
   getMemos,
   memoIncompleteCountsToMap,
   selectLoopMemoItemCommentList,
   selectLoopMemoItemList,
   updateLoopMemoItemComment,
-  updateLoopMemoItem, updateMemo
+  updateLoopMemoItem, updateMemo,
+  updateMemoTag
 } from "@/request/memoApi";
 import {finishName, columns, leftActions, rightActions, orderByName} from "@/pages/Mobile/shared/data";
 import {sortingOptions} from "@/store/NoLoginData";
@@ -68,9 +72,13 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [loopCommentMap, setLoopCommentMap] = useState({});           // 循环记录评论按循环项id分组
   const [editDateVisible, setEditDateVisible] = useState(false);     // 编辑框日期弹窗的显示和隐藏
   const [lastActionId, setLastActionId] = useState();                  // 最后操作的备忘 ID
+  const [memoTags, setMemoTags] = useState([]);                        // 当前类型标签列表
+  const [activeTagId, setActiveTagId] = useState(null);                 // 当前筛选标签
+  const [formMemoTags, setFormMemoTags] = useState([]);                 // 表单当前类型标签列表
 
   const [content, setContent] = useState('')                   // 表单内容
   const [itemType, setItemType] = useState(0)                 // 表单类型
+  const [tagIds, setTagIds] = useState([])                    // 表单标签ID列表
 
   const [showQ, setShowQ] = useState();
 
@@ -82,18 +90,41 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   // 筛选状态 或排序状态改变 就重置列表
   useEffect(() => {
     resetList()
-  }, [completed, orderBy])
+  }, [completed, orderBy, activeTagId])
+
+  // 当前类型标签加载
+  useEffect(() => {
+    refreshMemoTags()
+  }, [type])
+
+  // 表单类型变化时加载可选标签
+  useEffect(() => {
+    if (!editVisible) return;
+    getMemoTags(itemType).then(resp => {
+      const tags = resp?.data ?? []; // 表单可选标签
+      setFormMemoTags(tags)
+      setTagIds(ids => ids.filter(id => tags.some(tag => tag.id === id)))
+    })
+  }, [editVisible, itemType])
 
   const textRef = useRef()          // 搜索框的ref 让它能自动获得焦点
   const loading = useRef()          // 显示加载中
   const dateRef = useRef()          // 绑定日期
   const dropdownRef = useRef()      // 绑定排序和状态下拉菜单
+  const tagPressTimer = useRef()    // 标签长按计时器
+  const tagLongPressed = useRef(false) // 是否已经触发长按菜单
 
   /** 重置列表 */
   const resetList = () => {
     setPage(1)
     setData([])
     setHasMore(true)
+  }
+
+  /** 刷新当前类型标签 */
+  const refreshMemoTags = async () => {
+    const resp = await getMemoTags(type);
+    setMemoTags(resp?.data ?? [])
   }
 
   /** 刷新待办未完成预加载统计 */
@@ -110,7 +141,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   /** 加载更多 */
   const loadMore = async () => {
     const isFirstPage = page === 1  // 首次加载需要同步标签计数
-    const append = await getMemos({type, page, completed, orderBy, keyword});
+    const append = await getMemos({type, page, completed, orderBy, keyword, tagId: activeTagId});
     if (!(append?.code === 1)) return showLoading('fail', '获取数据失败') || setHasMore(false)
     const records = append.data?.records ?? []
     const total = append.data?.total ?? 0  // 总条数 给父组件显示
@@ -125,7 +156,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     setPage(1)
     setData([])
     setHasMore(false)
-    const append = await getMemos({type, page: 1, completed, orderBy, keyword});
+    const append = await getMemos({type, page: 1, completed, orderBy, keyword, tagId: activeTagId});
     if (!(append?.code === 1)) return showLoading('fail', '获取数据失败')
     const records = append.data?.records ?? []
     const total = append.data?.total ?? 0  // 总条数 给父组件显示
@@ -287,6 +318,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         setEditVisible(obj);
         setContent(obj.content);
         setItemType(obj.itemType)
+        setTagIds(obj.tagIds ?? [])
         window.setTimeout(() => {
           textRef.current?.focus()                                            // 获得焦点
           const length = obj.content.length                                  // 获取输入框字符串的长度
@@ -334,7 +366,15 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     setEditVisible('新增');
     setContent('');
     setItemType(type);
+    setTagIds([]);
     window.setTimeout(() => textRef.current?.focus(), 100) // 点击添加按钮后自动获得焦点,但是没在页面上所以要延迟一点点
+  }
+
+  /** 判断标签ID是否一致 */
+  const sameIds = (a, b) => {
+    const left = [...(a ?? [])].sort((x, y) => x - y).join(',');
+    const right = [...(b ?? [])].sort((x, y) => x - y).join(',');
+    return left === right;
   }
 
   /** 编辑或新增的提交表单 */
@@ -346,7 +386,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     let body = {};
     body.content = content === editVisible?.content ? null : content;       // 内容不一致时才更新
     body.itemType = itemType === editVisible?.itemType ? null : itemType;   // 内容不一致时才更新
-    if (!body.content && !body.itemType) return Toast.show({
+    if (!sameIds(tagIds, editVisible?.tagIds)) body.tagIds = tagIds;
+    if (!body.content && body.itemType === null && !body.tagIds) return Toast.show({
       icon: 'fail',
       content: '没有变化'
     }) && setEditVisible(false)
@@ -368,6 +409,99 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       }
     } else showLoading('fail', '失败')
   }
+
+  /** 新增当前类型标签 */
+  const addMemoTag = async () => {
+    let tagName = ''; // 新标签名称
+    await Dialog.confirm({
+      content: <Input placeholder="请输入标签名称" maxLength={32} onChange={value => tagName = value}/>,
+      confirmText: '新增',
+      onConfirm: async () => {
+        if (!tagName.trim()) {
+          Toast.show({icon: 'fail', content: '标签名称不能为空'})
+          throw new Error('标签名称不能为空')
+        }
+        const id = await createMemoTag({itemType: type, name: tagName.trim()})
+        if (id) await refreshMemoTags()
+      }
+    })
+  }
+
+  /** 修改当前类型标签 */
+  const editMemoTag = async (memoTag) => {
+    let tagName = memoTag.name ?? ''; // 修改后的标签名称
+    await Dialog.confirm({
+      content: <Input defaultValue={memoTag.name} maxLength={32} onChange={value => tagName = value}/>,
+      confirmText: '保存',
+      onConfirm: async () => {
+        if (!tagName.trim() || tagName.trim() === memoTag.name) return;
+        const success = await updateMemoTag({id: memoTag.id, name: tagName.trim()})
+        if (success) {
+          await refreshMemoTags()
+          await refreshListFromCloud()
+        }
+      }
+    })
+  }
+
+  /** 删除当前类型标签 */
+  const removeMemoTag = async (memoTag) => {
+    await Dialog.confirm({
+      content: `删除标签「${memoTag.name}」？删除后会从已绑定的备忘中移除该标签。`,
+      confirmText: '删除',
+      onConfirm: async () => {
+        const success = await deleteMemoTag(memoTag.id)
+        if (success) {
+          await refreshMemoTags()
+          if (activeTagId === memoTag.id) {
+            setActiveTagId(null)
+            resetList()
+          } else await refreshListFromCloud()
+        }
+      }
+    })
+  }
+
+  /** 打开标签操作菜单 */
+  const openMemoTagMenu = (memoTag) => {
+    const handler = Dialog.show({
+      content: `标签：${memoTag.name}`,
+      closeOnMaskClick: true,
+      actions: [
+        [{
+          key: 'edit',
+          text: '编辑',
+          onClick: () => {
+            handler.close()
+            editMemoTag(memoTag)
+          }
+        }],
+        [{
+          key: 'delete',
+          text: '删除',
+          danger: true,
+          onClick: () => {
+            handler.close()
+            removeMemoTag(memoTag)
+          }
+        }],
+        [{key: 'cancel', text: '取消', onClick: () => handler.close()}]
+      ]
+    })
+  }
+
+  /** 标签长按开始 */
+  const startTagPress = (memoTag) => {
+    window.clearTimeout(tagPressTimer.current)
+    tagLongPressed.current = false
+    tagPressTimer.current = window.setTimeout(() => {
+      tagLongPressed.current = true
+      openMemoTagMenu(memoTag)
+    }, 600)
+  }
+
+  /** 标签长按结束 */
+  const cancelTagPress = () => window.clearTimeout(tagPressTimer.current)
 
 
   /** 获取循环时间显示 */
@@ -673,6 +807,38 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         </Dropdown.Item>
       </Dropdown>
 
+      <div className={styles.memoTagFilter}>
+        {memoTags.map(memoTag =>
+          <span
+            key={memoTag.id}
+            className={styles.memoFilterTag}
+            onPointerDown={() => startTagPress(memoTag)}
+            onPointerUp={cancelTagPress}
+            onPointerLeave={cancelTagPress}
+            onPointerCancel={cancelTagPress}
+            onClick={() => {
+              if (tagLongPressed.current) {
+                tagLongPressed.current = false
+                return;
+              }
+              setActiveTagId(activeTagId === memoTag.id ? null : memoTag.id)
+            }}
+            onContextMenu={e => {
+              e.preventDefault()
+              openMemoTagMenu(memoTag)
+            }}
+          >
+            <Tag
+              color={activeTagId === memoTag.id ? 'success' : 'default'}
+              fill={activeTagId === memoTag.id ? 'solid' : 'outline'}
+            >
+              {memoTag.name}
+            </Tag>
+          </span>
+        )}
+        <Button size="mini" onClick={addMemoTag}>+</Button>
+      </div>
+
 
       {/*有数据时显示搜索框*/ (data?.length > 0 || keyword) &&
         <SearchBar
@@ -743,6 +909,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                       stopPropagationForActionButtons={['click']} // 阻止冒泡事件
                     />
                   }
+                  {item.tags?.length > 0 &&
+                    <div className={styles.memoItemTags}>
+                      {item.tags.map(tag => <Tag key={tag.id} color="default" fill="outline">{tag.name}</Tag>)}
+                    </div>
+                  }
                 </div>
               </List.Item>
             </SwipeAction>
@@ -767,7 +938,13 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         textRef={textRef}
         onClose={() => setEditVisible(false)}
         onContentChange={setContent}
-        onItemTypeChange={setItemType}
+        onItemTypeChange={value => {
+          setItemType(value)
+          setTagIds([])
+        }}
+        memoTags={formMemoTags}
+        tagIds={tagIds}
+        onTagIdsChange={setTagIds}
         onOpenDatePicker={() => setEditDateVisible(true)}
         onInsertAtCursor={insertAtCursor}
         onSubmit={submit}
