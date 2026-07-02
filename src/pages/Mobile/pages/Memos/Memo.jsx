@@ -11,7 +11,9 @@ import {
   deleteLoopMemoItemComment,
   deleteLoopMemoItem,
   deleteMemo,
+  getMemoIncompleteCounts,
   getMemos,
+  memoIncompleteCountsToMap,
   selectLoopMemoItemCommentList,
   selectLoopMemoItemList,
   updateLoopMemoItemComment,
@@ -94,18 +96,28 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     setHasMore(true)
   }
 
+  /** 刷新待办未完成预加载统计 */
+  const refreshIncompleteCounts = async (currentTotal) => {
+    if (completed !== 0) return
+    const countResp = await getMemoIncompleteCounts(type);
+    setIncompleteCounts(v => ({
+      ...v,
+      ...memoIncompleteCountsToMap(countResp?.data),
+      [type]: currentTotal,
+    }))
+  }
+
   /** 加载更多 */
   const loadMore = async () => {
+    const isFirstPage = page === 1  // 首次加载需要同步标签计数
     const append = await getMemos({type, page, completed, orderBy, keyword});
-    if (!append) return showLoading('fail', '获取数据失败') || setHasMore(false)
+    if (!(append?.code === 1)) return showLoading('fail', '获取数据失败') || setHasMore(false)
     const records = append.data?.records ?? []
+    const total = append.data?.total ?? 0  // 总条数 给父组件显示
     setData(val => [...val, ...records])
-    setHasMore(data.length + records.length < append.data.total)
+    setHasMore(data.length + records.length < total)
     setPage(val => val + 1)
-
-    const total = append.data.total  // 总条数 给父组件显示
-    // 给父组件传值：未完成总数s
-    setIncompleteCounts(v => ({...v, ...append?.map.groupMemosCounts, [type]: total}))
+    if (isFirstPage) await refreshIncompleteCounts(total)
   }
 
   /** 从云端刷新当前列表 */
@@ -114,13 +126,13 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     setData([])
     setHasMore(false)
     const append = await getMemos({type, page: 1, completed, orderBy, keyword});
-    if (!append) return showLoading('fail', '获取数据失败')
+    if (!(append?.code === 1)) return showLoading('fail', '获取数据失败')
     const records = append.data?.records ?? []
     const total = append.data?.total ?? 0  // 总条数 给父组件显示
     setData(records)
     setHasMore(records.length < total)
     setPage(2)
-    setIncompleteCounts(v => ({...v, ...append?.map?.groupMemosCounts, [type]: total}))
+    await refreshIncompleteCounts(total)
   }
 
   /** 显示加载动画 */

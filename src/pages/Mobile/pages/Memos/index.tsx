@@ -16,10 +16,10 @@ type MemoTab = {
 const tabList: MemoTab[] = [
   {title: '普通', type: 0},
   {title: '循环', type: 1},
+  {title: '工作', type: 6},
   {title: '长期', type: 2},
   {title: '紧急', type: 3},
   {title: '日记', type: 5},
-  {title: '工作', type: 6},
   {title: '其他', type: 7},
 ]
 

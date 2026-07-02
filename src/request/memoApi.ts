@@ -25,6 +25,24 @@ interface GetMemosParams {
   dateRange?: string
 }
 
+export interface MemoIncompleteCount {
+  /** 待办类型 */
+  itemType?: number
+  /** 未完成数量 */
+  count?: number
+}
+
+/** 将待办预加载统计列表转换为标签计数映射 */
+export const memoIncompleteCountsToMap = (counts?: MemoIncompleteCount[]) =>
+  (counts ?? []).reduce<Record<string, number>>((map, item) => {
+    if (typeof item.itemType === 'number') map[item.itemType] = Number(item.count ?? 0); // 标签计数
+    return map;
+  }, {})
+
+/** 获取待办未完成预加载统计 */
+export const getMemoIncompleteCounts = (currentType: number = 0) =>
+  myGet<MemoIncompleteCount[]>(`/memo/incomplete-counts?currentType=${currentType}`)
+
 /** 获取一个类型的待办列表 循环的先默认给个30条其他的还是默认10条
  * @param page      第几页
  * @param pageSize  每页多少条

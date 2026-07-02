@@ -25,7 +25,9 @@ import {
   addLoopMemoItem,
   deleteLoopMemoItem,
   deleteMemo,
+  getMemoIncompleteCounts,
   getMemos,
+  memoIncompleteCountsToMap,
   selectLoopMemoItemList, updateLoopMemoItem, updateMemo
 } from '@/request/memoApi'
 import JWTUtils from '@/utils/JWTUtils';
@@ -217,21 +219,28 @@ const MemoDrawer = () => {
       autoLoadFailedRef.current = false; // 自动翻页失败状态重置
       total = -1;                   // 待办总数重置
       // 使用 axios 发起请求 获取又一次初始化待办列表
-      const resp = await getMemos({type, page: 1, completed, orderBy, keyword: keywordRef.current, dateRange: filterDate});
+      const [resp, countResp] = await Promise.all([
+        getMemos({type, page: 1, completed, orderBy, keyword: keywordRef.current, dateRange: filterDate}),
+        completed === 0 ? getMemoIncompleteCounts(type) : Promise.resolve(undefined)
+      ]);
       if (!(resp?.code === 1)) {
         setInitLoading(false);
         setWebLoading(false);
         return;
       }
       const memoPage = resp.data; // 备忘分页数据
-      const groupMemosCounts = resp.map?.groupMemosCounts as MemoCountMap | undefined; // 类型未完成数量
       const memoRecords = memoPage?.records ?? []; // 当前页备忘列表
+      const currentTotal = memoPage?.total ?? memoRecords.length; // 当前页签总数
+      const incompleteCounts: MemoCountMap | null = completed === 0 ? {
+        ...memoIncompleteCountsToMap(countResp?.data),
+        [type]: currentTotal
+      } : null; // 类型未完成数量
       setData(memoRecords);
       setList(memoRecords);
 
-      if (completed === 0) setUnFinishCounts(groupMemosCounts ?? null)
+      if (completed === 0) setUnFinishCounts(incompleteCounts)
       // 如果刚打开时有未完成的紧急备忘 而且抽屉没打开 就弹出提醒
-      if (!initNoticeShownRef.current && !memoDrawerShow && (groupMemosCounts?.['3'] ?? 0) > 0 && total === -1) {
+      if (completed === 0 && !initNoticeShownRef.current && !memoDrawerShow && (incompleteCounts?.['3'] ?? 0) > 0 && total === -1) {
         initNoticeShownRef.current = true
         const key = `open${Date.now()}`;
         notification.info({
@@ -255,7 +264,7 @@ const MemoDrawer = () => {
         })
 
       }
-      total = memoPage?.total ?? memoRecords.length;
+      total = currentTotal;
       setInitLoading(false);
       setWebLoading(false);
     })();
@@ -339,7 +348,7 @@ const MemoDrawer = () => {
     <Badge size="small" offset={[-5, 2]}
            title="未完成的条数"
            overflowCount={9999}    // 展示封顶的数字值
-           count={type === TypeNum && total > 0 ? total : unFinishCounts?.[TypeNum]}
+           count={completed === 0 && type === TypeNum && total > 0 ? total : unFinishCounts?.[TypeNum]}
     >
       <Tag className={`pointer ${type === TypeNum ? 'currentTag' : ''}`}
            color={color ?? 'processing'}
