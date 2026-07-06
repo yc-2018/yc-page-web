@@ -4,15 +4,14 @@ import {observer} from 'mobx-react-lite'
 import {
   BookOutlined,
   ColumnHeightOutlined, ExclamationCircleOutlined,
-  FireOutlined, FlagOutlined, FolderOpenOutlined,
-  HistoryOutlined, PlusOutlined, QuestionCircleFilled, QuestionCircleOutlined,
-  ReadOutlined, SyncOutlined, TagsOutlined, ToolOutlined,
+  PlusOutlined, QuestionCircleFilled, QuestionCircleOutlined,
+  SyncOutlined,
   VerticalAlignMiddleOutlined
 } from '@ant-design/icons';
 import {
   Drawer, Skeleton, Button, Tag,
   Spin, Tooltip, Select, Divider,
-  Badge, Space, App, DatePicker,
+  Space, App, DatePicker,
   Switch, Input, TimePicker, Image, Upload, Dropdown
 } from 'antd';
 import type {UploadFile, UploadProps} from 'antd';
@@ -20,6 +19,7 @@ import type {UploadFile, UploadProps} from 'antd';
 import showOrNot from '@/store/ShowOrNot';
 import UserStore from '@/store/UserStore';
 import FormModal from '@/pages/MemoDrawer/compontets/FormModal';
+import MemoTypeSegmented from '@/pages/MemoDrawer/compontets/MemoTypeSegmented';
 import {sortingOptions, tagNameMapper} from '@/store/NoLoginData';
 import SortSelect from '@/components/SortSelect';
 import SearchBox from '@/components/common/SearchBox';
@@ -361,28 +361,10 @@ const MemoDrawer = () => {
       </div>
     ) : !itemLoading && list.length > 0 ? <Divider className="loadMore" plain>🥺到底啦🐾</Divider> : null;
 
-
-  /** 分类入口生成 */
-  const getCategoryPill = (TypeNum: number, typeName: string, icon: ReactNode, tone = 'blue') =>
-    <Badge size="small" offset={[-5, 2]}
-           title="未完成的条数"
-           overflowCount={9999}    // 展示封顶的数字值
-           count={completed === 0 && type === TypeNum && total > 0 ? total : unFinishCounts?.[TypeNum]}
-    >
-      <button
-        type="button"
-        className={`memo-category-pill memo-category-pill-${tone} ${type === TypeNum ? 'memo-category-pill-active' : ''}`}
-        onClick={() => {
-          setSearchEmpty(true)    // 搜索框为空重置
-          setKeyword('')          // 搜索关键字重置
-          setActiveTagId(null)     // 切换类型时清空标签筛选
-          setType(TypeNum)
-        }}
-      >
-        <span className="memo-category-pill-icon">{icon}</span>
-        {typeName}
-      </button>
-    </Badge>
+  const memoTypeCounts = completed === 0 ? { // 列表顶部备忘类型未完成条数
+    ...(unFinishCounts ?? {}),
+    [type]: total > 0 ? total : unFinishCounts?.[type],
+  } : undefined;
 
   /** 新增当前类型标签 */
   const addMemoTag = () => {
@@ -1001,13 +983,18 @@ const MemoDrawer = () => {
 
             </div>
             <div className="memo-category-nav">
-              {getCategoryPill(0, '普通', <FolderOpenOutlined/>, 'blue')}
-              {getCategoryPill(6, '工作', <ToolOutlined/>, 'green')}
-              {getCategoryPill(3, '紧急', <FireOutlined/>, 'red')}
-              {getCategoryPill(1, '循环', <HistoryOutlined/>, 'purple')}
-              {getCategoryPill(2, '长期', <FlagOutlined/>, 'gold')}
-              {getCategoryPill(5, '日记', <ReadOutlined/>, 'cyan')}
-              {getCategoryPill(7, '其他', <TagsOutlined/>, 'gray')}
+              <MemoTypeSegmented
+                size="large"
+                block
+                value={type}
+                counts={memoTypeCounts}
+                onChange={(nextType) => {
+                  setSearchEmpty(true)    // 搜索框为空重置
+                  setKeyword('')          // 搜索关键字重置
+                  setActiveTagId(null)     // 切换类型时清空标签筛选
+                  setType(nextType)
+                }}
+              />
             </div>
             {memoTagFilter}
           </Spin>

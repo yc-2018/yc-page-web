@@ -185,7 +185,114 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  width: 100%;
   margin-top: 4px;
+}
+
+.memo-category-nav .memo-type-segmented {
+  width: 100%;
+  max-width: 100%;
+}
+
+.memo-type-segmented :where(.ant-segmented-item, .ant-segmented-item-label, .ant-badge, .ant-badge-status) {
+  overflow: visible;
+}
+
+.memo-type-segmented .ant-segmented-item-label {
+  text-align: center;
+}
+
+.memo-type-segmented {
+  --memo-type-color: #1677ff;
+  --memo-type-bg: #e6f4ff;
+  --memo-type-shadow: rgba(22, 119, 255, 0.16);
+}
+
+.memo-type-segmented-blue {
+  --memo-type-color: #1677ff;
+  --memo-type-bg: #e6f4ff;
+  --memo-type-shadow: rgba(22, 119, 255, 0.16);
+}
+
+.memo-type-segmented-green {
+  --memo-type-color: #389e0d;
+  --memo-type-bg: #f6ffed;
+  --memo-type-shadow: rgba(56, 158, 13, 0.16);
+}
+
+.memo-type-segmented-red {
+  --memo-type-color: #cf1322;
+  --memo-type-bg: #fff1f0;
+  --memo-type-shadow: rgba(207, 19, 34, 0.14);
+}
+
+.memo-type-segmented-purple {
+  --memo-type-color: #722ed1;
+  --memo-type-bg: #f9f0ff;
+  --memo-type-shadow: rgba(114, 46, 209, 0.16);
+}
+
+.memo-type-segmented-gold {
+  --memo-type-color: #d48806;
+  --memo-type-bg: #fffbe6;
+  --memo-type-shadow: rgba(212, 136, 6, 0.16);
+}
+
+.memo-type-segmented-cyan {
+  --memo-type-color: #08979c;
+  --memo-type-bg: #e6fffb;
+  --memo-type-shadow: rgba(8, 151, 156, 0.16);
+}
+
+.memo-type-segmented-gray {
+  --memo-type-color: #434343;
+  --memo-type-bg: #e8e8e8;
+  --memo-type-shadow: rgba(67, 67, 67, 0.18);
+}
+
+.memo-type-segmented .ant-segmented-thumb,
+.memo-type-segmented .ant-segmented-item-selected {
+  background: var(--memo-type-bg);
+  box-shadow: 0 3px 9px var(--memo-type-shadow);
+}
+
+.memo-type-segmented .ant-segmented-thumb::after,
+.memo-type-segmented .ant-segmented-item-selected::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  bottom: 2px;
+  left: 8px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--memo-type-color);
+}
+
+.memo-type-segmented .ant-segmented-item-selected .memo-type-segment-label {
+  color: var(--memo-type-color);
+  font-weight: 600;
+}
+
+.memo-type-segmented .ant-segmented-item-selected .memo-type-segment-icon {
+  color: var(--memo-type-color);
+}
+
+.memo-type-segment-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.memo-type-segment-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.memo-type-segmented.ant-segmented-lg .memo-type-segment-label {
+  gap: 6px;
 }
 
 .memo-category-pill {

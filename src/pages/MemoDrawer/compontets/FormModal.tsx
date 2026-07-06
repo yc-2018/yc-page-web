@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import type {Dispatch, SetStateAction} from 'react';
 import {QuestionCircleTwoTone, SmileTwoTone} from '@ant-design/icons';
-import {Modal, Input, Radio, Button, DatePicker, Popover, Row, Col, App, Checkbox} from 'antd';
+import {Modal, Input, Button, DatePicker, Popover, Row, Col, App, Checkbox} from 'antd';
 import type {Dayjs} from 'dayjs';
 import type {TextAreaRef} from 'antd/es/input/TextArea';
 import {addMemo, getMemoTags, updateMemo} from '@/request/memoApi';
@@ -11,6 +11,7 @@ import {toolsBaseURL} from '@/request/toolsRequest';
 import type IMemo from '@/interface/IMemo';
 import type IMemoTag from '@/interface/IMemoTag';
 import {symbols} from '@/pages/MemoDrawer/constants';
+import MemoTypeSegmented from '@/pages/MemoDrawer/compontets/MemoTypeSegmented';
 
 const {TextArea} = Input;
 const {msg} = CommonStore
@@ -258,20 +259,11 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
       footer={footerButtons}
     >
       <div className="lrCenter">
-        <Radio.Group
-          onChange={(e) => setFormData(formData => ({...(formData ?? {}), itemType: e.target.value, tagIds: []}))}
-          value={formData?.itemType}
-          buttonStyle="solid"
-          style={{margin: 5}}
-        >
-          <Radio.Button value={0}>普通</Radio.Button>
-          <Radio.Button value={1}>循环</Radio.Button>
-          <Radio.Button value={2}>长期</Radio.Button>
-          <Radio.Button value={3}>紧急</Radio.Button>
-          <Radio.Button value={5}>日记</Radio.Button>
-          <Radio.Button value={6}>工作</Radio.Button>
-          <Radio.Button value={7}>其他</Radio.Button>
-        </Radio.Group>
+        <MemoTypeSegmented
+          size="large"
+          value={formData?.itemType ?? undefined}
+          onChange={(value) => setFormData(formData => ({...(formData ?? {}), itemType: value, tagIds: []}))}
+        />
       </div>
       <div className={modalStyle.memoTagBox}>
         {selectableMemoTags.length > 0 ?
