@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import type {Dispatch, SetStateAction} from 'react';
 import {QuestionCircleTwoTone, SmileTwoTone} from '@ant-design/icons';
-import {Modal, Input, Radio, Button, DatePicker, Popover, Row, Col, App, Select} from 'antd';
+import {Modal, Input, Radio, Button, DatePicker, Popover, Row, Col, App, Checkbox} from 'antd';
 import type {Dayjs} from 'dayjs';
 import type {TextAreaRef} from 'antd/es/input/TextArea';
 import {addMemo, getMemoTags, updateMemo} from '@/request/memoApi';
@@ -33,6 +33,8 @@ interface FormModalProps {
   reList: () => void
   /** 当前备忘类型，新增时使用 */
   currentMemoType: number
+  /** 当前备忘类型标签列表 */
+  currentMemoTags: IMemoTag[]
 }
 
 /** 外部图片链接列表 */
@@ -51,8 +53,9 @@ const externalImgBedList = [
  * @param data            编辑的数据（不改变的）
  * @param reList          刷新列表
  * @param currentMemoType 当前备忘类型，编辑时不用，新增时使用
+ * @param currentMemoTags 当前备忘类型标签列表
  */
-const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}: FormModalProps) => {
+const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoTags}: FormModalProps) => {
   const [formData, setFormData] = useState<MemoFormData | null>(null); // 用来复制编辑的数据（改变的）
   const [confirmLoading, setConfirmLoading] = useState(false)          // 提交按钮loading
   const [openDate, setOpenDate] = useState(false)                      // 日期选择
@@ -76,8 +79,9 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}: FormModalPr
   useEffect(() => {
     const itemType = formData?.itemType; // 当前表单类型
     if (itemType === null || itemType === undefined) return setMemoTags([]);
+    if (itemType === currentMemoType) return setMemoTags(currentMemoTags);
     getMemoTags(itemType).then(resp => setMemoTags(resp?.data ?? []));
-  }, [formData?.itemType])
+  }, [formData?.itemType, currentMemoTags, currentMemoType])
 
   // 打开后自动获得焦点
   useEffect(() => {
@@ -243,6 +247,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}: FormModalPr
     <Button key="back" onClick={() => closeModal()}>返回</Button>,
     <Button key="submit" type="primary" onClick={handleOk} loading={confirmLoading}>提交</Button>,
   ]
+  const selectableMemoTags = memoTags.filter((tag): tag is IMemoTag & {id: number} => typeof tag.id === 'number'); // 可选标签列表
 
   return (
     <Modal
@@ -268,17 +273,22 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType}: FormModalPr
           <Radio.Button value={7}>其他</Radio.Button>
         </Radio.Group>
       </div>
-      <Select
-        mode="multiple"
-        allowClear
-        size="small"
-        style={{width: '100%', marginBottom: 8}}
-        placeholder={memoTags.length ? '请选择标签' : '当前类型暂无标签，请先在列表上方新增'}
-        disabled={!memoTags.length}
-        value={formData?.tagIds ?? []}
-        options={memoTags.map(tag => ({label: tag.name, value: tag.id}))}
-        onChange={tagIds => setFormData(formData => ({...(formData ?? {}), tagIds}))}
-      />
+      <div className={modalStyle.memoTagBox}>
+        {selectableMemoTags.length > 0 ?
+          <Checkbox.Group
+            className={modalStyle.memoTagGroup}
+            value={formData?.tagIds ?? []}
+            onChange={tagIds => setFormData(formData => ({...(formData ?? {}), tagIds: tagIds as number[]}))}
+          >
+            {selectableMemoTags.map(tag =>
+              <Checkbox key={tag.id} value={tag.id}>
+                {tag.name}
+              </Checkbox>
+            )}
+          </Checkbox.Group> :
+          <div className={modalStyle.memoTagEmpty}>当前类型暂无标签，请先在列表上方新增</div>
+        }
+      </div>
       <TextArea
         rows={14}
         showCount

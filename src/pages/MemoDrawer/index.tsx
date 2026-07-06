@@ -912,6 +912,7 @@ const MemoDrawer = () => {
                 data={fModalData}
                 reList={sxSj}
                 currentMemoType={type}
+                currentMemoTags={memoTags}
               />
 
               <Tooltip title="刷新当前待办" mouseEnterDelay={0.6}>
