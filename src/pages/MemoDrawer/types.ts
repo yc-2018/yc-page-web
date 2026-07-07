@@ -26,6 +26,17 @@ export type DeleteLoopMemoItemHandler = (memoId: number, id: number) => void;
 /** 复制循环备忘子项并加一 */
 export type CopyLoopMemoItemHandler = (loopMemo: MemoLoopItem, keyword?: string) => void | Promise<void>;
 
+/** 循环记录转移载荷 */
+export interface LoopMemoTransferPayload {
+  /** 源循环备忘主键 */
+  sourceMemoId: number
+  /** 要转移的循环记录主键列表 */
+  loopItemIds: number[]
+}
+
+/** 开始选择循环记录转移目标 */
+export type StartLoopMemoTransferHandler = (payload: LoopMemoTransferPayload) => void;
+
 /** 循环备忘二层抽屉渲染函数 */
 export type RenderLoopMemoDrawer = (memo?: MemoDrawerListItem) => ReactNode;
 

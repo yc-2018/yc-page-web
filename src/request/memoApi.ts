@@ -35,6 +35,30 @@ export interface MemoIncompleteCount {
   count?: number
 }
 
+/** 循环记录转移请求 */
+export interface LoopMemoItemTransferRequest {
+  /** 源循环备忘主键 */
+  sourceMemoId: number
+  /** 目标循环备忘主键 */
+  targetMemoId: number
+  /** 要转移的循环记录主键列表 */
+  loopItemIds: number[]
+}
+
+/** 循环记录转移响应 */
+export interface LoopMemoItemTransferResponse {
+  /** 源循环备忘主键 */
+  sourceMemoId?: number
+  /** 目标循环备忘主键 */
+  targetMemoId?: number
+  /** 已转移循环记录数量 */
+  movedCount?: number
+  /** 源循环备忘最新循环次数 */
+  sourceNumberOfRecurrences?: number
+  /** 目标循环备忘最新循环次数 */
+  targetNumberOfRecurrences?: number
+}
+
 /** 将待办预加载统计列表转换为标签计数映射 */
 export const memoIncompleteCountsToMap = (counts?: MemoIncompleteCount[]) =>
   (counts ?? []).reduce<Record<string, number>>((map, item) => {
@@ -180,6 +204,14 @@ export const updateLoopMemoItem = async (loopMemoItem: ILoopMemoItem) =>
  */
 export const deleteLoopMemoItem = (memoId: number, loopId: number) =>
   myDelete<boolean>(`/loopMemoItem/${memoId}/${loopId}`);
+
+/**
+ * 转移循环备忘记录到另一个循环备忘
+ *
+ * @param request 循环记录转移请求
+ */
+export const transferLoopMemoItems = (request: LoopMemoItemTransferRequest) =>
+  myPut<LoopMemoItemTransferResponse>('/loopMemoItem/transfer', request)
 
 /**
  * 获取循环备忘记录评论列表

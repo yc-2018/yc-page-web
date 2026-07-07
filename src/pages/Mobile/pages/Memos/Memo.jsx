@@ -19,6 +19,7 @@ import {
   memoIncompleteCountsToMap,
   selectLoopMemoItemCommentList,
   selectLoopMemoItemList,
+  transferLoopMemoItems,
   updateLoopMemoItemComment,
   updateLoopMemoItem, updateMemo,
   updateMemoTag
@@ -76,6 +77,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [memoTags, setMemoTags] = useState([]);                        // 当前类型标签列表
   const [activeTagId, setActiveTagId] = useState(null);                 // 当前筛选标签
   const [formMemoTags, setFormMemoTags] = useState([]);                 // 表单当前类型标签列表
+  const [loopTransferSelecting, setLoopTransferSelecting] = useState(false); // 循环记录转移选择模式
+  const [selectedLoopIds, setSelectedLoopIds] = useState([]);                 // 已选择转移的循环记录主键
+  const [loopTransferTarget, setLoopTransferTarget] = useState(null);         // 主列表转移目标选择状态
 
   const [content, setContent] = useState('')                   // 表单内容
   const [itemType, setItemType] = useState(0)                 // 表单类型
@@ -655,6 +659,87 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     })
   }
 
+  /** 切换循环记录转移选中状态 */
+  const toggleLoopTransferItem = (loopId) => {
+    if (!loopId) return
+    setSelectedLoopIds(ids => ids.includes(loopId)
+      ? ids.filter(id => id !== loopId)
+      : [...ids, loopId]
+    )
+  }
+
+  /** 取消循环记录选择模式 */
+  const cancelLoopTransferSelecting = () => {
+    setLoopTransferSelecting(false)
+    setSelectedLoopIds([])
+  }
+
+  /** 进入主列表选择循环记录转移目标 */
+  const startLoopTransferTargetSelecting = () => {
+    if (!v['循环备忘主键']) return
+    if (!selectedLoopIds.length) return Toast.show({content: '请选择循环记录'})
+    setLoopTransferTarget({
+      sourceMemoId: v['循环备忘主键'],
+      loopItemIds: [...selectedLoopIds],
+    })
+    setLoopTransferSelecting(false)
+    setSelectedLoopIds([])
+    setLoopTime(undefined)
+    setLoopItemVisible(null)
+    setLoopMemoContent('')
+    setShowQ(undefined)
+    v['循环关键字'] = null
+    Toast.show({content: '请选择转移目标'})
+  }
+
+  /** 取消主列表转移目标选择 */
+  const cancelLoopTransferTarget = () => {
+    setLoopTransferTarget(null)
+    Toast.show({content: '已取消转移'})
+  }
+
+  /** 同步循环记录转移后的循环次数 */
+  const syncLoopTransferCounts = (sourceMemoId, targetMemoId, sourceCount, targetCount) => {
+    setData(list => list.map(item => {
+      if (item.id === sourceMemoId) return {...item, numberOfRecurrences: sourceCount ?? item.numberOfRecurrences}
+      if (item.id === targetMemoId) return {...item, numberOfRecurrences: targetCount ?? item.numberOfRecurrences}
+      return item
+    }))
+  }
+
+  /** 选择并确认循环记录转移目标 */
+  const selectLoopTransferTarget = async (targetMemo) => {
+    if (!loopTransferTarget || !targetMemo?.id) return
+    if (targetMemo.itemType !== 1) return Toast.show({icon: 'fail', content: '只能转移到循环备忘'})
+    if (targetMemo.id === loopTransferTarget.sourceMemoId) return Toast.show({icon: 'fail', content: '不能转移到原循环备忘'})
+    const transferState = loopTransferTarget; // 当前转移状态快照
+    await Dialog.confirm({
+      content: '是否确定转移？',
+      confirmText: '确定',
+      onConfirm: async () => {
+        const resp = await transferLoopMemoItems({
+          sourceMemoId: transferState.sourceMemoId,
+          targetMemoId: targetMemo.id,
+          loopItemIds: transferState.loopItemIds,
+        })
+        if (!resp.success) {
+          Toast.show({icon: 'fail', content: resp.message ?? '转移失败'})
+          throw new Error('转移失败')
+        }
+        const result = resp.data; // 转移后两边最新循环次数
+        syncLoopTransferCounts(
+          result?.sourceMemoId ?? transferState.sourceMemoId,
+          result?.targetMemoId ?? targetMemo.id,
+          result?.sourceNumberOfRecurrences,
+          result?.targetNumberOfRecurrences
+        )
+        setLoopTransferTarget(null)
+        Toast.show({icon: 'success', content: '转移成功'})
+        await refreshListFromCloud()
+      }
+    })
+  }
+
   /**
    * 显示循环子项列表
    *
@@ -669,6 +754,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     setLoopMemoContent(content => loopMemo?.content ?? (visibleObj?.id === v['循环备忘主键'] ? content : ''))
     setLoopTime([]);
     setLoopCommentMap({})
+    setLoopTransferSelecting(false)
+    setSelectedLoopIds([])
     v['循环次数继续加载'] = visibleObj.id
     v['循环时间页数'] = 1
     v['循环备忘主键'] = visibleObj.id
@@ -861,14 +948,20 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         completeText="哎呦，你干嘛🥴"
         onRefresh={async () => resetList()}
       >
+        {loopTransferTarget &&
+          <div className={styles.loopTransferTargetTip}>
+            <span>请选择转移目标</span>
+            <Button size="mini" fill="none" onClick={cancelLoopTransferTarget}>取消</Button>
+          </div>
+        }
         <List>
           {data.map(item => (
             <SwipeAction    // 滑动操作
               key={item.id}
-              leftActions={leftActions(item)}
-              rightActions={rightActions(item)}
-              onActionsReveal={() => setLastActionId(item.id)}
-              onAction={(a, _e) => onAction(a)}
+              leftActions={loopTransferTarget ? [] : leftActions(item)}
+              rightActions={loopTransferTarget ? [] : rightActions(item)}
+              onActionsReveal={() => !loopTransferTarget && setLastActionId(item.id)}
+              onAction={(a, _e) => !loopTransferTarget && onAction(a)}
             >
               <List.Item
                 key={item.id}
@@ -880,6 +973,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                     item.completed ? 'linear-gradient(270deg, #f2fff0, #fff)' : '#fff'
                 }}
                 onClick={() => {
+                  if (loopTransferTarget) {
+                    setLastActionId(item.id)
+                    selectLoopTransferTarget(item)
+                    return
+                  }
                   setLastActionId(item.id)
                   setVisible(item)
                 }}
@@ -890,7 +988,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                   {/*循环待办显示次数*/}
                   <div
                     className={styles.loopCount}
-                    onClick={e => showLoopMemoItemList(e, item)}
+                    onClick={e => {
+                      if (!loopTransferTarget) showLoopMemoItemList(e, item)
+                    }}
                     style={{display: type === 1 && item.numberOfRecurrences ? 'block' : 'none'}}
                   >
                     <Badge
@@ -962,12 +1062,31 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           setLoopTime(undefined);
           setLoopMemoContent('');
           setShowQ(undefined);
+          setLoopTransferSelecting(false);
+          setSelectedLoopIds([]);
           v['循环关键字'] = null;
         }}
       >
-        {loopMemoContent &&
-          <div className={styles.loopMemoPopupContent}>{loopMemoContent}</div>
-        }
+        <div className={styles.loopMemoPopupHeader}>
+          {loopMemoContent &&
+            <div className={styles.loopMemoPopupContent}>{loopMemoContent}</div>
+          }
+          {loopTransferSelecting ?
+            <div className={styles.loopTransferActions}>
+              <Button size="mini" fill="none" disabled={!selectedLoopIds.length} onClick={startLoopTransferTargetSelecting}>转移</Button>
+              <Button size="mini" fill="none" onClick={cancelLoopTransferSelecting}>取消</Button>
+            </div>
+            :
+            <Button
+              size="mini"
+              fill="none"
+              className={styles.loopTransferMore}
+              onClick={() => setLoopTransferSelecting(true)}
+            >
+              ...
+            </Button>
+          }
+        </div>
         {showQ?.length >= 0 ?
           <div
             style={{display: 'grid', gridTemplateColumns: '1fr 3rem', padding: 3, alignItems: 'center'}}
@@ -1067,7 +1186,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           <>
             <List>
               {loopTime?.map((item, index) =>
-                <List.Item key={item.id} onClick={() => setLoopItemVisible(item)}>
+                <List.Item
+                  key={item.id}
+                  className={`${loopTransferSelecting ? styles.loopTransferSelectable : ''} ${selectedLoopIds.includes(item.id) ? styles.loopTransferSelected : ''}`}
+                  onClick={() => loopTransferSelecting ? toggleLoopTransferItem(item.id) : setLoopItemVisible(item)}
+                >
                   <div style={{display: 'flex', gap: 10}}>
                     {index + 1}：{fDate(item.memoDate)}
                     {item.imgArr && item.imgArr.split(',').map((url, i) =>
@@ -1079,6 +1202,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                         style={{borderRadius: 5}}
                         onClick={(e) => {
                           e.stopPropagation()
+                          if (loopTransferSelecting) {
+                            toggleLoopTransferItem(item.id)
+                            return
+                          }
                           ImageViewer.Multi.show({
                             images: item.imgArr.split(','),
                             defaultIndex: i,
@@ -1097,6 +1224,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                           className={styles.loopCommentItem}
                           onClick={(e) => {
                             e.stopPropagation()
+                            if (loopTransferSelecting) {
+                              toggleLoopTransferItem(item.id)
+                              return
+                            }
                             setLoopItemVisible(null)
                             const handler = Dialog.show({
                               style: {zIndex: 1004},
@@ -1142,6 +1273,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                                 style={{borderRadius: 5}}
                                 onClick={(e) => {
                                   e.stopPropagation()
+                                  if (loopTransferSelecting) {
+                                    toggleLoopTransferItem(item.id)
+                                    return
+                                  }
                                   ImageViewer.Multi.show({
                                     images: comment.imgArr.split(',').filter(Boolean),
                                     defaultIndex: i,
@@ -1160,6 +1295,10 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                       className={styles.loopCommentMore}
                       onClick={(e) => {
                         e.stopPropagation()
+                        if (loopTransferSelecting) {
+                          toggleLoopTransferItem(item.id)
+                          return
+                        }
                         const commentState = loopCommentMap[item.id]; // 当前评论分页状态
                         if (!commentState?.loading) loadLoopCommentPage(item, commentState?.page ?? 1)
                       }}

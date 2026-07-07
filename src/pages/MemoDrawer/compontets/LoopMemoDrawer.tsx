@@ -2,7 +2,7 @@ import {useState} from 'react';
 import type {ReactNode} from 'react';
 import {App, Button, Drawer, Empty, Image, Input, Space, Spin, Tag, Typography} from 'antd';
 import type {UploadFile, UploadProps} from 'antd';
-import {CommentOutlined, DeleteOutlined, EditOutlined, HistoryOutlined, SyncOutlined} from '@ant-design/icons';
+import {CommentOutlined, DeleteOutlined, EditOutlined, HistoryOutlined, MoreOutlined, SyncOutlined} from '@ant-design/icons';
 import {fDate} from '@/utils/DateUtils';
 import {thumbUrl} from '@/utils/urlUtils.js';
 import {
@@ -19,6 +19,7 @@ import type {
   MemoDrawerListItem,
   MemoLoopItem,
   MemoLoopItemComment,
+  StartLoopMemoTransferHandler,
   UpdateLoopMemoItemHandler,
 } from '@/pages/MemoDrawer/types';
 
@@ -56,6 +57,8 @@ interface LoopMemoDrawerProps {
   previewUploadImage: (file: UploadFile<UploadImageResponse>) => void
   /** 是否有循环图片正在上传 */
   hasLoopMemoUploading: () => boolean
+  /** 进入主列表选择转移目标 */
+  onStartTransfer: StartLoopMemoTransferHandler
 }
 
 let editLoopMemoCommentText = ''; // 循环记录评论文本修改
@@ -77,10 +80,13 @@ const LoopMemoDrawer = ({
   uploadLoopMemoImage,
   previewUploadImage,
   hasLoopMemoUploading,
+  onStartTransfer,
 }: LoopMemoDrawerProps) => {
   const [open, setOpen] = useState(false); // 二层抽屉显示状态
   const [loopKeyword, setLoopKeyword] = useState(''); // 循环记录搜索输入值
   const [activeLoopKeyword, setActiveLoopKeyword] = useState(''); // 当前生效的循环记录关键字
+  const [transferSelecting, setTransferSelecting] = useState(false); // 循环记录转移选择模式
+  const [selectedLoopIds, setSelectedLoopIds] = useState<number[]>([]); // 已选择转移的循环记录主键
   const [commentMap, setCommentMap] = useState<Record<number, {
     loop?: MemoLoopItem
     records?: MemoLoopItemComment[]
@@ -100,6 +106,8 @@ const LoopMemoDrawer = ({
     setLoopKeyword('')
     setActiveLoopKeyword('')
     setCommentMap({})
+    setTransferSelecting(false)
+    setSelectedLoopIds([])
     const records = await getLoopMemoTimeData(memoId, 1, true)
     initLoopMemoCommentMap(records)
   }
@@ -110,6 +118,8 @@ const LoopMemoDrawer = ({
     setLoopKeyword('')
     setActiveLoopKeyword('')
     setCommentMap({})
+    setTransferSelecting(false)
+    setSelectedLoopIds([])
     resetLoopMemoTimeData()
   }
 
@@ -129,6 +139,29 @@ const LoopMemoDrawer = ({
   const clearLoopMemoSearch = () => {
     if (!activeLoopKeyword && !loopKeyword) return;
     void searchLoopMemos('')
+  }
+
+  /** 切换循环记录转移选中状态 */
+  const toggleTransferLoopItem = (loopItemId?: number) => {
+    if (!loopItemId) return;
+    setSelectedLoopIds(ids => ids.includes(loopItemId)
+      ? ids.filter(id => id !== loopItemId)
+      : [...ids, loopItemId]
+    )
+  }
+
+  /** 取消循环记录转移选择模式 */
+  const cancelTransferSelecting = () => {
+    setTransferSelecting(false)
+    setSelectedLoopIds([])
+  }
+
+  /** 关闭二层抽屉并进入主列表选择目标 */
+  const startTransferTargetSelecting = () => {
+    if (!memoId) return;
+    if (!selectedLoopIds.length) return message.warning('请选择循环记录')
+    onStartTransfer({sourceMemoId: memoId, loopItemIds: [...selectedLoopIds]})
+    closeDrawer()
   }
 
   /** 加载循环记录评论 */
@@ -193,7 +226,7 @@ const LoopMemoDrawer = ({
   }
 
   /** 渲染循环备忘子项图片缩略图，并让预览从被点击的原图开始 */
-  const renderLoopMemoImages = (imgArr: string) => {
+  const renderLoopMemoImages = (imgArr: string, previewEnabled = true) => {
     const imageUrls = imgArr.split(',').filter(Boolean); // 循环备忘图片原图地址列表
     if (!imageUrls.length) return null;
 
@@ -205,7 +238,7 @@ const LoopMemoDrawer = ({
               width={58}
               height={58}
               src={thumbUrl(url)}
-              preview={{src: url}}
+              preview={previewEnabled ? {src: url} : false}
               key={url}
             />
           )}
@@ -297,7 +330,7 @@ const LoopMemoDrawer = ({
   }
 
   /** 渲染循环记录评论图片 */
-  const renderCommentImages = (imgArr: string) => renderLoopMemoImages(imgArr)
+  const renderCommentImages = (imgArr: string) => renderLoopMemoImages(imgArr, !transferSelecting)
 
   return (
     <>
@@ -313,10 +346,37 @@ const LoopMemoDrawer = ({
 
       <Drawer
         title={
-          <Space>
-            <span>循环记录</span>
-            <Tag color="green">{loopTimeTotal || loopTimeList.length} 条</Tag>
-          </Space>
+          <div className="loop-memo-title">
+            <Space>
+              <span>循环记录</span>
+              <Tag color="green">{loopTimeTotal || loopTimeList.length} 条</Tag>
+            </Space>
+            {transferSelecting ?
+              <Space size={4}>
+                <Button
+                  type="link"
+                  size="small"
+                  disabled={!selectedLoopIds.length}
+                  onClick={startTransferTargetSelecting}
+                >
+                  转移
+                </Button>
+                <Button type="link" size="small" onClick={cancelTransferSelecting}>
+                  取消
+                </Button>
+              </Space>
+              :
+              <Button
+                type="text"
+                size="small"
+                className="loop-memo-more-button"
+                icon={<MoreOutlined/>}
+                title="选择循环记录"
+                aria-label="选择循环记录"
+                onClick={() => setTransferSelecting(true)}
+              />
+            }
+          </div>
         }
         placement="right"
         size={520}
@@ -357,82 +417,90 @@ const LoopMemoDrawer = ({
                 const commentState = loopMemo.id ? commentMap[loopMemo.id] : undefined; // 当前循环记录评论状态
                 const commentRecords = commentState?.records ?? []; // 当前循环记录评论列表
                 return (
-                  <div key={loopMemo.id ?? index} className="loop-memo-record">
+                  <div
+                    key={loopMemo.id ?? index}
+                    className={`loop-memo-record ${transferSelecting ? 'loop-memo-record-selectable' : ''} ${loopMemo.id && selectedLoopIds.includes(loopMemo.id) ? 'loop-memo-record-selected' : ''}`}
+                    onClick={transferSelecting ? () => toggleTransferLoopItem(loopMemo.id) : undefined}
+                  >
                     <div className="loop-memo-record-head">
                       <div>
                         <div className="loop-memo-date">{index + 1}：{fDate(loopMemo.memoDate)}</div>
                       </div>
-                      <Space>
-                        <Button
-                          size="small"
-                          icon={<CommentOutlined/>}
-                          onClick={() => editLoopMemoComment(loopMemo)}
-                        >
-                          评论
-                        </Button>
-                        {loopMemo.loopText &&
+                      {!transferSelecting &&
+                        <Space>
                           <Button
                             size="small"
-                            onClick={() => copyAddLoopMemo(loopMemo, activeLoopKeyword)}
+                            icon={<CommentOutlined/>}
+                            onClick={() => editLoopMemoComment(loopMemo)}
                           >
-                            复制+1
+                            评论
                           </Button>
-                        }
-                        {loopMemo.loopText &&
+                          {loopMemo.loopText &&
+                            <Button
+                              size="small"
+                              onClick={() => copyAddLoopMemo(loopMemo, activeLoopKeyword)}
+                            >
+                              复制+1
+                            </Button>
+                          }
+                          {loopMemo.loopText &&
+                            <Button
+                              size="small"
+                              onClick={() => copyEditLoopMemo(loopMemo, activeLoopKeyword)}
+                            >
+                              复制编辑
+                            </Button>
+                          }
                           <Button
                             size="small"
-                            onClick={() => copyEditLoopMemo(loopMemo, activeLoopKeyword)}
-                          >
-                            复制编辑
-                          </Button>
-                        }
-                        <Button
-                          size="small"
-                          shape="circle"
-                          icon={<EditOutlined/>}
-                          title="修改"
-                          aria-label="修改"
-                          onClick={() => loopMemo.id && loopMemo.memoId && updateLoopMemo(loopMemo)}
-                        />
-                        <Button
-                          size="small"
-                          shape="circle"
-                          icon={<DeleteOutlined/>}
-                          title="删除"
-                          aria-label="删除"
-                          danger
-                          onClick={() => loopMemo.id && loopMemo.memoId && deleteLoopMemo(loopMemo.memoId, loopMemo.id)}
-                        />
-                      </Space>
+                            shape="circle"
+                            icon={<EditOutlined/>}
+                            title="修改"
+                            aria-label="修改"
+                            onClick={() => loopMemo.id && loopMemo.memoId && updateLoopMemo(loopMemo)}
+                          />
+                          <Button
+                            size="small"
+                            shape="circle"
+                            icon={<DeleteOutlined/>}
+                            title="删除"
+                            aria-label="删除"
+                            danger
+                            onClick={() => loopMemo.id && loopMemo.memoId && deleteLoopMemo(loopMemo.memoId, loopMemo.id)}
+                          />
+                        </Space>
+                      }
                     </div>
 
                     {loopMemo.loopText && <div className="loop-text loop-memo-text">{loopMemo.loopText}</div>}
-                    {loopMemo.imgArr && renderLoopMemoImages(loopMemo.imgArr)}
+                    {loopMemo.imgArr && renderLoopMemoImages(loopMemo.imgArr, !transferSelecting)}
                     {commentRecords.length > 0 &&
                       <div className="loop-memo-comment-list">
                         {commentRecords.map(comment =>
                           <div key={comment.id} className="loop-memo-comment-item">
                             <div className="loop-memo-record-head">
                               <div className="loop-memo-comment-date">{fDate(comment.commentDate)}</div>
-                              <Space>
-                                <Button
-                                  size="small"
-                                  shape="circle"
-                                  icon={<EditOutlined/>}
-                                  title="修改"
-                                  aria-label="修改"
-                                  onClick={() => editLoopMemoComment(loopMemo, comment)}
-                                />
-                                <Button
-                                  size="small"
-                                  shape="circle"
-                                  icon={<DeleteOutlined/>}
-                                  title="删除"
-                                  aria-label="删除"
-                                  danger
-                                  onClick={() => deleteLoopMemoComment(loopMemo, comment)}
-                                />
-                              </Space>
+                              {!transferSelecting &&
+                                <Space>
+                                  <Button
+                                    size="small"
+                                    shape="circle"
+                                    icon={<EditOutlined/>}
+                                    title="修改"
+                                    aria-label="修改"
+                                    onClick={() => editLoopMemoComment(loopMemo, comment)}
+                                  />
+                                  <Button
+                                    size="small"
+                                    shape="circle"
+                                    icon={<DeleteOutlined/>}
+                                    title="删除"
+                                    aria-label="删除"
+                                    danger
+                                    onClick={() => deleteLoopMemoComment(loopMemo, comment)}
+                                  />
+                                </Space>
+                              }
                             </div>
                             {comment.commentText && <div className="loop-text loop-memo-text">{comment.commentText}</div>}
                             {comment.imgArr && renderCommentImages(comment.imgArr)}
@@ -440,7 +508,7 @@ const LoopMemoDrawer = ({
                         )}
                       </div>
                     }
-                    {commentState?.hasMore &&
+                    {!transferSelecting && commentState?.hasMore &&
                       <Button
                         block
                         size="small"

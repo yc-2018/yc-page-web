@@ -33,7 +33,7 @@ import {
   getMemoTags,
   getMemos,
   memoIncompleteCountsToMap,
-  selectLoopMemoItemList, updateLoopMemoItem, updateMemo, updateMemoTag
+  selectLoopMemoItemList, transferLoopMemoItems, updateLoopMemoItem, updateMemo, updateMemoTag
 } from '@/request/memoApi'
 import JWTUtils from '@/utils/JWTUtils';
 import '@/pages/MemoDrawer/MemoDrawer.css'
@@ -52,6 +52,7 @@ import type {
   MemoCompletedFilter,
   MemoCountMap,
   MemoDrawerListItem,
+  LoopMemoTransferPayload,
   RenderLoopMemoDrawer,
 } from '@/pages/MemoDrawer/types';
 
@@ -137,6 +138,7 @@ const MemoDrawer = () => {
   const [lastActionId, setLastActionId] = useState<number>();  // 最后操作的备忘 ID
   const [memoTags, setMemoTags] = useState<IMemoTag[]>([]);    // 当前类型标签列表
   const [activeTagId, setActiveTagId] = useState<number | null>(null); // 当前筛选标签ID
+  const [loopTransfer, setLoopTransfer] = useState<LoopMemoTransferPayload | null>(null); // 循环记录转移目标选择状态
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);                // 自动翻页触底监听元素
   const keywordRef = useRef(keyword);              // 当前搜索关键字引用
@@ -531,6 +533,65 @@ const MemoDrawer = () => {
     setLoopTimeWebLoading(false)
   }
 
+  /** 开始在主列表中选择循环记录转移目标 */
+  const startLoopMemoTransfer = (payload: LoopMemoTransferPayload) => {
+    setLoopTransfer(payload)
+    setLastActionId(payload.sourceMemoId)
+    msg.info('请选择转移目标')
+  }
+
+  /** 取消循环记录转移目标选择 */
+  const cancelLoopMemoTransfer = () => {
+    setLoopTransfer(null)
+    msg.info('已取消转移')
+  }
+
+  /** 把转移返回的循环次数同步到当前列表 */
+  const syncLoopTransferCounts = (sourceMemoId: number, targetMemoId: number, sourceCount?: number, targetCount?: number) => {
+    const syncCounts = (memos: MemoDrawerListItem[]) => memos.map(memo => {
+      if (memo.id === sourceMemoId) return {...memo, numberOfRecurrences: sourceCount ?? memo.numberOfRecurrences}
+      if (memo.id === targetMemoId) return {...memo, numberOfRecurrences: targetCount ?? memo.numberOfRecurrences}
+      return memo
+    }); // 转移后本地同步循环次数
+    setData(syncCounts)
+    setList(syncCounts)
+  }
+
+  /** 确认并执行循环记录转移 */
+  const confirmLoopMemoTransfer = (targetMemo: MemoDrawerListItem) => {
+    if (!loopTransfer || !targetMemo.id) return;
+    if (targetMemo.itemType !== 1) return msg.warning('只能转移到循环备忘')
+    if (targetMemo.id === loopTransfer.sourceMemoId) return msg.warning('不能转移到原循环备忘')
+    modal.confirm({
+      title: '是否确定转移？',
+      content: `将 ${loopTransfer.loopItemIds.length} 条循环记录转移到该循环备忘。`,
+      okText: '确定',
+      cancelText: '取消',
+      onOk: async () => {
+        const resp = await transferLoopMemoItems({
+          sourceMemoId: loopTransfer.sourceMemoId,
+          targetMemoId: targetMemo.id!,
+          loopItemIds: loopTransfer.loopItemIds,
+        })
+        if (!resp.success) {
+          msg.error(resp.message ?? '转移失败')
+          throw new Error('转移失败')
+        }
+        const result = resp.data; // 转移后两边最新循环次数
+        syncLoopTransferCounts(
+          result?.sourceMemoId ?? loopTransfer.sourceMemoId,
+          result?.targetMemoId ?? targetMemo.id!,
+          result?.sourceNumberOfRecurrences,
+          result?.targetNumberOfRecurrences
+        )
+        setLoopTransfer(null)
+        resetLoopMemoTimeData()
+        msg.success('转移成功')
+        sxSj()
+      }
+    })
+  }
+
   /** 渲染循环备忘录时间二层抽屉 */
   const renderLoopMemoDrawer: RenderLoopMemoDrawer = memo => memo?.id &&
     <LoopMemoDrawer
@@ -548,6 +609,7 @@ const MemoDrawer = () => {
       uploadLoopMemoImage={uploadLoopMemoImage}
       previewUploadImage={previewUploadImage}
       hasLoopMemoUploading={() => loopMemoUploadingCount > 0}
+      onStartTransfer={startLoopMemoTransfer}
     />
 
   // 获取循环备忘录时间列表
@@ -749,6 +811,10 @@ const MemoDrawer = () => {
     const itemObj = list.find(item => item.id === parsedId);
 
     if (id && itemObj) setLastActionId(parsedId)
+    if (loopTransfer) {
+      if (itemObj) confirmLoopMemoTransfer(itemObj)
+      return;
+    }
     if (!(actionEl instanceof HTMLElement)) return;
 
     const action = actionEl.getAttribute('data-action');
@@ -1018,6 +1084,12 @@ const MemoDrawer = () => {
             onDoubleClick={listHandleAction} // 在这里设置事件监听器
             className="demo-loadmore-list memo-list"
           >
+            {loopTransfer &&
+              <div className="memo-transfer-floating-tip">
+                <span>请选择转移目标</span>
+                <Button type="link" size="small" onClick={cancelLoopMemoTransfer}>取消</Button>
+              </div>
+            }
             {list.map((memo, index) =>
               <MemoListItem
                 key={memo.id ?? `loading-${index}`}

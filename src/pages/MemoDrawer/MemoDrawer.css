@@ -2,6 +2,10 @@
   min-height: 350px;
 }
 
+.memo-list {
+  position: relative;
+}
+
 .memo-list-item {
   position: relative;
   padding: 12px 0;
@@ -398,9 +402,39 @@
   font-size: 12px;
 }
 
+.memo-transfer-floating-tip {
+  position: sticky;
+  top: 42%;
+  z-index: 5;
+  display: flex;
+  width: fit-content;
+  max-width: calc(100% - 40px);
+  margin: 0 auto -34px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border: 1px solid rgba(22, 119, 255, 0.18);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #315b8f;
+  box-shadow: 0 6px 18px rgba(20, 40, 80, 0.14);
+}
+
 .loop-memo-drawer .ant-drawer-body {
   padding: 14px;
   background: #eef1f5;
+}
+
+.loop-memo-title {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.loop-memo-more-button {
+  color: #777;
 }
 
 .loop-memo-sticky-head {
@@ -436,6 +470,20 @@
   padding: 12px 10px;
   background: #fff;
   box-shadow: 0 1px 3px rgba(5, 5, 5, 0.06);
+  transition: background-color 0.18s, box-shadow 0.18s, transform 0.18s;
+}
+
+.loop-memo-record-selectable {
+  cursor: pointer;
+}
+
+.loop-memo-record-selectable:hover {
+  background: #f7fbff;
+}
+
+.loop-memo-record-selected {
+  background: #eef7ff;
+  box-shadow: inset 3px 0 0 #1677ff, 0 2px 8px rgba(22, 119, 255, 0.12);
 }
 
 .loop-memo-record-head {
