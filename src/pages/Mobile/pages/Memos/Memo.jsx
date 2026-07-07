@@ -70,6 +70,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [hhMmVisible, setHhMmVisible] = useState(false);     // 时分弹窗的显示和隐藏
   const [loopItemVisible, setLoopItemVisible] = useState(null);       // 备忘循环项 弹窗的显示和隐藏 有对象就是显示然有没有好有
   const [loopCommentMap, setLoopCommentMap] = useState({});           // 循环记录评论按循环项id分组
+  const [loopMemoContent, setLoopMemoContent] = useState('');          // 当前循环记录弹窗的备忘内容
   const [editDateVisible, setEditDateVisible] = useState(false);     // 编辑框日期弹窗的显示和隐藏
   const [lastActionId, setLastActionId] = useState();                  // 最后操作的备忘 ID
   const [memoTags, setMemoTags] = useState([]);                        // 当前类型标签列表
@@ -664,6 +665,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     e?.stopPropagation()
     visibleObj = visibleObj ?? visible
     if (visibleObj?.id) setLastActionId(visibleObj.id)
+    const loopMemo = visibleObj?.content ? visibleObj : data.find(item => item.id === visibleObj?.id); // 当前循环备忘主项
+    setLoopMemoContent(content => loopMemo?.content ?? (visibleObj?.id === v['循环备忘主键'] ? content : ''))
     setLoopTime([]);
     setLoopCommentMap({})
     v['循环次数继续加载'] = visibleObj.id
@@ -957,10 +960,14 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         bodyStyle={{height: '55vh', overflow: 'scroll'}}
         onMaskClick={() => {
           setLoopTime(undefined);
+          setLoopMemoContent('');
           setShowQ(undefined);
           v['循环关键字'] = null;
         }}
       >
+        {loopMemoContent &&
+          <div className={styles.loopMemoPopupContent}>{loopMemoContent}</div>
+        }
         {showQ?.length >= 0 ?
           <div
             style={{display: 'grid', gridTemplateColumns: '1fr 3rem', padding: 3, alignItems: 'center'}}

@@ -136,6 +136,17 @@
   color: #999;
 }
 
+.loopMemoPopupContent {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eef0f4;
+  color: #333;
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .loopCommentList {
   margin: 8px 0 0 12px;
   padding-left: 10px;
