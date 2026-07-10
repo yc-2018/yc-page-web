@@ -27,7 +27,7 @@ import {
 import {finishName, columns, leftActions, rightActions, orderByName} from "@/pages/Mobile/shared/data";
 import {sortingOptions} from "@/store/NoLoginData";
 import HighlightKeyword from "@/utils/HighlightKeyword";
-import {ExclamationCircleFilled} from "@ant-design/icons";
+import {CloseOutlined, ExclamationCircleFilled, FullscreenExitOutlined, FullscreenOutlined} from "@ant-design/icons";
 import styles from '@/pages/Mobile/styles/mobile.module.css'
 import {fDate} from "@/utils/DateUtils";
 import {uploadImgByJD} from "@/request/toolsRequest";
@@ -80,6 +80,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [loopTransferSelecting, setLoopTransferSelecting] = useState(false); // 循环记录转移选择模式
   const [selectedLoopIds, setSelectedLoopIds] = useState([]);                 // 已选择转移的循环记录主键
   const [loopTransferTarget, setLoopTransferTarget] = useState(null);         // 主列表转移目标选择状态
+  const [loopPopupFullscreen, setLoopPopupFullscreen] = useState(false);      // 循环记录弹窗是否全屏
 
   const [content, setContent] = useState('')                   // 表单内容
   const [itemType, setItemType] = useState(0)                 // 表单类型
@@ -674,6 +675,17 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     setSelectedLoopIds([])
   }
 
+  /** 关闭循环记录列表弹窗 */
+  const closeLoopMemoPopup = () => {
+    setLoopTime(undefined);
+    setLoopMemoContent('');
+    setShowQ(undefined);
+    setLoopTransferSelecting(false);
+    setSelectedLoopIds([]);
+    setLoopPopupFullscreen(false);
+    v['循环关键字'] = null;
+  }
+
   /** 进入主列表选择循环记录转移目标 */
   const startLoopTransferTargetSelecting = () => {
     if (!v['循环备忘主键']) return
@@ -1057,35 +1069,48 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       <Popup      /* 循环时间的弹出层 *******************************************************************/
         visible={!!loopTime}
         style={{zIndex: 1001}}
-        bodyStyle={{height: '55vh', overflow: 'scroll'}}
-        onMaskClick={() => {
-          setLoopTime(undefined);
-          setLoopMemoContent('');
-          setShowQ(undefined);
-          setLoopTransferSelecting(false);
-          setSelectedLoopIds([]);
-          v['循环关键字'] = null;
-        }}
+        bodyStyle={{height: loopPopupFullscreen ? '100vh' : '55vh', overflow: 'scroll'}}
+        onMaskClick={closeLoopMemoPopup}
       >
         <div className={styles.loopMemoPopupHeader}>
           {loopMemoContent &&
             <div className={styles.loopMemoPopupContent}>{loopMemoContent}</div>
           }
-          {loopTransferSelecting ?
-            <div className={styles.loopTransferActions}>
-              <Button size="mini" fill="none" disabled={!selectedLoopIds.length} onClick={startLoopTransferTargetSelecting}>转移</Button>
-              <Button size="mini" fill="none" onClick={cancelLoopTransferSelecting}>取消</Button>
-            </div>
-            :
+          <div className={styles.loopMemoPopupActions}>
+            {loopTransferSelecting ?
+              <div className={styles.loopTransferActions}>
+                <Button size="mini" fill="none" disabled={!selectedLoopIds.length} onClick={startLoopTransferTargetSelecting}>转移</Button>
+                <Button size="mini" fill="none" onClick={cancelLoopTransferSelecting}>取消</Button>
+              </div>
+              :
+              <Button
+                size="mini"
+                fill="none"
+                className={styles.loopTransferMore}
+                onClick={() => setLoopTransferSelecting(true)}
+              >
+                ...
+              </Button>
+            }
             <Button
               size="mini"
               fill="none"
-              className={styles.loopTransferMore}
-              onClick={() => setLoopTransferSelecting(true)}
+              aria-label={loopPopupFullscreen ? '半屏显示' : '全屏显示'}
+              title={loopPopupFullscreen ? '半屏显示' : '全屏显示'}
+              onClick={() => setLoopPopupFullscreen(fullscreen => !fullscreen)}
             >
-              ...
+              {loopPopupFullscreen ? <FullscreenExitOutlined/> : <FullscreenOutlined/>}
             </Button>
-          }
+            <Button
+              size="mini"
+              fill="none"
+              aria-label="关闭循环记录"
+              title="关闭循环记录"
+              onClick={closeLoopMemoPopup}
+            >
+              <CloseOutlined/>
+            </Button>
+          </div>
         </div>
         {showQ?.length >= 0 ?
           <div
