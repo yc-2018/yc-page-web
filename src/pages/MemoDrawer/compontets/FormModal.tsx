@@ -65,20 +65,26 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
   const [openDateRange, setOpenDateRange] = useState(false)            // 日期范围选择
   const [memoTags, setMemoTags] = useState<IMemoTag[]>([])              // 当前类型标签列表
   const [imageUploading, setImageUploading] = useState(false)          // 是否存在图片上传任务
+  const [formSession, setFormSession] = useState(0)                    // 当前表单会话编号
 
   const textRef = useRef<TextAreaRef>(null)  // 搜索框的ref 让它能自动获得焦点
+  const formSessionRef = useRef(0)           // 用于忽略已关闭表单的异步上传回调
   const {modal} = App.useApp();              // 关闭时提示框
 
   // 初始化数据
   useEffect(() => {
+    if (!isOpen) return;
+    const nextSession = formSessionRef.current + 1; // 新表单会话编号
+    formSessionRef.current = nextSession;
+    setFormSession(nextSession);
     setImageUploading(false)
-    if (data) setFormData(data)  // 编辑时，初始化数据
+    if (data) setFormData({...data, tagIds: [...(data.tagIds ?? [])]})  // 编辑时，初始化数据快照
     else setFormData({           // 新增时，初始化数据
       content: null,
       itemType: currentMemoType,
       tagIds: [],
     })
-  }, [data, currentMemoType])
+  }, [data, currentMemoType, isOpen])
 
   // 切换类型后加载当前类型标签
   useEffect(() => {
@@ -96,7 +102,8 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
 
   /** 关闭弹窗 */
   const closeModal = (notSubmit = true) => {
-    const hasUnsavedChanges = formData?.content !== (data?.content ?? null)
+    const hasUnsavedChanges = imageUploading
+      || formData?.content !== (data?.content ?? null)
       || formData?.itemType !== (data?.itemType ?? currentMemoType)
       || !sameIds(formData?.tagIds, data?.tagIds)
       || (formData?.imgArr ?? '') !== (data?.imgArr ?? ''); // 表单是否存在未保存修改
@@ -113,6 +120,9 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
       setOpenDateRange(false)                          // 日期范围选择器关闭
       setOpenDate(false)                               // 日期选择器关闭
       setImageUploading(false)                         // 重置图片上传状态
+      const nextSession = formSessionRef.current + 1;  // 立即使旧上传回调失效
+      formSessionRef.current = nextSession;
+      setFormSession(nextSession);
       window.setTimeout(() => setOpen(false), 100)     // 延迟关闭，防止这个先关闭了时间选择器就关闭不了
     }
   };
@@ -302,9 +312,16 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
         onChange={e => setFormData(formData => ({...(formData ?? {}), content: e.target.value}))}
       />
       <MemoImageUploader
+        key={formSession}
         value={formData?.imgArr}
-        onChange={imgArr => setFormData(current => ({...(current ?? {}), imgArr}))}
-        onUploadingChange={setImageUploading}
+        onChange={imgArr => {
+          if (formSession !== formSessionRef.current) return;
+          setFormData(current => ({...(current ?? {}), imgArr}))
+        }}
+        onUploadingChange={uploading => {
+          if (formSession !== formSessionRef.current) return;
+          setImageUploading(uploading)
+        }}
       />
       {/*日期选择面板*/}
       <DatePicker

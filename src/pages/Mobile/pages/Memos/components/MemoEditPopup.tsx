@@ -20,6 +20,7 @@ type MemoEditPopupProps = {
   tagIds: number[]
   onTagIdsChange: (value: number[]) => void
   hasUnsavedChanges: boolean
+  formSession: number
   memoImages: ImageUploadItem[]
   onMemoImagesChange: (items: ImageUploadItem[]) => void
   onImageUploadQueueChange: (tasks: UploadTask[]) => void
@@ -42,6 +43,7 @@ const MemoEditPopup = ({
   tagIds,
   onTagIdsChange,
   hasUnsavedChanges,
+  formSession,
   memoImages,
   onMemoImagesChange,
   onImageUploadQueueChange,
@@ -102,6 +104,7 @@ const MemoEditPopup = ({
       />
       <div className={styles.memoImageUploaderRow}>
         <ImageUploader
+          key={formSession}
           className={styles.memoImageUploader}
           value={memoImages}
           columns={6}
@@ -109,6 +112,7 @@ const MemoEditPopup = ({
           multiple
           accept="image/*"
           showFailed={false}
+          preview={false}
           upload={onUploadImage}
           onChange={onMemoImagesChange}
           onUploadQueueChange={onImageUploadQueueChange}

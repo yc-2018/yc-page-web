@@ -90,6 +90,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [memoImages, setMemoImages] = useState([])            // 当前备忘原图与缩略图
   const [memoImageUploading, setMemoImageUploading] = useState(false) // 是否正在上传备忘图片
   const [initialMemoForm, setInitialMemoForm] = useState(null) // 打开表单时的数据快照
+  const [memoFormSession, setMemoFormSession] = useState(0)    // 当前备忘表单会话编号
 
   const [showQ, setShowQ] = useState();
 
@@ -124,6 +125,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const dropdownRef = useRef()      // 绑定排序和状态下拉菜单
   const tagPressTimer = useRef()    // 标签长按计时器
   const tagLongPressed = useRef(false) // 是否已经触发长按菜单
+  const memoFormSessionRef = useRef(0) // 用于忽略已关闭表单的异步上传回调
 
   /** 重置列表 */
   const resetList = () => {
@@ -326,6 +328,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       case 'edit':
         setVisible(undefined)
         const obj = data.find(item => item.id === id);
+        startMemoFormSession()
         setEditVisible(obj);
         setContent(obj.content);
         setItemType(obj.itemType)
@@ -382,6 +385,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
   /** 打开添加弹窗 */
   const openAdd = () => {
+    startMemoFormSession()
     setEditVisible('新增');
     setContent('');
     setItemType(type);
@@ -399,9 +403,24 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     return left === right;
   }
 
+  /** 开启新的备忘表单会话，并使旧上传回调失效 */
+  function startMemoFormSession() {
+    const nextSession = memoFormSessionRef.current + 1; // 新表单会话编号
+    memoFormSessionRef.current = nextSession;
+    setMemoFormSession(nextSession)
+  }
+
+  /** 关闭备忘表单并使当前上传回调失效 */
+  const closeMemoForm = () => {
+    startMemoFormSession()
+    setMemoImageUploading(false)
+    setEditVisible(false)
+  }
+
   const currentMemoImgArr = joinMemoImages(memoImages.map(item => item.url)); // 当前表单图片字段
   const memoFormChanged = Boolean(initialMemoForm) && (
-    content !== initialMemoForm.content
+    memoImageUploading
+    || content !== initialMemoForm.content
     || itemType !== initialMemoForm.itemType
     || !sameIds(tagIds, initialMemoForm.tagIds)
     || currentMemoImgArr !== initialMemoForm.imgArr
@@ -425,7 +444,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     if (nextImgArr !== (editVisible?.imgArr ?? '')) body.imgArr = nextImgArr;
     if (body.content === null && body.itemType === null && body.tagIds === undefined && body.imgArr === undefined) {
       Toast.show({icon: 'fail', content: '没有变化'})
-      setEditVisible(false)
+      closeMemoForm()
       return
     }
     body.id = editVisible?.id;
@@ -433,7 +452,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     let result = await (editVisible === '新增' ? addMemo : updateMemo)(body);
     if (result) {
       showLoading('success', '成功')
-      setEditVisible(false);
+      closeMemoForm();
 
       if (editVisible === '新增') {
         if (type !== body.itemType) return setChangeType(body.itemType);  /* 新增的待办不是当前类型，那个重置的数据 */
@@ -1083,7 +1102,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         content={content}
         itemType={itemType}
         textRef={textRef}
-        onClose={() => setEditVisible(false)}
+        onClose={closeMemoForm}
         onContentChange={setContent}
         onItemTypeChange={value => {
           setItemType(value)
@@ -1093,9 +1112,16 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         tagIds={tagIds}
         onTagIdsChange={setTagIds}
         hasUnsavedChanges={memoFormChanged}
+        formSession={memoFormSession}
         memoImages={memoImages}
-        onMemoImagesChange={setMemoImages}
-        onImageUploadQueueChange={tasks => setMemoImageUploading(tasks.some(task => task.status === 'pending'))}
+        onMemoImagesChange={items => {
+          if (memoFormSession !== memoFormSessionRef.current) return;
+          setMemoImages(items.filter(Boolean))
+        }}
+        onImageUploadQueueChange={tasks => {
+          if (memoFormSession !== memoFormSessionRef.current) return;
+          setMemoImageUploading(tasks.some(task => task.status === 'pending'))
+        }}
         onUploadImage={uploadToJD}
         onOpenDatePicker={() => setEditDateVisible(true)}
         onInsertAtCursor={insertAtCursor}

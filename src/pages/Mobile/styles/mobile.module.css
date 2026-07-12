@@ -365,6 +365,7 @@
 
 .memoImageUploader :global(.adm-grid) {
   width: max-content;
+  --cell-size: 45px !important;
   grid-template-columns: repeat(6, 45px) !important;
 }
 

@@ -1,7 +1,7 @@
 import {PlusOutlined} from '@ant-design/icons';
 import {App, Image, Upload} from 'antd';
 import type {UploadFile, UploadProps} from 'antd';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import CommonStore from '@/store/CommonStore';
 import {uploadImgByJD} from '@/request/toolsRequest';
 import {MAX_MEMO_IMAGES, joinMemoImages, splitMemoImages} from '@/utils/memoImageUtils.js';
@@ -24,21 +24,23 @@ interface MemoImageUploaderProps {
 /** 读取上传项的原图地址 */
 const getOriginalUrl = (file: UploadFile<UploadImageResponse>) => file.response?.url || file.url;
 
+/** 将已保存图片转换为上传列表 */
+const createInitialFileList = (value?: string): UploadFile<UploadImageResponse>[] =>
+  splitMemoImages(value).map((url: string, index: number) => ({
+    uid: `memo-image-${index}-${url}`,
+    name: `memo-image-${index + 1}.webp`,
+    status: 'done',
+    url,
+    thumbUrl: thumbUrl(url),
+  }));
+
 /** 桌面端备忘图片上传组件 */
 const MemoImageUploader = ({value, onChange, onUploadingChange}: MemoImageUploaderProps) => {
-  const [fileList, setFileList] = useState<UploadFile<UploadImageResponse>[]>([]); // 当前上传列表
+  const [fileList, setFileList] = useState<UploadFile<UploadImageResponse>[]>(
+    () => createInitialFileList(value)
+  ); // 当前上传列表
   const {msg} = CommonStore;
   const {modal} = App.useApp(); // 原图预览弹窗
-
-  useEffect(() => {
-    setFileList(splitMemoImages(value).map((url: string, index: number) => ({
-      uid: `memo-image-${index}-${url}`,
-      name: `memo-image-${index + 1}.webp`,
-      status: 'done',
-      url,
-      thumbUrl: thumbUrl(url),
-    })));
-  }, [value]);
 
   /** 上传单张图片到现有图床 */
   const uploadImage: UploadProps<UploadImageResponse>['customRequest'] = async ({file, onSuccess, onError}) => {
