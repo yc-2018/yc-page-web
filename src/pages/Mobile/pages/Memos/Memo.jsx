@@ -294,7 +294,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                 onChange={v => okText = v}
               />
               <ImageUploader
-                columns={3}
+                className={styles.loopMemoImageUploader}
                 maxCount={3}
                 capture="camera"
                 showFailed={false}

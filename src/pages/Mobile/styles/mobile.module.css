@@ -245,6 +245,11 @@
   font-size: 12px;
 }
 
+.loopMemoImageUploader {
+  --cell-size: 70px;
+  --gap: 6px;
+}
+
 .tipContent{
   color: #999;
   white-space: nowrap;
