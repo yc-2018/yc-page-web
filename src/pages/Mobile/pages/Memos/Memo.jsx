@@ -664,6 +664,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             onChange={v => okText = v}
           />
           <ImageUploader
+            className={styles.loopMemoImageUploader}
             defaultValue={imgArr ? imgArr.split(',').map(url => ({url})) : undefined} // 防止空字符串生成一个无效的
             maxCount={3}
             showFailed={false}
