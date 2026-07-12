@@ -4,6 +4,7 @@ import ActionBtn from '@/pages/MemoDrawer/compontets/ActionBtn';
 import HighlightKeyword from '@/utils/HighlightKeyword';
 import {fDate} from '@/utils/DateUtils';
 import type {MemoDrawerListItem, RenderLoopMemoDrawer} from '@/pages/MemoDrawer/types';
+import MemoImageGallery from '@/pages/MemoDrawer/compontets/MemoImageGallery';
 
 interface MemoListItemProps {
   /** 备忘数据 */
@@ -39,6 +40,7 @@ const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer, lastAct
     numberOfRecurrences,
     okTime,
     okText,
+    imgArr,
     tags,
   } = memo;
 
@@ -59,6 +61,8 @@ const MemoListItem = ({memo, keyword, searchEmpty, renderLoopMemoDrawer, lastAct
               {content}
             </Typography.Paragraph>
           </div>
+
+          <MemoImageGallery imgArr={imgArr}/>
 
           {Boolean(tags?.length) &&
             <div className="memo-list-tags">

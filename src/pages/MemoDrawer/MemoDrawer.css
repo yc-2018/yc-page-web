@@ -387,6 +387,34 @@
   margin-top: 6px;
 }
 
+.memo-image-gallery {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  overflow-x: auto;
+}
+
+.memo-image-gallery .ant-image,
+.memo-image-gallery img {
+  flex: 0 0 auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.memo-image-uploader {
+  margin-top: 10px;
+}
+
+.memo-image-upload-button {
+  display: flex;
+  border: 0;
+  background: none;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+}
+
 /*日期选择里面的按创建时间还是按修改时间来筛选的按创建时间来筛选改变一下样式*/
 .memo-dateRangeSwitch [aria-checked="false"] {
   background-color: #439861;

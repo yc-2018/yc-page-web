@@ -12,6 +12,8 @@ import type IMemo from '@/interface/IMemo';
 import type IMemoTag from '@/interface/IMemoTag';
 import {symbols} from '@/pages/MemoDrawer/constants';
 import MemoTypeSegmented from '@/pages/MemoDrawer/compontets/MemoTypeSegmented';
+import MemoImageUploader from '@/pages/MemoDrawer/compontets/MemoImageUploader';
+import {isMemoImageValueValid} from '@/utils/memoImageUtils.js';
 
 const {TextArea} = Input;
 const {msg} = CommonStore
@@ -62,12 +64,14 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
   const [openDate, setOpenDate] = useState(false)                      // 日期选择
   const [openDateRange, setOpenDateRange] = useState(false)            // 日期范围选择
   const [memoTags, setMemoTags] = useState<IMemoTag[]>([])              // 当前类型标签列表
+  const [imageUploading, setImageUploading] = useState(false)          // 是否存在图片上传任务
 
   const textRef = useRef<TextAreaRef>(null)  // 搜索框的ref 让它能自动获得焦点
   const {modal} = App.useApp();              // 关闭时提示框
 
   // 初始化数据
   useEffect(() => {
+    setImageUploading(false)
     if (data) setFormData(data)  // 编辑时，初始化数据
     else setFormData({           // 新增时，初始化数据
       content: null,
@@ -92,11 +96,14 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
 
   /** 关闭弹窗 */
   const closeModal = (notSubmit = true) => {
-    // 编辑框有内容 && 内容发送改变 && 不是提交 ==>> 提示弹窗
-    if (formData?.content && formData.content !== data?.content && notSubmit) {
+    const hasUnsavedChanges = formData?.content !== (data?.content ?? null)
+      || formData?.itemType !== (data?.itemType ?? currentMemoType)
+      || !sameIds(formData?.tagIds, data?.tagIds)
+      || (formData?.imgArr ?? '') !== (data?.imgArr ?? ''); // 表单是否存在未保存修改
+    if (hasUnsavedChanges && notSubmit) {
       modal.confirm({
-        title: '检查到内容发送改变',
-        content: '是否确定不保存内容直接关闭编辑框？',
+        title: '检查到表单发生改变',
+        content: '是否确定不保存修改直接关闭编辑框？',
         okText: '确认关闭',
         onOk: close
       })
@@ -105,6 +112,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
     function close() {
       setOpenDateRange(false)                          // 日期范围选择器关闭
       setOpenDate(false)                               // 日期选择器关闭
+      setImageUploading(false)                         // 重置图片上传状态
       window.setTimeout(() => setOpen(false), 100)     // 延迟关闭，防止这个先关闭了时间选择器就关闭不了
     }
   };
@@ -113,6 +121,8 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
   const handleOk = async () => {
     if (!formData?.itemType?.toString()) return msg.error('备忘类型不能为空')
     if (!formData.content) return msg.error('备忘内容不能为空')
+    if (imageUploading) return msg.warning('图片还在上传中，请稍等')
+    if (!isMemoImageValueValid(formData.imgArr)) return msg.error('图片地址总长度不能超过999个字符，请删除部分图片')
 
     setConfirmLoading(true);
     // 构造请求体
@@ -120,6 +130,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
     body.content = formData.content === data?.content ? null : formData.content;
     body.itemType = formData.itemType === data?.itemType ? null : formData.itemType;
     if (!sameIds(formData.tagIds, data?.tagIds)) body.tagIds = formData.tagIds ?? [];
+    if ((formData.imgArr ?? '') !== (data?.imgArr ?? '')) body.imgArr = formData.imgArr ?? '';
     body.id = data?.id;
     const result = await (data ? updateMemo : addMemo)(body as IMemo);
     if (result) {
@@ -289,6 +300,11 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
         value={formData?.content ?? undefined}
         placeholder="请输入备忘内容"
         onChange={e => setFormData(formData => ({...(formData ?? {}), content: e.target.value}))}
+      />
+      <MemoImageUploader
+        value={formData?.imgArr}
+        onChange={imgArr => setFormData(current => ({...(current ?? {}), imgArr}))}
+        onUploadingChange={setImageUploading}
       />
       {/*日期选择面板*/}
       <DatePicker

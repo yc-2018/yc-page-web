@@ -864,7 +864,7 @@ const MemoDrawer = () => {
             width: '80vw',
             style: {top: '5vh'},
             icon: <BookOutlined/>,
-            content: <MemoPreviewContent content={itemObj.content ?? ''}/>,
+            content: <MemoPreviewContent content={itemObj.content ?? ''} imgArr={itemObj.imgArr}/>,
           })
           seeModel.update({ // 添加按钮分开写是因为 seeModel直接写会没初始化完成 导致没发关闭
             footer:

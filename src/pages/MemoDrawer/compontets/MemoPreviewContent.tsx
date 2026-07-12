@@ -1,9 +1,12 @@
 import {Popover} from 'antd';
 import LinkifyContent from '@/components/LinkifyContent/index';
+import MemoImageGallery from '@/pages/MemoDrawer/compontets/MemoImageGallery';
 
 interface MemoPreviewContentProps {
   /** 备忘内容 */
   content: string
+  /** 备忘图片地址 */
+  imgArr?: string
 }
 
 /**
@@ -11,7 +14,7 @@ interface MemoPreviewContentProps {
  *
  * @param {string} content 备忘内容
  */
-const MemoPreviewContent = ({content}: MemoPreviewContentProps) => (
+const MemoPreviewContent = ({content, imgArr}: MemoPreviewContentProps) => (
   <div
     className="gun"
     style={{height: '70vh', border: '1px solid #ccc', borderRadius: '6px', padding: 9, overflow: 'auto'}}
@@ -53,6 +56,7 @@ const MemoPreviewContent = ({content}: MemoPreviewContentProps) => (
         {content}
       </LinkifyContent>
     </pre>
+    <MemoImageGallery imgArr={imgArr}/>
   </div>
 )
 
