@@ -346,6 +346,38 @@
   font-weight: 600;
 }
 
+.memoImageUploaderRow,
+.memoImageGallery {
+  display: flex;
+  width: 100%;
+  margin-top: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.memoImageUploader {
+  flex: 0 0 auto;
+  --cell-size: 45px;
+  --gap: 5px;
+}
+
+.memoImageUploader :global(.adm-grid) {
+  width: max-content;
+  grid-template-columns: repeat(6, 45px) !important;
+}
+
+.memoImageGallery {
+  gap: 5px;
+}
+
+.memoImageThumbnail {
+  flex: 0 0 45px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
 .imgListViewer{
   z-index: 2000!important;
 }

@@ -36,6 +36,8 @@ import MemoDetailPopup from './components/MemoDetailPopup'
 import MemoEditPopup from './components/MemoEditPopup'
 import MemoDatePickers from './components/MemoDatePickers'
 import LoopMemoActionPopup from './components/LoopMemoActionPopup'
+import MobileMemoImageGallery from './components/MobileMemoImageGallery'
+import {isMemoImageValueValid, joinMemoImages, splitMemoImages} from '@/utils/memoImageUtils.js'
 
 let imgArr;     // 多张图片字符串，用,分割
 let okTime;     // 待办更新时间
@@ -85,6 +87,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const [content, setContent] = useState('')                   // 表单内容
   const [itemType, setItemType] = useState(0)                 // 表单类型
   const [tagIds, setTagIds] = useState([])                    // 表单标签ID列表
+  const [memoImages, setMemoImages] = useState([])            // 当前备忘原图与缩略图
+  const [memoImageUploading, setMemoImageUploading] = useState(false) // 是否正在上传备忘图片
+  const [initialMemoForm, setInitialMemoForm] = useState(null) // 打开表单时的数据快照
 
   const [showQ, setShowQ] = useState();
 
@@ -187,9 +192,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     const result = await uploadImgByJD(file);
     if (!result.success || !result.data?.url) {
       Toast.show({icon: 'fail', content: result.message ?? '上传失败'})
-      throw new Error('上传失败')
+      throw new Error(result.message ?? '上传失败')
     }
-    return {url: result.data.url}
+    return {url: result.data.url, thumbnailUrl: thumbUrl(result.data.url)}
   }
 
   /** 执行动作 */
@@ -325,6 +330,14 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         setContent(obj.content);
         setItemType(obj.itemType)
         setTagIds(obj.tagIds ?? [])
+        setMemoImages(splitMemoImages(obj.imgArr).map(url => ({url, thumbnailUrl: thumbUrl(url)})))
+        setMemoImageUploading(false)
+        setInitialMemoForm({
+          content: obj.content ?? '',
+          itemType: obj.itemType,
+          tagIds: obj.tagIds ?? [],
+          imgArr: obj.imgArr ?? '',
+        })
         window.setTimeout(() => {
           textRef.current?.focus()                                            // 获得焦点
           const length = obj.content.length                                  // 获取输入框字符串的长度
@@ -373,6 +386,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     setContent('');
     setItemType(type);
     setTagIds([]);
+    setMemoImages([])
+    setMemoImageUploading(false)
+    setInitialMemoForm({content: '', itemType: type, tagIds: [], imgArr: ''})
     window.setTimeout(() => textRef.current?.focus(), 100) // 点击添加按钮后自动获得焦点,但是没在页面上所以要延迟一点点
   }
 
@@ -383,9 +399,22 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     return left === right;
   }
 
+  const currentMemoImgArr = joinMemoImages(memoImages.map(item => item.url)); // 当前表单图片字段
+  const memoFormChanged = Boolean(initialMemoForm) && (
+    content !== initialMemoForm.content
+    || itemType !== initialMemoForm.itemType
+    || !sameIds(tagIds, initialMemoForm.tagIds)
+    || currentMemoImgArr !== initialMemoForm.imgArr
+  ); // 表单是否存在未保存修改
+
   /** 编辑或新增的提交表单 */
   const submit = async () => {
     if (content?.length === 0) return Toast.show({icon: 'fail', content: '内容不能为空'})
+    if (memoImageUploading) return Toast.show({icon: 'fail', content: '图片还在上传中，请稍等'})
+    const nextImgArr = joinMemoImages(memoImages.map(item => item.url)); // 待提交图片字段
+    if (!isMemoImageValueValid(nextImgArr)) {
+      return Toast.show({icon: 'fail', content: '图片地址总长度不能超过999个字符，请删除部分图片'})
+    }
     // if (!itemType) return Toast.show({icon: 'fail', content: '类型不能为空'})
 
     // 构造请求体
@@ -393,10 +422,12 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     body.content = content === editVisible?.content ? null : content;       // 内容不一致时才更新
     body.itemType = itemType === editVisible?.itemType ? null : itemType;   // 内容不一致时才更新
     if (!sameIds(tagIds, editVisible?.tagIds)) body.tagIds = tagIds;
-    if (!body.content && body.itemType === null && !body.tagIds) return Toast.show({
-      icon: 'fail',
-      content: '没有变化'
-    }) && setEditVisible(false)
+    if (nextImgArr !== (editVisible?.imgArr ?? '')) body.imgArr = nextImgArr;
+    if (body.content === null && body.itemType === null && body.tagIds === undefined && body.imgArr === undefined) {
+      Toast.show({icon: 'fail', content: '没有变化'})
+      setEditVisible(false)
+      return
+    }
     body.id = editVisible?.id;
     showLoading('loading', '处理中…')
     let result = await (editVisible === '新增' ? addMemo : updateMemo)(body);
@@ -1024,6 +1055,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                       stopPropagationForActionButtons={['click']} // 阻止冒泡事件
                     />
                   }
+                  <MobileMemoImageGallery imgArr={item.imgArr}/>
                   {item.tags?.length > 0 &&
                     <div className={styles.memoItemTags}>
                       {item.tags.map(tag => <Tag key={tag.id} color="default" fill="outline">{tag.name}</Tag>)}
@@ -1060,6 +1092,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         memoTags={formMemoTags}
         tagIds={tagIds}
         onTagIdsChange={setTagIds}
+        hasUnsavedChanges={memoFormChanged}
+        memoImages={memoImages}
+        onMemoImagesChange={setMemoImages}
+        onImageUploadQueueChange={tasks => setMemoImageUploading(tasks.some(task => task.status === 'pending'))}
+        onUploadImage={uploadToJD}
         onOpenDatePicker={() => setEditDateVisible(true)}
         onInsertAtCursor={insertAtCursor}
         onSubmit={submit}

@@ -4,6 +4,7 @@ import LinkifyContent from '@/components/LinkifyContent/index'
 import {fDate} from '@/utils/DateUtils'
 import styles from '@/pages/Mobile/styles/mobile.module.css'
 import type {MemoAction, MobileMemoItem} from './types'
+import MobileMemoImageGallery from './MobileMemoImageGallery'
 
 type MemoDetailPopupProps = {
   visibleMemo?: MobileMemoItem
@@ -100,6 +101,7 @@ const MemoDetailPopup = ({visibleMemo, onClose, onShowLoopItems, onAction}: Memo
               {visibleMemo.content ?? ''}
             </LinkifyContent>
           </pre>
+          <MobileMemoImageGallery imgArr={visibleMemo.imgArr}/>
         </div>
 
         <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10}}>

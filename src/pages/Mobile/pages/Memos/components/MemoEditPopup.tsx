@@ -1,10 +1,12 @@
 import type {RefObject} from 'react'
-import {Button, Dialog, Modal, Popup, Radio, Selector, TextArea} from 'antd-mobile'
+import {Button, Dialog, ImageUploader, ImageViewer, Modal, Popup, Radio, Selector, TextArea} from 'antd-mobile'
+import type {ImageUploadItem, UploadTask} from 'antd-mobile/es/components/image-uploader'
 import type {TextAreaRef} from 'antd-mobile/es/components/text-area'
 
 import {symbols} from '@/pages/MemoDrawer/constants'
 import styles from '@/pages/Mobile/styles/mobile.module.css'
 import type {MobileMemoItem} from './types'
+import {MAX_MEMO_IMAGES} from '@/utils/memoImageUtils.js'
 
 type MemoEditPopupProps = {
   editVisible?: false | '新增' | MobileMemoItem
@@ -17,6 +19,11 @@ type MemoEditPopupProps = {
   memoTags: {id?: number, name?: string}[]
   tagIds: number[]
   onTagIdsChange: (value: number[]) => void
+  hasUnsavedChanges: boolean
+  memoImages: ImageUploadItem[]
+  onMemoImagesChange: (items: ImageUploadItem[]) => void
+  onImageUploadQueueChange: (tasks: UploadTask[]) => void
+  onUploadImage: (file: File) => Promise<ImageUploadItem>
   onOpenDatePicker: () => void
   onInsertAtCursor: (text: string) => void
   onSubmit: () => void
@@ -34,6 +41,11 @@ const MemoEditPopup = ({
   memoTags,
   tagIds,
   onTagIdsChange,
+  hasUnsavedChanges,
+  memoImages,
+  onMemoImagesChange,
+  onImageUploadQueueChange,
+  onUploadImage,
   onOpenDatePicker,
   onInsertAtCursor,
   onSubmit,
@@ -42,8 +54,7 @@ const MemoEditPopup = ({
     style={{background: '#bf3434'}}
     visible={!!editVisible}
     onMaskClick={async () => {
-      const oldContent = editVisible && editVisible !== '新增' ? editVisible.content : '' // 原备忘内容
-      if (!content || content === oldContent) return onClose()
+      if (!hasUnsavedChanges) return onClose()
       const result = await Dialog.confirm({
         content: '检测到内容已修改，直接返回已编辑的内容会丢失哦,确定退出吗？',
         closeOnMaskClick: true,
@@ -84,11 +95,30 @@ const MemoEditPopup = ({
         ref={textRef}
         value={content}
         className="contentText"
-        style={{height: memoTags.length > 0 ? '255px' : '300px'}}
+        style={{height: memoTags.length > 0 ? '200px' : '245px'}}
         placeholder="请输入备忘内容"
         maxLength={itemType === 5 ? 4000 : 2000}
         onChange={onContentChange}
       />
+      <div className={styles.memoImageUploaderRow}>
+        <ImageUploader
+          className={styles.memoImageUploader}
+          value={memoImages}
+          columns={6}
+          maxCount={MAX_MEMO_IMAGES}
+          multiple
+          accept="image/*"
+          showFailed={false}
+          upload={onUploadImage}
+          onChange={onMemoImagesChange}
+          onUploadQueueChange={onImageUploadQueueChange}
+          onPreview={index => ImageViewer.Multi.show({
+            images: memoImages.map(item => item.url),
+            defaultIndex: index,
+            classNames: {mask: styles.imgListViewer},
+          })}
+        />
+      </div>
       <div style={{margin: '10px 0'}}>
         <Button size="small" onClick={onOpenDatePicker}>插入日期</Button>
         &nbsp;
