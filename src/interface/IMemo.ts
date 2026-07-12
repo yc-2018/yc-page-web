@@ -28,6 +28,9 @@ export default interface IMemo {
   /** 完成时记录备注文本 */
   okText?: string
 
+  /** 备忘图片地址，多个地址用逗号分隔 */
+  imgArr?: string
+
   /** 创建时间 */
   createTime?: string
 

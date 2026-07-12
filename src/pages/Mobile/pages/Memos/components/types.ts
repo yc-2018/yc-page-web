@@ -4,6 +4,7 @@ export type MobileMemoItem = {
   completed?: number
   content?: string
   okText?: string
+  imgArr?: string
   okTime?: string
   createTime?: string
   updateTime?: string
