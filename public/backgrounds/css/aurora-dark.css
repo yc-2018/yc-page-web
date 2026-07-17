@@ -1,0 +1,98 @@
+[data-background-source='css://aurora-dark'] {
+  background:
+    radial-gradient(circle at 50% 115%, rgba(25, 86, 128, 0.48), transparent 42%),
+    linear-gradient(145deg, #02030b 0%, #071124 48%, #02040d 100%);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+[data-background-source='css://aurora-dark']::before {
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  content: '';
+  opacity: 0.34;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.72) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(113, 206, 255, 0.5) 0 1px, transparent 1.6px);
+  background-position: 0 0, 37px 63px;
+  background-size: 96px 96px, 137px 137px;
+  animation: ycBgAuroraStars 36s linear infinite;
+}
+
+[data-background-source='css://aurora-dark']::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(180deg, transparent 58%, rgba(0, 0, 0, 0.28));
+}
+
+[data-background-source='css://aurora-dark'] .yc-background-layer {
+  position: absolute;
+  top: -36%;
+  left: 4%;
+  width: 52vmax;
+  height: 92vmax;
+  border-radius: 42% 58% 55% 45%;
+  opacity: 0.42;
+  filter: blur(48px);
+  mix-blend-mode: screen;
+  transform-origin: 50% 20%;
+  background: conic-gradient(
+    from 180deg,
+    transparent 0deg,
+    rgba(31, 255, 196, 0.85) 70deg,
+    rgba(43, 123, 255, 0.72) 145deg,
+    rgba(190, 57, 255, 0.6) 220deg,
+    transparent 300deg
+  );
+  animation: ycBgAuroraFlow 18s ease-in-out infinite alternate;
+}
+
+[data-background-source='css://aurora-dark'] .yc-background-layer:nth-child(2) {
+  top: -55%;
+  left: 35%;
+  opacity: 0.32;
+  animation-duration: 24s;
+  animation-delay: -9s;
+  transform: rotate(44deg);
+}
+
+[data-background-source='css://aurora-dark'] .yc-background-layer:nth-child(3) {
+  top: -18%;
+  left: 62%;
+  width: 38vmax;
+  opacity: 0.3;
+  animation-duration: 21s;
+  animation-delay: -15s;
+  transform: rotate(105deg);
+}
+
+[data-background-source='css://aurora-dark'] .yc-background-layer:nth-child(4) {
+  top: 16%;
+  left: 15%;
+  width: 68vmax;
+  height: 38vmax;
+  opacity: 0.2;
+  animation-duration: 28s;
+  animation-delay: -18s;
+  transform: rotate(-22deg);
+}
+
+@keyframes ycBgAuroraFlow {
+  0% {
+    transform: rotate(-22deg) translate3d(-4%, -3%, 0) scale(0.94);
+  }
+  55% {
+    transform: rotate(12deg) translate3d(9%, 4%, 0) scale(1.08);
+  }
+  100% {
+    transform: rotate(35deg) translate3d(-1%, 10%, 0) scale(1);
+  }
+}
+
+@keyframes ycBgAuroraStars {
+  to {
+    transform: translate3d(48px, 32px, 0);
+  }
+}

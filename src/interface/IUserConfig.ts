@@ -9,7 +9,7 @@ export default interface IUserConfig {
   /** 头像url */
   avatarUrl?: string
 
-  /** 背景URL */
+  /** 背景来源：图片 URL 或内置 css://、js:// 协议 */
   backgroundUrl?: string
 
   /** 搜索引擎排序 id/id/id */

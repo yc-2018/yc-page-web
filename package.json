@@ -9,7 +9,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/validate-backgrounds.mjs",
     "build": "vite build",
+    "check:backgrounds": "node scripts/validate-backgrounds.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

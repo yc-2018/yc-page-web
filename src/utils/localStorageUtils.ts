@@ -34,7 +34,7 @@ export const _getDefaultEngine = () => {
 }
 
 
-/** 背景图片url */
+/** 背景来源：图片 URL 或内置动态背景协议 */
 export const _setBackgroundUrl = (url: string) => saveLocal('backgroundUrl', url)
 export const _getBackgroundUrl = () => getLocal('backgroundUrl')
 

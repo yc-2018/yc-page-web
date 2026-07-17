@@ -3,6 +3,47 @@
     z-index: 1000;
   }
 
+.homePage {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.homeContent {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+}
+
+.homeEnglishContextArea {
+  position: absolute;
+  right: 20%;
+  bottom: 10%;
+  z-index: 0;
+  width: 60%;
+  height: 80%;
+}
+
+.homePage[data-background-tone='dark'] .homeContent {
+  color: #f4f7ff;
+  text-shadow: 0 1px 7px rgba(0, 0, 0, 0.42);
+}
+
+.homePage[data-background-tone='light'] .homeContent {
+  color: #26364a;
+  text-shadow: 0 1px 5px rgba(255, 255, 255, 0.72);
+}
+
+.homePage[data-background-tone='light'] .buttonOpacity {
+  background-color: rgba(66, 93, 132, 0.14);
+}
+
+.homePage[data-background-tone='light'] .filing a {
+  color: #344861;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.9);
+}
+
 
   .App-link {
     color: #61dafb;

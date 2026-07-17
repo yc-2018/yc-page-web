@@ -24,6 +24,14 @@ import HomeSearch from '@/pages/Home/HomeSearch';
 import HomeLink from '@/pages/Home/HomeLink';
 import {_getBackgroundUrl, _setNameAndAvatar, _setBackgroundUrl} from '@/utils/localStorageUtils';
 import IUser from '@/interface/IUser';
+import BackgroundHost from '@/pages/Home/Background/BackgroundHost';
+import BackgroundPicker from '@/pages/Home/Background/BackgroundPicker';
+import {
+  isDynamicBackgroundSource,
+  isImageBackgroundSource,
+  loadBackgroundManifest,
+} from '@/pages/Home/Background/backgroundSource';
+import type {HomeBackgroundTone} from '@/pages/Home/Background/types';
 import '@/pages/Home/Home.css'
 
 const {TextArea} = Input;
@@ -31,7 +39,9 @@ const {TextArea} = Input;
 type ToolItem = [string, string];
 
 function Home() {
-  const [bgImg, setBgImg] = useState('/Default-wallpaper.jpg');// 背景背景
+  const [backgroundSource, setBackgroundSource] = useState('/Default-wallpaper.jpg');// 当前背景来源
+  const [backgroundTone, setBackgroundTone] = useState<HomeBackgroundTone>('image');// 背景明暗色调
+  const [backgroundPopoverOpen, setBackgroundPopoverOpen] = useState(false);// 是否打开背景选择器
   const [info, setInfo] = useState<IUser>({});
   const [tools, setTools] = useState<ToolItem[]>([]);
 
@@ -75,10 +85,10 @@ function Home() {
     else msg.error('获取背景出错');
   }
 
-  /** 保存背景URL到本地 */
+  /** 保存背景来源到本地 */
   const setBgImage = (backgroundUrl: string, msg: string | null = null) => {
     _setBackgroundUrl(backgroundUrl);
-    setBgImg(backgroundUrl);
+    setBackgroundSource(backgroundUrl);
     return msg && CommonStore.msg.info(msg);
   }
 
@@ -92,9 +102,10 @@ function Home() {
 
   /** 下载背景图片 */
   const xzTp = async () => {
+    if (!isImageBackgroundSource(backgroundSource)) return msg.warning('动态背景不能下载为图片');
     CommonStore.setLoading(true, '开始缓存该背景...');
     try {
-      const response = await axios.get(bgImg, {
+      const response = await axios.get(backgroundSource, {
         responseType: 'blob', // 重要：这会告诉 Axios 返回一个 Blob 对象
       });
 
@@ -112,23 +123,23 @@ function Home() {
       CommonStore.setLoading(false, '缓存完成,请保存');
     } catch {
       CommonStore.setLoading(false, '该图片无法直接下载,请在新标签页中保存')
-      window.open(bgImg, '_blank'); // 在新标签页中打开图片
+      window.open(backgroundSource, '_blank'); // 在新标签页中打开图片
     }
   }
 
   return (
-    <div
-      style={{
-        height: '100vh',
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
-        backgroundImage: `linear-gradient( rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.4)),url(${bgImg})`,
-      }}
-    >
+    <div className="homePage" data-background-tone={backgroundTone}>
+      <BackgroundHost
+        source={backgroundSource}
+        onToneChange={setBackgroundTone}
+        onError={message => msg.warning(message)}
+      />
+
+      <div className="homeContent">
 
       {/* 《为了打开英语抽屉漂浮在底层透明背景》用做 点击右键显示 抽屉 只能放在这上面，放到下面去写会挡住按钮 不知道为啥。*/}
       <div
-        style={{position: 'absolute', bottom: '10%', right: '20%', width: '60%', height: '80%', zIndex: 0}}
+        className="homeEnglishContextArea"
         onContextMenu={event => {
           event.preventDefault();                 // 阻止默认的右键菜单弹出
           showOrNot.setEnglishDrawerShow(true);  // 打开英语抽屉
@@ -188,35 +199,55 @@ function Home() {
 
             {/*背景***********************************************************/}
             <Popover
-              title={<div style={{textAlign: 'center', fontWeight: 'bold'}}>背景图</div>}
+              title={<div style={{textAlign: 'center', fontWeight: 'bold'}}>页面背景</div>}
+              trigger="click"
+              open={backgroundPopoverOpen}
+              onOpenChange={setBackgroundPopoverOpen}
               content={
                 <div className="bottomMenuItemButton">
                   {jwt &&
                     <>
                       <div onClick={getBgImg}><CloudDownloadOutlined/> 从服务器获取背景</div>
-                      <div onClick={() => updateUserConfig({backgroundUrl: bgImg})}>
+                      <div onClick={() => updateUserConfig({backgroundUrl: backgroundSource})}>
                         <CloudUploadOutlined/> 上传背景到服务器
                       </div>
                     </>
                   }
-                  <div onClick={xzTp}><DownloadOutlined/> 下载背景图片</div>
-                  <div className="bottomMenuItemButton">
-                    <b style={{textAlign: 'center', display: 'block'}}>换背景</b>
-                    <div onClick={() => reImages('bing')}><SyncOutlined/> bing随机壁纸</div>
-                    <div onClick={() => reImages('风景')}><SyncOutlined/> 风景背景(慢)</div>
-                    <div onClick={() => reImages('漫画')}><SyncOutlined/> 漫画背景</div>
-                    <TextArea
-                      rows={4}
-                      allowClear
-                      placeholder="自定义背景链接，回车加载"
-                      onPressEnter={(event: KeyboardEvent<HTMLTextAreaElement>) => {
-                        const backgroundUrl = event.currentTarget.value; // 输入的背景链接
-                        if (/^(http|https):\/\/.+/.test(backgroundUrl))
-                          setBgImage(backgroundUrl, '正在设置中...') // 设置背景
-                        else msg.error('请输入正确的链接');
-                      }}
-                    />
-                  </div>
+                  <BackgroundPicker
+                    enabled={backgroundPopoverOpen || isDynamicBackgroundSource(backgroundSource)}
+                    value={backgroundSource}
+                    onSelect={source => setBgImage(source, '背景已切换')}
+                    imagePanel={
+                      <div className="bottomMenuItemButton">
+                        <div onClick={xzTp}><DownloadOutlined/> 下载背景图片</div>
+                        <div onClick={() => reImages('bing')}><SyncOutlined/> bing随机壁纸</div>
+                        <div onClick={() => reImages('风景')}><SyncOutlined/> 风景背景(慢)</div>
+                        <div onClick={() => reImages('漫画')}><SyncOutlined/> 漫画背景</div>
+                        <TextArea
+                          rows={3}
+                          allowClear
+                          placeholder="图片地址或内置 css://、js://，回车加载"
+                          onPressEnter={async (event: KeyboardEvent<HTMLTextAreaElement>) => {
+                            event.preventDefault();
+                            const nextSource = event.currentTarget.value.trim(); // 输入的背景来源
+                            if (isImageBackgroundSource(nextSource)) return setBgImage(nextSource, '背景已切换');
+                            if (!isDynamicBackgroundSource(nextSource)) {
+                              return msg.error('请输入 http(s)、/、css:// 或 js:// 开头的有效背景');
+                            }
+                            try {
+                              const manifest = await loadBackgroundManifest();
+                              if (manifest.items.some(item => item.source === nextSource)) {
+                                return setBgImage(nextSource, '背景已切换');
+                              }
+                              msg.error('没有找到这个内置动态背景');
+                            } catch {
+                              msg.error('动态背景清单加载失败，请稍后重试');
+                            }
+                          }}
+                        />
+                      </div>
+                    }
+                  />
                 </div>
               }
             >
@@ -336,6 +367,7 @@ function Home() {
       </div>
       {/*备案号显示*/}
       <Filing/>
+      </div>
     </div>
   );
 }

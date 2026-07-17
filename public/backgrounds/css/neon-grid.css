@@ -1,0 +1,84 @@
+[data-background-source='css://neon-grid'] {
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 54%, rgba(107, 41, 255, 0.27), transparent 18%),
+    linear-gradient(180deg, #02030a 0%, #07091c 54%, #010207 100%);
+  perspective: 460px;
+}
+
+[data-background-source='css://neon-grid']::before {
+  position: absolute;
+  right: -50%;
+  bottom: -47%;
+  left: -50%;
+  height: 92%;
+  content: '';
+  opacity: 0.58;
+  transform: rotateX(62deg);
+  transform-origin: center top;
+  background-image:
+    linear-gradient(rgba(42, 223, 255, 0.56) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(174, 64, 255, 0.5) 1px, transparent 1px);
+  background-position: center 0;
+  background-size: 58px 42px;
+  box-shadow: 0 -2px 24px rgba(82, 229, 255, 0.66);
+  animation: ycBgGridTravel 3.8s linear infinite;
+}
+
+[data-background-source='css://neon-grid']::after {
+  position: absolute;
+  top: 53%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  content: '';
+  opacity: 0.4;
+  background: linear-gradient(90deg, transparent, #a552ff 34%, #42e4ff 50%, #a552ff 66%, transparent);
+  box-shadow: 0 0 11px 2px rgba(90, 213, 255, 0.3);
+}
+
+[data-background-source='css://neon-grid'] .yc-background-layer {
+  position: absolute;
+  width: 28vmax;
+  height: 28vmax;
+  border: 1px solid rgba(122, 225, 255, 0.24);
+  border-radius: 50%;
+  opacity: 0.22;
+  filter: drop-shadow(0 0 18px rgba(117, 71, 255, 0.8));
+  animation: ycBgGridOrbit 15s linear infinite;
+}
+
+[data-background-source='css://neon-grid'] .yc-background-layer:nth-child(1) {
+  top: -18vmax;
+  left: -7vmax;
+}
+
+[data-background-source='css://neon-grid'] .yc-background-layer:nth-child(2) {
+  top: 2vmax;
+  right: -16vmax;
+  width: 38vmax;
+  height: 38vmax;
+  animation-duration: 22s;
+  animation-direction: reverse;
+}
+
+[data-background-source='css://neon-grid'] .yc-background-layer:nth-child(3) {
+  top: 20%;
+  left: 42%;
+  width: 12vmax;
+  height: 12vmax;
+  border-color: rgba(255, 72, 228, 0.3);
+  animation-duration: 11s;
+}
+
+@keyframes ycBgGridTravel {
+  to {
+    background-position: center 42px;
+  }
+}
+
+@keyframes ycBgGridOrbit {
+  to {
+    transform: rotate(360deg) scale(1.08);
+  }
+}
