@@ -1,15 +1,15 @@
 [data-background-source='css://neon-grid'] {
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 50% 54%, rgba(107, 41, 255, 0.27), transparent 18%),
-    linear-gradient(180deg, #02030a 0%, #07091c 54%, #010207 100%);
+    radial-gradient(ellipse at 50% 47%, rgba(107, 41, 255, 0.27), transparent 21%),
+    linear-gradient(180deg, #02030a 0%, #07091c 47%, #010207 100%);
   perspective: 460px;
 }
 
 [data-background-source='css://neon-grid']::before {
   position: absolute;
   right: -50%;
-  bottom: -47%;
+  bottom: -39%;
   left: -50%;
   height: 92%;
   content: '';
@@ -21,20 +21,9 @@
     linear-gradient(90deg, rgba(174, 64, 255, 0.5) 1px, transparent 1px);
   background-position: center 0;
   background-size: 58px 42px;
-  box-shadow: 0 -2px 24px rgba(82, 229, 255, 0.66);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.34) 8%, #000 20%);
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.34) 8%, #000 20%);
   animation: ycBgGridTravel 3.8s linear infinite;
-}
-
-[data-background-source='css://neon-grid']::after {
-  position: absolute;
-  top: 53%;
-  right: 0;
-  left: 0;
-  height: 1px;
-  content: '';
-  opacity: 0.4;
-  background: linear-gradient(90deg, transparent, #a552ff 34%, #42e4ff 50%, #a552ff 66%, transparent);
-  box-shadow: 0 0 11px 2px rgba(90, 213, 255, 0.3);
 }
 
 [data-background-source='css://neon-grid'] .yc-background-layer {

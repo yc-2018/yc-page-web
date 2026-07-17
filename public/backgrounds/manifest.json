@@ -1,5 +1,5 @@
 {
-  "version": 12,
+  "version": 14,
   "items": [
     {
       "source": "css://aurora-dark",
@@ -18,7 +18,7 @@
       "name": "霓虹网格",
       "description": "黑色空间中的透视网格与地平线微光",
       "tone": "dark",
-      "version": 2,
+      "version": 4,
       "layers": 3
     },
     {
