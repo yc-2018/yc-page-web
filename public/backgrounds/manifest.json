@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 11,
   "items": [
     {
       "source": "css://aurora-dark",
@@ -28,7 +28,7 @@
       "name": "白色丝绸",
       "description": "简约明亮的半透明柔光层叠",
       "tone": "light",
-      "version": 2,
+      "version": 7,
       "layers": 5
     },
     {
