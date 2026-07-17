@@ -147,8 +147,8 @@ const glowFragmentShader = `
     float radius = length(vUv - 0.5) * 2.0;
     float innerFade = smoothstep(0.52, 0.76, radius);
     float outerFade = 1.0 - smoothstep(0.72, 1.0, radius);
-    float opacity = innerFade * outerFade * 0.42;
-    gl_FragColor = vec4(0.16, 0.58, 1.0, opacity);
+    float opacity = innerFade * outerFade * 0.34;
+    gl_FragColor = vec4(0.34, 0.72, 1.0, opacity);
   }
 `;
 
@@ -251,13 +251,13 @@ export function mountBackground(container, options) {
     previousTime = time;
     elapsedTime += delta;
     const mouse = pointer.update(0.045);
-    earthGroup.rotation.y += delta * 0.16;
+    earthGroup.rotation.y += delta * 0.055;
     earthGroup.rotation.x += (mouse.y * 0.22 - earthGroup.rotation.x) * 0.04;
     earthGroup.position.x += (mouse.x * 1.05 - earthGroup.position.x) * 0.035;
     earthGroup.position.y += (mouse.y * 0.6 - earthGroup.position.y) * 0.035;
     atmosphereGlow.position.x += (earthGroup.position.x - atmosphereGlow.position.x) * 0.12;
     atmosphereGlow.position.y += (earthGroup.position.y - atmosphereGlow.position.y) * 0.12;
-    clouds.rotation.y += delta * 0.19;
+    clouds.rotation.y += delta * 0.07;
     keyLight.position.x += (mouse.x * 7 - keyLight.position.x) * 0.055;
     keyLight.position.y += (mouse.y * 5 - keyLight.position.y) * 0.055;
     earthMaterial.uniforms.uLightDirection.value.set(

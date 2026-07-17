@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "items": [
     {
       "source": "css://aurora-dark",
@@ -68,7 +68,7 @@
       "name": "蓝色地球",
       "description": "带云层和大气光晕的程序化地球",
       "tone": "dark",
-      "version": 5,
+      "version": 6,
       "fallback": "css://aurora-dark"
     }
   ]
