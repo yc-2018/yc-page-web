@@ -7,12 +7,72 @@ import {
   prepareRenderer,
 } from './scene-utils.js';
 
+const noise3dShader = `
+  vec3 hashGradient3d(vec3 point) {
+    point = fract(point * vec3(0.1031, 0.103, 0.0973));
+    point += dot(point, point.yxz + 33.33);
+    return normalize(fract((point.xxy + point.yxx) * point.zyx) * 2.0 - 1.0);
+  }
+
+  float noise3d(vec3 point) {
+    vec3 cell = floor(point);
+    vec3 local = fract(point);
+    vec3 fade = local * local * local * (local * (local * 6.0 - 15.0) + 10.0);
+    float gradient = mix(
+      mix(
+        mix(
+          dot(hashGradient3d(cell), local),
+          dot(hashGradient3d(cell + vec3(1.0, 0.0, 0.0)), local - vec3(1.0, 0.0, 0.0)),
+          fade.x
+        ),
+        mix(
+          dot(hashGradient3d(cell + vec3(0.0, 1.0, 0.0)), local - vec3(0.0, 1.0, 0.0)),
+          dot(hashGradient3d(cell + vec3(1.0, 1.0, 0.0)), local - vec3(1.0, 1.0, 0.0)),
+          fade.x
+        ),
+        fade.y
+      ),
+      mix(
+        mix(
+          dot(hashGradient3d(cell + vec3(0.0, 0.0, 1.0)), local - vec3(0.0, 0.0, 1.0)),
+          dot(hashGradient3d(cell + vec3(1.0, 0.0, 1.0)), local - vec3(1.0, 0.0, 1.0)),
+          fade.x
+        ),
+        mix(
+          dot(hashGradient3d(cell + vec3(0.0, 1.0, 1.0)), local - vec3(0.0, 1.0, 1.0)),
+          dot(hashGradient3d(cell + vec3(1.0, 1.0, 1.0)), local - vec3(1.0, 1.0, 1.0)),
+          fade.x
+        ),
+        fade.y
+      ),
+      fade.z
+    );
+    return gradient * 0.82 + 0.5;
+  }
+
+  float fbm3d(vec3 point) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    mat3 rotation = mat3(
+      0.0, 0.8, 0.6,
+      -0.8, 0.36, -0.48,
+      -0.6, -0.48, 0.64
+    );
+    for (int octave = 0; octave < 5; octave++) {
+      value += noise3d(point) * amplitude;
+      point = rotation * point * 2.03 + vec3(17.1, 7.4, 13.7);
+      amplitude *= 0.5;
+    }
+    return value;
+  }
+`;
+
 const earthVertexShader = `
-  varying vec2 vUv;
+  varying vec3 vObjectPosition;
   varying vec3 vNormal;
 
   void main() {
-    vUv = uv;
+    vObjectPosition = normalize(position);
     vNormal = normalize(normalMatrix * normal);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
@@ -20,42 +80,58 @@ const earthVertexShader = `
 
 const earthFragmentShader = `
   uniform vec3 uLightDirection;
-  uniform float uTime;
-  varying vec2 vUv;
+  varying vec3 vObjectPosition;
   varying vec3 vNormal;
-
-  float hash(vec2 point) {
-    return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453);
-  }
-
-  float noise(vec2 point) {
-    vec2 cell = floor(point);
-    vec2 local = fract(point);
-    local = local * local * (3.0 - 2.0 * local);
-    return mix(
-      mix(hash(cell), hash(cell + vec2(1.0, 0.0)), local.x),
-      mix(hash(cell + vec2(0.0, 1.0)), hash(cell + vec2(1.0, 1.0)), local.x),
-      local.y
-    );
-  }
+  ${noise3dShader}
 
   void main() {
-    vec2 coordinate = vUv * vec2(5.0, 3.0);
-    float continent = noise(coordinate + vec2(0.0, uTime * 0.008));
-    continent = mix(continent, noise(coordinate * 2.2 + 8.0), 0.32);
-    float land = smoothstep(0.5, 0.63, continent);
-    vec3 ocean = mix(vec3(0.015, 0.12, 0.3), vec3(0.02, 0.3, 0.52), vUv.y);
-    vec3 landColor = mix(vec3(0.14, 0.28, 0.08), vec3(0.42, 0.58, 0.19), noise(coordinate * 1.7));
+    vec3 spherePosition = normalize(vObjectPosition);
+    vec3 terrainPoint = spherePosition * 2.25;
+    vec3 terrainWarp = vec3(
+      noise3d(terrainPoint + vec3(4.1, 1.7, 8.3)),
+      noise3d(terrainPoint + vec3(9.2, 3.4, 2.8)),
+      noise3d(terrainPoint + vec3(1.3, 7.9, 5.6))
+    ) - 0.5;
+    float continent = fbm3d(terrainPoint + terrainWarp * 0.82);
+    float land = smoothstep(0.45, 0.54, continent);
+    float landDetail = fbm3d(spherePosition * 7.5 + 5.0);
+    vec3 ocean = mix(vec3(0.012, 0.09, 0.24), vec3(0.015, 0.3, 0.54), spherePosition.y * 0.5 + 0.5);
+    vec3 landColor = mix(vec3(0.11, 0.24, 0.07), vec3(0.44, 0.58, 0.18), landDetail);
     vec3 surface = mix(ocean, landColor, land);
+    float ice = smoothstep(0.78, 0.94, abs(spherePosition.y));
+    surface = mix(surface, vec3(0.86, 0.94, 1.0), ice * 0.82);
     float daylight = max(dot(normalize(vNormal), normalize(uLightDirection)), 0.0);
-    float cityLights = smoothstep(0.76, 0.9, noise(coordinate * 18.0));
-    surface += vec3(1.0, 0.42, 0.08) * cityLights * (1.0 - daylight) * 0.18;
-    surface *= 0.28 + daylight * 0.92;
+    float cityLights = smoothstep(0.7, 0.86, fbm3d(spherePosition * 19.0 + 9.0));
+    surface += vec3(1.0, 0.44, 0.08) * cityLights * land * (1.0 - daylight) * 0.19;
+    surface *= 0.27 + daylight * 0.94;
     gl_FragColor = vec4(surface, 1.0);
   }
 `;
 
 const cloudVertexShader = `
+  varying vec3 vObjectPosition;
+
+  void main() {
+    vObjectPosition = normalize(position);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const cloudFragmentShader = `
+  uniform float uTime;
+  varying vec3 vObjectPosition;
+  ${noise3dShader}
+
+  void main() {
+    vec3 spherePosition = normalize(vObjectPosition);
+    vec3 cloudPoint = spherePosition * 3.5 + vec3(uTime * 0.018, 0.0, 0.0);
+    float cloud = fbm3d(cloudPoint);
+    float opacity = smoothstep(0.5, 0.66, cloud) * 0.24;
+    gl_FragColor = vec4(vec3(0.94, 0.98, 1.0), opacity);
+  }
+`;
+
+const glowVertexShader = `
   varying vec2 vUv;
 
   void main() {
@@ -64,35 +140,20 @@ const cloudVertexShader = `
   }
 `;
 
-const cloudFragmentShader = `
-  uniform float uTime;
+const glowFragmentShader = `
   varying vec2 vUv;
 
-  float hash(vec2 point) {
-    return fract(sin(dot(point, vec2(41.7, 289.3))) * 15731.743);
-  }
-
-  float noise(vec2 point) {
-    vec2 cell = floor(point);
-    vec2 local = fract(point);
-    local = local * local * (3.0 - 2.0 * local);
-    return mix(
-      mix(hash(cell), hash(cell + vec2(1.0, 0.0)), local.x),
-      mix(hash(cell + vec2(0.0, 1.0)), hash(cell + vec2(1.0, 1.0)), local.x),
-      local.y
-    );
-  }
-
   void main() {
-    float cloud = noise(vUv * vec2(8.0, 4.0) + vec2(uTime * 0.012, 0.0));
-    cloud = mix(cloud, noise(vUv * 17.0 - uTime * 0.018), 0.32);
-    float opacity = smoothstep(0.57, 0.76, cloud) * 0.26;
-    gl_FragColor = vec4(vec3(0.94, 0.98, 1.0), opacity);
+    float radius = length(vUv - 0.5) * 2.0;
+    float innerFade = smoothstep(0.52, 0.76, radius);
+    float outerFade = 1.0 - smoothstep(0.72, 1.0, radius);
+    float opacity = innerFade * outerFade * 0.42;
+    gl_FragColor = vec4(0.16, 0.58, 1.0, opacity);
   }
 `;
 
 /**
- * 挂载带云层和大气光晕的程序化地球。
+ * 挂载带云层和柔和大气光晕的程序化地球。
  *
  * @param {HTMLElement} container 背景容器
  * @param {{reducedMotion: boolean, pixelRatio: number, quality: 'low' | 'balanced'}} options 性能参数
@@ -112,10 +173,7 @@ export function mountBackground(container, options) {
   const earthGroup = new THREE.Group();
   earthGroup.rotation.z = -0.22;
   const earthMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-      uLightDirection: {value: new THREE.Vector3(0.72, 0.48, 1).normalize()},
-      uTime: {value: 0},
-    },
+    uniforms: {uLightDirection: {value: new THREE.Vector3(0.72, 0.48, 1).normalize()}},
     vertexShader: earthVertexShader,
     fragmentShader: earthFragmentShader,
   });
@@ -134,20 +192,20 @@ export function mountBackground(container, options) {
   });
   const clouds = new THREE.Mesh(new THREE.SphereGeometry(2.59, 48, 32), cloudMaterial);
   earthGroup.add(clouds);
+  scene.add(earthGroup);
 
-  const atmosphere = new THREE.Mesh(
-    new THREE.SphereGeometry(2.78, 48, 32),
-    new THREE.MeshBasicMaterial({
-      color: 0x47baff,
+  const atmosphereGlow = new THREE.Mesh(
+    new THREE.PlaneGeometry(7.8, 7.8),
+    new THREE.ShaderMaterial({
+      vertexShader: glowVertexShader,
+      fragmentShader: glowFragmentShader,
       transparent: true,
-      opacity: 0.17,
-      side: THREE.BackSide,
-      blending: THREE.AdditiveBlending,
       depthWrite: false,
+      blending: THREE.AdditiveBlending,
     }),
   );
-  earthGroup.add(atmosphere);
-  scene.add(earthGroup);
+  atmosphereGlow.position.z = -0.65;
+  scene.add(atmosphereGlow);
 
   const ambientLight = new THREE.AmbientLight(0x40558d, 1.4);
   const keyLight = new THREE.PointLight(0xfff1cc, 38, 32);
@@ -197,6 +255,8 @@ export function mountBackground(container, options) {
     earthGroup.rotation.x += (mouse.y * 0.22 - earthGroup.rotation.x) * 0.04;
     earthGroup.position.x += (mouse.x * 1.05 - earthGroup.position.x) * 0.035;
     earthGroup.position.y += (mouse.y * 0.6 - earthGroup.position.y) * 0.035;
+    atmosphereGlow.position.x += (earthGroup.position.x - atmosphereGlow.position.x) * 0.12;
+    atmosphereGlow.position.y += (earthGroup.position.y - atmosphereGlow.position.y) * 0.12;
     clouds.rotation.y += delta * 0.19;
     keyLight.position.x += (mouse.x * 7 - keyLight.position.x) * 0.055;
     keyLight.position.y += (mouse.y * 5 - keyLight.position.y) * 0.055;
@@ -205,7 +265,6 @@ export function mountBackground(container, options) {
       0.48 + mouse.y * 0.36,
       1,
     ).normalize();
-    earthMaterial.uniforms.uTime.value = elapsedTime;
     cloudMaterial.uniforms.uTime.value = elapsedTime;
     dust.rotation.y -= delta * 0.014;
     dust.rotation.x += delta * 0.005;

@@ -73,7 +73,7 @@ export function mountBackground(container, options) {
     camera.position.y += (mouse.y * 1.5 - camera.position.y) * 0.035;
     camera.rotation.z += (-mouse.x * 0.025 - camera.rotation.z) * 0.04;
 
-    const speed = 9 * delta;
+    const speed = 3 * delta;
     for (let index = 2; index < positions.length; index += 3) {
       positions[index] += speed;
       if (positions[index] > 10) positions[index] = -140 - Math.random() * 15;
