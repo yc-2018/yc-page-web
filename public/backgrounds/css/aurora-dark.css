@@ -1,5 +1,6 @@
 [data-background-source='css://aurora-dark'] {
   background:
+    linear-gradient(180deg, transparent 58%, rgba(0, 0, 0, 0.28)),
     radial-gradient(circle at 50% 115%, rgba(25, 86, 128, 0.48), transparent 42%),
     linear-gradient(145deg, #02030b 0%, #071124 48%, #02040d 100%);
   isolation: isolate;
@@ -8,23 +9,95 @@
 
 [data-background-source='css://aurora-dark']::before {
   position: absolute;
-  inset: -20%;
-  z-index: -1;
+  top: -10vh;
+  left: -10vw;
+  z-index: 0;
+  width: 1px;
+  height: 1px;
+  border-radius: 50%;
   content: '';
-  opacity: 0.34;
-  background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.72) 0 1px, transparent 1.5px),
-    radial-gradient(circle, rgba(113, 206, 255, 0.5) 0 1px, transparent 1.6px);
-  background-position: 0 0, 37px 63px;
-  background-size: 96px 96px, 137px 137px;
-  animation: ycBgAuroraStars 36s linear infinite;
+  opacity: 0.54;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow:
+    3vw 7vh rgba(255, 255, 255, 0.72),
+    8vw 31vh rgba(132, 209, 255, 0.62),
+    12vw 13vh rgba(255, 255, 255, 0.48),
+    15vw 74vh rgba(183, 224, 255, 0.7),
+    19vw 47vh rgba(255, 255, 255, 0.56),
+    23vw 21vh rgba(113, 198, 255, 0.68),
+    27vw 89vh rgba(255, 255, 255, 0.44),
+    31vw 58vh rgba(215, 238, 255, 0.74),
+    34vw 10vh rgba(255, 255, 255, 0.58),
+    37vw 42vh rgba(126, 207, 255, 0.54),
+    41vw 79vh rgba(255, 255, 255, 0.76),
+    45vw 29vh rgba(194, 229, 255, 0.5),
+    48vw 94vh rgba(255, 255, 255, 0.62),
+    52vw 63vh rgba(115, 199, 255, 0.72),
+    55vw 16vh rgba(255, 255, 255, 0.46),
+    58vw 51vh rgba(225, 242, 255, 0.66),
+    61vw 84vh rgba(255, 255, 255, 0.54),
+    65vw 33vh rgba(127, 205, 255, 0.64),
+    68vw 70vh rgba(255, 255, 255, 0.78),
+    71vw 8vh rgba(206, 234, 255, 0.48),
+    74vw 47vh rgba(255, 255, 255, 0.58),
+    77vw 91vh rgba(112, 197, 255, 0.7),
+    80vw 24vh rgba(255, 255, 255, 0.52),
+    83vw 61vh rgba(221, 240, 255, 0.74),
+    86vw 14vh rgba(255, 255, 255, 0.42),
+    89vw 77vh rgba(128, 207, 255, 0.62),
+    92vw 39vh rgba(255, 255, 255, 0.7),
+    95vw 96vh rgba(191, 226, 255, 0.48),
+    98vw 55vh rgba(255, 255, 255, 0.56),
+    101vw 18vh rgba(111, 198, 255, 0.68),
+    104vw 69vh rgba(255, 255, 255, 0.74),
+    107vw 31vh rgba(211, 236, 255, 0.5),
+    110vw 86vh rgba(255, 255, 255, 0.6),
+    114vw 49vh rgba(123, 204, 255, 0.66),
+    117vw 6vh rgba(255, 255, 255, 0.46),
+    120vw 73vh rgba(222, 240, 255, 0.72);
+  animation:
+    ycBgAuroraStarsFar 62s linear infinite,
+    ycBgAuroraTwinkleFar 5.6s ease-in-out infinite alternate;
 }
 
 [data-background-source='css://aurora-dark']::after {
   position: absolute;
-  inset: 0;
+  top: -10vh;
+  left: -10vw;
+  z-index: 0;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
   content: '';
-  background: linear-gradient(180deg, transparent 58%, rgba(0, 0, 0, 0.28));
+  opacity: 0.68;
+  pointer-events: none;
+  background: rgba(218, 239, 255, 0.9);
+  box-shadow:
+    6vw 18vh 1px rgba(255, 255, 255, 0.82),
+    13vw 65vh 2px rgba(106, 201, 255, 0.7),
+    21vw 38vh 1px rgba(255, 255, 255, 0.74),
+    29vw 81vh 2px rgba(180, 225, 255, 0.76),
+    35vw 25vh 1px rgba(255, 255, 255, 0.68),
+    43vw 56vh 2px rgba(112, 202, 255, 0.72),
+    50vw 7vh 1px rgba(255, 255, 255, 0.8),
+    57vw 74vh 2px rgba(205, 235, 255, 0.7),
+    64vw 44vh 1px rgba(255, 255, 255, 0.76),
+    72vw 16vh 2px rgba(105, 198, 255, 0.68),
+    79vw 88vh 1px rgba(255, 255, 255, 0.82),
+    87vw 52vh 2px rgba(192, 229, 255, 0.74),
+    94vw 29vh 1px rgba(255, 255, 255, 0.7),
+    103vw 80vh 2px rgba(112, 201, 255, 0.76),
+    111vw 12vh 1px rgba(255, 255, 255, 0.78),
+    118vw 61vh 2px rgba(211, 237, 255, 0.7),
+    9vw 93vh 1px rgba(255, 255, 255, 0.72),
+    46vw 95vh 2px rgba(118, 204, 255, 0.68),
+    69vw 67vh 1px rgba(255, 255, 255, 0.8),
+    99vw 4vh 2px rgba(185, 226, 255, 0.72),
+    116vw 37vh 1px rgba(255, 255, 255, 0.76);
+  animation:
+    ycBgAuroraStarsNear 44s linear infinite,
+    ycBgAuroraTwinkleNear 4.2s ease-in-out -1.7s infinite alternate;
 }
 
 [data-background-source='css://aurora-dark'] .yc-background-layer {
@@ -33,6 +106,7 @@
   left: 4%;
   width: 52vmax;
   height: 92vmax;
+  z-index: 1;
   border-radius: 42% 58% 55% 45%;
   opacity: 0.42;
   filter: blur(48px);
@@ -91,8 +165,36 @@
   }
 }
 
-@keyframes ycBgAuroraStars {
-  to {
-    transform: translate3d(48px, 32px, 0);
+@keyframes ycBgAuroraStarsFar {
+  100% {
+    transform: translate3d(6vw, -4vh, 0);
+  }
+}
+
+@keyframes ycBgAuroraStarsNear {
+  100% {
+    transform: translate3d(-7vw, 5vh, 0);
+  }
+}
+
+@keyframes ycBgAuroraTwinkleFar {
+  0% {
+    opacity: 0.34;
+    filter: brightness(0.82);
+  }
+  100% {
+    opacity: 0.66;
+    filter: brightness(1.18);
+  }
+}
+
+@keyframes ycBgAuroraTwinkleNear {
+  0% {
+    opacity: 0.42;
+    filter: drop-shadow(0 0 1px rgba(132, 210, 255, 0.34));
+  }
+  100% {
+    opacity: 0.78;
+    filter: drop-shadow(0 0 3px rgba(132, 210, 255, 0.72));
   }
 }
