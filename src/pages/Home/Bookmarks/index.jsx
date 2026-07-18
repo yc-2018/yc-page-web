@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Button, Dropdown} from "antd";
-import {PlusOutlined} from "@ant-design/icons";
+import {HolderOutlined, PlusOutlined} from "@ant-design/icons";
 
 import BookmarksItem from "@/pages/Home/Bookmarks/BookmarksItem";
 import MyDnd from "@/components/MyDnd";
@@ -11,6 +11,7 @@ import CommonStore from "@/store/CommonStore";
 import ContextMenu from "@/components/ContextMenu";
 import action from "@/pages/Home/Bookmarks/action";
 import {addBookmarks, dragSort, getBookmarks, updateBookmark} from "@/request/homeApi";
+import styles from "./bookmark.module.css";
 
 let setCurrentGroupItems;   //组内传过来的设置列表的方法 放在方法内会报错 应该是会重新变成空
 
@@ -104,16 +105,10 @@ export default function Bookmarks() {
   /** 添加【书签组】按钮 */
   const addBookmarkGroupButton = () =>
     <Button
-      ghost
       size="small"
       type="dashed"
       onClick={() => setModal(true, 1)}
-      style={{
-        textShadow: ' 0px 0px 5px #abc9ec',
-        borderColor: 'rgb(0 0 0 / 18%)',
-        margin: '1px 7px',
-        width: 30
-      }}
+      className={styles.addGroupButton}
       icon={<PlusOutlined/>}
     >
     </Button>
@@ -151,8 +146,8 @@ export default function Bookmarks() {
           <MyDnd.Item
             key={group.id}
             id={group.id}
-            styles={{padding: '1px 0'}}
-            drag={<span style={{color: '#00000030'}}>☰</span>}
+            className={styles.groupItem}
+            drag={<HolderOutlined className={styles.groupDragHandle}/>}
           >
             <Dropdown // 下拉菜单
               popupRender={() =>
@@ -166,19 +161,18 @@ export default function Bookmarks() {
                 </div>
               }
             >
-              <span style={{marginLeft: -5}}> {/*不加一层span 2个下拉菜单直接嵌套控制台会有警告*/}
+              <span className={styles.groupDropdownTrigger}> {/*不加一层span 2个下拉菜单直接嵌套控制台会有警告*/}
                 <ContextMenu tag={group} lambdaObj={lambdaObj}>
                   <Button
-                    ghost           // 使按钮背景透明
-                    type="dashed"
+                    type="text"
                     size="small"
                     href={group.url}
-                    style={{textShadow: ' 1px 1px 4px #4A4A4AFF', borderColor: '#4a4a4a'}}
+                    className={styles.groupButton}
                     target="_blank"
                   >
                     {group.name}
                   </Button>
-                  </ContextMenu>
+                </ContextMenu>
               </span>
             </Dropdown>
           </MyDnd.Item>

@@ -22,3 +22,114 @@
   color: black !important;
   width: 100%;
 }
+
+.groupItem,
+.addGroupButton {
+  --bookmark-group-text: #f4f7ff;
+  --bookmark-group-handle: #edf3ff;
+  --bookmark-group-border: rgba(255, 255, 255, 0.7);
+  --bookmark-group-background: rgba(3, 8, 23, 0.1);
+  --bookmark-group-hover-background: rgba(3, 8, 23, 0.24);
+  --bookmark-group-shadow: 0 0 0 1px rgba(0, 0, 0, 0.38), 0 1px 5px rgba(0, 0, 0, 0.48);
+  --bookmark-group-text-shadow: 0 1px 3px rgba(0, 0, 0, 0.88);
+}
+
+:global(.homePage[data-background-tone='dark']) .groupItem,
+:global(.homePage[data-background-tone='dark']) .addGroupButton {
+  --bookmark-group-text: #d2dae7;
+  --bookmark-group-handle: #f0f5ff;
+  --bookmark-group-border: rgba(255, 255, 255, 0.56);
+  --bookmark-group-background: rgba(255, 255, 255, 0.035);
+  --bookmark-group-hover-background: rgba(255, 255, 255, 0.12);
+  --bookmark-group-shadow: 0 0 0 1px rgba(0, 0, 0, 0.48), 0 0 7px rgba(255, 255, 255, 0.14);
+  --bookmark-group-text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+:global(.homePage[data-background-tone='light']) .groupItem,
+:global(.homePage[data-background-tone='light']) .addGroupButton {
+  --bookmark-group-text: #26364a;
+  --bookmark-group-handle: #344861;
+  --bookmark-group-border: rgba(38, 54, 74, 0.58);
+  --bookmark-group-background: rgba(255, 255, 255, 0.12);
+  --bookmark-group-hover-background: rgba(255, 255, 255, 0.4);
+  --bookmark-group-shadow: 0 0 0 1px rgba(255, 255, 255, 0.62), 0 1px 4px rgba(38, 54, 74, 0.2);
+  --bookmark-group-text-shadow: 0 1px 3px rgba(255, 255, 255, 0.92);
+}
+
+.groupItem {
+  display: flex;
+  min-height: 26px;
+  overflow: hidden;
+  align-items: stretch;
+  border: 1px dashed var(--bookmark-group-border);
+  border-radius: 6px;
+  background: var(--bookmark-group-background);
+  box-shadow: var(--bookmark-group-shadow);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.groupItem:hover {
+  border-color: var(--bookmark-group-handle);
+  background: var(--bookmark-group-hover-background);
+}
+
+.groupItem > :global(.mouseMove) {
+  display: flex;
+  padding: 0 5px;
+  color: var(--bookmark-group-handle);
+  cursor: grab;
+  align-items: center;
+  border-right: 1px dashed var(--bookmark-group-border);
+}
+
+.groupItem > :global(.mouseMove):active {
+  cursor: grabbing;
+}
+
+.groupItem > :global(.pointer),
+.groupDropdownTrigger {
+  display: flex;
+  min-width: 0;
+}
+
+.groupDragHandle {
+  font-size: 12px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.48));
+}
+
+.groupButton {
+  height: 24px;
+  padding: 0 8px 0 6px;
+  color: var(--bookmark-group-text) !important;
+  border: 0 !important;
+  background: transparent !important;
+  text-shadow: var(--bookmark-group-text-shadow);
+}
+
+.groupButton:hover,
+.groupButton:focus-visible {
+  color: var(--bookmark-group-handle) !important;
+  background: transparent !important;
+}
+
+.addGroupButton {
+  width: 30px;
+  height: 26px;
+  margin: 1px 7px;
+  padding: 0;
+  color: var(--bookmark-group-handle) !important;
+  border-color: var(--bookmark-group-border) !important;
+  background: var(--bookmark-group-background) !important;
+  box-shadow: var(--bookmark-group-shadow) !important;
+  text-shadow: var(--bookmark-group-text-shadow);
+}
+
+.addGroupButton:hover,
+.addGroupButton:focus-visible {
+  color: var(--bookmark-group-handle) !important;
+  border-color: var(--bookmark-group-handle) !important;
+  background: var(--bookmark-group-hover-background) !important;
+}
