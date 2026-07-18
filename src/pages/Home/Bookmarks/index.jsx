@@ -114,8 +114,8 @@ export default function Bookmarks() {
         margin: '1px 7px',
         width: 30
       }}
+      icon={<PlusOutlined/>}
     >
-      <PlusOutlined/> {/*加号➕*/}
     </Button>
 
   /** 拖动后请求排序 */
@@ -148,8 +148,12 @@ export default function Bookmarks() {
         style={{display: 'flex', flexWrap: 'wrap', gap: 8, padding: 5}}
       >
         {bookmarkGroupList.map(group =>
-          <MyDnd.Item key={group.id} id={group.id} styles={{padding: '1px 0'}}
-                      drag={<span style={{color: '#00000030'}}>☰</span>}>
+          <MyDnd.Item
+            key={group.id}
+            id={group.id}
+            styles={{padding: '1px 0'}}
+            drag={<span style={{color: '#00000030'}}>☰</span>}
+          >
             <Dropdown // 下拉菜单
               popupRender={() =>
                 <div className={'ant-dropdown-menu'}>
