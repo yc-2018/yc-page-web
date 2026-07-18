@@ -14,6 +14,8 @@ import action from "@/pages/Home/Bookmarks/action";
 import {addBookmarks, dragSort, getBookmarks, updateBookmark} from "@/request/homeApi";
 import styles from "./bookmark.module.css";
 
+const BOOKMARK_GROUP_HANDLE_WIDTH = 23 // 书签组拖拽把手区域宽度
+
 let setCurrentGroupItems;   //组内传过来的设置列表的方法 放在方法内会报错 应该是会重新变成空
 
 export default function Bookmarks() {
@@ -25,8 +27,23 @@ export default function Bookmarks() {
   const [ModalType, setModalType] = useState(1)        // 表单模态框类型 书签还是书签组
   const [editObj, setEditObj] = useState()                    // 表单模态框编辑对象
   const [sort, setSort] = useState()                          // 那个书签组的新增点击了 它就是哪个书签组的id
+  const [dropdownMinWidths, setDropdownMinWidths] = useState({}) // 每个书签组下拉框的最小宽度
+  const dropdownTriggerRefs = React.useRef(new Map())          // 保存书签组下拉触发区域
 
   const {msg} = CommonStore
+
+  /** 下拉框打开时按触发区域宽度计算最小宽度，多出的23px用于覆盖拖拽把手区域 */
+  const updateDropdownMinWidth = (id, open) => {
+    if (!open) return
+    const trigger = dropdownTriggerRefs.current.get(id)
+    const width = trigger?.getBoundingClientRect().width
+    if (!width) return
+    const minWidth = width + BOOKMARK_GROUP_HANDLE_WIDTH
+    setDropdownMinWidths(current => current[id] === minWidth
+      ? current
+      : {...current, [id]: minWidth}
+    )
+  }
 
   useEffect(() => {
     // 登录后获取本用户全部书签
@@ -154,6 +171,9 @@ export default function Bookmarks() {
             }
           >
             <Dropdown // 下拉菜单
+              align={{offset: [-BOOKMARK_GROUP_HANDLE_WIDTH, 5]}}
+              onOpenChange={open => updateDropdownMinWidth(group.id, open)}
+              styles={{root: {minWidth: dropdownMinWidths[group.id]}}}
               popupRender={() =>
                 <div className={'ant-dropdown-menu'}>
                   <BookmarksItem
@@ -165,7 +185,13 @@ export default function Bookmarks() {
                 </div>
               }
             >
-              <span className={styles.groupDropdownTrigger}> {/*不加一层span 2个下拉菜单直接嵌套控制台会有警告*/}
+              <span
+                ref={trigger => {
+                  if (trigger) dropdownTriggerRefs.current.set(group.id, trigger)
+                  else dropdownTriggerRefs.current.delete(group.id)
+                }}
+                className={styles.groupDropdownTrigger}
+              > {/*不加一层span 2个下拉菜单直接嵌套控制台会有警告*/}
                 <ContextMenu tag={group} lambdaObj={lambdaObj}>
                   <Button
                     type="text"
