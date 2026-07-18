@@ -177,20 +177,24 @@ const LinkBox = () => {
               {linkList.map(item =>
                 <IsMyDndItem linkItem={item} key={item.id} isDrag={isDrag} menuOnClick={menuOnClick}>
                   <div key={item.id} className={s.item} onClick={() => openUrl(item.engineUrl)}>
-                    <TryFavicon
-                      size={50}
-                      errSize={40}
-                      initElm="loading"
-                      url={item.engineUrl}
-                      iconUrl={item.iconUrl}
-                    />
-                    <div>{item.name}</div>
+                    <span className={s.itemIcon}>
+                      <TryFavicon
+                        size={50}
+                        errSize={40}
+                        initElm="loading"
+                        url={item.engineUrl}
+                        iconUrl={item.iconUrl}
+                      />
+                    </span>
+                    <div className={s.itemName}>{item.name}</div>
                   </div>
                 </IsMyDndItem>
               )}
               {linkList.length < 20 && !isDrag &&
                 <div onClick={() => openModal()} className={s.item}>
-                  <PlusOutlined style={{fontSize: 30, color: '#888'}}/>
+                  <span className={s.itemIcon}>
+                    <PlusOutlined style={{fontSize: 30, color: 'currentColor'}}/>
+                  </span>
                 </div>
               }
             </div>

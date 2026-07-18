@@ -1,10 +1,33 @@
 .grid10 {
+    --home-link-text: #f6f8ff;
+    --home-link-hover-text: #f6f8ff;
+    --home-link-outline: rgba(0, 0, 0, 0.78);
+    --home-link-shadow: rgba(0, 0, 0, 0.82);
+    --home-link-icon-filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.92)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.72));
+    --home-link-hover-background: rgba(0, 0, 0, 0.2);
     gap: 30px;
-    color: #888;
+    color: var(--home-link-text);
     display: grid;
     align-items: center;
     justify-content: center;
     grid-template-columns: repeat(10, 1fr);
+}
+
+:global(.homePage[data-background-tone='dark']) .grid10 {
+    --home-link-text: #c4ccd9;
+    --home-link-hover-text: #f4f7ff;
+    --home-link-outline: rgba(0, 0, 0, 0.8);
+    --home-link-shadow: rgba(0, 0, 0, 0.86);
+    --home-link-icon-filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 3px rgba(255, 255, 255, 0.58));
+}
+
+:global(.homePage[data-background-tone='light']) .grid10 {
+    --home-link-text: #26364a;
+    --home-link-hover-text: #26364a;
+    --home-link-outline: rgba(255, 255, 255, 0.9);
+    --home-link-shadow: rgba(255, 255, 255, 0.88);
+    --home-link-icon-filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.42)) drop-shadow(0 0 1px rgba(0, 0, 0, 0.28));
+    --home-link-hover-background: rgba(255, 255, 255, 0.42);
 }
 
 .center {
@@ -31,9 +54,30 @@
 
 .item:hover {
     opacity: 1;
-    color: #333;
+    color: var(--home-link-hover-text);
     font-weight: bold;
     transform: scale(1.2);
     transform-origin: 50% 100%;
-    background-color: #00000033;
+    background-color: var(--home-link-hover-background);
+}
+
+.itemIcon {
+    display: flex;
+    line-height: 0;
+    filter: var(--home-link-icon-filter);
+    transition: filter 0.2s ease-in-out;
+}
+
+.item:hover .itemIcon {
+    filter: var(--home-link-icon-filter) brightness(1.08);
+}
+
+.itemName {
+    color: inherit;
+    line-height: 1.35;
+    -webkit-text-stroke: 0.35px var(--home-link-outline);
+    paint-order: stroke fill;
+    text-shadow:
+        0 1px 2px var(--home-link-shadow),
+        0 0 5px var(--home-link-shadow);
 }
