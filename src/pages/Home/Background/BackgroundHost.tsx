@@ -114,7 +114,11 @@ const BackgroundHost = ({source, onToneChange, onError}: BackgroundHostProps) =>
   }, [applyFallback, effectiveSource]);
 
   useEffect(() => {
-    if (renderState.kind !== 'dynamic' || !mountRef.current) return;
+    if (
+      renderState.kind !== 'dynamic'
+      || renderState.item.source !== effectiveSource
+      || !mountRef.current
+    ) return;
     const item = renderState.item;
     const mountContainer = mountRef.current;
     let cancelled = false;
