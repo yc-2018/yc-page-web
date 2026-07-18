@@ -9,6 +9,7 @@ import UserStore from "@/store/UserStore";
 import JWTUtils from "@/utils/JWTUtils";
 import CommonStore from "@/store/CommonStore";
 import ContextMenu from "@/components/ContextMenu";
+import TryFavicon from "@/components/TryFavicon";
 import action from "@/pages/Home/Bookmarks/action";
 import {addBookmarks, dragSort, getBookmarks, updateBookmark} from "@/request/homeApi";
 import styles from "./bookmark.module.css";
@@ -147,7 +148,10 @@ export default function Bookmarks() {
             key={group.id}
             id={group.id}
             className={styles.groupItem}
-            drag={<HolderOutlined className={styles.groupDragHandle}/>}
+            drag={group.icon
+              ? <TryFavicon iconUrl={group.icon} url={group.url} size={16} errSize={14}/>
+              : <HolderOutlined className={styles.groupDragHandle}/>
+            }
           >
             <Dropdown // 下拉菜单
               popupRender={() =>
