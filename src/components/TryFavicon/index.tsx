@@ -104,8 +104,8 @@ const TryFavicon: FC<Props> = ({
       return;
     }
 
-    const cacheKey = JSON.stringify(originalSources); // 当前候选源组合的缓存键
-    const cachedSource = getFaviconSourceCache()[cacheKey]; // 上次成功加载的来源
+    const cacheKey = !iconUrl ? JSON.stringify(originalSources) : null; // 仅为自动探测图标生成缓存键
+    const cachedSource = cacheKey ? getFaviconSourceCache()[cacheKey] : null; // 上次成功加载的来源
     const sources = cachedSource && originalSources.includes(cachedSource)
       ? [cachedSource, ...originalSources.filter(source => source !== cachedSource)]
       : originalSources;
@@ -131,7 +131,7 @@ const TryFavicon: FC<Props> = ({
       // 图片加载成功
       img.onload = () => {
         if (mounted) {
-          saveFaviconSourceCache(cacheKey, src);
+          if (cacheKey) saveFaviconSourceCache(cacheKey, src);
           setCurrentSrc(src);
           setLoading(false);
           setError(false);
@@ -141,7 +141,7 @@ const TryFavicon: FC<Props> = ({
       // 图片加载失败，尝试下一个源
       img.onerror = () => {
         if (mounted) {
-          removeFaviconSourceCache(cacheKey, src);
+          if (cacheKey) removeFaviconSourceCache(cacheKey, src);
           currentIndex++;
           tryNextSource(); // 递归尝试下一个源
         }
