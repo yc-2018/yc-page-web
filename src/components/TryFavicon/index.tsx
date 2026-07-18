@@ -4,6 +4,54 @@ import {tryGetFavicon, tryGetFavicon1, tryGetFavicon2} from '@/utils/urlUtils';
 import {FC} from 'react';
 import {Skeleton} from 'antd';
 
+const FAVICON_SOURCE_CACHE_KEY = 'tryFaviconSuccessfulSources'; // favicon成功来源缓存键
+
+type FaviconSourceCache = Record<string, string>;
+
+/**
+ * 读取已成功加载的favicon来源映射，缓存异常时按空映射处理
+ */
+const getFaviconSourceCache = (): FaviconSourceCache => {
+  try {
+    const cacheStr = localStorage.getItem(FAVICON_SOURCE_CACHE_KEY);
+    if (!cacheStr) return {};
+    const cache = JSON.parse(cacheStr) as unknown;
+    return cache && typeof cache === 'object' && !Array.isArray(cache)
+      ? cache as FaviconSourceCache
+      : {};
+  } catch {
+    return {};
+  }
+};
+
+/**
+ * 保存当前候选源组合最终成功加载的favicon地址
+ */
+const saveFaviconSourceCache = (cacheKey: string, src: string) => {
+  try {
+    const cache = getFaviconSourceCache();
+    if (cache[cacheKey] === src) return;
+    cache[cacheKey] = src;
+    localStorage.setItem(FAVICON_SOURCE_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // localStorage不可用或空间不足时不影响图标正常回退
+  }
+};
+
+/**
+ * 删除已经失效的favicon来源，避免后续继续优先尝试
+ */
+const removeFaviconSourceCache = (cacheKey: string, src: string) => {
+  try {
+    const cache = getFaviconSourceCache();
+    if (cache[cacheKey] !== src) return;
+    delete cache[cacheKey];
+    localStorage.setItem(FAVICON_SOURCE_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // localStorage不可用时不影响图标正常回退
+  }
+};
+
 interface Props {
   iconUrl?: string;                       // 直接提供的图标URL（最高优先级）
   url?: string;                           // 网站URL，用于自动获取图标
@@ -42,7 +90,7 @@ const TryFavicon: FC<Props> = ({
     setCurrentSrc(null);
 
     // 按优先级构建图标源数组：
-    const sources = [
+    const originalSources = [
       iconUrl,                                // 1. 直接提供的iconUrl（最高优先级）
       url ? tryGetFavicon(url) : null,        // 2. 通过tryGetFavicon从URL获取
       url ? tryGetFavicon1(url) : null,       // 3. 通过tryGetFavicon1从URL获取
@@ -50,11 +98,17 @@ const TryFavicon: FC<Props> = ({
     ].filter(Boolean) as string[];            // 过滤掉null/undefined值
 
     // 如果没有可用的图标源，直接显示错误状态
-    if (sources.length === 0) {
+    if (originalSources.length === 0) {
       setLoading(false);
       setError(true);
       return;
     }
+
+    const cacheKey = JSON.stringify(originalSources); // 当前候选源组合的缓存键
+    const cachedSource = getFaviconSourceCache()[cacheKey]; // 上次成功加载的来源
+    const sources = cachedSource && originalSources.includes(cachedSource)
+      ? [cachedSource, ...originalSources.filter(source => source !== cachedSource)]
+      : originalSources;
 
     let currentIndex = 0;    // 当前尝试的图标源索引
     let mounted = true;      // 组件挂载状态，防止内存泄漏
@@ -77,6 +131,7 @@ const TryFavicon: FC<Props> = ({
       // 图片加载成功
       img.onload = () => {
         if (mounted) {
+          saveFaviconSourceCache(cacheKey, src);
           setCurrentSrc(src);
           setLoading(false);
           setError(false);
@@ -86,6 +141,7 @@ const TryFavicon: FC<Props> = ({
       // 图片加载失败，尝试下一个源
       img.onerror = () => {
         if (mounted) {
+          removeFaviconSourceCache(cacheKey, src);
           currentIndex++;
           tryNextSource(); // 递归尝试下一个源
         }
