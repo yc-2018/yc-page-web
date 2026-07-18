@@ -27,3 +27,7 @@ export default interface ISearchEngines {
   userId?: string
 }
 
+/** 搜索引擎或首页链接的可选示例，不包含用户数据ID和业务类型 */
+export type ISearchEngineExample = Pick<ISearchEngines, 'name' | 'engineUrl'> &
+  Partial<Pick<ISearchEngines, 'directUrl' | 'iconUrl'>>
+

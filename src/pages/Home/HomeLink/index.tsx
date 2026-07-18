@@ -4,16 +4,18 @@ import {
   getSearchEngines, sortSearchEngine,
   updateSearchEngines
 } from '@/request/homeApi';
-import {App, Button, Dropdown, Form, Input, Modal} from 'antd';
+import {App, Button, Dropdown, Form, Input, Modal, Space} from 'antd';
 import {_getHomeLinks, _setHomeLinks} from '@/utils/localStorageUtils';
-import ISearchEngines, {HOME_LINK} from '@/interface/ISearchEngines';
+import ISearchEngines, {HOME_LINK, type ISearchEngineExample} from '@/interface/ISearchEngines';
 import type {MenuClickInfo} from '@/interface/IAntd';
 import JWTUtils from '@/utils/JWTUtils';
 import UserStore from '@/store/UserStore';
 import CommonStore from '@/store/CommonStore';
-import {PlusOutlined} from '@ant-design/icons';
+import {AppstoreAddOutlined, PlusOutlined} from '@ant-design/icons';
 import MyDnd from '@/components/MyDnd';
 import TryFavicon from '@/components/TryFavicon';
+import EngineExamplePicker from '@/components/EngineExamplePicker';
+import {homeLinkExamples} from '@/store/SearchEngineExamples';
 import s from './index.module.css'
 import searchStyles from '@/pages/Home/HomeSearch/SearchEngines.module.css';
 
@@ -61,6 +63,7 @@ const LinkBox = () => {
   const [editOrAddData, setEditOrAddData] = useState<IEditOrAdd>({open: false})
   const [modalLoading, setModalLoading] = useState(false)
   const [isDrag, setIsDrag] = useState(false)
+  const [examplePickerOpen, setExamplePickerOpen] = useState(false) // 示例选择弹窗状态
 
   const [form] = Form.useForm(); // 创建一个表单域
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
@@ -85,8 +88,24 @@ const LinkBox = () => {
   /** 打开编辑或新增弹窗 */
   const openModal = (edit?: ISearchEngines) => {
     setEditOrAddData({open: true, edit})
+    setExamplePickerOpen(false)
     form.resetFields()
     form.setFieldsValue(edit)
+  }
+
+  /** 关闭新增或编辑弹窗 */
+  const closeModal = () => {
+    setExamplePickerOpen(false)
+    setEditOrAddData({open: false})
+  }
+
+  /** 选择示例后回填首页链接表单 */
+  const applyHomeLinkExample = (example: ISearchEngineExample) => {
+    form.setFieldsValue({
+      name: example.name,
+      engineUrl: example.engineUrl,
+      iconUrl: example.iconUrl ?? '',
+    })
   }
 
   /** 新增或编辑弹窗的确定处理 */
@@ -102,7 +121,7 @@ const LinkBox = () => {
             // 数据回显
             setLinkList(items => items?.map(item => item.id === updateData.id ? updateData : item));
             msg.success('修改成功');
-            setEditOrAddData({open: false})
+            closeModal()
           } else msg.error('修改失败(返回数据异常')
         }).finally(() => setModalLoading(false));
       } else {
@@ -110,7 +129,7 @@ const LinkBox = () => {
         addSearchEngines({...values, type: HOME_LINK}).then(result => {
           if (result.success) {
             setLinkList(v => [...v, result.data!])
-            setEditOrAddData({open: false})
+            closeModal()
           }
         })
       }
@@ -208,7 +227,18 @@ const LinkBox = () => {
         open={editOrAddData.open}
         onOk={modalOnOk}
         confirmLoading={modalLoading}
-        onCancel={() => setEditOrAddData({open: false})}
+        onCancel={closeModal}
+        footer={(_, {OkBtn, CancelBtn}) => (
+          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+            {!editOrAddData.edit?.id
+              ? <Button icon={<AppstoreAddOutlined/>} onClick={() => setExamplePickerOpen(true)}>选择示例</Button>
+              : <span/>}
+            <Space>
+              <CancelBtn/>
+              <OkBtn/>
+            </Space>
+          </div>
+        )}
       >
         <Form<ISearchEngines>
           form={form}
@@ -249,6 +279,13 @@ const LinkBox = () => {
 
         </Form>
       </Modal>
+
+      <EngineExamplePicker
+        open={examplePickerOpen}
+        examples={homeLinkExamples}
+        onCancel={() => setExamplePickerOpen(false)}
+        onSelect={applyHomeLinkExample}
+      />
 
 
       {isDrag &&  // 拖拽中 遮罩和功能键

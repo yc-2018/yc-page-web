@@ -1,14 +1,16 @@
 import {useEffect, useState} from 'react';
-import {DownCircleOutlined, PlusOutlined} from '@ant-design/icons';
+import {AppstoreAddOutlined, DownCircleOutlined, PlusOutlined} from '@ant-design/icons';
 import {addSearchEngines, getSearchEngines, updateSearchEngines} from '@/request/homeApi';
-import {Alert, App, Button, Checkbox, Divider, Form, Input, Modal} from 'antd';
+import {Alert, App, Button, Checkbox, Divider, Form, Input, Modal, Space} from 'antd';
 import SearchEngines from '@/pages/Home/HomeSearch/SearchEngines';
 import {_getDefaultEngine, _getSearchEngines, _setSearchEngines} from '@/utils/localStorageUtils';
-import ISearchEngines, {LOW_SEARCH, SEARCH} from '@/interface/ISearchEngines';
+import ISearchEngines, {LOW_SEARCH, SEARCH, type ISearchEngineExample} from '@/interface/ISearchEngines';
 import JWTUtils from '@/utils/JWTUtils';
 import UserStore from '@/store/UserStore';
 import CommonStore from '@/store/CommonStore';
 import SearchInput from '@/pages/Home/HomeSearch/SearchInput';
+import EngineExamplePicker from '@/components/EngineExamplePicker';
+import {searchEngineExamples} from '@/store/SearchEngineExamples';
 import './index.css'
 
 const {msg} = CommonStore
@@ -32,6 +34,7 @@ const SearchBox = () => {
   const [editOrAddData, setEditOrAddData] = useState<IEditOrAdd>({open: false})
   const [modalLoading, setModalLoading] = useState(false)
   const [lowLoading, setLowLoading] = useState(false)
+  const [examplePickerOpen, setExamplePickerOpen] = useState(false) // 示例选择弹窗状态
   const [form] = Form.useForm(); // 创建一个表单域
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
   const {jwt} = UserStore;           // 当前登录凭证
@@ -67,8 +70,25 @@ const SearchBox = () => {
   /** 打开编辑或新增弹窗 */
   const openModal = (edit?: ISearchEngines) => {
     setEditOrAddData({open: true, edit})
+    setExamplePickerOpen(false)
     form.resetFields()
     form.setFieldsValue({...edit, lowUsage: Boolean(edit?.type)})
+  }
+
+  /** 关闭新增或编辑弹窗 */
+  const closeModal = () => {
+    setExamplePickerOpen(false)
+    setEditOrAddData({open: false})
+  }
+
+  /** 选择示例后回填表单，不修改用户当前选择的常用类型 */
+  const applySearchExample = (example: ISearchEngineExample) => {
+    form.setFieldsValue({
+      name: example.name,
+      engineUrl: example.engineUrl,
+      directUrl: example.directUrl ?? '',
+      iconUrl: example.iconUrl ?? '',
+    })
   }
 
   /** 设置为[常用/不常用](换) */
@@ -120,7 +140,7 @@ const SearchBox = () => {
               setToXxxSearchList(items => items ? [...items, updateData] : undefined);
             }
             msg.success('修改成功');
-            setEditOrAddData({open: false})
+            closeModal()
           } else msg.error('修改失败(返回数据异常')
         }).finally(() => setModalLoading(false));
       } else {
@@ -129,7 +149,7 @@ const SearchBox = () => {
           if (result.success) {
             const setXxxSearchList = values.type === SEARCH ? setSearchList : setSearchLowList;
             setXxxSearchList(v => v ? [...v, result.data!] : undefined)
-            setEditOrAddData({open: false})
+            closeModal()
           }
         })
       }
@@ -203,7 +223,18 @@ const SearchBox = () => {
         open={editOrAddData.open}
         onOk={modalOnOk}
         confirmLoading={modalLoading}
-        onCancel={() => setEditOrAddData({open: false})}
+        onCancel={closeModal}
+        footer={(_, {OkBtn, CancelBtn}) => (
+          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+            {!editOrAddData.edit?.id
+              ? <Button icon={<AppstoreAddOutlined/>} onClick={() => setExamplePickerOpen(true)}>选择示例</Button>
+              : <span/>}
+            <Space>
+              <CancelBtn/>
+              <OkBtn/>
+            </Space>
+          </div>
+        )}
       >
         {!editOrAddData.edit && // 新增时提示
           <Alert
@@ -279,6 +310,13 @@ const SearchBox = () => {
 
         </Form>
       </Modal>
+
+      <EngineExamplePicker
+        open={examplePickerOpen}
+        examples={searchEngineExamples}
+        onCancel={() => setExamplePickerOpen(false)}
+        onSelect={applySearchExample}
+      />
     </div>
   );
 }
