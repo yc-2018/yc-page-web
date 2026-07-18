@@ -79,8 +79,8 @@ export function mountBackground(container, options) {
     if (!running || destroyed) return;
     const delta = Math.min((time - previousTime) / 1000, 0.05);
     previousTime = time;
-    elapsedTime += delta;
-    const mouse = pointer.update(0.06);
+    elapsedTime += delta * 0.82;  // 整体波动速度降为原来的 82%，稍微舒缓一些
+    const mouse = pointer.update(0.01);   // 鼠标扰动中心追随系数 越小越慢
     const mouseX = mouse.x * 10;
     const mouseZ = -mouse.y * 7;
 

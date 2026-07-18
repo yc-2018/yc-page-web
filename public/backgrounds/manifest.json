@@ -1,5 +1,5 @@
 {
-  "version": 14,
+  "version": 15,
   "items": [
     {
       "source": "css://aurora-dark",
@@ -58,7 +58,7 @@
       "name": "粒子波浪",
       "description": "会被鼠标扰动的空间粒子海面",
       "tone": "dark",
-      "version": 2,
+      "version": 3,
       "fallback": "css://aurora-dark"
     },
     {
