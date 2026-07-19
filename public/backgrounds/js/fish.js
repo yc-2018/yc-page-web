@@ -9,31 +9,95 @@ import {
 const waterVertexShader = `
   varying vec2 vUv;
   varying vec2 vPosition;
+  varying float vWave;
+
+  uniform float uTime;
+  uniform int uRippleCount;
+  uniform vec4 uRipples[16];
 
   void main() {
     vUv = uv;
     vPosition = position.xy;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    float height = 0.0;
+    for (int index = 0; index < 16; index++) {
+      if (index >= uRippleCount) break;
+      vec4 ripple = uRipples[index];
+      float distanceToRipple = distance(position.xy, ripple.xy);
+      float radius = ripple.z * (2.1 + ripple.w * 0.72) + 0.08;
+      float ringDistance = distanceToRipple - radius;
+      float lifeFade = 1.0 - smoothstep(0.48, 1.0, ripple.z);
+      float envelope = exp(-ringDistance * ringDistance * 13.0) * exp(-ripple.z * 0.7) * lifeFade;
+      height += sin(ringDistance * 8.0 - ripple.z * 5.0) * envelope * ripple.w * 0.092;
+      float wake = exp(-distanceToRipple * distanceToRipple * 0.22) * exp(-ripple.z * 1.2) * lifeFade;
+      float clickStrength = smoothstep(0.8, 1.2, ripple.w);
+      height += sin(distanceToRipple * 4.5 - ripple.z * 3.0) * wake * ripple.w * clickStrength * 0.018;
+    }
+    float ambient = sin(position.x * 0.34 + uTime * 0.34) * cos(position.y * 0.29 - uTime * 0.25) * 0.012;
+    vWave = height + ambient;
+    vec3 displaced = position + vec3(0.0, 0.0, vWave);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
   }
 `;
 
 const waterFragmentShader = `
   uniform float uTime;
+  uniform int uRippleCount;
+  uniform vec4 uRipples[16];
   varying vec2 vUv;
   varying vec2 vPosition;
+  varying float vWave;
+
+  float rippleHeight(vec2 point) {
+    float height = 0.0;
+    for (int index = 0; index < 16; index++) {
+      if (index >= uRippleCount) break;
+      vec4 ripple = uRipples[index];
+      float distanceToRipple = distance(point, ripple.xy);
+      float radius = ripple.z * (2.1 + ripple.w * 0.72) + 0.08;
+      float ringDistance = distanceToRipple - radius;
+      float lifeFade = 1.0 - smoothstep(0.48, 1.0, ripple.z);
+      float envelope = exp(-ringDistance * ringDistance * 13.0) * exp(-ripple.z * 0.7) * lifeFade;
+      height += sin(ringDistance * 8.0 - ripple.z * 5.0) * envelope * ripple.w * 0.092;
+      float wake = exp(-distanceToRipple * distanceToRipple * 0.22) * exp(-ripple.z * 1.2) * lifeFade;
+      float clickStrength = smoothstep(0.8, 1.2, ripple.w);
+      height += sin(distanceToRipple * 4.5 - ripple.z * 3.0) * wake * ripple.w * clickStrength * 0.018;
+    }
+    return height;
+  }
 
   void main() {
     float broadWave = sin(vPosition.x * 0.34 + uTime * 0.34)
       * cos(vPosition.y * 0.29 - uTime * 0.25);
-    float fineWave = sin((vPosition.x + vPosition.y) * 1.2 + uTime * 0.62)
-      * sin((vPosition.x - vPosition.y) * 0.72 - uTime * 0.48);
+    float fineWave = sin(vPosition.x * 1.8 + uTime * 0.42)
+      * sin(vPosition.y * 2.2 - uTime * 0.33);
+    float sampleStep = 0.055;
+    float heightLeft = rippleHeight(vPosition - vec2(sampleStep, 0.0));
+    float heightRight = rippleHeight(vPosition + vec2(sampleStep, 0.0));
+    float heightDown = rippleHeight(vPosition - vec2(0.0, sampleStep));
+    float heightUp = rippleHeight(vPosition + vec2(0.0, sampleStep));
+    vec3 surfaceNormal = normalize(vec3(
+      (heightLeft - heightRight) / (sampleStep * 2.0),
+      (heightDown - heightUp) / (sampleStep * 2.0),
+      0.72
+    ));
+    vec3 lightDirection = normalize(vec3(-0.35, 0.48, 0.82));
+    vec3 halfDirection = normalize(lightDirection + vec3(0.0, 0.0, 1.0));
+    float diffuse = dot(surfaceNormal, lightDirection) * 0.5 + 0.5;
+    float reflection = pow(max(dot(surfaceNormal, halfDirection), 0.0), 42.0);
     float caustic = smoothstep(0.68, 0.96, broadWave * 0.32 + fineWave * 0.18 + 0.68);
-    vec3 deepWater = vec3(0.012, 0.105, 0.16);
-    vec3 shallowWater = vec3(0.025, 0.24, 0.29);
+    vec3 deepWater = vec3(0.08, 0.28, 0.31);
+    vec3 shallowWater = vec3(0.18, 0.5, 0.43);
     vec3 color = mix(deepWater, shallowWater, vUv.y * 0.34 + broadWave * 0.08 + 0.2);
-    color += vec3(0.08, 0.3, 0.32) * caustic * 0.18;
+    color *= 0.84 + diffuse * 0.22;
+    float crest = smoothstep(0.01, 0.065, abs(vWave));
+    color += vec3(0.20, 0.42, 0.36) * crest * 0.22;
+    color += vec3(0.68, 0.86, 0.67) * reflection * (0.14 + crest * 0.62);
+    color += vec3(0.34, 0.46, 0.23) * caustic * 0.16;
+    float shimmer = pow(max(0.0, sin(vPosition.x * 2.7 + sin(vPosition.y * 0.8) + uTime * 1.1)
+      * sin(vPosition.y * 2.1 - cos(vPosition.x * 0.6) - uTime * 0.7)), 12.0);
+    color += vec3(0.24, 0.48, 0.46) * shimmer * 0.035;
     float vignette = 1.0 - smoothstep(0.35, 0.75, distance(vUv, vec2(0.5)));
-    color *= 0.82 + vignette * 0.18;
+    color *= 0.98 + vignette * 0.08;
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -48,6 +112,215 @@ function shortestAngleDifference(from, to) {
   return Math.atan2(Math.sin(to - from), Math.cos(to - from));
 }
 
+const fishVertexShader = `
+  uniform float uTime;
+  uniform float uPhase;
+  uniform float uFlee;
+  varying vec2 vUv;
+
+  void main() {
+    vUv = uv;
+    vec3 bentPosition = position;
+    float tailWeight = pow(1.0 - uv.x, 2.2);
+    bentPosition.y += sin(uTime * (3.5 + uFlee * 0.9) + uPhase + uv.x * 4.2)
+      * tailWeight * (0.052 + uFlee * 0.012);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(bentPosition, 1.0);
+  }
+`;
+
+const fishFragmentShader = `
+  uniform sampler2D uTexture;
+  varying vec2 vUv;
+
+  void main() {
+    vec4 fish = texture2D(uTexture, vUv);
+    if (fish.a < 0.02) discard;
+    float sunlight = 0.98 + smoothstep(0.1, 0.72, vUv.y) * 0.06;
+    vec3 vividColor = fish.rgb * vec3(1.03, 1.0, 0.96);
+    gl_FragColor = vec4(vividColor * sunlight, fish.a);
+  }
+`;
+
+function createFishTexture(palette, seed) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 128;
+  const context = canvas.getContext('2d');
+  let randomState = seed * 2654435761 >>> 0;
+  const random = () => {
+    randomState = randomState * 1664525 + 1013904223 >>> 0;
+    return randomState / 4294967296;
+  };
+  const traceBody = () => {
+    context.beginPath();
+    context.moveTo(216, 64);
+    context.bezierCurveTo(196, 31, 105, 22, 50, 48);
+    context.bezierCurveTo(37, 54, 34, 60, 34, 64);
+    context.bezierCurveTo(34, 68, 37, 74, 50, 80);
+    context.bezierCurveTo(105, 106, 196, 97, 216, 64);
+    context.closePath();
+  };
+
+  context.clearRect(0, 0, 256, 128);
+  const bodyGradient = context.createLinearGradient(35, 35, 216, 91);
+  bodyGradient.addColorStop(0, palette.shadow);
+  bodyGradient.addColorStop(0.42, palette.body);
+  bodyGradient.addColorStop(0.72, palette.belly);
+  bodyGradient.addColorStop(1, palette.shadow);
+  traceBody();
+  context.shadowColor = 'rgba(83, 48, 24, 0.18)';
+  context.shadowBlur = 6;
+  context.fillStyle = bodyGradient;
+  context.fill();
+  context.shadowBlur = 0;
+
+  context.save();
+  traceBody();
+  context.clip();
+  for (let index = 0; index < 5; index += 1) {
+    const x = 65 + random() * 115;
+    const y = 45 + random() * 38;
+    const radiusX = 12 + random() * 23;
+    const radiusY = 5 + random() * 12;
+    context.save();
+    context.translate(x, y);
+    context.rotate((random() - 0.5) * 0.8);
+    const markGradient = context.createRadialGradient(0, 0, 1, 0, 0, radiusX);
+    markGradient.addColorStop(0, palette.pattern);
+    markGradient.addColorStop(0.62, `${palette.pattern}cc`);
+    markGradient.addColorStop(1, `${palette.pattern}00`);
+    context.globalAlpha = 0.56 + random() * 0.29;
+    context.fillStyle = markGradient;
+    context.beginPath();
+    context.ellipse(0, 0, radiusX, radiusY, 0, 0, TAU);
+    context.fill();
+    context.restore();
+  }
+  context.strokeStyle = 'rgba(226, 239, 218, 0.08)';
+  context.lineWidth = 1;
+  for (let x = 72; x < 184; x += 10) {
+    for (let y = 48; y < 82; y += 9) {
+      context.beginPath();
+      context.arc(x + (y % 18 ? 5 : 0), y, 5, -1.1, 1.1);
+      context.stroke();
+    }
+  }
+  context.restore();
+
+  context.fillStyle = 'rgba(7, 14, 14, 0.86)';
+  context.beginPath();
+  context.arc(196, 51, 3.1, 0, TAU);
+  context.fill();
+  context.beginPath();
+  context.arc(196, 77, 3.1, 0, TAU);
+  context.fill();
+  context.fillStyle = 'rgba(225, 242, 226, 0.48)';
+  context.beginPath();
+  context.arc(197, 50, 0.9, 0, TAU);
+  context.fill();
+  context.beginPath();
+  context.arc(197, 76, 0.9, 0, TAU);
+  context.fill();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  return texture;
+}
+
+function createGrassTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext('2d');
+  context.clearRect(0, 0, 128, 128);
+  const gradient = context.createLinearGradient(0, 20, 0, 128);
+  gradient.addColorStop(0, 'rgba(124, 187, 103, 0.74)');
+  gradient.addColorStop(1, 'rgba(27, 91, 67, 0.3)');
+  context.strokeStyle = gradient;
+  context.lineWidth = 4;
+  context.lineCap = 'round';
+  for (let index = 0; index < 14; index += 1) {
+    const x = 8 + index * 8;
+    context.beginPath();
+    context.moveTo(64, 72);
+    context.quadraticCurveTo(x - 8 + (index % 3) * 6, 56, x - 3 + (index % 4) * 4, 24 + (index % 5) * 10);
+    context.stroke();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function createRockTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext('2d');
+  context.fillStyle = 'rgba(24, 57, 52, 0.42)';
+  context.beginPath();
+  context.ellipse(64, 76, 46, 20, -0.12, 0, TAU);
+  context.fill();
+  const gradient = context.createLinearGradient(44, 28, 88, 88);
+  gradient.addColorStop(0, '#b6b48c');
+  gradient.addColorStop(0.42, '#7d866d');
+  gradient.addColorStop(1, '#495b55');
+  context.fillStyle = gradient;
+  context.beginPath();
+  context.moveTo(20, 67);
+  context.bezierCurveTo(25, 40, 46, 22, 76, 27);
+  context.bezierCurveTo(105, 32, 112, 62, 92, 83);
+  context.bezierCurveTo(63, 103, 27, 95, 20, 67);
+  context.fill();
+  context.strokeStyle = 'rgba(224, 220, 166, 0.28)';
+  context.lineWidth = 3;
+  context.beginPath();
+  context.moveTo(31, 59);
+  context.bezierCurveTo(48, 35, 70, 30, 91, 42);
+  context.stroke();
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function createFinTexture(type) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext('2d');
+  const gradient = context.createLinearGradient(112, 64, 12, 64);
+  gradient.addColorStop(0, 'rgba(255, 255, 255, 0.32)');
+  gradient.addColorStop(0.48, 'rgba(255, 255, 255, 0.8)');
+  gradient.addColorStop(1, 'rgba(255, 255, 255, 0.12)');
+  context.fillStyle = gradient;
+  context.shadowColor = 'rgba(255, 255, 255, 0.35)';
+  context.shadowBlur = 4;
+  context.beginPath();
+  if (type === 'tail') {
+    context.moveTo(118, 64);
+    context.bezierCurveTo(91, 54, 65, 19, 14, 15);
+    context.bezierCurveTo(26, 41, 48, 55, 66, 64);
+    context.bezierCurveTo(48, 73, 26, 87, 14, 113);
+    context.bezierCurveTo(65, 109, 91, 74, 118, 64);
+  } else if (type === 'pectoral') {
+    context.moveTo(116, 67);
+    context.bezierCurveTo(87, 55, 55, 25, 16, 19);
+    context.bezierCurveTo(26, 52, 64, 83, 116, 67);
+  } else {
+    context.moveTo(8, 75);
+    context.bezierCurveTo(37, 42, 84, 39, 120, 69);
+    context.bezierCurveTo(82, 62, 39, 68, 8, 75);
+  }
+  context.closePath();
+  context.fill();
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  return texture;
+}
+
 /**
  * Mounts a top-down pond with free-swimming fish and pointer ripples.
  * @param {HTMLElement} container
@@ -58,7 +331,7 @@ export function mountBackground(container, options) {
   const lowQuality = options?.quality === 'low';
   const renderer = new THREE.WebGLRenderer({antialias: !lowQuality, powerPreference: 'high-performance'});
   prepareRenderer(renderer, container, options?.pixelRatio ?? 1);
-  renderer.setClearColor(0x031a27, 1);
+  renderer.setClearColor(0x17606a, 1);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const scene = new THREE.Scene();
@@ -66,104 +339,137 @@ export function mountBackground(container, options) {
   camera.position.set(0, 0, 18);
 
   const waterMaterial = new THREE.ShaderMaterial({
-    uniforms: {uTime: {value: 0}},
+    uniforms: {
+      uTime: {value: 0},
+      uRippleCount: {value: 0},
+      uRipples: {value: Array.from({length: 16}, () => new THREE.Vector4())},
+    },
     vertexShader: waterVertexShader,
     fragmentShader: waterFragmentShader,
     depthWrite: false,
   });
-  const water = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), waterMaterial);
+  const water = new THREE.Mesh(
+    new THREE.PlaneGeometry(60, 40, lowQuality ? 48 : 96, lowQuality ? 32 : 64),
+    waterMaterial,
+  );
   water.position.z = -0.5;
   scene.add(water);
 
-  scene.add(new THREE.HemisphereLight(0xc8ffff, 0x06303d, 2.3));
-  const sunlight = new THREE.DirectionalLight(0xd9ffff, 2.8);
-  sunlight.position.set(-4, 7, 12);
-  scene.add(sunlight);
-
-  const bodyGeometry = new THREE.SphereGeometry(0.5, lowQuality ? 10 : 16, lowQuality ? 7 : 10);
-  const detailGeometry = new THREE.SphereGeometry(0.5, lowQuality ? 8 : 12, lowQuality ? 6 : 8);
-  const eyeGeometry = new THREE.SphereGeometry(0.045, 7, 5);
-  const finGeometry = new THREE.BufferGeometry();
-  finGeometry.setAttribute('position', new THREE.Float32BufferAttribute([
-    0, 0, 0.02,
-    -0.38, 0.27, 0,
-    -0.4, -0.27, 0,
-  ], 3));
-  finGeometry.computeVertexNormals();
-  const sideFinGeometry = new THREE.BufferGeometry();
-  sideFinGeometry.setAttribute('position', new THREE.Float32BufferAttribute([
-    0.08, 0.1, 0.02,
-    -0.2, 0.42, -0.01,
-    -0.24, 0.1, 0,
-  ], 3));
-  sideFinGeometry.computeVertexNormals();
-  const shadowGeometry = new THREE.CircleGeometry(0.5, 16);
-
-  const palettes = [
-    {body: 0xf0a13a, detail: 0xffd47a, fin: 0xd96b2b},
-    {body: 0xe9e1ca, detail: 0xf3774c, fin: 0xd55335},
-    {body: 0x58a8b0, detail: 0x9ee0d7, fin: 0x32757f},
-    {body: 0xe1bd50, detail: 0xffe293, fin: 0xa66d28},
-    {body: 0xb4c7d5, detail: 0xf4f7e9, fin: 0x718c9c},
-  ].map(colors => ({
-    body: new THREE.MeshPhongMaterial({color: colors.body, shininess: 65}),
-    detail: new THREE.MeshPhongMaterial({color: colors.detail, shininess: 75}),
-    fin: new THREE.MeshPhongMaterial({
-      color: colors.fin,
-      transparent: true,
-      opacity: 0.9,
-      side: THREE.DoubleSide,
-      shininess: 30,
-    }),
-  }));
-  const eyeMaterial = new THREE.MeshBasicMaterial({color: 0x071014});
-  const shadowMaterial = new THREE.MeshBasicMaterial({
-    color: 0x001019,
+  const grassGeometry = new THREE.PlaneGeometry(2.7, 2.2, 1, 1);
+  const grassTexture = createGrassTexture();
+  const grassMaterial = new THREE.MeshBasicMaterial({
+    map: grassTexture,
     transparent: true,
-    opacity: 0.2,
     depthWrite: false,
+    opacity: 0.52,
   });
+  const grassPositions = [[-8.2, -5.1, -0.2], [-3.8, -5.8, -0.1], [3.4, -5.5, -0.15], [8.1, -4.8, -0.05]];
+  const grass = grassPositions.map(([x, y, z], index) => {
+    const mesh = new THREE.Mesh(grassGeometry, grassMaterial);
+    mesh.position.set(x, y, z);
+    mesh.scale.setScalar(0.75 + (index % 2) * 0.25);
+    mesh.rotation.z = (index - 1.5) * 0.18;
+    scene.add(mesh);
+    return mesh;
+  });
+
+  const rockTexture = createRockTexture();
+  const rockGeometry = new THREE.PlaneGeometry(2.1, 1.45);
+  const rockMaterial = new THREE.MeshBasicMaterial({map: rockTexture, transparent: true, depthWrite: false, opacity: 0.78});
+  const rocks = [[-6.3, -5.4, 0.9], [-1.2, -6.1, 0.65], [5.8, -5.2, 1.05], [8.8, -3.7, 0.62]].map(([x, y, scale], index) => {
+    const mesh = new THREE.Mesh(rockGeometry, rockMaterial);
+    mesh.position.set(x, y, -0.12 + index * 0.01);
+    mesh.scale.set(scale, scale * (0.78 + index % 2 * 0.12), 1);
+    mesh.rotation.z = index * 0.47;
+    scene.add(mesh);
+    return mesh;
+  });
+
+  const fishGeometry = new THREE.PlaneGeometry(1.35, 0.68, lowQuality ? 8 : 16, 1);
+  const finTextures = {
+    tail: createFinTexture('tail'),
+    pectoral: createFinTexture('pectoral'),
+    dorsal: createFinTexture('dorsal'),
+  };
+  const finGeometries = {
+    tail: new THREE.PlaneGeometry(0.68, 0.56),
+    pectoral: new THREE.PlaneGeometry(0.36, 0.27),
+    dorsal: new THREE.PlaneGeometry(0.4, 0.12),
+  };
+  const fishPalettes = [
+    {body: '#d1c7aa', belly: '#f1dfb9', shadow: '#8d7052', pattern: '#c84b32', fin: '#d98563'},
+    {body: '#d58e25', belly: '#f0c960', shadow: '#8a571b', pattern: '#c8472e', fin: '#d99a48'},
+    {body: '#d8ad38', belly: '#f1d875', shadow: '#92702a', pattern: '#b95d2b', fin: '#d7ad52'},
+    {body: '#cf6640', belly: '#eebd70', shadow: '#873b2a', pattern: '#d5a02f', fin: '#d78459'},
+    {body: '#d9cfb4', belly: '#f3e8c9', shadow: '#957653', pattern: '#d26c37', fin: '#dba06a'},
+  ];
+  const fishTextures = [];
 
   const fishCount = lowQuality ? 10 : 17;
   const fishes = [];
   for (let index = 0; index < fishCount; index += 1) {
-    const palette = palettes[index % palettes.length];
+    const palette = fishPalettes[index % fishPalettes.length];
     const root = new THREE.Group();
-    const visual = new THREE.Group();
+    const texture = createFishTexture(palette, index + 11);
+    fishTextures.push(texture);
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uTexture: {value: texture},
+        uTime: {value: 0},
+        uPhase: {value: Math.random() * TAU},
+        uFlee: {value: 0},
+      },
+      vertexShader: fishVertexShader,
+      fragmentShader: fishFragmentShader,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const visual = new THREE.Mesh(fishGeometry, material);
+    visual.renderOrder = 2;
     root.add(visual);
 
-    const body = new THREE.Mesh(bodyGeometry, palette.body);
-    body.scale.set(1, 0.39, 0.27);
-    visual.add(body);
-
-    const backMark = new THREE.Mesh(detailGeometry, palette.detail);
-    backMark.scale.set(0.56, 0.15, 0.285);
-    backMark.position.set(0.03, 0, 0.055);
-    visual.add(backMark);
-
+    const createFinMaterial = (map, opacity, color = palette.fin) => new THREE.MeshBasicMaterial({
+      map,
+      color,
+      transparent: true,
+      opacity,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const finMaterials = {
+      tail: createFinMaterial(finTextures.tail, 0.58, palette.body),
+      pectoral: createFinMaterial(finTextures.pectoral, 0.46),
+      dorsal: createFinMaterial(finTextures.dorsal, 0.25),
+    };
     const tailPivot = new THREE.Group();
-    tailPivot.position.x = -0.42;
-    const tail = new THREE.Mesh(finGeometry, palette.fin);
+    tailPivot.position.set(-0.4, 0, -0.02);
+    const tail = new THREE.Mesh(finGeometries.tail, finMaterials.tail);
+    tail.position.x = -0.18;
+    tail.renderOrder = 1;
     tailPivot.add(tail);
-    visual.add(tailPivot);
+    root.add(tailPivot);
 
-    const leftFin = new THREE.Mesh(sideFinGeometry, palette.fin);
-    visual.add(leftFin);
-    const rightFin = new THREE.Mesh(sideFinGeometry, palette.fin);
-    rightFin.scale.y = -1;
-    visual.add(rightFin);
+    const pectoralLeftPivot = new THREE.Group();
+    pectoralLeftPivot.position.set(0.14, 0.14, 0.005);
+    const pectoralLeft = new THREE.Mesh(finGeometries.pectoral, finMaterials.pectoral);
+    pectoralLeft.position.set(-0.17, 0.035, 0);
+    pectoralLeft.renderOrder = 3;
+    pectoralLeftPivot.add(pectoralLeft);
+    root.add(pectoralLeftPivot);
+    const pectoralRightPivot = new THREE.Group();
+    pectoralRightPivot.position.set(0.14, -0.14, 0.005);
+    const pectoralRight = new THREE.Mesh(finGeometries.pectoral, finMaterials.pectoral);
+    pectoralRight.position.set(-0.17, -0.035, 0);
+    pectoralRight.scale.y = -1;
+    pectoralRight.renderOrder = 3;
+    pectoralRightPivot.add(pectoralRight);
+    root.add(pectoralRightPivot);
 
-    const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    leftEye.position.set(0.38, 0.13, 0.1);
-    visual.add(leftEye);
-    const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    rightEye.position.set(0.38, -0.13, 0.1);
-    visual.add(rightEye);
-
-    const shadow = new THREE.Mesh(shadowGeometry, shadowMaterial);
-    shadow.position.set(-0.05, 0, -0.24);
-    shadow.scale.set(1.18, 0.48, 1);
-    visual.add(shadow);
+    const dorsal = new THREE.Mesh(finGeometries.dorsal, finMaterials.dorsal);
+    dorsal.position.set(-0.08, 0.03, 0.012);
+    dorsal.renderOrder = 3;
+    root.add(dorsal);
 
     const size = randomRange(0.72, 1.18);
     root.scale.setScalar(size);
@@ -174,7 +480,14 @@ export function mountBackground(container, options) {
     fishes.push({
       root,
       visual,
+      material,
+      finMaterials,
       tailPivot,
+      pectoralLeftPivot,
+      pectoralRightPivot,
+      pectoralLeft,
+      pectoralRight,
+      dorsal,
       heading,
       wanderHeading: heading,
       wanderTimer: randomRange(0.4, 2.5),
@@ -184,11 +497,11 @@ export function mountBackground(container, options) {
     });
   }
 
-  const rippleGeometry = new THREE.RingGeometry(0.82, 1, lowQuality ? 36 : 64);
   const ripples = [];
   const pointerWorld = new THREE.Vector2(1000, 1000);
   let pointerActiveUntil = 0;
   let lastRippleTime = 0;
+  const lastPointerPosition = new THREE.Vector2(1000, 1000);
   const lastRipplePosition = new THREE.Vector2(1000, 1000);
 
   const eventToWorld = event => {
@@ -206,24 +519,9 @@ export function mountBackground(container, options) {
   };
 
   const addRipple = (position, strength = 1) => {
-    const material = new THREE.MeshBasicMaterial({
-      color: strength > 1 ? 0xc5ffff : 0x8be5e5,
-      transparent: true,
-      opacity: Math.min(0.38, 0.22 * strength),
-      side: THREE.DoubleSide,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    });
-    const ring = new THREE.Mesh(rippleGeometry, material);
-    ring.position.set(position.x, position.y, 0.24);
-    ring.scale.setScalar(0.08);
-    ring.renderOrder = 3;
-    scene.add(ring);
-    ripples.push({ring, material, age: 0, strength});
+    ripples.push({position: position.clone(), age: 0, strength});
     while (ripples.length > (lowQuality ? 8 : 16)) {
-      const oldest = ripples.shift();
-      scene.remove(oldest.ring);
-      oldest.material.dispose();
+      ripples.shift();
     }
   };
 
@@ -232,12 +530,20 @@ export function mountBackground(container, options) {
     if (!position) return;
     pointerWorld.copy(position);
     pointerActiveUntil = performance.now() + 1150;
-    const now = performance.now();
-    if (now - lastRippleTime > 90 && position.distanceToSquared(lastRipplePosition) > 0.12) {
-      addRipple(position, 0.8);
+    if (lastPointerPosition.x < 900) {
+      const movement = position.clone().sub(lastPointerPosition);
+      const now = performance.now();
+      const distanceFromLastRipple = position.distanceToSquared(lastRipplePosition);
+      if (movement.lengthSq() > 0.0001 && now - lastRippleTime > 90
+        && distanceFromLastRipple > 0.065) {
+        addRipple(position, 0.62);
+        lastRippleTime = now;
+        lastRipplePosition.copy(position);
+      }
+    } else {
       lastRipplePosition.copy(position);
-      lastRippleTime = now;
     }
+    lastPointerPosition.copy(position);
   };
 
   const onPointerDown = event => {
@@ -328,8 +634,17 @@ export function mountBackground(container, options) {
     fish.root.position.x += Math.cos(fish.heading) * swimSpeed * delta;
     fish.root.position.y += Math.sin(fish.heading) * swimSpeed * delta;
     fish.root.rotation.z = fish.heading;
-    fish.tailPivot.rotation.z = Math.sin(elapsedTime * (fleeing ? 10 : 6.2) + fish.phase) * (fleeing ? 0.46 : 0.3);
-    fish.visual.rotation.z = Math.sin(elapsedTime * 2.4 + fish.phase) * 0.025;
+    fish.material.uniforms.uTime.value = elapsedTime;
+    fish.material.uniforms.uFlee.value += ((fleeing ? 1 : 0) - fish.material.uniforms.uFlee.value) * 0.08;
+    const tailMotion = Math.sin(elapsedTime * (fleeing ? 3.2 : 2.15) + fish.phase);
+    const pectoralMotion = Math.sin(elapsedTime * (fleeing ? 2.6 : 1.65) + fish.phase + 0.7);
+    fish.tailPivot.rotation.z = tailMotion * (fleeing ? 0.33 : 0.27);
+    fish.pectoralLeftPivot.rotation.z = -0.1 + pectoralMotion * 0.22;
+    fish.pectoralRightPivot.rotation.z = 0.1 - pectoralMotion * 0.22;
+    fish.pectoralLeft.scale.x = 0.94 + pectoralMotion * 0.1;
+    fish.pectoralRight.scale.x = 0.94 + pectoralMotion * 0.1;
+    fish.dorsal.rotation.z = tailMotion * 0.03;
+    fish.visual.rotation.z = Math.sin(elapsedTime * 2.1 + fish.phase) * 0.018;
 
     if (fish.root.position.x > horizontalLimit) fish.root.position.x = -horizontalLimit;
     else if (fish.root.position.x < -horizontalLimit) fish.root.position.x = horizontalLimit;
@@ -344,14 +659,26 @@ export function mountBackground(container, options) {
       const duration = 1.35 + ripple.strength * 0.2;
       const progress = ripple.age / duration;
       if (progress >= 1) {
-        scene.remove(ripple.ring);
-        ripple.material.dispose();
         ripples.splice(index, 1);
         continue;
       }
-      const radius = 0.1 + progress * (2.15 + ripple.strength * 0.75);
-      ripple.ring.scale.setScalar(radius);
-      ripple.material.opacity = (1 - progress) * (1 - progress) * 0.25 * ripple.strength;
+    }
+    const rippleUniforms = waterMaterial.uniforms.uRipples.value;
+    const rippleCount = Math.min(ripples.length, rippleUniforms.length);
+    waterMaterial.uniforms.uRippleCount.value = rippleCount;
+    for (let index = 0; index < rippleUniforms.length; index += 1) {
+      if (index >= rippleCount) {
+        rippleUniforms[index].set(0, 0, 1, 0);
+        continue;
+      }
+      const ripple = ripples[ripples.length - 1 - index];
+      const duration = 1.35 + ripple.strength * 0.2;
+      rippleUniforms[index].set(
+        ripple.position.x,
+        ripple.position.y,
+        Math.min(ripple.age / duration, 1),
+        ripple.strength,
+      );
     }
   };
 
@@ -361,6 +688,12 @@ export function mountBackground(container, options) {
     previousTime = time;
     elapsedTime += delta;
     waterMaterial.uniforms.uTime.value = elapsedTime;
+    grass.forEach((mesh, index) => {
+      mesh.rotation.z += Math.sin(elapsedTime * 0.7 + index) * delta * 0.04;
+    });
+    rocks.forEach((mesh, index) => {
+      mesh.rotation.z += Math.sin(elapsedTime * 0.18 + index) * delta * 0.012;
+    });
     for (let index = 0; index < fishes.length; index += 1) updateFish(fishes[index], index, delta, time);
     updateRipples(delta);
     renderer.render(scene, camera);
@@ -399,7 +732,9 @@ export function mountBackground(container, options) {
       delayedRippleTimers.clear();
       stopObservingSize();
       disposeObject3D(scene);
-      rippleGeometry.dispose();
+      for (const texture of fishTextures) texture.dispose();
+      grassTexture.dispose();
+      rockTexture.dispose();
       disposeRenderer(renderer);
     },
   };
