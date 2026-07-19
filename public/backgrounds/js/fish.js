@@ -116,14 +116,17 @@ const fishVertexShader = `
   uniform float uTime;
   uniform float uPhase;
   uniform float uFlee;
+  uniform float uTurn;
   varying vec2 vUv;
 
   void main() {
     vUv = uv;
     vec3 bentPosition = position;
-    float tailWeight = pow(1.0 - uv.x, 2.2);
-    bentPosition.y += sin(uTime * (2.2 + uFlee * 0.8) + uPhase + uv.x * 4.0)
-      * tailWeight * (0.07 + uFlee * 0.016);
+    float tailWeight = pow(1.0 - uv.x, 1.85);
+    float turnWeight = pow(1.0 - uv.x, 1.35);
+    bentPosition.y += sin(uTime * (2.8 + uFlee * 1.2) + uPhase + uv.x * 4.0)
+      * tailWeight * (0.095 + uFlee * 0.015);
+    bentPosition.y -= uTurn * turnWeight * (0.15 + uFlee * 0.025);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(bentPosition, 1.0);
   }
 `;
@@ -238,8 +241,8 @@ function createFishTexture(palette, seed) {
   context.restore();
 
   // 俯视时只保留贴近头部两侧的暗色眼缘，避免形成正面的卡通眼睛。
-  context.strokeStyle = 'rgba(43, 33, 21, 0.34)';
-  context.lineWidth = 1.25;
+  context.strokeStyle = 'rgba(43, 33, 21, 0.64)';
+  context.lineWidth = 1.8;
   context.lineCap = 'round';
   context.beginPath();
   context.moveTo(201, 40.5);
@@ -442,6 +445,7 @@ export function mountBackground(container, options) {
         uTime: {value: 0},
         uPhase: {value: Math.random() * TAU},
         uFlee: {value: 0},
+        uTurn: {value: 0},
       },
       vertexShader: fishVertexShader,
       fragmentShader: fishFragmentShader,
@@ -466,14 +470,14 @@ export function mountBackground(container, options) {
     };
 
     const pectoralLeftPivot = new THREE.Group();
-    pectoralLeftPivot.position.set(0.14, 0.14, 0.005);
+    pectoralLeftPivot.position.set(0.2, 0.14, 0.005);
     const pectoralLeft = new THREE.Mesh(finGeometries.pectoral, finMaterials.pectoral);
     pectoralLeft.position.set(-0.17, 0.035, 0);
     pectoralLeft.renderOrder = 3;
     pectoralLeftPivot.add(pectoralLeft);
     root.add(pectoralLeftPivot);
     const pectoralRightPivot = new THREE.Group();
-    pectoralRightPivot.position.set(0.14, -0.14, 0.005);
+    pectoralRightPivot.position.set(0.2, -0.14, 0.005);
     const pectoralRight = new THREE.Mesh(finGeometries.pectoral, finMaterials.pectoral);
     pectoralRight.position.set(-0.17, -0.035, 0);
     pectoralRight.scale.y = -1;
@@ -633,18 +637,22 @@ export function mountBackground(container, options) {
     desired.normalize();
     const targetHeading = Math.atan2(desired.y, desired.x);
     const maximumTurn = delta * (fleeing ? 3.4 : 1.15);
-    fish.heading += THREE.MathUtils.clamp(
+    const turnStep = THREE.MathUtils.clamp(
       shortestAngleDifference(fish.heading, targetHeading),
       -maximumTurn,
       maximumTurn,
     );
+    fish.heading += turnStep;
     const swimSpeed = fish.speed * (fleeing ? 2.15 : 1);
     fish.root.position.x += Math.cos(fish.heading) * swimSpeed * delta;
     fish.root.position.y += Math.sin(fish.heading) * swimSpeed * delta;
     fish.root.rotation.z = fish.heading;
     fish.material.uniforms.uTime.value = elapsedTime;
     fish.material.uniforms.uFlee.value += ((fleeing ? 1 : 0) - fish.material.uniforms.uFlee.value) * 0.08;
-    const pectoralMotion = Math.sin(elapsedTime * (fleeing ? 2.6 : 1.65) + fish.phase + 0.7);
+    const turnTarget = maximumTurn > 0 ? THREE.MathUtils.clamp(turnStep / maximumTurn, -1, 1) : 0;
+    const turnSmoothing = Math.min(1, delta * 7.5);
+    fish.material.uniforms.uTurn.value += (turnTarget - fish.material.uniforms.uTurn.value) * turnSmoothing;
+    const pectoralMotion = Math.sin(elapsedTime * (fleeing ? 5.2 : 3.3) + fish.phase + 0.7);
     fish.pectoralLeftPivot.rotation.z = -0.1 + pectoralMotion * 0.22;
     fish.pectoralRightPivot.rotation.z = 0.1 - pectoralMotion * 0.22;
     fish.pectoralLeft.scale.x = 0.94 + pectoralMotion * 0.1;
