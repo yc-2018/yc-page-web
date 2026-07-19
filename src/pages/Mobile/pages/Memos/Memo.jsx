@@ -1106,6 +1106,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                     />
                   }
                   <MobileMemoImageGallery imgArr={item.imgArr}/>
+                  {item.completed && item.okText &&
+                    <div className={styles.okText}><b>完成备注：</b>{item.okText}</div>
+                  }
                   {item.tags?.length > 0 &&
                     <div className={styles.memoItemTags}>
                       {item.tags.map(tag => <Tag key={tag.id} color="default" fill="outline">{tag.name}</Tag>)}

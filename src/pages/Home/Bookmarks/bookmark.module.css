@@ -118,7 +118,7 @@
 .addGroupButton {
   width: 30px;
   height: 26px;
-  margin: 1px 7px;
+  margin: 1px 0;
   padding: 0;
   color: var(--bookmark-group-handle) !important;
   border-color: var(--bookmark-group-border) !important;

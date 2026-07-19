@@ -153,30 +153,30 @@ function createFishTexture(palette, seed) {
   };
   const traceBody = () => {
     context.beginPath();
-    context.moveTo(222, 64);
-    context.bezierCurveTo(211, 42, 187, 29, 153, 27);
-    context.bezierCurveTo(112, 24, 76, 33, 50, 48);
-    context.bezierCurveTo(43, 52, 39, 57, 38, 64);
-    context.bezierCurveTo(39, 71, 43, 76, 50, 80);
-    context.bezierCurveTo(76, 95, 112, 104, 153, 101);
-    context.bezierCurveTo(187, 99, 211, 86, 222, 64);
+    context.moveTo(225, 64);
+    context.bezierCurveTo(216, 43, 188, 28, 153, 26);
+    context.bezierCurveTo(112, 24, 78, 33, 53, 47);
+    context.bezierCurveTo(46, 51, 42, 57, 41, 64);
+    context.bezierCurveTo(42, 71, 46, 77, 53, 81);
+    context.bezierCurveTo(78, 95, 112, 104, 153, 102);
+    context.bezierCurveTo(188, 100, 216, 85, 225, 64);
     context.closePath();
   };
 
   context.clearRect(0, 0, 256, 128);
 
-  const tailGradient = context.createLinearGradient(6, 64, 55, 64);
-  tailGradient.addColorStop(0, `${palette.fin}99`);
-  tailGradient.addColorStop(0.6, palette.fin);
+  const tailGradient = context.createLinearGradient(6, 64, 58, 64);
+  tailGradient.addColorStop(0, `${palette.fin}88`);
+  tailGradient.addColorStop(0.58, `${palette.fin}d8`);
   tailGradient.addColorStop(1, palette.shadow);
   context.fillStyle = tailGradient;
   context.beginPath();
-  context.moveTo(45, 51);
-  context.bezierCurveTo(29, 43, 13, 22, 3, 14);
-  context.bezierCurveTo(8, 41, 22, 56, 34, 64);
-  context.bezierCurveTo(22, 72, 8, 87, 3, 114);
-  context.bezierCurveTo(13, 106, 29, 85, 45, 77);
-  context.bezierCurveTo(39, 69, 39, 59, 45, 51);
+  context.moveTo(57, 46);
+  context.bezierCurveTo(42, 41, 24, 25, 8, 28);
+  context.bezierCurveTo(12, 43, 24, 57, 38, 64);
+  context.bezierCurveTo(24, 71, 12, 85, 8, 100);
+  context.bezierCurveTo(24, 103, 42, 87, 57, 82);
+  context.bezierCurveTo(50, 70, 50, 58, 57, 46);
   context.fill();
 
   const bodyGradient = context.createLinearGradient(35, 35, 216, 91);
@@ -194,11 +194,21 @@ function createFishTexture(palette, seed) {
   context.save();
   traceBody();
   context.clip();
+  const bodyHighlight = context.createRadialGradient(148, 43, 3, 148, 54, 92);
+  bodyHighlight.addColorStop(0, 'rgba(255, 246, 204, 0.22)');
+  bodyHighlight.addColorStop(1, 'rgba(255, 246, 204, 0)');
+  context.fillStyle = bodyHighlight;
+  context.fillRect(35, 25, 190, 78);
+  context.restore();
+
+  context.save();
+  traceBody();
+  context.clip();
   for (let index = 0; index < 5; index += 1) {
     const x = 65 + random() * 115;
     const y = 45 + random() * 38;
-    const radiusX = 12 + random() * 23;
-    const radiusY = 5 + random() * 12;
+    const radiusX = 12 + random() * 24;
+    const radiusY = 6 + random() * 13;
     context.save();
     context.translate(x, y);
     context.rotate((random() - 0.5) * 0.8);
@@ -209,7 +219,10 @@ function createFishTexture(palette, seed) {
     context.globalAlpha = 0.56 + random() * 0.29;
     context.fillStyle = markGradient;
     context.beginPath();
-    context.ellipse(0, 0, radiusX, radiusY, 0, 0, TAU);
+    context.moveTo(radiusX, 0);
+    context.bezierCurveTo(radiusX * 0.55, -radiusY, -radiusX * 0.35, -radiusY * 0.8, -radiusX, -radiusY * 0.1);
+    context.bezierCurveTo(-radiusX * 0.55, radiusY, radiusX * 0.35, radiusY * 0.8, radiusX, 0);
+    context.closePath();
     context.fill();
     context.restore();
   }
@@ -224,20 +237,18 @@ function createFishTexture(palette, seed) {
   }
   context.restore();
 
-  context.fillStyle = 'rgba(7, 14, 14, 0.86)';
+  // 俯视时只保留贴近头部两侧的暗色眼缘，避免形成正面的卡通眼睛。
+  context.strokeStyle = 'rgba(43, 33, 21, 0.34)';
+  context.lineWidth = 1.25;
+  context.lineCap = 'round';
   context.beginPath();
-  context.arc(196, 51, 3.1, 0, TAU);
-  context.fill();
+  context.moveTo(201, 40.5);
+  context.quadraticCurveTo(205, 41.5, 207, 44);
+  context.stroke();
   context.beginPath();
-  context.arc(196, 77, 3.1, 0, TAU);
-  context.fill();
-  context.fillStyle = 'rgba(225, 242, 226, 0.48)';
-  context.beginPath();
-  context.arc(197, 50, 0.9, 0, TAU);
-  context.fill();
-  context.beginPath();
-  context.arc(197, 76, 0.9, 0, TAU);
-  context.fill();
+  context.moveTo(201, 87.5);
+  context.quadraticCurveTo(205, 86.5, 207, 84);
+  context.stroke();
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
