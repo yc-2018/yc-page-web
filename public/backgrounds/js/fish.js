@@ -125,7 +125,7 @@ const fishVertexShader = `
     float tailWeight = pow(1.0 - uv.x, 1.85);
     float turnWeight = pow(1.0 - uv.x, 1.35);
     bentPosition.y += sin(uTime * (2.8 + uFlee * 1.2) + uPhase + uv.x * 4.0)
-      * tailWeight * (0.095 + uFlee * 0.015);
+      * tailWeight * (0.095 + abs(uTurn) * 0.06 + uFlee * 0.015);
     bentPosition.y -= uTurn * turnWeight * (0.15 + uFlee * 0.025);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(bentPosition, 1.0);
   }
