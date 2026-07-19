@@ -683,11 +683,13 @@ const MemoDrawer = () => {
           <span id="okTimePicker" style={{display: 'none', marginLeft: 5}}>
           <TimePicker
             size="small"
+            format="HH:mm"
+            showSecond={false}
             onChange={(_time, ts) => {
               if (!window.ikunSelectDate) return CommonStore.msg.error('请选择时间');
               const selectedTime = Array.isArray(ts) ? ts[0] : ts; // 指定时间文本
               const dateTimeArr = window.ikunSelectDate.split(' ');
-              dateTimeArr[1] = selectedTime ?? '00:00:00';
+              dateTimeArr[1] = selectedTime ? `${selectedTime}:00` : '00:00:00';
               window.ikunSelectDate = dateTimeArr.join(' ');
             }}
           />
