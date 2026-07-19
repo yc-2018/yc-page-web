@@ -30,6 +30,7 @@ import HighlightKeyword from "@/utils/HighlightKeyword";
 import {CloseOutlined, ExclamationCircleFilled, FullscreenExitOutlined, FullscreenOutlined} from "@ant-design/icons";
 import styles from '@/pages/Mobile/styles/mobile.module.css'
 import {fDate} from "@/utils/DateUtils";
+import dayjs from 'dayjs'
 import {uploadImgByJD} from "@/request/toolsRequest";
 import {thumbUrl} from "@/utils/urlUtils.js";
 import MemoDetailPopup from './components/MemoDetailPopup'
@@ -184,6 +185,22 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     Toast.show({icon, content})
   }
 
+  /** 设置完成或加一弹框的快捷时间 */
+  const setQuickMemoTime = (type) => {
+    const now = dayjs(); // 当前时间
+    const date = type === 'yesterday' ? now.subtract(1, 'day') : now; // 快捷时间对应日期
+    const dateTime = type === 'now'
+      ? now
+      : type === 'today' ? date.startOf('day') : date.hour(23).minute(59).second(0); // 快捷日期时间
+    okTime = `${dateTime.format('YYYY-MM-DD HH:mm')}:00`
+    if (dateRef.current) dateRef.current.textContent = dateTime.format('YYYY-MM-DD')
+    const timeElement = window.document.querySelector('#timing'); // 时分选择入口
+    if (timeElement) {
+      timeElement.style.display = 'inline-block'
+      timeElement.textContent = dateTime.format('HH:mm')
+    }
+  }
+
   /**
    * 上传图片
    * @author 𝓒𝓱𝓮𝓷𝓖𝓾𝓪𝓷𝓰𝓛𝓸𝓷𝓰
@@ -210,6 +227,15 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       return (<div className={styles.tipContent}>{obj.content}</div>)
     }
 
+    /** 显示快捷时间选择 */
+    const showQuickTime = () => (
+      <>
+        <a onClick={() => setQuickMemoTime('now')} style={{marginLeft: 12, color: '#1677ff', fontWeight: 600}}>现在</a>
+        <a onClick={() => setQuickMemoTime('today')} style={{marginLeft: 12, color: '#1677ff', fontWeight: 600}}>今天</a>
+        <a onClick={() => setQuickMemoTime('yesterday')} style={{marginLeft: 12, color: '#1677ff', fontWeight: 600}}>昨天</a>
+      </>
+    )
+
     switch (action.key) {
       // 取消|完成 //////////////////////////////////////////////////////////////
       case 'success':
@@ -219,15 +245,17 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           content: text === '完成' ?
             <div>
               {showContent()}
-              <div>完成时间:</div>
-              <a ref={dateRef} onClick={() => setDateVisible(true)}>现在</a>
-              <a
-                id="timing"
-                onClick={() => setHhMmVisible(true)}
-                style={{marginLeft: 9, display: 'none'}}
-              >
-                (可选)选择时间
-              </a>
+              <div>完成时间:{showQuickTime()}</div>
+              <div>
+                <a ref={dateRef} onClick={() => setDateVisible(true)}>选择日期</a>
+                <a
+                  id="timing"
+                  onClick={() => setHhMmVisible(true)}
+                  style={{marginLeft: 9, display: 'none'}}
+                >
+                  选择时间
+                </a>
+              </div>
               <div style={{marginTop: 9}}>完成备注：</div>
               <TextArea
                 rows={4}
@@ -275,15 +303,17 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           content:
             <div>
               {showContent()}
-              <div>循环时间:</div>
-              <a ref={dateRef} onClick={() => setDateVisible(true)}>现在</a>
-              <a
-                id="timing"
-                onClick={() => setHhMmVisible(true)}
-                style={{marginLeft: 9, display: 'none'}}
-              >
-                (可选)选择时间
-              </a>
+              <div>循环时间:{showQuickTime()}</div>
+              <div>
+                <a ref={dateRef} onClick={() => setDateVisible(true)}>选择日期</a>
+                <a
+                  id="timing"
+                  onClick={() => setHhMmVisible(true)}
+                  style={{marginLeft: 9, display: 'none'}}
+                >
+                  选择时间
+                </a>
+              </div>
               <div style={{marginTop: 9}}>加一备注：</div>
               <TextArea
                 rows={4}

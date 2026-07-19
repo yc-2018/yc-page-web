@@ -94,6 +94,11 @@ interface SearchBoxProps {
   setSearchEmpty: Dispatch<SetStateAction<boolean>>
 }
 
+interface MemoTimeSelectorProps {
+  /** 当前操作名称 */
+  text: '完成' | '加一'
+}
+
 const MemoSortSelect = SortSelect as unknown as ComponentType<SortSelectProps>;
 const MemoSearchBox = SearchBox as unknown as ComponentType<SearchBoxProps>;
 
@@ -114,6 +119,69 @@ let editLoopMemoImgArr = ''; // 循环备忘项图片修改(逗号分隔)
 let ikunLoopMemoImgArr = ''; // 循环备忘加一图片(逗号分隔)
 let loopMemoUploadingCount = 0; // 循环备忘图片上传中数量
 const {msg} = CommonStore
+
+/** 完成或加一弹框的时间选择区 */
+const MemoTimeSelector = ({text}: MemoTimeSelectorProps) => {
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null); // 当前选择日期
+  const [selectedTime, setSelectedTime] = useState<Dayjs | null>(null); // 当前选择时分
+
+  /** 同步日期、时分和提交值 */
+  const updateSelectedDateTime = (date: Dayjs | null, time: Dayjs | null) => {
+    setSelectedDate(date)
+    setSelectedTime(time)
+    window.ikunSelectDate = date
+      ? `${date.format('YYYY-MM-DD')} ${time?.format('HH:mm') ?? '00:00'}:00`
+      : undefined
+  }
+
+  /** 设置快捷时间 */
+  const setQuickTime = (type: 'now' | 'today' | 'yesterday') => {
+    const now = dayjs(); // 当前时间
+    const date = type === 'yesterday' ? now.subtract(1, 'day') : now; // 快捷日期
+    const time = type === 'now'
+      ? now
+      : type === 'today' ? date.startOf('day') : date.hour(23).minute(59).second(0); // 快捷时分
+    updateSelectedDateTime(date, time)
+  }
+
+  return (
+    <div>
+      <div style={{display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap'}}>
+        <span>
+          指定{text}时间：
+          <Tooltip title="非必填，不填默认当前时间。填日期不填时间，则时间为空(0)">
+            <QuestionCircleOutlined/>
+          </Tooltip>
+        </span>
+        <Space size={12}>
+          <a onClick={() => setQuickTime('now')} style={{color: '#1677ff', fontWeight: 600}}>现在</a>
+          <a onClick={() => setQuickTime('today')} style={{color: '#1677ff', fontWeight: 600}}>今天</a>
+          <a onClick={() => setQuickTime('yesterday')} style={{color: '#1677ff', fontWeight: 600}}>昨天</a>
+        </Space>
+      </div>
+      <Space size={5} style={{marginTop: 4}}>
+        <DatePicker
+          allowClear
+          size="small"
+          value={selectedDate}
+          minDate={dayjs().subtract(60, 'days')}
+          maxDate={dayjs()}
+          onChange={date => updateSelectedDateTime(date, null)}
+        />
+        {selectedDate &&
+          <TimePicker
+            allowClear
+            size="small"
+            format="HH:mm"
+            showSecond={false}
+            value={selectedTime}
+            onChange={time => updateSelectedDateTime(selectedDate, time)}
+          />
+        }
+      </Space>
+    </div>
+  )
+}
 
 const MemoDrawer = () => {
   const [initLoading, setInitLoading] = useState(true);       // 初始化加载
@@ -660,41 +728,7 @@ const MemoDrawer = () => {
           {content}
         </div>
 
-        <div>
-          <div>
-            指定{text}时间：
-            <Tooltip title="非必填,不填默认当前时间。填日期不填时间，则时间为空(0)">
-              <QuestionCircleOutlined/>
-            </Tooltip>
-          </div>
-          <DatePicker
-            allowClear
-            size="small"
-            style={{width: '50%'}}
-            minDate={dayjs().subtract(60, 'days')}
-            maxDate={dayjs()}
-            onChange={(_, dateStr) => {
-              const selectedDate = Array.isArray(dateStr) ? dateStr[0] : dateStr; // 指定日期文本
-              window.ikunSelectDate = selectedDate ? selectedDate + ' 00:00:00' : undefined
-              const okTimeElement = window.document.querySelector('#okTimePicker');
-              if (okTimeElement instanceof HTMLElement) okTimeElement.style.display = dateStr ? 'inline-block' : 'none'
-            }}
-          />
-          <span id="okTimePicker" style={{display: 'none', marginLeft: 5}}>
-          <TimePicker
-            size="small"
-            format="HH:mm"
-            showSecond={false}
-            onChange={(_time, ts) => {
-              if (!window.ikunSelectDate) return CommonStore.msg.error('请选择时间');
-              const selectedTime = Array.isArray(ts) ? ts[0] : ts; // 指定时间文本
-              const dateTimeArr = window.ikunSelectDate.split(' ');
-              dateTimeArr[1] = selectedTime ? `${selectedTime}:00` : '00:00:00';
-              window.ikunSelectDate = dateTimeArr.join(' ');
-            }}
-          />
-        </span>
-        </div>
+        <MemoTimeSelector text={text}/>
 
         <div id="备注输入块" style={{marginBottom: 12}}>
           {text}备注：

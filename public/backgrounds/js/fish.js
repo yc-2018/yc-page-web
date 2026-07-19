@@ -122,8 +122,8 @@ const fishVertexShader = `
     vUv = uv;
     vec3 bentPosition = position;
     float tailWeight = pow(1.0 - uv.x, 2.2);
-    bentPosition.y += sin(uTime * (3.5 + uFlee * 0.9) + uPhase + uv.x * 4.2)
-      * tailWeight * (0.052 + uFlee * 0.012);
+    bentPosition.y += sin(uTime * (2.2 + uFlee * 0.8) + uPhase + uv.x * 4.0)
+      * tailWeight * (0.07 + uFlee * 0.016);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(bentPosition, 1.0);
   }
 `;
@@ -153,15 +153,32 @@ function createFishTexture(palette, seed) {
   };
   const traceBody = () => {
     context.beginPath();
-    context.moveTo(216, 64);
-    context.bezierCurveTo(196, 31, 105, 22, 50, 48);
-    context.bezierCurveTo(37, 54, 34, 60, 34, 64);
-    context.bezierCurveTo(34, 68, 37, 74, 50, 80);
-    context.bezierCurveTo(105, 106, 196, 97, 216, 64);
+    context.moveTo(222, 64);
+    context.bezierCurveTo(211, 42, 187, 29, 153, 27);
+    context.bezierCurveTo(112, 24, 76, 33, 50, 48);
+    context.bezierCurveTo(43, 52, 39, 57, 38, 64);
+    context.bezierCurveTo(39, 71, 43, 76, 50, 80);
+    context.bezierCurveTo(76, 95, 112, 104, 153, 101);
+    context.bezierCurveTo(187, 99, 211, 86, 222, 64);
     context.closePath();
   };
 
   context.clearRect(0, 0, 256, 128);
+
+  const tailGradient = context.createLinearGradient(6, 64, 55, 64);
+  tailGradient.addColorStop(0, `${palette.fin}99`);
+  tailGradient.addColorStop(0.6, palette.fin);
+  tailGradient.addColorStop(1, palette.shadow);
+  context.fillStyle = tailGradient;
+  context.beginPath();
+  context.moveTo(45, 51);
+  context.bezierCurveTo(29, 43, 13, 22, 3, 14);
+  context.bezierCurveTo(8, 41, 22, 56, 34, 64);
+  context.bezierCurveTo(22, 72, 8, 87, 3, 114);
+  context.bezierCurveTo(13, 106, 29, 85, 45, 77);
+  context.bezierCurveTo(39, 69, 39, 59, 45, 51);
+  context.fill();
+
   const bodyGradient = context.createLinearGradient(35, 35, 216, 91);
   bodyGradient.addColorStop(0, palette.shadow);
   bodyGradient.addColorStop(0.42, palette.body);
@@ -385,16 +402,12 @@ export function mountBackground(container, options) {
     return mesh;
   });
 
-  const fishGeometry = new THREE.PlaneGeometry(1.35, 0.68, lowQuality ? 8 : 16, 1);
+  const fishGeometry = new THREE.PlaneGeometry(1.55, 0.72, lowQuality ? 10 : 20, 1);
   const finTextures = {
-    tail: createFinTexture('tail'),
     pectoral: createFinTexture('pectoral'),
-    dorsal: createFinTexture('dorsal'),
   };
   const finGeometries = {
-    tail: new THREE.PlaneGeometry(0.68, 0.56),
     pectoral: new THREE.PlaneGeometry(0.36, 0.27),
-    dorsal: new THREE.PlaneGeometry(0.4, 0.12),
   };
   const fishPalettes = [
     {body: '#d1c7aa', belly: '#f1dfb9', shadow: '#8d7052', pattern: '#c84b32', fin: '#d98563'},
@@ -429,26 +442,17 @@ export function mountBackground(container, options) {
     visual.renderOrder = 2;
     root.add(visual);
 
-    const createFinMaterial = (map, opacity, color = palette.fin) => new THREE.MeshBasicMaterial({
+    const createFinMaterial = (map, opacity) => new THREE.MeshBasicMaterial({
       map,
-      color,
+      color: palette.fin,
       transparent: true,
       opacity,
       depthWrite: false,
       side: THREE.DoubleSide,
     });
     const finMaterials = {
-      tail: createFinMaterial(finTextures.tail, 0.58, palette.body),
       pectoral: createFinMaterial(finTextures.pectoral, 0.46),
-      dorsal: createFinMaterial(finTextures.dorsal, 0.25),
     };
-    const tailPivot = new THREE.Group();
-    tailPivot.position.set(-0.4, 0, -0.02);
-    const tail = new THREE.Mesh(finGeometries.tail, finMaterials.tail);
-    tail.position.x = -0.18;
-    tail.renderOrder = 1;
-    tailPivot.add(tail);
-    root.add(tailPivot);
 
     const pectoralLeftPivot = new THREE.Group();
     pectoralLeftPivot.position.set(0.14, 0.14, 0.005);
@@ -466,11 +470,6 @@ export function mountBackground(container, options) {
     pectoralRightPivot.add(pectoralRight);
     root.add(pectoralRightPivot);
 
-    const dorsal = new THREE.Mesh(finGeometries.dorsal, finMaterials.dorsal);
-    dorsal.position.set(-0.08, 0.03, 0.012);
-    dorsal.renderOrder = 3;
-    root.add(dorsal);
-
     const size = randomRange(0.72, 1.18);
     root.scale.setScalar(size);
     root.position.set(randomRange(-10, 10), randomRange(-5.7, 5.7), randomRange(-0.02, 0.2));
@@ -482,12 +481,10 @@ export function mountBackground(container, options) {
       visual,
       material,
       finMaterials,
-      tailPivot,
       pectoralLeftPivot,
       pectoralRightPivot,
       pectoralLeft,
       pectoralRight,
-      dorsal,
       heading,
       wanderHeading: heading,
       wanderTimer: randomRange(0.4, 2.5),
@@ -636,14 +633,11 @@ export function mountBackground(container, options) {
     fish.root.rotation.z = fish.heading;
     fish.material.uniforms.uTime.value = elapsedTime;
     fish.material.uniforms.uFlee.value += ((fleeing ? 1 : 0) - fish.material.uniforms.uFlee.value) * 0.08;
-    const tailMotion = Math.sin(elapsedTime * (fleeing ? 3.2 : 2.15) + fish.phase);
     const pectoralMotion = Math.sin(elapsedTime * (fleeing ? 2.6 : 1.65) + fish.phase + 0.7);
-    fish.tailPivot.rotation.z = tailMotion * (fleeing ? 0.33 : 0.27);
     fish.pectoralLeftPivot.rotation.z = -0.1 + pectoralMotion * 0.22;
     fish.pectoralRightPivot.rotation.z = 0.1 - pectoralMotion * 0.22;
     fish.pectoralLeft.scale.x = 0.94 + pectoralMotion * 0.1;
     fish.pectoralRight.scale.x = 0.94 + pectoralMotion * 0.1;
-    fish.dorsal.rotation.z = tailMotion * 0.03;
     fish.visual.rotation.z = Math.sin(elapsedTime * 2.1 + fish.phase) * 0.018;
 
     if (fish.root.position.x > horizontalLimit) fish.root.position.x = -horizontalLimit;

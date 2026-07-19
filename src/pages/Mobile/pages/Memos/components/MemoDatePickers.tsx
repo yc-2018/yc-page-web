@@ -15,6 +15,13 @@ type MemoDatePickersProps = {
   onInsertAtCursor: (text: string) => void
 }
 
+/** 从备忘时间中读取时分，未指定时间时使用当前时分 */
+const getPickerTimeValue = (okTime?: string) => {
+  const timeText = okTime?.split(' ')[1]; // 备忘时分秒文本
+  const [hour, minute] = timeText?.split(':') ?? [];
+  return hour && minute ? [hour, minute] : [dayjs().format('HH'), dayjs().format('mm')]
+}
+
 /** 移动端备忘日期和时间选择器 */
 const MemoDatePickers = ({
   dateVisible,
@@ -68,7 +75,7 @@ const MemoDatePickers = ({
 
     <Picker
       popupStyle={{zIndex: 99999}}
-      defaultValue={[dayjs().format('HH'), dayjs().format('mm')]}
+      value={getPickerTimeValue(getOkTime())}
       columns={[
         Array.from({length: 24}, (_, i) => ({
           label: i.toString().padStart(2, '0'),

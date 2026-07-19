@@ -1,5 +1,5 @@
 {
-  "version": 43,
+  "version": 44,
   "items": [
     {
       "source": "css://aurora-dark",
@@ -78,7 +78,7 @@
       "name": "俯视鱼群",
       "description": "会避开鼠标并在点击处泛起水波的俯视水塘",
       "tone": "dark",
-      "version": 27,
+      "version": 28,
       "fallback": "css://aurora-dark"
     }
   ]
