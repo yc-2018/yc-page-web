@@ -1,5 +1,5 @@
 {
-  "version": 15,
+  "version": 16,
   "items": [
     {
       "source": "css://aurora-dark",
@@ -62,13 +62,23 @@
       "fallback": "css://aurora-dark"
     },
     {
-      "source": "js://crystal",
+      "source": "js://earth",
       "kind": "js",
-      "entry": "js/crystal.js",
+      "entry": "js/earth.js",
       "name": "蓝色地球",
       "description": "带云层和大气光晕的程序化地球",
       "tone": "dark",
       "version": 6,
+      "fallback": "css://aurora-dark"
+    },
+    {
+      "source": "js://fish",
+      "kind": "js",
+      "entry": "js/fish.js",
+      "name": "俯视鱼群",
+      "description": "会避开鼠标并在点击处泛起水波的俯视水塘",
+      "tone": "dark",
+      "version": 1,
       "fallback": "css://aurora-dark"
     }
   ]

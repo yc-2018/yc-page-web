@@ -45,3 +45,10 @@ export function mountBackground(container, options) {
 Three.js 使用同源的 `vendor/three-0.185.1.module.min.js` 及其内部依赖
 `vendor/three.core.min.js`，来源为官方 npm 包 `three@0.185.1`。许可证保存在
 `vendor/three-LICENSE.txt`。
+
+## 内置 JavaScript 背景
+
+- `js://starfield`：鼠标视差星空隧道。
+- `js://particle-wave`：鼠标扰动空间粒子波浪。
+- `js://earth`：程序化蓝色地球。
+- `js://fish`：俯视鱼群；移动鼠标生成水波并驱散附近鱼群，左键点击生成更强的双层水波。
