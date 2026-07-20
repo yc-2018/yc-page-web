@@ -1147,7 +1147,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
                     />
                   }
                   <MobileMemoImageGallery imgArr={item.imgArr}/>
-                  {item.completed && item.okText &&
+                  {Boolean(item.completed && item.okText) &&
                     <div className={styles.okText}><b>完成备注：</b>{item.okText}</div>
                   }
                   {item.tags?.length > 0 &&
