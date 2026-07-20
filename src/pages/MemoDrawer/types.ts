@@ -30,6 +30,8 @@ export type CopyLoopMemoItemHandler = (loopMemo: MemoLoopItem, keyword?: string)
 export interface LoopMemoTransferPayload {
   /** 源循环备忘主键 */
   sourceMemoId: number
+  /** 源循环备忘版本号 */
+  sourceMemoVersion: number
   /** 要转移的循环记录主键列表 */
   loopItemIds: number[]
 }

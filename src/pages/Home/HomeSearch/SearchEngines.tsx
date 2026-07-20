@@ -19,6 +19,7 @@ interface ISearchEngineList {
   setEngine: Dispatch<SetStateAction<ISearchEngines>>                   // 设置默认搜索引擎
   openModal: (edit?: ISearchEngines) => void                            // 打开模态框
   changeLowUsage: (search: ISearchEngines) => void                      // 修改搜索引擎的常用性
+  refreshSearchData: () => Promise<void>                                // 刷新搜索列表和排序版本
   extraElement?: ReactNode                                              // 额外元素
   changeLowName?: string                                                // 菜单中的常用名称
   btnStyle?: CSSProperties                                              // 按钮样式
@@ -62,6 +63,7 @@ const SearchEngineList: FC<ISearchEngineList> = (
     openModal,
     extraElement,
     changeLowUsage,
+    refreshSearchData,
     changeLowName = '设为不常用',
     btnStyle = {},
   }) => {
@@ -104,12 +106,21 @@ const SearchEngineList: FC<ISearchEngineList> = (
     }
 
     CommonStore.setLoading(true, '正在排序...')
-    sortSearchEngine(son, searchItems[0].type).then(res => {
+    const sortVersion = searchItems[0]?.sortVersion; // 拖拽开始时读取的排序版本
+    if (sortVersion === undefined) {
+      CommonStore.setLoading(false)
+      return msg.error('排序版本缺失，请刷新后重试')
+    }
+    sortSearchEngine(son, searchItems[0].type, sortVersion).then(async res => {
       if (res.success) {
-        setSearchList([...searchItems])
+        await refreshSearchData()
         msg.success('排序成功')
         setIsDrag(false)
-      } else msg.error(res.msg)
+      } else {
+        await refreshSearchData()
+        setIsDrag(false)
+        msg.error(res.msg)
+      }
     }).finally(() => CommonStore.setLoading(false))
   }
 
@@ -127,11 +138,14 @@ const SearchEngineList: FC<ISearchEngineList> = (
         content: '删除了就不能撤回了哟...',
         mask: {closable: true},
         async onOk() {
-          const result = await deleteSearchEngine(searchItem.id);
-          if (result.success) {
-            setSearchList(items => items?.filter(item => item.id !== searchItem.id))
-            msg.success('删除成功');
+          if (searchItem.version === undefined || searchItem.sortVersion === undefined) {
+            return msg.error('数据版本缺失，请刷新后重试')
           }
+          const result = await deleteSearchEngine(searchItem.id, searchItem.version, searchItem.sortVersion);
+          if (result.success) {
+            await refreshSearchData()
+            msg.success('删除成功');
+          } else await refreshSearchData()
         }
       })
     }

@@ -268,8 +268,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             '确定取消完成吗？',
           onConfirm: async () => {
             showLoading('loading', '加载中…')
+            const memo = data.find(item => item.id === id); // 当前备忘录版本快照
+            if (memo?.version === undefined) return Toast.show({icon: 'fail', content: '数据版本缺失，请刷新后重试'})
             const finishResp = await updateMemo({
               id,
+              version: memo.version,
               okTime,
               completed: text === '完成' ? 1 : 0,
               okText: text === '完成' ? okText : '',
@@ -336,8 +339,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           onConfirm: async () => {
             showLoading('loading', '加载中…')
             imgArr = imgArr ?? undefined
+            const memo = data.find(item => item.id === id); // 当前循环备忘版本快照
+            if (memo?.version === undefined) return Toast.show({icon: 'fail', content: '数据版本缺失，请刷新后重试'})
             const addOneResp = await addLoopMemoItem({
               memoId: id,
+              memoVersion: memo.version,
               memoDate: okTime,
               loopText: okText,
               imgArr
@@ -387,7 +393,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
               <ExclamationCircleFilled style={{color: 'red'}}/> 确定删除该条备忘吗
             </div>,
           onConfirm: async () => {
-            const deleteResponse = await deleteMemo(id)
+            const memo = data.find(item => item.id === id); // 当前备忘录版本快照
+            if (memo?.version === undefined) return Toast.show({icon: 'fail', content: '数据版本缺失，请刷新后重试'})
+            const deleteResponse = await deleteMemo(id, memo.version)
             if (deleteResponse) {
               Toast.show({icon: 'success', content: '删除成功'})
               // 刷新列表
@@ -404,7 +412,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
   /** 直接+1 */
   const directAddOne = async ({memoId, loopText}) => {
-    const addOneResp = await addLoopMemoItem({memoId, loopText});
+    const memo = data.find(item => item.id === memoId); // 当前循环备忘版本快照
+    if (memo?.version === undefined) return Toast.show({icon: 'fail', content: '数据版本缺失，请刷新后重试'})
+    const addOneResp = await addLoopMemoItem({memoId, memoVersion: memo.version, loopText});
     if (addOneResp.success) {
       setLoopItemVisible(null);
       if (loopTime) showLoopMemoItemList(null, {id: memoId});   // 刷新列表
@@ -478,6 +488,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
       return
     }
     body.id = editVisible?.id;
+    body.version = editVisible === '新增' ? undefined : editVisible?.version;
     showLoading('loading', '处理中…')
     let result = await (editVisible === '新增' ? addMemo : updateMemo)(body);
     if (result) {
@@ -717,10 +728,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
 
   /**
    * 删除循环备忘子项
+   * @param loop 要删除的循环备忘子项
    * @author Yc
    * @since 2025/5/20 1:09
    */
-  const delLoopMemoItem = async (memoId, id) => {
+  const delLoopMemoItem = async (loop) => {
     await Dialog.confirm({
       style: {zIndex: 1004},
       content:
@@ -729,12 +741,16 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           确定删除该条循环吗
         </div>,
       onConfirm: async () => {
-        const result = await deleteLoopMemoItem(memoId, id)
+        const memo = data.find(item => item.id === loop.memoId); // 父备忘录版本快照
+        if (loop.version === undefined || memo?.version === undefined) {
+          return Toast.show({icon: 'fail', content: '数据版本缺失，请刷新后重试'})
+        }
+        const result = await deleteLoopMemoItem(loop.memoId, loop.id, loop.version, memo.version)
         if (result.success) {
           Toast.show({icon: 'success', content: '删除成功'})
           // 刷新列表
           setLoopItemVisible(null)
-          showLoopMemoItemList(null, {id: memoId})
+          showLoopMemoItemList(null, {id: loop.memoId})
           await refreshListFromCloud()
         } else Toast.show({icon: 'fail', content: '删除失败'})
       },
@@ -771,8 +787,11 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
   const startLoopTransferTargetSelecting = () => {
     if (!v['循环备忘主键']) return
     if (!selectedLoopIds.length) return Toast.show({content: '请选择循环记录'})
+    const sourceMemo = data.find(item => item.id === v['循环备忘主键']); // 源备忘录版本快照
+    if (sourceMemo?.version === undefined) return Toast.show({icon: 'fail', content: '数据版本缺失，请刷新后重试'})
     setLoopTransferTarget({
       sourceMemoId: v['循环备忘主键'],
+      sourceMemoVersion: sourceMemo.version,
       loopItemIds: [...selectedLoopIds],
     })
     setLoopTransferSelecting(false)
@@ -791,11 +810,27 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     Toast.show({content: '已取消转移'})
   }
 
-  /** 同步循环记录转移后的循环次数 */
-  const syncLoopTransferCounts = (sourceMemoId, targetMemoId, sourceCount, targetCount) => {
+  /**
+   * 同步循环记录转移后的循环次数和版本号
+   * @param sourceMemoId 源循环备忘主键
+   * @param targetMemoId 目标循环备忘主键
+   * @param sourceCount 源循环备忘最新循环次数
+   * @param targetCount 目标循环备忘最新循环次数
+   * @param sourceVersion 源循环备忘新版本号
+   * @param targetVersion 目标循环备忘新版本号
+   */
+  const syncLoopTransferCounts = (sourceMemoId, targetMemoId, sourceCount, targetCount, sourceVersion, targetVersion) => {
     setData(list => list.map(item => {
-      if (item.id === sourceMemoId) return {...item, numberOfRecurrences: sourceCount ?? item.numberOfRecurrences}
-      if (item.id === targetMemoId) return {...item, numberOfRecurrences: targetCount ?? item.numberOfRecurrences}
+      if (item.id === sourceMemoId) return {
+        ...item,
+        numberOfRecurrences: sourceCount ?? item.numberOfRecurrences,
+        version: sourceVersion ?? item.version,
+      }
+      if (item.id === targetMemoId) return {
+        ...item,
+        numberOfRecurrences: targetCount ?? item.numberOfRecurrences,
+        version: targetVersion ?? item.version,
+      }
       return item
     }))
   }
@@ -805,6 +840,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
     if (!loopTransferTarget || !targetMemo?.id) return
     if (targetMemo.itemType !== 1) return Toast.show({icon: 'fail', content: '只能转移到循环备忘'})
     if (targetMemo.id === loopTransferTarget.sourceMemoId) return Toast.show({icon: 'fail', content: '不能转移到原循环备忘'})
+    if (targetMemo.version === undefined) return Toast.show({icon: 'fail', content: '数据版本缺失，请刷新后重试'})
     const transferState = loopTransferTarget; // 当前转移状态快照
     await Dialog.confirm({
       content: '是否确定转移？',
@@ -813,10 +849,12 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
         const resp = await transferLoopMemoItems({
           sourceMemoId: transferState.sourceMemoId,
           targetMemoId: targetMemo.id,
+          sourceMemoVersion: transferState.sourceMemoVersion,
+          targetMemoVersion: targetMemo.version,
           loopItemIds: transferState.loopItemIds,
         })
         if (!resp.success) {
-          Toast.show({icon: 'fail', content: resp.message ?? '转移失败'})
+          Toast.show({icon: 'fail', content: resp.msg ?? '转移失败'})
           throw new Error('转移失败')
         }
         const result = resp.data; // 转移后两边最新循环次数
@@ -824,7 +862,9 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           result?.sourceMemoId ?? transferState.sourceMemoId,
           result?.targetMemoId ?? targetMemo.id,
           result?.sourceNumberOfRecurrences,
-          result?.targetNumberOfRecurrences
+          result?.targetNumberOfRecurrences,
+          result?.sourceMemoVersion,
+          result?.targetMemoVersion,
         )
         setLoopTransferTarget(null)
         Toast.show({icon: 'success', content: '转移成功'})
@@ -921,7 +961,8 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           确定删除该条评论吗
         </div>,
       onConfirm: async () => {
-        const result = await deleteLoopMemoItemComment(comment.memoId, comment.loopItemId, comment.id)
+        if (comment.version === undefined) return Toast.show({icon: 'fail', content: '数据版本缺失，请刷新后重试'})
+        const result = await deleteLoopMemoItemComment(comment.memoId, comment.loopItemId, comment.id, comment.version)
         if (result.success) {
           Toast.show({icon: 'success', content: '删除成功'})
           loadLoopCommentPage(loop, 1, true)

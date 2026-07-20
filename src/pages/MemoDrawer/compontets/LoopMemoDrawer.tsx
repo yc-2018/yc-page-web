@@ -160,7 +160,8 @@ const LoopMemoDrawer = ({
   const startTransferTargetSelecting = () => {
     if (!memoId) return;
     if (!selectedLoopIds.length) return message.warning('请选择循环记录')
-    onStartTransfer({sourceMemoId: memoId, loopItemIds: [...selectedLoopIds]})
+    if (memo.version === undefined) return message.warning('备忘录版本缺失，请刷新后重试')
+    onStartTransfer({sourceMemoId: memoId, sourceMemoVersion: memo.version, loopItemIds: [...selectedLoopIds]})
     closeDrawer()
   }
 
@@ -321,7 +322,8 @@ const LoopMemoDrawer = ({
       okText: '删除',
       okButtonProps: {danger: true},
       onOk: async () => {
-        const resp = await deleteLoopMemoItemComment(comment.memoId!, comment.loopItemId!, comment.id!)
+        if (comment.version === undefined) return message.warning('评论版本缺失，请刷新后重试')
+        const resp = await deleteLoopMemoItemComment(comment.memoId!, comment.loopItemId!, comment.id!, comment.version)
         if (!resp.success) return message.error('删除失败')
         message.success('删除成功')
         await loadLoopMemoComments(loopMemo, 1, true)

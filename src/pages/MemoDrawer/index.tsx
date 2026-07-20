@@ -537,7 +537,12 @@ const MemoDrawer = () => {
       okText: '确定',
       cancelText: '取消',
       onOk: async () => {
-        const resp = await deleteLoopMemoItem(memoId, id)
+        const loopMemo = loopTimeList.find(item => item.id === id); // 当前循环记录版本快照
+        const memo = list.find(item => item.id === memoId); // 父备忘录版本快照
+        if (loopMemo?.version === undefined || memo?.version === undefined) {
+          return msg.warning('数据版本缺失，请刷新后重试')
+        }
+        const resp = await deleteLoopMemoItem(memoId, id, loopMemo.version, memo.version)
         if (!resp.success) return msg.error('删除失败')
         msg.success('删除成功')
 
@@ -548,6 +553,7 @@ const MemoDrawer = () => {
         setList(memos);
         setLoopTimeList(list => list.filter(item => item.id !== id))
         setLoopTimeTotal(total => Math.max(0, total - 1))
+        sxSj()
       }
     })
 
@@ -576,6 +582,7 @@ const MemoDrawer = () => {
         const resp = await updateLoopMemoItem({
           memoId: loopMemo.memoId,
           id: loopMemo.id,
+          version: loopMemo.version,
           loopText: editLoopMemoText,
           imgArr: editLoopMemoImgArr || undefined
         })
@@ -585,6 +592,7 @@ const MemoDrawer = () => {
             ...item,
             loopText: editLoopMemoText,
             imgArr: editLoopMemoImgArr,
+            version: resp.data?.version ?? item.version,
             updateTime: new Date().toLocaleString()
           } : item))
         }
@@ -614,11 +622,35 @@ const MemoDrawer = () => {
     msg.info('已取消转移')
   }
 
-  /** 把转移返回的循环次数同步到当前列表 */
-  const syncLoopTransferCounts = (sourceMemoId: number, targetMemoId: number, sourceCount?: number, targetCount?: number) => {
+  /**
+   * 把转移返回的循环次数和版本号同步到当前列表
+   *
+   * @param sourceMemoId 源循环备忘主键
+   * @param targetMemoId 目标循环备忘主键
+   * @param sourceCount 源循环备忘最新循环次数
+   * @param targetCount 目标循环备忘最新循环次数
+   * @param sourceVersion 源循环备忘新版本号
+   * @param targetVersion 目标循环备忘新版本号
+   */
+  const syncLoopTransferCounts = (
+    sourceMemoId: number,
+    targetMemoId: number,
+    sourceCount?: number,
+    targetCount?: number,
+    sourceVersion?: number,
+    targetVersion?: number,
+  ) => {
     const syncCounts = (memos: MemoDrawerListItem[]) => memos.map(memo => {
-      if (memo.id === sourceMemoId) return {...memo, numberOfRecurrences: sourceCount ?? memo.numberOfRecurrences}
-      if (memo.id === targetMemoId) return {...memo, numberOfRecurrences: targetCount ?? memo.numberOfRecurrences}
+      if (memo.id === sourceMemoId) return {
+        ...memo,
+        numberOfRecurrences: sourceCount ?? memo.numberOfRecurrences,
+        version: sourceVersion ?? memo.version,
+      }
+      if (memo.id === targetMemoId) return {
+        ...memo,
+        numberOfRecurrences: targetCount ?? memo.numberOfRecurrences,
+        version: targetVersion ?? memo.version,
+      }
       return memo
     }); // 转移后本地同步循环次数
     setData(syncCounts)
@@ -630,6 +662,7 @@ const MemoDrawer = () => {
     if (!loopTransfer || !targetMemo.id) return;
     if (targetMemo.itemType !== 1) return msg.warning('只能转移到循环备忘')
     if (targetMemo.id === loopTransfer.sourceMemoId) return msg.warning('不能转移到原循环备忘')
+    if (targetMemo.version === undefined) return msg.warning('备忘录版本缺失，请刷新后重试')
     modal.confirm({
       title: '是否确定转移？',
       content: `将 ${loopTransfer.loopItemIds.length} 条循环记录转移到该循环备忘。`,
@@ -639,10 +672,12 @@ const MemoDrawer = () => {
         const resp = await transferLoopMemoItems({
           sourceMemoId: loopTransfer.sourceMemoId,
           targetMemoId: targetMemo.id!,
+          sourceMemoVersion: loopTransfer.sourceMemoVersion,
+          targetMemoVersion: targetMemo.version!,
           loopItemIds: loopTransfer.loopItemIds,
         })
         if (!resp.success) {
-          msg.error(resp.message ?? '转移失败')
+          msg.error(resp.msg ?? '转移失败')
           throw new Error('转移失败')
         }
         const result = resp.data; // 转移后两边最新循环次数
@@ -650,7 +685,9 @@ const MemoDrawer = () => {
           result?.sourceMemoId ?? loopTransfer.sourceMemoId,
           result?.targetMemoId ?? targetMemo.id!,
           result?.sourceNumberOfRecurrences,
-          result?.targetNumberOfRecurrences
+          result?.targetNumberOfRecurrences,
+          result?.sourceMemoVersion,
+          result?.targetMemoVersion,
         )
         setLoopTransfer(null)
         resetLoopMemoTimeData()
@@ -701,10 +738,15 @@ const MemoDrawer = () => {
     await getLoopMemoTimeData(memoId, 1, true, loopKeyword)
   }
 
-  /** 本地增加循环次数，避免刷新第一层列表导致二层抽屉关闭 */
-  const increaseLoopMemoCount = (memoId: number) => {
+  /**
+   * 本地增加循环次数，避免刷新第一层列表导致二层抽屉关闭
+   *
+   * @param memoId 循环备忘主键
+   * @param memoVersion 循环备忘新版本号
+   */
+  const increaseLoopMemoCount = (memoId: number, memoVersion?: number) => {
     const addCount = (memos: MemoDrawerListItem[]) => memos.map(memo => memo.id === memoId
-      ? {...memo, numberOfRecurrences: (memo.numberOfRecurrences ?? 0) + 1}
+      ? {...memo, numberOfRecurrences: (memo.numberOfRecurrences ?? 0) + 1, version: memoVersion ?? memo.version}
       : memo
     ); // 循环次数本地更新函数
     setData(addCount)
@@ -786,8 +828,11 @@ const MemoDrawer = () => {
           msg.warning('图片还在上传中，请稍等')
           throw new Error('图片上传中')
         }
+        const memo = list.find(item => item.id === memoId); // 本次加一使用的父备忘录版本
+        if (memo?.version === undefined) return msg.warning('备忘录版本缺失，请刷新后重试')
         const result = await addLoopMemoItem({
           memoId,
+          memoVersion: memo.version,
           memoDate: window.ikunSelectDate,
           loopText: window.ikunOkText,
           imgArr: ikunLoopMemoImgArr || undefined
@@ -798,18 +843,29 @@ const MemoDrawer = () => {
         }
         msg.success('成功+1')
         if (refreshMemoList) sxSj()
-        else increaseLoopMemoCount(memoId)
+        else increaseLoopMemoCount(memoId, result.data?.memoVersion)
         await onSuccess?.()
       }
     })
   }
 
-  /** 复制循环子项备注并直接 +1 */
+  /**
+   * 复制循环子项备注并直接 +1
+   *
+   * @param loopMemo 要复制的循环子项
+   * @param loopKeyword 当前循环子项搜索关键字
+   */
   const copyAddLoopMemo = async (loopMemo: ILoopMemoItem, loopKeyword = '') => {
     if (!loopMemo.memoId) return;
     setLastActionId(loopMemo.memoId)
+    const memo = list.find(item => item.id === loopMemo.memoId); // 父备忘录版本快照
+    if (memo?.version === undefined) {
+      msg.warning('备忘录版本缺失，请刷新后重试')
+      return
+    }
     const result = await addLoopMemoItem({
       memoId: loopMemo.memoId,
+      memoVersion: memo.version,
       loopText: loopMemo.loopText || undefined
     });
     if (!result.success) {
@@ -817,7 +873,7 @@ const MemoDrawer = () => {
       return
     }
     msg.success('成功+1')
-    increaseLoopMemoCount(loopMemo.memoId)
+    increaseLoopMemoCount(loopMemo.memoId, result.data?.memoVersion)
     await refreshLoopMemoTimeData(loopMemo.memoId, loopKeyword)
   }
 
@@ -877,6 +933,7 @@ const MemoDrawer = () => {
         onOk: async () => {
           const finishResponse = await updateMemo({
             id: parsedId,
+            version: itemObj.version,
             completed: itemObj.completed ? 0 : 1,
             updateTime: window.ikunSelectDate,
             okText: itemObj.completed ? '' : window.ikunOkText,
@@ -932,7 +989,8 @@ const MemoDrawer = () => {
           okButtonProps: {danger: true},
           onOk: async () => {
             setWebLoading(true)
-            const deleteResponse = await deleteMemo(parsedId)
+            if (itemObj.version === undefined) return msg.warning('备忘录版本缺失，请刷新后重试')
+            const deleteResponse = await deleteMemo(parsedId, itemObj.version)
             if (deleteResponse) sxSj()
             setWebLoading(false)
           }

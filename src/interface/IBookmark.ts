@@ -7,6 +7,10 @@
 export default interface IBookmark {
   /** 书签ID */
   id?: number
+  /** 乐观锁版本号 */
+  version?: number
+  /** 父排序节点乐观锁版本号，仅新增和删除时提交 */
+  parentVersion?: number
   /** 用户ID */
   userId?: string
   /** 名称 */

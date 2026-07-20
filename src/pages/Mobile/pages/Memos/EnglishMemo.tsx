@@ -195,7 +195,7 @@ const EnglishMemo = () => {
     const loading = Toast.show({icon: 'loading', content: '处理中…', duration: 0})
     const result = editVisible === '新增'
       ? await addMemo({itemType: ENGLISH_MEMO_TYPE, content})
-      : await updateMemo({id: editVisible.id, content})
+      : await updateMemo({id: editVisible.id, version: editVisible.version, content})
     loading?.close()
 
     if (result) {
@@ -217,7 +217,11 @@ const EnglishMemo = () => {
           确定删除该条英语备忘吗？
         </div>,
       onConfirm: async () => {
-        const result = await deleteMemo(item.id)
+        if (item.version === undefined) {
+          Toast.show({icon: 'fail', content: '数据版本缺失，请刷新后重试'})
+          return
+        }
+        const result = await deleteMemo(item.id, item.version)
         if (result) {
           setData(list => list.filter(dataItem => dataItem.id !== item.id))
           setTotal(value => Math.max(value - 1, 0))

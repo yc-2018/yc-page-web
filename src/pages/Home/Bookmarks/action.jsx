@@ -7,9 +7,11 @@ import CommonStore from "@/store/CommonStore";
  * @param setList  要修改的状态列表
  * @param setModal 设置表单数据和开关
  * @param setItems 修改书签列表
+ * @param parentVersion 父排序节点版本号
+ * @param refreshBookmarks 重新读取书签树和排序版本
  * @return {{string:Function}} 一个对象 key为事件名 value为事件回调
  * */
-export default (setList, setModal, setItems = null) => {
+export default (setList, setModal, setItems = null, parentVersion, refreshBookmarks) => {
   const {msg} = CommonStore
   const {modal} = App.useApp();
 
@@ -26,11 +28,17 @@ export default (setList, setModal, setItems = null) => {
       async onOk() {
         try {
           await new Promise(async (resolve, reject) => {
-            const delResp = await delBookmark(object);
+            if (object.version === undefined || parentVersion === undefined) {
+              msg.error('数据版本缺失，请刷新后重试')
+              return reject()
+            }
+            const delResp = await delBookmark({...object, parentVersion});
             if (delResp) {
               setList(list => list.filter(item => item.id !== object.id));
+              await refreshBookmarks?.()
               return resolve(); // 成功,关闭按钮加载 关闭窗口
             }
+            await refreshBookmarks?.()
             return reject(); // 失败，关闭按钮加载,关闭窗口
           });
         } catch (error) {

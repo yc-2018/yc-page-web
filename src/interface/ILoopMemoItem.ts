@@ -8,6 +8,9 @@ import ILoopMemoItemComment from '@/interface/ILoopMemoItemComment';
  */
 export default interface ILoopMemoItem {
   id?: number
+  version?: number
+  /** 所属备忘录版本号，仅写操作使用 */
+  memoVersion?: number
   memoId?: number
   memoDate?: string
   createTime?: string

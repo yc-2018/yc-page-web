@@ -6,6 +6,7 @@
  */
 export default interface ILoopMemoItemComment {
   id?: number
+  version?: number
   memoId?: number
   loopItemId?: number
   commentDate?: string

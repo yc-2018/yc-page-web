@@ -5,8 +5,8 @@ import UserStore from '@/store/UserStore';
 import JWTUtils from '@/utils/JWTUtils';
 import R from '@/interface/R';
 
-export const baseURL = 'https://yc556.cn/api'; // 基础URL
-// export const baseURL = '/api'; // 本地测试基础URL
+// export const baseURL = 'https://yc556.cn/api'; // 基础URL
+export const baseURL = '/api'; // 本地测试基础URL
 const {msg} = CommonStore
 const refreshTokenThreshold = 2 * 24 * 60 * 60 * 1000; // 静默续签阈值：2天
 let refreshTokenPromise: Promise<void> | null = null; // 当前静默续签任务

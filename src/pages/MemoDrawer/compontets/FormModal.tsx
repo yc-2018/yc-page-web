@@ -142,6 +142,7 @@ const FormModal = ({isOpen, setOpen, data, reList, currentMemoType, currentMemoT
     if (!sameIds(formData.tagIds, data?.tagIds)) body.tagIds = formData.tagIds ?? [];
     if ((formData.imgArr ?? '') !== (data?.imgArr ?? '')) body.imgArr = formData.imgArr ?? '';
     body.id = data?.id;
+    body.version = data?.version;
     const result = await (data ? updateMemo : addMemo)(body as IMemo);
     if (result) {
       closeModal(false);

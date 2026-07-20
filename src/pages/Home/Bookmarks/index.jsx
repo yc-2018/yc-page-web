@@ -32,6 +32,20 @@ export default function Bookmarks() {
 
   const {msg} = CommonStore
 
+  /** 从云端重新读取书签树和所有排序版本。 */
+  const refreshBookmarks = async () => {
+    const bookmarks = await getBookmarks(); // 当前用户全部书签
+    const groups = bookmarks.filter(item => item.type === 1); // 书签组
+    const root = bookmarks.find(item => item.type === 0); // 根排序节点
+    const order = root?.sort?.split('/').map(id => parseInt(id)); // 书签组顺序
+    setBookmarkGroupList(groups.sort((a, b) => {
+      if (!order) return 0
+      return order.indexOf(a.id) - order.indexOf(b.id)
+    }))
+    setBookmarkGroupItems(bookmarks.filter(item => item.type !== 1))
+    setBookmarkGroupOrder(root)
+  }
+
   /** 下拉框打开时按触发区域宽度计算最小宽度，多出的23px用于覆盖拖拽把手区域 */
   const updateDropdownMinWidth = (id, open) => {
     if (!open) return
@@ -47,25 +61,7 @@ export default function Bookmarks() {
 
   useEffect(() => {
     // 登录后获取本用户全部书签
-    if (UserStore.jwt) (async () => {
-      // 获取云端全部书签
-      const bookmarks = await getBookmarks()
-      // 获取所有书签组 并整理
-      setBookmarkGroupList(() => {
-        const groups = bookmarks.filter(item => item.type === 1)
-        const order = bookmarks.find(item => item.type === 0)?.sort?.split('/').map(id => parseInt(id))
-        if (groups.length === 0 || !order) return []
-        return groups.sort((a, b) => {
-          // 获取两个元素的id在排序顺序数组中的索引
-          const indexA = order.indexOf(a.id)
-          const indexB = order.indexOf(b.id)
-          // 比较这两个索引来决定顺序
-          return indexA - indexB
-        })
-      })
-      setBookmarkGroupItems(bookmarks.filter(item => item.type !== 1)) // 保存不是书签组书签 给书签组里面的书签用
-      setBookmarkGroupOrder(bookmarks.find(item => item.type === 0))  // 保存书签组排序对象
-    })()
+    if (UserStore.jwt) refreshBookmarks()
   }, [UserStore.jwt])
 
   /** 分离并排序书签组里的书签 */
@@ -102,21 +98,26 @@ export default function Bookmarks() {
 
   /** 添加书签|组请求 */
   const addBookmark = async (formData) => {
-    const bookmark = {...formData, type: ModalType, sort};
+    const parent = ModalType === 1
+      ? bookmarkGroupOrder
+      : bookmarkGroupList.find(group => group.id === sort); // 本次排序要修改的父节点
+    if (parent?.version === undefined) return '数据版本缺失，请刷新后重试'
+    const bookmark = {...formData, type: ModalType, sort, parentVersion: parent.version};
     const id = await addBookmarks(bookmark)
-    if (id && ModalType === 1) {
-      setBookmarkGroupList(bookmarkGroups => [...bookmarkGroups, {...bookmark, id}])
+    if (!id) {
+      await refreshBookmarks()
+      return '操作失败'
     }
-    else if (id && ModalType === 2) setCurrentGroupItems(Items => [...Items, {...bookmark, id}])
-    else return '操作失败'
+    await refreshBookmarks()
   }
 
   /** 修改书签|组请求 */
   const updateBookmarks = async (formData) => {
-    if (await updateBookmark(formData))
-      return setCurrentGroupItems(Items =>
-        Items.map(item => item.id === formData.id ? {...item, ...formData} : item)
-      )
+    if (await updateBookmark(formData)) {
+      await refreshBookmarks()
+      return
+    }
+    await refreshBookmarks()
     return '操作失败'
   }
 
@@ -135,13 +136,26 @@ export default function Bookmarks() {
   const dragSortReq = async (dragEndList) => {
     const oldList = [...bookmarkGroupList]
     const sort = dragEndList.map(item => item.id).join('/')
-    const result = await dragSort({id: bookmarkGroupOrder.id, type: 0, sort})
-    if (result) msg.success('排序成功')
-    else setBookmarkGroupList(oldList)
+    if (bookmarkGroupOrder?.version === undefined) return msg.error('数据版本缺失，请刷新后重试')
+    const result = await dragSort({id: bookmarkGroupOrder.id, type: 0, sort, version: bookmarkGroupOrder.version})
+    if (result) {
+      await refreshBookmarks()
+      msg.success('排序成功')
+    }
+    else {
+      setBookmarkGroupList(oldList)
+      await refreshBookmarks()
+    }
   }
 
   /** 右键菜单点击后的功能 */
-  const lambdaObj = action(setBookmarkGroupList, setModal, () => setGroup(null, setBookmarkGroupList))
+  const lambdaObj = action(
+    setBookmarkGroupList,
+    setModal,
+    () => setGroup(null, setBookmarkGroupList),
+    bookmarkGroupOrder?.version,
+    refreshBookmarks,
+  )
 
 
   return <>
@@ -180,7 +194,8 @@ export default function Bookmarks() {
                     bookmarkItems={getSortBookmarks(group)}
                     setModal={setModal}
                     setGroup={setGroup} // 新增时表单要用
-                    groupId={group.id}
+                    group={group}
+                    refreshBookmarks={refreshBookmarks}
                   />
                 </div>
               }

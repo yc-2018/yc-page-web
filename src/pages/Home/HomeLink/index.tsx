@@ -1,7 +1,7 @@
 import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from 'react';
 import {
   addSearchEngines, deleteSearchEngine,
-  getSearchEngines, sortSearchEngine,
+  getSearchEngines, getSearchEngineSortVersion, sortSearchEngine,
   updateSearchEngines
 } from '@/request/homeApi';
 import {App, Button, Dropdown, Form, Input, Modal, Space} from 'antd';
@@ -64,6 +64,7 @@ const LinkBox = () => {
   const [modalLoading, setModalLoading] = useState(false)
   const [isDrag, setIsDrag] = useState(false)
   const [examplePickerOpen, setExamplePickerOpen] = useState(false) // 示例选择弹窗状态
+  const [sortVersion, setSortVersion] = useState(0) // 首页链接排序版本快照
 
   const [form] = Form.useForm(); // 创建一个表单域
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
@@ -73,8 +74,9 @@ const LinkBox = () => {
   useEffect(() => {
     // 获取搜索引擎列表
     if (!JWTUtils.isExpired()) {
-      getSearchEngines(HOME_LINK).then(response => {
+      Promise.all([getSearchEngines(HOME_LINK), getSearchEngineSortVersion()]).then(([response, versionResponse]) => {
         if (response.success) setLinkList(response.data ?? [])
+        if (versionResponse.success) setSortVersion(versionResponse.data ?? 0)
       });
     }
   }, [jwt])
@@ -83,6 +85,16 @@ const LinkBox = () => {
   useEffect(() => {
     if (!JWTUtils.isExpired() && linkList?.length) _setHomeLinks(linkList)
   }, [linkList])
+
+  /** 刷新首页链接及排序版本。 */
+  const refreshLinks = async () => {
+    const [response, versionResponse] = await Promise.all([
+      getSearchEngines(HOME_LINK),
+      getSearchEngineSortVersion(),
+    ]);
+    if (response.success) setLinkList(response.data ?? [])
+    if (versionResponse.success) setSortVersion(versionResponse.data ?? 0)
+  }
 
 
   /** 打开编辑或新增弹窗 */
@@ -115,22 +127,23 @@ const LinkBox = () => {
       if (editSearch?.id) {
         // ———————————— 修改 ————————————
         setModalLoading(true);
-        updateSearchEngines({...editSearch, ...values}).then(result => {
+        updateSearchEngines({...editSearch, ...values}).then(async result => {
           if (result.success && result.data) {
-            const updateData = result.data;
-            // 数据回显
-            setLinkList(items => items?.map(item => item.id === updateData.id ? updateData : item));
+            await refreshLinks()
             msg.success('修改成功');
             closeModal()
-          } else msg.error('修改失败(返回数据异常')
+          } else {
+            await refreshLinks()
+            msg.error('修改失败(返回数据异常')
+          }
         }).finally(() => setModalLoading(false));
       } else {
         // ———————————— 新增 ————————————
-        addSearchEngines({...values, type: HOME_LINK}).then(result => {
+        addSearchEngines({...values, type: HOME_LINK, sortVersion}).then(async result => {
           if (result.success) {
-            setLinkList(v => [...v, result.data!])
+            await refreshLinks()
             closeModal()
-          }
+          } else await refreshLinks()
         })
       }
     })
@@ -149,11 +162,14 @@ const LinkBox = () => {
         content: '删除了就不能撤回了哟...',
         mask: {closable: true},
         async onOk() {
-          const result = await deleteSearchEngine(linkItem.id);
-          if (result.success) {
-            setLinkList(items => items?.filter(item => item.id !== linkItem.id))
-            msg.success('删除成功');
+          if (linkItem.version === undefined || linkItem.sortVersion === undefined) {
+            return msg.error('数据版本缺失，请刷新后重试')
           }
+          const result = await deleteSearchEngine(linkItem.id, linkItem.version, linkItem.sortVersion);
+          if (result.success) {
+            await refreshLinks()
+            msg.success('删除成功');
+          } else await refreshLinks()
         }
       })
     }
@@ -176,12 +192,19 @@ const LinkBox = () => {
     }
 
     CommonStore.setLoading(true, '正在排序...')
-    sortSearchEngine(newSort, HOME_LINK).then(res => {
+    const currentSortVersion = linkListBak.current?.[0]?.sortVersion; // 拖拽开始时的排序版本
+    if (currentSortVersion === undefined) {
+      CommonStore.setLoading(false)
+      return msg.error('排序版本缺失，请刷新后重试')
+    }
+    sortSearchEngine(newSort, HOME_LINK, currentSortVersion).then(async res => {
       if (res.success) {
+        await refreshLinks()
         msg.success('排序成功')
         setIsDrag(false)
       } else {
-        setLinkList([...linkListBak.current!])
+        await refreshLinks()
+        setIsDrag(false)
         msg.error(res.msg)
       }
     }).finally(() => CommonStore.setLoading(false))

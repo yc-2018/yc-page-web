@@ -10,6 +10,9 @@ export default interface IMemo {
   /** 备忘录事项ID */
   id?: number
 
+  /** 乐观锁版本号 */
+  version?: number
+
   /** 用户ID */
   userId?: string
 

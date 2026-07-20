@@ -20,4 +20,7 @@ export default interface IUserConfig {
 
   /** 首页大图标书签排序  id/id/id */
   homeBookmarkSort?: string
+
+  /** 搜索引擎排序版本号 */
+  sortVersion?: number
 }

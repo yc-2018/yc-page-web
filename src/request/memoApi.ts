@@ -41,6 +41,10 @@ export interface LoopMemoItemTransferRequest {
   sourceMemoId: number
   /** 目标循环备忘主键 */
   targetMemoId: number
+  /** 源循环备忘版本号 */
+  sourceMemoVersion: number
+  /** 目标循环备忘版本号 */
+  targetMemoVersion: number
   /** 要转移的循环记录主键列表 */
   loopItemIds: number[]
 }
@@ -57,6 +61,10 @@ export interface LoopMemoItemTransferResponse {
   sourceNumberOfRecurrences?: number
   /** 目标循环备忘最新循环次数 */
   targetNumberOfRecurrences?: number
+  /** 源循环备忘新版本号 */
+  sourceMemoVersion?: number
+  /** 目标循环备忘新版本号 */
+  targetMemoVersion?: number
 }
 
 /** 将待办预加载统计列表转换为标签计数映射 */
@@ -148,9 +156,14 @@ export async function updateMemo(memo: IMemo) {
   }
 }
 
-/** 删除一个待办 */
-export async function deleteMemo(id: number) {
-  const response = await myDelete<boolean>(`/memo/${id}`);
+/**
+ * 删除一个待办
+ *
+ * @param id 待办主键
+ * @param version 待办版本号
+ */
+export async function deleteMemo(id: number, version: number) {
+  const response = await myDelete<boolean>(`/memo/${id}?version=${version}`);
   if (response.code === 1) {
     msg.success('删除成功');
     return true;
@@ -201,9 +214,11 @@ export const updateLoopMemoItem = async (loopMemoItem: ILoopMemoItem) =>
  *
  * @param memoId 备忘录id
  * @param loopId 循环id
+ * @param version 循环记录版本号
+ * @param memoVersion 所属备忘录版本号
  */
-export const deleteLoopMemoItem = (memoId: number, loopId: number) =>
-  myDelete<boolean>(`/loopMemoItem/${memoId}/${loopId}`);
+export const deleteLoopMemoItem = (memoId: number, loopId: number, version: number, memoVersion: number) =>
+  myDelete<boolean>(`/loopMemoItem/${memoId}/${loopId}?version=${version}&memoVersion=${memoVersion}`);
 
 /**
  * 转移循环备忘记录到另一个循环备忘
@@ -245,7 +260,8 @@ export const updateLoopMemoItemComment = async (comment: ILoopMemoItemComment) =
  * @param memoId 备忘录id
  * @param loopItemId 循环记录id
  * @param commentId 评论id
+ * @param version 评论版本号
  */
-export const deleteLoopMemoItemComment = (memoId: number, loopItemId: number, commentId: number) =>
-  myDelete<boolean>(`/loopMemoItemComment/${memoId}/${loopItemId}/${commentId}`);
+export const deleteLoopMemoItemComment = (memoId: number, loopItemId: number, commentId: number, version: number) =>
+  myDelete<boolean>(`/loopMemoItemComment/${memoId}/${loopItemId}/${commentId}?version=${version}`);
 

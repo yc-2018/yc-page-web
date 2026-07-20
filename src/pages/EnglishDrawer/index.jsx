@@ -135,17 +135,16 @@ function EnglishDrawer() {
                 const saveResp = await addMemo({itemType: 4,content})
                 setReqLoading(false)
                 if(saveResp) {
-                    item.id = saveResp
-                    item.content = content
-                    setEditId(-1)
+                    reset() // 新增后重新读取版本号，避免紧接着编辑使用空版本
                 }
             }else{          // 修改请求
                 setReqLoading(true)
-                const updateResp = await updateMemo({id: item.id, content})
+                const updateResp = await updateMemo({id: item.id, version: item.version, content})
                 setReqLoading(false)
                 if(updateResp) {
                     setEditId(-1)
                     item.content = `${editEnglish ?? ''}@@@${editChinese ?? ''}`
+                    item.version = updateResp.version
                 }
             }
         }   // 进入编辑状态
@@ -172,7 +171,11 @@ function EnglishDrawer() {
                 mask: {closable: true},  // 点遮罩可以关闭
                 onOk () {
                     return new Promise(async (resolve, reject)=>{
-                        const delResp = await deleteMemo(id)
+                        if (item.version === undefined) {
+                            msg.error('数据版本缺失，请刷新后重试')
+                            return reject()
+                        }
+                        const delResp = await deleteMemo(id, item.version)
                         if (delResp) {
                             --total
                             setEditId(-1 * id)  // 驱动页面变化，因为listData不是状态，无法驱动页面的改变,异步的放前面就行

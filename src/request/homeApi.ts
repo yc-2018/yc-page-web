@@ -77,17 +77,34 @@ export const getNameAndAvatar = () => myGet<IUser>('/users/getNameAndAvatar')
 /** 搜索引擎列表 */
 export const getSearchEngines = (linkType: ILinkType) => myGet<ISearchEngines[]>(`/searchEngines?linkType=${linkType}`)
 
+/** 搜索引擎排序版本，空列表新增时也需要 */
+export const getSearchEngineSortVersion = () => myGet<number>('/searchEngines/sortVersion')
+
 /** 增加搜索引擎 */
 export const addSearchEngines = (searchEngines: ISearchEngines) => myPost<ISearchEngines>('/searchEngines', searchEngines)
 
 /** 修改搜索引擎 */
 export const updateSearchEngines = (searchEngines: ISearchEngines) => myPut<ISearchEngines>('/searchEngines', searchEngines)
 
-/** 删除搜索引擎 */
-export const deleteSearchEngine = (id: number) => myDelete<boolean>(`/searchEngines/${id}`)
+/**
+ * 删除搜索引擎
+ *
+ * @param id 搜索引擎主键
+ * @param version 搜索引擎版本号
+ * @param sortVersion 当前分类排序版本号
+ */
+export const deleteSearchEngine = (id: number, version: number, sortVersion: number) =>
+  myDelete<boolean>(`/searchEngines/${id}?version=${version}&sortVersion=${sortVersion}`)
 
-/** 排序搜索引擎 */
-export const sortSearchEngine = (sort: string, type: ILinkType) => myPost<boolean>(`/searchEngines/sort?sort=${sort}&linkType=${type}`)
+/**
+ * 排序搜索引擎
+ *
+ * @param sort 排序后的主键字符串
+ * @param type 搜索引擎分类
+ * @param sortVersion 当前分类排序版本号
+ */
+export const sortSearchEngine = (sort: string, type: ILinkType, sortVersion: number) =>
+  myPost<boolean>(`/searchEngines/sort?sort=${sort}&linkType=${type}&sortVersion=${sortVersion}`)
 
 
 /**
@@ -125,15 +142,15 @@ export async function addBookmarks(bookmark: IBookmark) {
  * @since 2024/03/5
  */
 export async function updateBookmark(bookmark: IBookmark) {
-  const result = await myPut<boolean>('/bookmarks', bookmark);
-  return result.success
+  const result = await myPut<IBookmark>('/bookmarks', bookmark);
+  return result.data
 }
 
 /**
  * 拖动排序书签
  * @param bookmark 书签dto
  */
-export async function dragSort(bookmark: { id: number; type: number; sort: string; }) {
+export async function dragSort(bookmark: { id: number; type: number; sort: string; version: number; }) {
   CommonStore.setLoading(true);
   const result = await myPut('/bookmarks/dragSort', bookmark);
   CommonStore.setLoading(false);

@@ -2,6 +2,7 @@ import {Button, Popup} from 'antd-mobile'
 
 type LoopMemoItem = {
   id: number
+  version?: number
   memoId: number
   loopText?: string
   createTime?: string
@@ -15,7 +16,7 @@ type LoopMemoActionPopupProps = {
   onAddOneWithText: (loopItem: LoopMemoItem) => void
   onEditLoopItem: (loopItem: LoopMemoItem) => void
   onEditLoopComment: (loopItem: LoopMemoItem) => void
-  onDeleteLoopItem: (memoId: number, id: number) => void
+  onDeleteLoopItem: (loopItem: LoopMemoItem) => void
 }
 
 /** 移动端循环备忘单条记录操作弹窗 */
@@ -55,7 +56,7 @@ const LoopMemoActionPopup = ({
         <Button
           block
           color="danger"
-          onClick={() => onDeleteLoopItem(loopItemVisible.memoId, loopItemVisible.id)}
+          onClick={() => onDeleteLoopItem(loopItemVisible)}
         >
           删除此项
         </Button>

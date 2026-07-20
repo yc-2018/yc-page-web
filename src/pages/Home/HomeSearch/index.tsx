@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {AppstoreAddOutlined, DownCircleOutlined, PlusOutlined} from '@ant-design/icons';
-import {addSearchEngines, getSearchEngines, updateSearchEngines} from '@/request/homeApi';
+import {addSearchEngines, getSearchEngines, getSearchEngineSortVersion, updateSearchEngines} from '@/request/homeApi';
 import {Alert, App, Button, Checkbox, Divider, Form, Input, Modal, Space} from 'antd';
 import SearchEngines from '@/pages/Home/HomeSearch/SearchEngines';
 import {_getDefaultEngine, _getSearchEngines, _setSearchEngines} from '@/utils/localStorageUtils';
@@ -35,6 +35,7 @@ const SearchBox = () => {
   const [modalLoading, setModalLoading] = useState(false)
   const [lowLoading, setLowLoading] = useState(false)
   const [examplePickerOpen, setExamplePickerOpen] = useState(false) // 示例选择弹窗状态
+  const [sortVersion, setSortVersion] = useState(0) // 搜索排序版本快照
   const [form] = Form.useForm(); // 创建一个表单域
   const {modal} = App.useApp();      // 获取在App组件的上下文的modal
   const {jwt} = UserStore;           // 当前登录凭证
@@ -42,8 +43,9 @@ const SearchBox = () => {
   useEffect(() => {
     // 获取搜索引擎列表
     if (!JWTUtils.isExpired()) {
-      getSearchEngines(SEARCH).then(response => {
+      Promise.all([getSearchEngines(SEARCH), getSearchEngineSortVersion()]).then(([response, versionResponse]) => {
         if (response.success) setSearchList(response.data)
+        if (versionResponse.success) setSortVersion(versionResponse.data ?? 0)
       });
       const defaultEngine = _getDefaultEngine(); // 获取默认搜索引擎(登录时)
       if (defaultEngine) setNowSearch(defaultEngine)
@@ -63,8 +65,23 @@ const SearchBox = () => {
 
     setLowLoading(true)
     getSearchEngines(LOW_SEARCH).then(response => {
-      if (response.success) setSearchLowList(response.data ?? [])
+      if (response.success) {
+        setSearchLowList(response.data ?? [])
+        if (response.data?.[0]?.sortVersion !== undefined) setSortVersion(response.data[0].sortVersion)
+      }
     }).finally(() => setLowLoading(false));
+  }
+
+  /** 刷新两个搜索分类及全局排序版本。 */
+  const refreshSearchData = async () => {
+    const [mainResponse, lowResponse, versionResponse] = await Promise.all([
+      getSearchEngines(SEARCH),
+      getSearchEngines(LOW_SEARCH),
+      getSearchEngineSortVersion(),
+    ]);
+    if (mainResponse.success) setSearchList(mainResponse.data ?? [])
+    if (lowResponse.success) setSearchLowList(lowResponse.data ?? [])
+    if (versionResponse.success) setSortVersion(versionResponse.data ?? 0)
   }
 
   /** 打开编辑或新增弹窗 */
@@ -99,17 +116,11 @@ const SearchBox = () => {
       content: `放到【${lowTo}】列表的最后`,
       mask: {closable: true},
       async onOk() {
-        const setXxxSearchList = search.type === SEARCH ? setSearchList : setSearchLowList
-        if (search?.type === SEARCH) search.type = LOW_SEARCH
-        else search.type = SEARCH
-        updateSearchEngines(search).then(res => {
+        const targetType = search.type === SEARCH ? LOW_SEARCH : SEARCH; // 要移动到的分类
+        updateSearchEngines({...search, type: targetType, sortVersion: search.sortVersion ?? sortVersion}).then(async res => {
           if (res.success) {
-            // 本身列表中移除
-            setXxxSearchList(v => v?.filter(item => item.id !== search.id))
-            // 添加到另外列表中
-            const setXxxToSearchList = setXxxSearchList === setSearchList ? setSearchLowList : setSearchList
-            setXxxToSearchList(v => v ? [...v, res.data!] : undefined)
-          }
+            await refreshSearchData()
+          } else await refreshSearchData()
         })
       }
     })
@@ -123,34 +134,23 @@ const SearchBox = () => {
       if (editSearch?.id) {
         // ———————————— 修改 ————————————
         setModalLoading(true);
-        updateSearchEngines({...editSearch, ...values}).then(result => {
+        updateSearchEngines({...editSearch, ...values, sortVersion: editSearch.sortVersion ?? sortVersion}).then(async result => {
           if (result.success && result.data) {
-            const updateData = result.data;
-            const setXxxSearchList = editSearch.type === SEARCH ? setSearchList : setSearchLowList;
-            // 数据回显 ( 考虑 常用和不常用列表的转换
-            if (updateData.type === editSearch!.type) {
-              setXxxSearchList(items =>
-                items?.map(item => item.id === updateData.id ? updateData : item));
-            } else {  // ——数据换列表——
-              // 移除原列表那个数据
-              setXxxSearchList(items => items?.filter(item => item.id !== updateData.id));
-              // 反转设置某列表方法
-              const setToXxxSearchList = setXxxSearchList === setSearchList ? setSearchLowList : setSearchList
-              // 放到新列表：考虑新列表是否为空？空就算了
-              setToXxxSearchList(items => items ? [...items, updateData] : undefined);
-            }
+            await refreshSearchData()
             msg.success('修改成功');
             closeModal()
-          } else msg.error('修改失败(返回数据异常')
+          } else {
+            await refreshSearchData()
+            msg.error('修改失败(返回数据异常')
+          }
         }).finally(() => setModalLoading(false));
       } else {
         // ———————————— 新增 ————————————
-        addSearchEngines(values).then(result => {
+        addSearchEngines({...values, sortVersion}).then(async result => {
           if (result.success) {
-            const setXxxSearchList = values.type === SEARCH ? setSearchList : setSearchLowList;
-            setXxxSearchList(v => v ? [...v, result.data!] : undefined)
+            await refreshSearchData()
             closeModal()
-          }
+          } else await refreshSearchData()
         })
       }
     })
@@ -167,6 +167,7 @@ const SearchBox = () => {
         setSearchList={setSearchList}
         openModal={openModal}
         changeLowUsage={changeLowUsage}
+        refreshSearchData={refreshSearchData}
         extraElement={UserStore.jwt &&
           <div style={{width: 0, marginLeft: -8, whiteSpace: 'nowrap'}}>
             {!showLows &&
@@ -199,6 +200,7 @@ const SearchBox = () => {
           setSearchList={setSearchLowList}
           openModal={openModal}
           changeLowUsage={changeLowUsage}
+          refreshSearchData={refreshSearchData}
           btnStyle={{borderColor: '#fff', background: '#555050', color: 'white'}}
           extraElement={
             <div style={{width: 0, marginLeft: -8}}>
