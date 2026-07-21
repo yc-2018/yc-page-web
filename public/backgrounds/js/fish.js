@@ -124,7 +124,7 @@ const fishVertexShader = `
     vec3 bentPosition = position;
     float tailWeight = pow(1.0 - uv.x, 1.85);
     float turnWeight = pow(1.0 - uv.x, 1.35);
-    bentPosition.y += sin(uTime * (2.8 + uFlee * 1.2) + uPhase + uv.x * 4.0)
+    bentPosition.y += sin(uTime + uPhase + uv.x * 4.0)
       * tailWeight * (0.095 + abs(uTurn) * 0.06 + uFlee * 0.015);
     bentPosition.y -= uTurn * turnWeight * (0.15 + uFlee * 0.025);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(bentPosition, 1.0);
@@ -505,6 +505,9 @@ export function mountBackground(container, options) {
       wanderTimer: randomRange(0.4, 2.5),
       speed: randomRange(0.42, 0.78),
       phase: Math.random() * TAU,
+      fleeStrength: 0, // 平滑后的逃离强度
+      tailClock: 0, // 连续累积的尾摆相位
+      pectoralClock: 0, // 连续累积的胸鳍摆动相位
       size,
     });
   }
@@ -620,39 +623,44 @@ export function mountBackground(container, options) {
     }
     desired.addScaledVector(separation, 0.38);
 
-    let fleeing = false;
+    let targetFleeStrength = 0;
     if (now < pointerActiveUntil) {
       away.set(fish.root.position.x - pointerWorld.x, fish.root.position.y - pointerWorld.y);
       const pointerDistance = away.length();
       const avoidRadius = 2.7 + fish.size * 0.35;
       if (pointerDistance < avoidRadius) {
-        const avoidStrength = Math.pow(1 - pointerDistance / avoidRadius, 1.4) * 5.2;
+        targetFleeStrength = Math.pow(1 - pointerDistance / avoidRadius, 1.4);
         if (pointerDistance < 0.05) away.set(Math.cos(fish.heading), Math.sin(fish.heading));
         else away.multiplyScalar(1 / pointerDistance);
-        desired.addScaledVector(away, avoidStrength);
-        fleeing = true;
+        desired.addScaledVector(away, targetFleeStrength * 5.2);
       }
     }
 
+    const fleeResponse = 1 - Math.exp(-delta * (targetFleeStrength > fish.fleeStrength ? 8 : 3));
+    fish.fleeStrength += (targetFleeStrength - fish.fleeStrength) * fleeResponse;
+
     desired.normalize();
     const targetHeading = Math.atan2(desired.y, desired.x);
-    const maximumTurn = delta * (fleeing ? 3.4 : 1.15);
+    const maximumTurn = delta * THREE.MathUtils.lerp(1.15, 3.4, fish.fleeStrength);
     const turnStep = THREE.MathUtils.clamp(
       shortestAngleDifference(fish.heading, targetHeading),
       -maximumTurn,
       maximumTurn,
     );
     fish.heading += turnStep;
-    const swimSpeed = fish.speed * (fleeing ? 2.15 : 1);
+    const swimSpeed = fish.speed * THREE.MathUtils.lerp(1, 3.2, fish.fleeStrength);
     fish.root.position.x += Math.cos(fish.heading) * swimSpeed * delta;
     fish.root.position.y += Math.sin(fish.heading) * swimSpeed * delta;
     fish.root.rotation.z = fish.heading;
-    fish.material.uniforms.uTime.value = elapsedTime;
-    fish.material.uniforms.uFlee.value += ((fleeing ? 1 : 0) - fish.material.uniforms.uFlee.value) * 0.08;
+    fish.tailClock += delta * THREE.MathUtils.lerp(2.8, 2, fish.fleeStrength);
+    fish.material.uniforms.uTime.value = fish.tailClock;
+    fish.material.uniforms.uFlee.value = fish.fleeStrength;
     const turnTarget = maximumTurn > 0 ? THREE.MathUtils.clamp(turnStep / maximumTurn, -1, 1) : 0;
     const turnSmoothing = Math.min(1, delta * 7.5);
     fish.material.uniforms.uTurn.value += (turnTarget - fish.material.uniforms.uTurn.value) * turnSmoothing;
-    const pectoralMotion = Math.sin(elapsedTime * (fleeing ? 5.2 : 3.3) + fish.phase + 0.7);
+    const pectoralSpeed = THREE.MathUtils.lerp(3.3, 5.2, fish.fleeStrength);
+    fish.pectoralClock += delta * pectoralSpeed;
+    const pectoralMotion = Math.sin(fish.pectoralClock + fish.phase + 0.7);
     fish.pectoralLeftPivot.rotation.z = -0.1 + pectoralMotion * 0.22;
     fish.pectoralRightPivot.rotation.z = 0.1 - pectoralMotion * 0.22;
     fish.pectoralLeft.scale.x = 0.94 + pectoralMotion * 0.1;
