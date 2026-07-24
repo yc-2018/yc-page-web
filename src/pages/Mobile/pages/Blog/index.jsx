@@ -7,6 +7,7 @@ import {blogMenu} from "@/store/NoLoginData";
 import {blogBaseURL, getBlogItemIconObj, getBlogList, getBlogMd} from "@/request/blogRequest";
 import LoaderWhite from "@/components/common/LoaderWhite";
 import CommonStore from "@/store/CommonStore";
+import styles from './blog.module.css';
 
 export default () => {
   const [menu, setMenu] = useState(blogMenu)      // 菜单项
@@ -99,14 +100,14 @@ export default () => {
   /** 渲染当前文章内容 */
   const renderArticleContent = item =>
     selectKey[0] === item
-      ? <div style={{wordBreak: 'break-all', overflowX: 'auto', padding: '0 4px 12px'}}>
+      ? <div className={styles.articleContent}>
           {loading ? <LoaderWhite/> : <Md>{content}</Md>}
         </div>
       : null
 
   /** 构建菜单 */
   const buildMenu = blogMenu =>
-    <div style={{paddingBottom: 8}}>
+    <div className={styles.blogPage}>
       <Collapse accordion activeKey={openCatalog} onChange={setOpenCatalog}>
         {
           blogMenu.map(itemList =>

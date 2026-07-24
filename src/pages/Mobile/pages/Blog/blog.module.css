@@ -1,0 +1,39 @@
+/* 限制嵌套折叠面板的 flex 子项，避免长代码行把移动端页面撑宽。 */
+.blogPage {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding-bottom: 8px;
+  overflow-x: hidden;
+}
+
+.blogPage :global(.adm-list-item-content-main) {
+  min-width: 0;
+}
+
+.articleContent {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0 0 12px;
+  overflow-wrap: anywhere;
+}
+
+/* 不可换行的内容在自身区域横向滑动，普通正文仍保持在屏幕内。 */
+.articleContent pre,
+.articleContent table {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.articleContent table {
+  display: block;
+}
+
+.articleContent img {
+  max-width: 100%;
+  height: auto;
+}
