@@ -1,0 +1,1 @@
+import{a as o}from"./traverse-react-node-CXx-wGLg.js";import{r as u}from"./index-BeClk22c.js";function s(r,n,t){if(r&&typeof MutationObserver<"u"){let e=new MutationObserver(()=>{t()});return e.observe(r,n),()=>{e&&(e.disconnect(),e=null)}}return()=>{}}function a(r,n,t){const e=o(r);u.useEffect(()=>s(n.current,t,e),[n])}export{s as o,a as u};

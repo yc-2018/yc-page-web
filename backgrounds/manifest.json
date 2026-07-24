@@ -1,0 +1,85 @@
+{
+  "version": 52,
+  "items": [
+    {
+      "source": "css://aurora-dark",
+      "kind": "css",
+      "entry": "css/aurora-dark.css",
+      "name": "暗色极光",
+      "description": "深色天空中缓慢流动的柔和极光",
+      "tone": "dark",
+      "version": 2,
+      "layers": 4
+    },
+    {
+      "source": "css://neon-grid",
+      "kind": "css",
+      "entry": "css/neon-grid.css",
+      "name": "霓虹网格",
+      "description": "黑色空间中的透视网格与地平线微光",
+      "tone": "dark",
+      "version": 4,
+      "layers": 3
+    },
+    {
+      "source": "css://silk-light",
+      "kind": "css",
+      "entry": "css/silk-light.css",
+      "name": "白色丝绸",
+      "description": "简约明亮的半透明柔光层叠",
+      "tone": "light",
+      "version": 7,
+      "layers": 5
+    },
+    {
+      "source": "css://floating-cubes",
+      "kind": "css",
+      "entry": "css/floating-cubes.css",
+      "name": "悬浮方块",
+      "description": "带空间阴影的半透明立体几何体",
+      "tone": "light",
+      "version": 1,
+      "layers": 8
+    },
+    {
+      "source": "js://starfield",
+      "kind": "js",
+      "entry": "js/starfield.js",
+      "name": "星空隧道",
+      "description": "随鼠标视差变化的立体星空穿行",
+      "tone": "dark",
+      "version": 3,
+      "fallback": "css://aurora-dark"
+    },
+    {
+      "source": "js://particle-wave",
+      "kind": "js",
+      "entry": "js/particle-wave.js",
+      "name": "粒子波浪",
+      "description": "会被鼠标扰动的空间粒子海面",
+      "tone": "dark",
+      "version": 3,
+      "fallback": "css://aurora-dark"
+    },
+    {
+      "source": "js://earth",
+      "kind": "js",
+      "entry": "js/earth.js",
+      "name": "蓝色地球",
+      "description": "带云层和大气光晕的程序化地球",
+      "tone": "dark",
+      "version": 6,
+      "fallback": "css://aurora-dark"
+    },
+    {
+      "source": "js://fish",
+      "kind": "js",
+      "entry": "js/fish.js",
+      "name": "俯视鱼群",
+      "description": "会避开鼠标并在点击处泛起水波的俯视水塘",
+      "tone": "dark",
+      "version": 36,
+      "fallback": "css://aurora-dark"
+    }
+  ]
+}

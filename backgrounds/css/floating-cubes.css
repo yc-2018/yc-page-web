@@ -1,0 +1,124 @@
+[data-background-source='css://floating-cubes'] {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 28% 20%, rgba(119, 183, 255, 0.3), transparent 33%),
+    radial-gradient(circle at 74% 82%, rgba(196, 144, 255, 0.25), transparent 36%),
+    linear-gradient(145deg, #f9fcff, #e9f1fb 54%, #f8f3ff);
+  perspective: 900px;
+}
+
+[data-background-source='css://floating-cubes']::after {
+  position: absolute;
+  right: -10%;
+  bottom: -38%;
+  left: -10%;
+  height: 64%;
+  content: '';
+  opacity: 0.45;
+  transform: rotateX(67deg);
+  background-image:
+    linear-gradient(rgba(80, 112, 156, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(80, 112, 156, 0.13) 1px, transparent 1px);
+  background-size: 54px 54px;
+}
+
+[data-background-source='css://floating-cubes'] .yc-background-layer {
+  --cube-size: clamp(38px, 5.5vw, 92px);
+  --cube-x: 10vw;
+  --cube-y: 12vh;
+  --cube-delay: 0s;
+  position: absolute;
+  top: var(--cube-y);
+  left: var(--cube-x);
+  width: var(--cube-size);
+  height: var(--cube-size);
+  border: 1px solid rgba(89, 133, 189, 0.32);
+  border-radius: 7px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(161, 202, 247, 0.24));
+  box-shadow:
+    18px 22px 38px rgba(75, 104, 142, 0.18),
+    inset 8px 8px 18px rgba(255, 255, 255, 0.75);
+  transform: rotateX(58deg) rotateZ(38deg);
+  transform-style: preserve-3d;
+  animation: ycBgCubeFloat 8s ease-in-out var(--cube-delay) infinite alternate;
+}
+
+[data-background-source='css://floating-cubes'] .yc-background-layer::before,
+[data-background-source='css://floating-cubes'] .yc-background-layer::after {
+  position: absolute;
+  inset: -1px;
+  content: '';
+  border: inherit;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+[data-background-source='css://floating-cubes'] .yc-background-layer::before {
+  background: rgba(114, 177, 239, 0.18);
+  transform: translateZ(calc(var(--cube-size) * -0.28));
+}
+
+[data-background-source='css://floating-cubes'] .yc-background-layer::after {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(181, 151, 240, 0.2));
+  transform: rotateY(90deg) translateZ(calc(var(--cube-size) * 0.5));
+}
+
+[data-background-source='css://floating-cubes'] .yc-background-layer:nth-child(2) {
+  --cube-size: clamp(26px, 3.6vw, 58px);
+  --cube-x: 31vw;
+  --cube-y: 23vh;
+  --cube-delay: -4s;
+}
+
+[data-background-source='css://floating-cubes'] .yc-background-layer:nth-child(3) {
+  --cube-size: clamp(54px, 7.5vw, 110px);
+  --cube-x: 58vw;
+  --cube-y: 9vh;
+  --cube-delay: -2s;
+}
+
+[data-background-source='css://floating-cubes'] .yc-background-layer:nth-child(4) {
+  --cube-size: clamp(30px, 4vw, 68px);
+  --cube-x: 82vw;
+  --cube-y: 31vh;
+  --cube-delay: -6s;
+}
+
+[data-background-source='css://floating-cubes'] .yc-background-layer:nth-child(5) {
+  --cube-size: clamp(42px, 6vw, 88px);
+  --cube-x: 17vw;
+  --cube-y: 67vh;
+  --cube-delay: -7s;
+}
+
+[data-background-source='css://floating-cubes'] .yc-background-layer:nth-child(6) {
+  --cube-size: clamp(28px, 4vw, 62px);
+  --cube-x: 45vw;
+  --cube-y: 74vh;
+  --cube-delay: -3s;
+}
+
+[data-background-source='css://floating-cubes'] .yc-background-layer:nth-child(7) {
+  --cube-size: clamp(48px, 6.6vw, 98px);
+  --cube-x: 70vw;
+  --cube-y: 62vh;
+  --cube-delay: -5s;
+}
+
+[data-background-source='css://floating-cubes'] .yc-background-layer:nth-child(8) {
+  --cube-size: clamp(23px, 3vw, 50px);
+  --cube-x: 90vw;
+  --cube-y: 79vh;
+  --cube-delay: -1s;
+}
+
+@keyframes ycBgCubeFloat {
+  0% {
+    translate: 0 0;
+    rotate: 0deg;
+  }
+  100% {
+    translate: 0 -32px;
+    rotate: 10deg;
+  }
+}

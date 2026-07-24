@@ -1,0 +1,1 @@
+function n(t,e=!1){const r=t.match(/^(?:https?:\/\/)?([^/|^?]+)/);return r?r[e?0:1]:""}function a(t){if(t)return`${n(t,!0)}/favicon.ico`}function i(t){if(t)return`https://api.mxin.moe/api/v1/favicon?url=${n(t,!0)}`}function c(t){if(t)return`https://api.qqsuu.cn/api/dm-get?url=${n(t,!1)}`}const s=t=>t.replace("/cxxjwimg/jfs","/jdcms/s80x80_jfs");export{a,i as b,c,s as t};
