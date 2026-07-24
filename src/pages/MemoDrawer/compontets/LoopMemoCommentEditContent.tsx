@@ -3,6 +3,7 @@ import {Input, Upload} from 'antd';
 import type {UploadFile, UploadProps} from 'antd';
 import type {ReactNode} from 'react';
 import type {MemoLoopItemComment} from '@/pages/MemoDrawer/types';
+import {thumbUrl} from '@/utils/urlUtils';
 
 const MAX_LOOP_MEMO_COMMENT_IMAGES = 3; // 循环评论最多上传图片数
 
@@ -51,6 +52,7 @@ const LoopMemoCommentEditContent = ({
         name: `comment-image-${index}.webp`,
         status: 'done',
         url,
+        thumbUrl: thumbUrl(url),
       }))
       : []
   ); // 当前图片列表
@@ -80,7 +82,10 @@ const LoopMemoCommentEditContent = ({
         fileList={fileList}
         customRequest={uploadLoopMemoImage}
         onChange={({fileList}) => {
-          const nextFileList = fileList.slice(0, MAX_LOOP_MEMO_COMMENT_IMAGES); // 控制最多展示三张图片
+          const nextFileList = fileList.slice(0, MAX_LOOP_MEMO_COMMENT_IMAGES).map(fileItem => {
+            const originalUrl = getUploadImageUrl(fileItem); // 当前图片原图地址
+            return originalUrl ? {...fileItem, url: originalUrl, thumbUrl: thumbUrl(originalUrl)} : fileItem
+          }); // 控制最多展示三张图片并使用缩略图渲染上传列表
           setFileList(nextFileList)
           onImgArrChange(nextFileList
             .map(fileItem => getUploadImageUrl(fileItem))

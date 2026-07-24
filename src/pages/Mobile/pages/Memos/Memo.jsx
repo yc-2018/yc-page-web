@@ -706,7 +706,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
           />
           <ImageUploader
             className={styles.loopMemoImageUploader}
-            defaultValue={imgArr ? imgArr.split(',').map(url => ({url})) : undefined} // 防止空字符串生成一个无效的
+            defaultValue={imgArr ? imgArr.split(',').map(url => ({url, thumbnailUrl: thumbUrl(url)})) : undefined} // 防止空字符串生成一个无效的
             maxCount={3}
             showFailed={false}
             upload={uploadToJD}
@@ -924,7 +924,7 @@ const Memo = ({type, setIncompleteCounts, changeType, setChangeType}) => {
             onChange={v => commentText = v}
           />
           <ImageUploader
-            defaultValue={commentImgArr ? commentImgArr.split(',').map(url => ({url})) : undefined}
+            defaultValue={commentImgArr ? commentImgArr.split(',').map(url => ({url, thumbnailUrl: thumbUrl(url)})) : undefined}
             maxCount={3}
             showFailed={false}
             upload={uploadToJD}
